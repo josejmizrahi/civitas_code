@@ -189,7 +189,7 @@ export function ContractList() {
   }
 
   const handleStatusChange = (id: string, status: string) => {
-    updateContract.mutate({ id, updates: { status } }, {
+    updateContract.mutate({ id, updates: { status: status as any } }, {
       onSuccess: () => toast.success('Estado del contrato actualizado'),
       onError: () => toast.error('Error al actualizar contrato'),
     })

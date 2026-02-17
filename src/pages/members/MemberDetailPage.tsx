@@ -108,7 +108,7 @@ export function MemberDetailPage() {
           const { data: fallback, error: fbErr } = await supabase
             .from('members')
             .select('*')
-            .eq('id', memberId)
+            .eq('id', memberId!)
             .single()
           if (fbErr) throw fbErr
           if (!cancelled) setMember(fallback as Member)
@@ -116,16 +116,16 @@ export function MemberDetailPage() {
           if (!cancelled) setMember(memberData as Member)
         }
 
-        const userId = memberData?.user_id || (await supabase
-          .from('members').select('user_id').eq('id', memberId).single()
-        ).data?.user_id
+        const userId = memberData?.user_id || ((await supabase
+          .from('members').select('user_id').eq('id', memberId!).single()
+        ).data as any)?.user_id
 
         // Fetch payment obligations
         const { data: oblData } = await supabase
           .from('payment_obligations')
           .select('*')
-          .eq('community_id', communityId)
-          .eq('member_id', memberId)
+          .eq('community_id', communityId!)
+          .eq('member_id', memberId!)
           .order('due_date', { ascending: false })
 
         if (!cancelled) setObligations((oblData ?? []) as PaymentObligation[])
@@ -135,7 +135,7 @@ export function MemberDetailPage() {
           const { data: voteData } = await supabase
             .from('votes')
             .select('*, proposals(title)')
-            .eq('member_id', memberId)
+            .eq('member_id', memberId!)
 
           if (!cancelled) {
             setVotes((voteData ?? []).map((v: any) => ({
@@ -148,7 +148,7 @@ export function MemberDetailPage() {
           const { data: logData } = await supabase
             .from('audit_log')
             .select('*')
-            .eq('community_id', communityId)
+            .eq('community_id', communityId!)
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(30)

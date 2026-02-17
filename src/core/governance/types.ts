@@ -161,3 +161,41 @@ export interface Convocatoria {
   // Joined
   caller_name?: string
 }
+
+// ---------------------------------------------------------------------------
+// Proxy / Representación — LPCI CDMX Art. 36
+// ---------------------------------------------------------------------------
+
+export interface AssemblyProxy {
+  id: string
+  community_id: string
+  assembly_id: string
+  grantor_id: string
+  representative_id: string
+  granted_at: string
+  revoked_at: string | null
+  is_active: boolean
+  created_at: string
+  // Joined
+  grantor_name?: string
+  representative_name?: string
+}
+
+// ---------------------------------------------------------------------------
+// Document Retention — Código de Comercio Art. 38-52, NOM-151
+// ---------------------------------------------------------------------------
+
+export type RetentionDocumentType = 'minutes' | 'financial_statement' | 'convocatoria' | 'report'
+
+export interface RetentionRecord {
+  id: string
+  community_id: string
+  document_type: RetentionDocumentType
+  document_id: string
+  retention_years: number
+  created_at: string
+  expires_at: string
+  integrity_hash: string | null
+  archived: boolean
+  archived_at: string | null
+}

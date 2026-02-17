@@ -244,7 +244,17 @@ export function AssemblyDetail({ assemblyId }: Props) {
       )}
 
       {/* Attendance Manager (admin only) */}
-      {isAdmin && isActive && <AttendanceManager assembly={assembly} />}
+      {isAdmin && isActive && (
+        <AttendanceManager
+          assemblyId={assembly.id}
+          initialAttendance={assembly.attendance || []}
+          memberList={(assembly.attendance || []).map((r) => ({
+            id: r.member_id,
+            name: r.member_name,
+            indiviso_pct: r.indiviso_pct,
+          }))}
+        />
+      )}
 
       {/* Agenda */}
       {assembly.agenda && assembly.agenda.length > 0 && (

@@ -86,7 +86,7 @@ function ClabeDisplay({ config }: { config: { clabe: string | null; bank_name: s
   }
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(config.clabe)
+    navigator.clipboard.writeText(config.clabe!)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

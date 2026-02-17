@@ -47,7 +47,7 @@ export async function createDocument(
   communityId: string,
   doc: { title: string; file_url: string; category: string; uploaded_by: string }
 ): Promise<Document> {
-  const { data, error } = await supabase.from('documents')
+  const { data, error } = await (supabase.from('documents') as any)
     .insert({ community_id: communityId, ...doc })
     .select()
     .single()
@@ -56,7 +56,7 @@ export async function createDocument(
 }
 
 export async function deleteDocument(documentId: string): Promise<void> {
-  const { error } = await supabase.from('documents')
+  const { error } = await (supabase.from('documents') as any)
     .delete()
     .eq('id', documentId)
   if (error) throw error

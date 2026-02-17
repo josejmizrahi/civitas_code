@@ -98,6 +98,7 @@ describe('CommunityRules type structure', () => {
   it('can create a valid CommunityRules object', () => {
     const rules: CommunityRules = {
       governance: {
+        ...DEFAULT_RULES.governance,
         default_quorum: 0.3,
         default_majority: 0.6,
         delegation_enabled: false,
@@ -107,6 +108,7 @@ describe('CommunityRules type structure', () => {
         auto_execution_threshold: 10000,
       },
       treasury: {
+        ...DEFAULT_RULES.treasury,
         mode: 'fintech_rail',
         currency: 'MXN',
         admin_spending_limit: 100000,
@@ -119,9 +121,9 @@ describe('CommunityRules type structure', () => {
         collection_reminder_days: 3,
       },
       identity: {
+        ...DEFAULT_RULES.identity,
         payment_to_vote_enabled: true,
         grace_period_months: 1,
-        auto_restore_on_payment: true,
         delinquent_restrictions: ['vote', 'propose', 'delegate'],
       },
     }

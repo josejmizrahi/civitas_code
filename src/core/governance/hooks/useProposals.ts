@@ -38,7 +38,7 @@ export function useCreateProposal() {
       voting_end: string | null
       financial_instruction?: FinancialInstruction
     }) =>
-      createProposal(communityId!, { ...proposal, created_by: user!.id }),
+      createProposal(communityId!, { ...proposal, created_by: user!.id, financial_instruction: proposal.financial_instruction as any }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals', communityId] })
     },

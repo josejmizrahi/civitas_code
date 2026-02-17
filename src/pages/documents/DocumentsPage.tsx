@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/shared/components/ui/dialog'
+import { DocumentRetentionPanel } from '@/core/governance/components/DocumentRetentionPanel'
 import { FileText, Plus, Trash2, Upload, Search, File, X, AlertCircle } from 'lucide-react'
 import { formatDate } from '@/shared/lib/utils'
 import { useDocuments, useCreateDocument, useDeleteDocument } from '@/core/documents/hooks/useDocuments'
@@ -253,6 +254,9 @@ export function DocumentsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Document Retention — Código de Comercio / NOM-151 */}
+      <DocumentRetentionPanel />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent onClose={() => setDialogOpen(false)}>

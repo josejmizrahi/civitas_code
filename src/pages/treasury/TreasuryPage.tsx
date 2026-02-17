@@ -10,6 +10,8 @@ import { MyPayments } from '@/core/treasury/components/MyPayments'
 import { RecurringScheduleList } from '@/core/treasury/components/RecurringScheduleList'
 import { ContractList } from '@/core/treasury/components/ContractList'
 import { ExpenseForm } from '@/core/treasury/components/ExpenseForm'
+import { FundSelector } from '@/core/treasury/components/FundSelector'
+import { StatementList } from '@/core/treasury/components/StatementList'
 import { useRefreshOverdueObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { useProcessRecurringSchedules } from '@/core/treasury/hooks/useRecurring'
 import { useRefreshOverdueInstallments } from '@/core/treasury/hooks/useContracts'
@@ -17,14 +19,15 @@ import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityContext } from '@/app/providers'
 import {
   Plus, FileSpreadsheet, CreditCard, BarChart3, Receipt, PiggyBank,
-  Banknote, User, RefreshCw, FileText, CalendarClock,
+  Banknote, User, RefreshCw, FileText, CalendarClock, ClipboardList,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import type { TreasuryRules } from '@/shared/types/rules'
+import type { TreasuryRules, FundType } from '@/shared/types/rules'
 
 export function TreasuryPage() {
   const [tab, setTab] = useState('dashboard')
   const [showForm, setShowForm] = useState(false)
+  const [selectedFund, setSelectedFund] = useState<FundType>('mantenimiento')
   const refreshOverdue = useRefreshOverdueObligations()
   const processRecurring = useProcessRecurringSchedules()
   const refreshInstallments = useRefreshOverdueInstallments()
@@ -80,6 +83,9 @@ export function TreasuryPage() {
         </div>
       </div>
 
+      {/* Fund Selector — LPCI CDMX Art. 57-58 dual fund toggle */}
+      <FundSelector value={selectedFund} onChange={setSelectedFund} />
+
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap overflow-x-auto">
           <TabsTrigger value="dashboard" className="gap-1">
@@ -114,6 +120,10 @@ export function TreasuryPage() {
             <PiggyBank className="h-3.5 w-3.5" />
             Presupuestos
           </TabsTrigger>
+          <TabsTrigger value="statements" className="gap-1">
+            <ClipboardList className="h-3.5 w-3.5" />
+            Estados Financieros
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">
           <FinancialDashboard />
@@ -138,6 +148,9 @@ export function TreasuryPage() {
         </TabsContent>
         <TabsContent value="budgets">
           <BudgetOverview />
+        </TabsContent>
+        <TabsContent value="statements">
+          <StatementList fundType={selectedFund} />
         </TabsContent>
       </Tabs>
 

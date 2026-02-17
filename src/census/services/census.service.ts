@@ -45,7 +45,7 @@ export async function getCensusSnapshots(communityId: string): Promise<CensusSna
 }
 
 export async function takeCensusSnapshot(communityId: string): Promise<CensusSnapshot> {
-  const { data, error } = await supabase.rpc('take_census_snapshot', {
+  const { data, error } = await (supabase as any).rpc('take_census_snapshot', {
     p_community_id: communityId,
   })
   if (error) throw error
@@ -65,7 +65,7 @@ export async function getLatestCensus(communityId: string): Promise<CensusSnapsh
 }
 
 export async function getPlatformCensus(): Promise<PlatformCensus> {
-  const { data, error } = await supabase.rpc('get_platform_census')
+  const { data, error } = await (supabase as any).rpc('get_platform_census')
   if (error) throw error
   return data as unknown as PlatformCensus
 }

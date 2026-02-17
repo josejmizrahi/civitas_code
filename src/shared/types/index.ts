@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'tesorero' | 'miembro' | 'observador'
+export type Role = 'admin' | 'comite_vigilancia' | 'tesorero' | 'miembro' | 'observador'
 
 export type MemberStatus = 'active' | 'inactive' | 'pending'
 
@@ -42,6 +42,7 @@ export type RatingTargetType = 'entity' | 'member'
 
 export const ROLE_HIERARCHY: Record<Role, number> = {
   admin: 4,
+  comite_vigilancia: 3,
   tesorero: 3,
   miembro: 2,
   observador: 1,

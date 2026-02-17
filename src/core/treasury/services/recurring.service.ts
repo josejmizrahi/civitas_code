@@ -56,8 +56,8 @@ export async function createRecurringSchedule(
     created_by: string
   }
 ): Promise<RecurringSchedule> {
-  const { data, error } = await supabase
-    .from('recurring_schedules')
+  const { data, error } = await (supabase
+    .from('recurring_schedules') as any)
     .insert({ community_id: communityId, ...schedule })
     .select()
     .single()
@@ -69,8 +69,8 @@ export async function updateRecurringSchedule(
   scheduleId: string,
   updates: Partial<Pick<RecurringSchedule, 'name' | 'description' | 'amount' | 'frequency' | 'is_active' | 'end_date' | 'day_of_month' | 'target_type' | 'target_entity_id' | 'category_id'>>
 ): Promise<RecurringSchedule> {
-  const { data, error } = await supabase
-    .from('recurring_schedules')
+  const { data, error } = await (supabase
+    .from('recurring_schedules') as any)
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', scheduleId)
     .select()
@@ -80,15 +80,15 @@ export async function updateRecurringSchedule(
 }
 
 export async function deleteRecurringSchedule(scheduleId: string): Promise<void> {
-  const { error } = await supabase
-    .from('recurring_schedules')
+  const { error } = await (supabase
+    .from('recurring_schedules') as any)
     .delete()
     .eq('id', scheduleId)
   if (error) throw error
 }
 
 export async function processRecurringSchedules(communityId: string): Promise<number> {
-  const { data, error } = await supabase.rpc('process_recurring_schedules', {
+  const { data, error } = await (supabase as any).rpc('process_recurring_schedules', {
     p_community_id: communityId,
   })
   if (error) throw error
@@ -96,7 +96,7 @@ export async function processRecurringSchedules(communityId: string): Promise<nu
 }
 
 export async function generateSingleSchedule(scheduleId: string): Promise<number> {
-  const { data, error } = await supabase.rpc('generate_recurring_obligations', {
+  const { data, error } = await (supabase as any).rpc('generate_recurring_obligations', {
     p_schedule_id: scheduleId,
   })
   if (error) throw error

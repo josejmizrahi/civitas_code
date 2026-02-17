@@ -18,7 +18,8 @@ const makeTx = (ref: string | null, date: string, amount: number): NormalizedTra
   description: 'Test',
   date,
   external_ref: ref,
-  category_hint: null,
+  category: null,
+  _raw: {} as any,
   _errors: [],
   _isDuplicate: false,
 })

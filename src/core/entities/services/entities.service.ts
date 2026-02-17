@@ -50,8 +50,8 @@ export async function createEntity(
   communityId: string,
   entity: Omit<Entity, 'id' | 'community_id' | 'created_at' | 'updated_at' | 'metadata'>
 ): Promise<Entity> {
-  const { data, error } = await supabase
-    .from('entities')
+  const { data, error } = await (supabase
+    .from('entities') as any)
     .insert({ community_id: communityId, ...entity })
     .select()
     .single()
@@ -63,8 +63,8 @@ export async function updateEntity(
   entityId: string,
   updates: Partial<Pick<Entity, 'name' | 'type' | 'rfc' | 'email' | 'phone' | 'address' | 'clabe' | 'bank_name' | 'contact_person' | 'status' | 'notes'>>
 ): Promise<Entity> {
-  const { data, error } = await supabase
-    .from('entities')
+  const { data, error } = await (supabase
+    .from('entities') as any)
     .update(updates)
     .eq('id', entityId)
     .select()
@@ -74,8 +74,8 @@ export async function updateEntity(
 }
 
 export async function deleteEntity(entityId: string): Promise<void> {
-  const { error } = await supabase
-    .from('entities')
+  const { error } = await (supabase
+    .from('entities') as any)
     .delete()
     .eq('id', entityId)
   if (error) throw error
@@ -97,8 +97,8 @@ export async function createEntityContact(
   entityId: string,
   contact: Omit<EntityContact, 'id' | 'entity_id' | 'created_at'>
 ): Promise<EntityContact> {
-  const { data, error } = await supabase
-    .from('entity_contacts')
+  const { data, error } = await (supabase
+    .from('entity_contacts') as any)
     .insert({ entity_id: entityId, ...contact })
     .select()
     .single()
@@ -107,7 +107,7 @@ export async function createEntityContact(
 }
 
 export async function deleteEntityContact(contactId: string): Promise<void> {
-  const { error } = await supabase.from('entity_contacts').delete().eq('id', contactId)
+  const { error } = await (supabase.from('entity_contacts') as any).delete().eq('id', contactId)
   if (error) throw error
 }
 
@@ -160,8 +160,8 @@ export async function createRating(
     contract_id?: string
   }
 ): Promise<Rating> {
-  const { data, error } = await supabase
-    .from('ratings')
+  const { data, error } = await (supabase
+    .from('ratings') as any)
     .insert({ community_id: communityId, ...rating })
     .select()
     .single()
@@ -173,8 +173,8 @@ export async function updateRating(
   ratingId: string,
   updates: { overall_score?: number; dimensions?: Record<string, number>; comment?: string }
 ): Promise<Rating> {
-  const { data, error } = await supabase
-    .from('ratings')
+  const { data, error } = await (supabase
+    .from('ratings') as any)
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', ratingId)
     .select()

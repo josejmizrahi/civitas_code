@@ -31,6 +31,7 @@ import {
   useTakeCensusSnapshot,
   usePlatformCensus,
 } from '@/census/hooks/useCensus'
+import { useState } from 'react'
 import { useToast } from '@/shared/components/ui/toast'
 import {
   AreaChart,
@@ -469,6 +470,7 @@ function PlatformCensusTab() {
 }
 
 export function CensusPage() {
+  const [activeTab, setActiveTab] = useState('community')
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -478,7 +480,7 @@ export function CensusPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="community">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap overflow-x-auto">
           <TabsTrigger value="community">
             <Building2 className="mr-2 h-4 w-4" />

@@ -14,6 +14,7 @@ import { TreasuryPage } from '@/pages/treasury/TreasuryPage'
 import { IngestionPage } from '@/pages/ingestion/IngestionPage'
 import { GovernancePage } from '@/pages/governance/GovernancePage'
 import { ProposalDetailPage } from '@/pages/governance/ProposalDetailPage'
+import { AssemblyDetailPage } from '@/pages/governance/AssemblyDetailPage'
 import { ResidentialPage } from '@/pages/residential/ResidentialPage'
 import { SettingsPage } from '@/pages/settings/SettingsPage'
 import { CensusPage } from '@/pages/census/CensusPage'
@@ -91,6 +92,7 @@ export function AppRouter() {
           <Route path="/treasury" element={<TreasuryPage />} />
           <Route path="/ingestion" element={<RoleGuard requiredRole="tesorero"><IngestionPage /></RoleGuard>} />
           <Route path="/governance" element={<GovernancePage />} />
+          <Route path="/governance/assemblies/:assemblyId" element={<AssemblyDetailPage />} />
           <Route path="/governance/:proposalId" element={<ProposalDetailPage />} />
           <Route path="/residential" element={<ResidentialPage />} />
           <Route path="/census" element={<CensusPage />} />

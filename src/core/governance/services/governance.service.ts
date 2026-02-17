@@ -69,8 +69,8 @@ export async function updateProposalStatus(
   status: string,
   extra?: Record<string, unknown>
 ): Promise<void> {
-  const { error } = await supabase.from('proposals')
-    .update({ status, ...extra } as any)
+  const { error } = await (supabase.from('proposals') as any)
+    .update({ status, ...extra })
     .eq('id', proposalId)
 
   if (error) throw error
@@ -119,13 +119,13 @@ export async function castVote(vote: {
   const weight = Number((member as any)?.voting_weight) || 1
 
   // 3. Delete existing vote if any (upsert pattern)
-  await supabase.from('votes')
+  await (supabase.from('votes') as any)
     .delete()
     .eq('proposal_id', vote.proposal_id)
     .eq('member_id', vote.member_id)
 
   // 4. Insert new vote with real weight
-  const { data, error } = await supabase.from('votes')
+  const { data, error } = await (supabase.from('votes') as any)
     .insert({
       ...vote,
       weight,
@@ -186,7 +186,7 @@ export async function castVoteWithDelegations(
 
     const weight = Number((delMember as any)?.voting_weight) || 1
 
-    const { data: delegatedVote, error: voteErr } = await supabase.from('votes')
+    const { data: delegatedVote, error: voteErr } = await (supabase.from('votes') as any)
       .insert({
         proposal_id: proposalId,
         member_id: delegation.from_member_id,
@@ -298,7 +298,7 @@ export async function closeProposal(
       (community as any)?.rules ?? null
     )
 
-    const instruction = proposal.financial_instruction as Record<string, unknown>
+    const instruction = proposal.financial_instruction as unknown as Record<string, unknown>
     const amount = Number(instruction.amount ?? instruction.new_amount ?? 0)
     const autoEnabled = rules.governance.auto_execution_enabled
     const threshold = rules.governance.auto_execution_threshold
@@ -389,7 +389,7 @@ export async function executeProposal(
     }
   }
 
-  const instruction = proposal.financial_instruction as Record<string, unknown>
+  const instruction = proposal.financial_instruction as unknown as Record<string, unknown>
   const instructionType = instruction.type as string
 
   try {
@@ -417,8 +417,8 @@ export async function executeProposal(
 
         if (categoryId) {
           // Check if budget already exists for this category + period
-          const { data: existing } = await supabase
-            .from('budgets')
+          const { data: existing } = await (supabase
+            .from('budgets') as any)
             .select('id')
             .eq('community_id', communityId)
             .eq('category_id', categoryId)
@@ -572,7 +572,7 @@ export async function createDelegation(delegation: {
   to_member_id: string
   scope: string
 }): Promise<Delegation> {
-  const { data, error } = await supabase.from('delegations')
+  const { data, error } = await (supabase.from('delegations') as any)
     .insert({ ...delegation, active: true })
     .select()
     .single()
@@ -582,7 +582,7 @@ export async function createDelegation(delegation: {
 }
 
 export async function revokeDelegation(delegationId: string): Promise<void> {
-  const { error } = await supabase.from('delegations')
+  const { error } = await (supabase.from('delegations') as any)
     .update({ active: false })
     .eq('id', delegationId)
 
@@ -623,7 +623,7 @@ export async function generateMinutes(
     proposal.result ? `\nNota: ${proposal.result}` : '',
   ].join('\n')
 
-  const { data, error } = await supabase.from('minutes')
+  const { data, error } = await (supabase.from('minutes') as any)
     .insert({
       community_id: communityId,
       proposal_id: proposalId,
@@ -656,7 +656,7 @@ export async function getMinutes(proposalId: string): Promise<Minutes | null> {
  * Approve minutes (admin only).
  */
 export async function approveMinutes(minutesId: string, userId: string): Promise<Minutes> {
-  const { data, error } = await supabase.from('minutes')
+  const { data, error } = await (supabase.from('minutes') as any)
     .update({
       approved: true,
       approved_at: new Date().toISOString(),
@@ -699,7 +699,7 @@ export async function signMinutes(
   // Append signature
   const signatures = [...(minutes.signatures || []), { member_id: memberId, member_name: memberName, signed_at: signedAt, hash }]
 
-  const { data, error } = await supabase.from('minutes')
+  const { data, error } = await (supabase.from('minutes') as any)
     .update({ signatures })
     .eq('id', minutesId)
     .select()

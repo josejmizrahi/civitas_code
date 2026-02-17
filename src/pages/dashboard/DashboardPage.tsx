@@ -10,6 +10,7 @@ import { AuditLog } from '@/shared/components/AuditLog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { IncomeVsExpenseChart } from '@/core/treasury/components/IncomeVsExpenseChart'
+import { MorosoStatusBanner } from '@/core/identity/components/MorosoStatusBanner'
 import { formatCurrency, formatDateTime } from '@/shared/lib/utils'
 import {
   Users, Wallet, Vote, Upload, TrendingUp, TrendingDown,
@@ -55,6 +56,10 @@ export function DashboardPage() {
           <span>Error al cargar algunos datos. Intenta recargar la página.</span>
         </div>
       )}
+
+      {/* Moroso banner — shows only when current user is moroso */}
+      <MorosoStatusBanner />
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Dashboard</h1>

@@ -12,12 +12,14 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Label } from '@/shared/components/ui/label'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
-import { Settings, Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText } from 'lucide-react'
+import { Settings, Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock } from 'lucide-react'
 import { formatDate } from '@/shared/lib/utils'
 import type { CommunityRules } from '@/shared/types/rules'
 import { DEFAULT_RULES } from '@/shared/types/rules'
 import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
 import { ARCOAdminPanel } from '@/core/privacy/components/ARCOAdminPanel'
+import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
+import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 
 export function SettingsPage() {
   const { communityId, community } = useCommunityContext()
@@ -165,6 +167,10 @@ export function SettingsPage() {
           <TabsTrigger value="privacy" className="flex items-center gap-1.5">
             <ScrollText className="h-3.5 w-3.5" />
             Privacidad
+          </TabsTrigger>
+          <TabsTrigger value="terminos" className="flex items-center gap-1.5">
+            <CalendarClock className="h-3.5 w-3.5" />
+            Terminos
           </TabsTrigger>
         </TabsList>
 
@@ -695,6 +701,14 @@ export function SettingsPage() {
         {/* Privacy Tab */}
         <TabsContent value="privacy">
           <ARCOAdminPanel />
+        </TabsContent>
+
+        {/* Terminos Tab — LPCI CDMX Art. 42-46 */}
+        <TabsContent value="terminos">
+          <div className="space-y-6">
+            <AdminTermTracker />
+            <VigilanciaPanel />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

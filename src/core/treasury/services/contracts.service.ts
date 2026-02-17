@@ -77,8 +77,8 @@ export async function createContract(
     created_by: string
   }
 ): Promise<Contract> {
-  const { data, error } = await supabase
-    .from('contracts')
+  const { data, error } = await (supabase
+    .from('contracts') as any)
     .insert({ community_id: communityId, ...contract })
     .select()
     .single()
@@ -90,8 +90,8 @@ export async function updateContract(
   contractId: string,
   updates: Partial<Pick<Contract, 'name' | 'description' | 'status' | 'end_date' | 'terms'>>
 ): Promise<Contract> {
-  const { data, error } = await supabase
-    .from('contracts')
+  const { data, error } = await (supabase
+    .from('contracts') as any)
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', contractId)
     .select()
@@ -101,7 +101,7 @@ export async function updateContract(
 }
 
 export async function deleteContract(contractId: string): Promise<void> {
-  const { error } = await supabase.from('contracts').delete().eq('id', contractId)
+  const { error } = await (supabase.from('contracts') as any).delete().eq('id', contractId)
   if (error) throw error
 }
 
@@ -149,8 +149,8 @@ export async function generateInstallments(
     }
   })
 
-  const { data, error } = await supabase
-    .from('contract_installments')
+  const { data, error } = await (supabase
+    .from('contract_installments') as any)
     .insert(records)
     .select()
   if (error) throw error
@@ -165,8 +165,8 @@ export async function markInstallmentPaid(
 ): Promise<{ installment: ContractInstallment; transactionId: string }> {
   const description = `Pago contrato parcialidad #${installment.installment_number}${reference ? ` (Ref: ${reference})` : ''}`
 
-  const { data: tx, error: txError } = await supabase
-    .from('transactions')
+  const { data: tx, error: txError } = await (supabase
+    .from('transactions') as any)
     .insert({
       community_id: communityId,
       type: 'expense',
@@ -180,8 +180,8 @@ export async function markInstallmentPaid(
     .single()
   if (txError) throw txError
 
-  const { data: updated, error: upError } = await supabase
-    .from('contract_installments')
+  const { data: updated, error: upError } = await (supabase
+    .from('contract_installments') as any)
     .update({
       status: 'paid',
       paid_amount: installment.amount,
@@ -194,15 +194,15 @@ export async function markInstallmentPaid(
   if (upError) throw upError
 
   // Update compliance score
-  await supabase.rpc('update_contract_compliance', { p_contract_id: installment.contract_id })
+  await (supabase as any).rpc('update_contract_compliance', { p_contract_id: installment.contract_id })
 
   return { installment: updated as ContractInstallment, transactionId: tx.id }
 }
 
 export async function refreshOverdueInstallments(communityId: string): Promise<number> {
   const today = new Date().toISOString().split('T')[0]
-  const { data, error } = await supabase
-    .from('contract_installments')
+  const { data, error } = await (supabase
+    .from('contract_installments') as any)
     .update({ status: 'overdue' })
     .eq('community_id', communityId)
     .eq('status', 'pending')
