@@ -14,9 +14,9 @@ export function ImportPreview({ transactions }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 text-sm">
+      <div className="flex flex-wrap gap-4 text-sm">
         <span>Total: <strong>{transactions.length}</strong></span>
-        <span className="text-green-600">Válidos: <strong>{valid.length}</strong></span>
+        <span className="text-green-600">Validos: <strong>{valid.length}</strong></span>
         <span className="text-yellow-600">Duplicados: <strong>{duplicates.length}</strong></span>
         <span className="text-red-600">Con errores: <strong>{errors.length}</strong></span>
       </div>
@@ -28,8 +28,8 @@ export function ImportPreview({ transactions }: Props) {
               <TableHead className="w-10">#</TableHead>
               <TableHead>Fecha</TableHead>
               <TableHead>Descripción</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead>Tipo</TableHead>
+              <TableHead className="hidden md:table-cell">Categoría</TableHead>
+              <TableHead className="hidden sm:table-cell">Tipo</TableHead>
               <TableHead className="text-right">Monto</TableHead>
               <TableHead>Estado</TableHead>
             </TableRow>
@@ -49,8 +49,8 @@ export function ImportPreview({ transactions }: Props) {
                 <TableCell className="text-muted-foreground">{i + 1}</TableCell>
                 <TableCell>{tx.date || '—'}</TableCell>
                 <TableCell className="max-w-48 truncate">{tx.description || '—'}</TableCell>
-                <TableCell>{tx.category || '—'}</TableCell>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">{tx.category || '—'}</TableCell>
+                <TableCell className="hidden sm:table-cell">
                   {tx.type ? (
                     <Badge variant={tx.type === 'income' ? 'success' : 'destructive'}>
                       {tx.type === 'income' ? 'Ingreso' : 'Egreso'}

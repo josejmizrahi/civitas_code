@@ -18,7 +18,8 @@ export function useNotifications() {
     queryKey: ['notifications', memberId],
     queryFn: () => getNotifications(memberId!),
     enabled: !!memberId,
-    refetchInterval: 30_000,
+    staleTime: 1000 * 60 * 2, // 2 min fresh
+    refetchInterval: 60_000,   // poll every 60s
   })
 }
 
@@ -30,7 +31,8 @@ export function useUnreadCount() {
     queryKey: ['notifications-unread', memberId],
     queryFn: () => getUnreadCount(memberId!),
     enabled: !!memberId,
-    refetchInterval: 30_000,
+    staleTime: 1000 * 60 * 2, // 2 min fresh
+    refetchInterval: 60_000,   // poll every 60s
   })
 }
 

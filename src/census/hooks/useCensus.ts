@@ -36,6 +36,6 @@ export function usePlatformCensus() {
   return useQuery({
     queryKey: ['platform-census'],
     queryFn: getPlatformCensus,
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }

@@ -58,7 +58,7 @@ export function PaymentObligationList() {
   return (
     <div className="space-y-4">
       {/* Summary cards */}
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-3 gap-3">
         <div className="rounded-lg border bg-yellow-50 p-3">
           <div className="text-sm text-yellow-700">Pendientes</div>
           <div className="text-xl font-bold text-yellow-800">{pendingCount}</div>
@@ -73,8 +73,8 @@ export function PaymentObligationList() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-48">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-48">
           <option value="">Todos los estados</option>
           <option value="pending">Pendiente</option>
           <option value="paid">Pagado</option>
@@ -94,11 +94,11 @@ export function PaymentObligationList() {
           <TableHeader>
             <TableRow>
               <TableHead>Miembro</TableHead>
-              <TableHead>Concepto</TableHead>
+              <TableHead className="hidden md:table-cell">Concepto</TableHead>
               <TableHead className="text-right">Monto</TableHead>
-              <TableHead>Vencimiento</TableHead>
+              <TableHead className="hidden sm:table-cell">Vencimiento</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Vinculo</TableHead>
+              <TableHead className="hidden lg:table-cell">Vinculo</TableHead>
               {canManageTreasury && <TableHead>Acciones</TableHead>}
             </TableRow>
           </TableHeader>
@@ -119,15 +119,15 @@ export function PaymentObligationList() {
               filtered.map((ob) => (
                 <TableRow key={ob.id}>
                   <TableCell className="font-medium">{memberMap.get(ob.member_id) || ob.member_id.slice(0, 8)}</TableCell>
-                  <TableCell>{ob.concept}</TableCell>
+                  <TableCell className="hidden md:table-cell">{ob.concept}</TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(ob.amount)}</TableCell>
-                  <TableCell className="text-muted-foreground">{formatDate(ob.due_date)}</TableCell>
+                  <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(ob.due_date)}</TableCell>
                   <TableCell>
                     <Badge variant={statusVariant(ob.status)}>
                       {statusLabels[ob.status] || ob.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     {ob.payment_transaction_id ? (
                       <span className="inline-flex items-center gap-1 text-xs text-green-600">
                         <Link2 className="h-3 w-3" /> Tx vinculada

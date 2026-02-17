@@ -350,17 +350,17 @@ export function MemberDetailPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Concepto</TableHead>
-                    <TableHead>Vencimiento</TableHead>
+                    <TableHead className="hidden sm:table-cell">Vencimiento</TableHead>
                     <TableHead className="text-right">Monto</TableHead>
                     <TableHead>Estado</TableHead>
-                    <TableHead>Pagado</TableHead>
+                    <TableHead className="hidden sm:table-cell">Pagado</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {obligations.map(obl => (
                     <TableRow key={obl.id}>
                       <TableCell className="font-medium">{obl.concept || '—'}</TableCell>
-                      <TableCell className="text-muted-foreground">{formatDate(obl.due_date)}</TableCell>
+                      <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(obl.due_date)}</TableCell>
                       <TableCell className="text-right font-medium">{formatCurrency(Number(obl.amount))}</TableCell>
                       <TableCell>
                         <Badge variant={
@@ -371,7 +371,7 @@ export function MemberDetailPage() {
                            obl.status === 'overdue' ? 'Vencido' : 'Pendiente'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="hidden sm:table-cell text-muted-foreground">
                         {obl.paid_at ? formatDate(obl.paid_at) : '—'}
                       </TableCell>
                     </TableRow>
@@ -401,8 +401,8 @@ export function MemberDetailPage() {
                   <TableRow>
                     <TableHead>Propuesta</TableHead>
                     <TableHead>Voto</TableHead>
-                    <TableHead>Peso</TableHead>
-                    <TableHead>Fecha</TableHead>
+                    <TableHead className="hidden sm:table-cell">Peso</TableHead>
+                    <TableHead className="hidden sm:table-cell">Fecha</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -422,8 +422,8 @@ export function MemberDetailPage() {
                            v.vote === 'no' ? 'En contra' : 'Abstención'}
                         </Badge>
                       </TableCell>
-                      <TableCell>{v.weight}</TableCell>
-                      <TableCell className="text-muted-foreground">{formatDate(v.created_at)}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{v.weight}</TableCell>
+                      <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(v.created_at)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

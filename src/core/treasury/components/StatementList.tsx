@@ -98,7 +98,7 @@ export function StatementList({ fundType }: StatementListProps) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-muted-foreground" />
           <h3 className="font-semibold">Estados Financieros</h3>
@@ -133,13 +133,13 @@ export function StatementList({ fundType }: StatementListProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>Periodo</TableHead>
-                <TableHead>Fondo</TableHead>
-                <TableHead className="text-right">Saldo Inicial</TableHead>
-                <TableHead className="text-right">Ingresos</TableHead>
-                <TableHead className="text-right">Egresos</TableHead>
+                <TableHead className="hidden sm:table-cell">Fondo</TableHead>
+                <TableHead className="hidden md:table-cell text-right">Saldo Inicial</TableHead>
+                <TableHead className="hidden md:table-cell text-right">Ingresos</TableHead>
+                <TableHead className="hidden md:table-cell text-right">Egresos</TableHead>
                 <TableHead className="text-right">Saldo Final</TableHead>
                 <TableHead>Estado</TableHead>
-                <TableHead>Generado</TableHead>
+                <TableHead className="hidden lg:table-cell">Generado</TableHead>
                 <TableHead className="w-16">Ver</TableHead>
               </TableRow>
             </TableHeader>
@@ -147,18 +147,18 @@ export function StatementList({ fundType }: StatementListProps) {
               {statements.map((stmt) => (
                 <TableRow key={stmt.id} className="cursor-pointer hover:bg-muted/50">
                   <TableCell className="font-medium">{stmt.period}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary">
                       {FUND_LABELS[stmt.fund_type] || stmt.fund_type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right text-muted-foreground">
+                  <TableCell className="hidden md:table-cell text-right text-muted-foreground">
                     {formatCurrency(stmt.opening_balance)}
                   </TableCell>
-                  <TableCell className="text-right text-green-600">
+                  <TableCell className="hidden md:table-cell text-right text-green-600">
                     +{formatCurrency(stmt.total_income)}
                   </TableCell>
-                  <TableCell className="text-right text-red-600">
+                  <TableCell className="hidden md:table-cell text-right text-red-600">
                     -{formatCurrency(stmt.total_expense)}
                   </TableCell>
                   <TableCell className="text-right font-semibold">
@@ -171,7 +171,7 @@ export function StatementList({ fundType }: StatementListProps) {
                       <Badge variant="warning">Pendiente</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                     {formatDate(stmt.generated_at)}
                   </TableCell>
                   <TableCell>

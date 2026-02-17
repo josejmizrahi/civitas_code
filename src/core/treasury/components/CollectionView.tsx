@@ -148,7 +148,7 @@ export function CollectionView() {
 
       {/* Collection Stats */}
       {!isLoading && stats && (
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Por Cobrar</CardTitle>
@@ -211,7 +211,7 @@ export function CollectionView() {
           <CardTitle className="text-base">Flujo de Cobranza</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
             {/* Current flow (MVP) */}
             <div className="space-y-3">
               <h4 className="flex items-center gap-2 font-medium">

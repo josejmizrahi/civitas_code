@@ -131,8 +131,8 @@ export function EntityList() {
             <TableRow>
               <TableHead>Nombre</TableHead>
               <TableHead>Tipo</TableHead>
-              <TableHead>Contacto</TableHead>
-              <TableHead>Rating</TableHead>
+              <TableHead className="hidden md:table-cell">Contacto</TableHead>
+              <TableHead className="hidden sm:table-cell">Rating</TableHead>
               <TableHead>Estado</TableHead>
               {canManageTreasury && <TableHead className="w-20">Acciones</TableHead>}
             </TableRow>
@@ -167,7 +167,7 @@ export function EntityList() {
                     <TableCell>
                       <Badge variant="secondary">{ENTITY_TYPE_LABELS[entity.type as EntityType] || entity.type}</Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="space-y-0.5 text-sm">
                         {entity.contact_person && <div>{entity.contact_person}</div>}
                         {entity.email && (
@@ -182,7 +182,7 @@ export function EntityList() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {rating ? (
                         <div className="flex items-center gap-1">
                           <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />

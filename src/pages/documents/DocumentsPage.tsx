@@ -176,9 +176,9 @@ export function DocumentsPage() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>Documentos de la comunidad</CardTitle>
-            <div className="relative w-64">
+            <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar documentos..."
@@ -209,7 +209,7 @@ export function DocumentsPage() {
                 <TableRow>
                   <TableHead>Título</TableHead>
                   <TableHead>Categoría</TableHead>
-                  <TableHead>Fecha</TableHead>
+                  <TableHead className="hidden sm:table-cell">Fecha</TableHead>
                   {isAdmin && <TableHead className="w-16" />}
                 </TableRow>
               </TableHeader>
@@ -231,7 +231,7 @@ export function DocumentsPage() {
                         {CATEGORIES.find((c) => c.value === doc.category)?.label ?? doc.category}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(doc.created_at)}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(doc.created_at)}</TableCell>
                     {isAdmin && (
                       <TableCell>
                         <Button

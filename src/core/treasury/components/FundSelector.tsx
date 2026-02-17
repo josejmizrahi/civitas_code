@@ -29,7 +29,7 @@ const FUNDS: { value: FundType; label: string; description: string; icon: typeof
  */
 export function FundSelector({ value, onChange, className }: FundSelectorProps) {
   return (
-    <div className={cn('inline-flex rounded-lg bg-muted p-1', className)}>
+    <div className={cn('inline-flex flex-col sm:flex-row rounded-lg bg-muted p-1 w-full sm:w-auto', className)}>
       {FUNDS.map((fund) => {
         const Icon = fund.icon
         const isActive = value === fund.value

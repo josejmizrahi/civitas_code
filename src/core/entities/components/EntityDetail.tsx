@@ -51,14 +51,14 @@ export function EntityDetail({ entityId, onBack }: Props) {
       </Button>
 
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted p-3">
+          <div className="rounded-lg bg-muted p-3 shrink-0">
             <Building2 className="h-6 w-6" />
           </div>
           <div>
             <h2 className="text-xl font-bold">{entity.name}</h2>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
               <Badge variant="secondary">{ENTITY_TYPE_LABELS[entity.type as EntityType] || entity.type}</Badge>
               <Badge variant={entity.status === 'active' ? 'success' : entity.status === 'blacklisted' ? 'destructive' : 'secondary'}>
                 {ENTITY_STATUS_LABELS[entity.status as EntityStatus] || entity.status}
@@ -68,7 +68,7 @@ export function EntityDetail({ entityId, onBack }: Props) {
           </div>
         </div>
         {canManageTreasury && (
-          <Select value={entity.status} onChange={(e) => handleStatusChange(e.target.value)} className="w-36">
+          <Select value={entity.status} onChange={(e) => handleStatusChange(e.target.value)} className="w-full sm:w-36">
             {Object.entries(ENTITY_STATUS_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
@@ -77,7 +77,7 @@ export function EntityDetail({ entityId, onBack }: Props) {
       </div>
 
       {/* Metadata row */}
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {entity.creator_name && (
           <Card>
             <CardContent className="pt-4">
@@ -239,8 +239,8 @@ export function EntityDetail({ entityId, onBack }: Props) {
                   <TableRow>
                     <TableHead>Nombre</TableHead>
                     <TableHead>Rol</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Teléfono</TableHead>
+                    <TableHead className="hidden sm:table-cell">Email</TableHead>
+                    <TableHead className="hidden sm:table-cell">Teléfono</TableHead>
                     <TableHead>Principal</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -249,8 +249,8 @@ export function EntityDetail({ entityId, onBack }: Props) {
                     <TableRow key={contact.id}>
                       <TableCell className="font-medium">{contact.name}</TableCell>
                       <TableCell>{contact.role || '—'}</TableCell>
-                      <TableCell>{contact.email || '—'}</TableCell>
-                      <TableCell>{contact.phone || '—'}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{contact.email || '—'}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{contact.phone || '—'}</TableCell>
                       <TableCell>
                         {contact.is_primary && <Badge variant="success">Sí</Badge>}
                       </TableCell>

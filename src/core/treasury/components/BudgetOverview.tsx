@@ -131,10 +131,10 @@ export function BudgetOverview() {
             <TableHeader>
               <TableRow>
                 <TableHead>Categoria</TableHead>
-                <TableHead>Periodo</TableHead>
+                <TableHead className="hidden sm:table-cell">Periodo</TableHead>
                 <TableHead className="text-right">Presupuesto</TableHead>
                 <TableHead className="text-right">Real</TableHead>
-                <TableHead className="text-right">Diferencia</TableHead>
+                <TableHead className="hidden sm:table-cell text-right">Diferencia</TableHead>
                 {canManageTreasury && <TableHead className="w-24">Acciones</TableHead>}
               </TableRow>
             </TableHeader>
@@ -148,7 +148,7 @@ export function BudgetOverview() {
                   return (
                     <TableRow key={budget.id}>
                       <TableCell>{budget.category_name || '\u2014'}</TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <Input
                           value={editValues.period}
                           onChange={(e) => setEditValues({ ...editValues, period: e.target.value })}
@@ -167,7 +167,7 @@ export function BudgetOverview() {
                         />
                       </TableCell>
                       <TableCell className="text-right text-muted-foreground">{formatCurrency(actual)}</TableCell>
-                      <TableCell className="text-right text-muted-foreground">{'\u2014'}</TableCell>
+                      <TableCell className="hidden sm:table-cell text-right text-muted-foreground">{'\u2014'}</TableCell>
                       <TableCell>
                         <div className="flex gap-1">
                           <Button size="icon" variant="ghost" onClick={saveEdit} disabled={updateBudget.isPending} aria-label="Guardar">
@@ -185,10 +185,10 @@ export function BudgetOverview() {
                 return (
                   <TableRow key={budget.id}>
                     <TableCell>{budget.category_name || '\u2014'}</TableCell>
-                    <TableCell>{budget.period}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{budget.period}</TableCell>
                     <TableCell className="text-right font-medium">{formatCurrency(budget.amount)}</TableCell>
                     <TableCell className="text-right font-medium">{formatCurrency(actual)}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="hidden sm:table-cell text-right">
                       <Badge variant={diff >= 0 ? 'success' : 'destructive'}>
                         {diff >= 0 ? '+' : ''}{formatCurrency(diff)}
                       </Badge>

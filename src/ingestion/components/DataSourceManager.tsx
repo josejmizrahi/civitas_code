@@ -46,7 +46,7 @@ export function DataSourceManager({ onSelectSource }: Props) {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Tipo</TableHead>
-                <TableHead>Última sync</TableHead>
+                <TableHead className="hidden sm:table-cell">Última sync</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -57,7 +57,7 @@ export function DataSourceManager({ onSelectSource }: Props) {
                   <TableCell>
                     <Badge variant="secondary">{s.type.toUpperCase()}</Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <SyncStatusBadge lastSyncAt={s.last_sync_at} status={s.status} />
                   </TableCell>
                   <TableCell>

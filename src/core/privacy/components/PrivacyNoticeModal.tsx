@@ -16,9 +16,9 @@ export function PrivacyNoticeModal({ open, onAccept, onClose, communityName }: P
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto" onClose={onClose}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto w-[95vw] sm:w-auto" onClose={onClose}>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <ScrollText className="h-5 w-5" />
             Aviso de Privacidad
           </DialogTitle>
@@ -139,7 +139,7 @@ export function PrivacyNoticeModal({ open, onAccept, onClose, communityName }: P
           </div>
         </div>
 
-        <DialogFooter className="mt-4">
+        <DialogFooter className="mt-4 flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={onClose}>
             Cerrar
           </Button>

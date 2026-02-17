@@ -25,7 +25,7 @@ export function ConvocatoriaCard({ convocatoria }: Props) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <FileText className="h-4 w-4" />
             Convocatoria - {convocatoria.call_number}a Llamada
@@ -46,46 +46,46 @@ export function ConvocatoriaCard({ convocatoria }: Props) {
       <CardContent className="space-y-4">
         {/* Art. 34 required fields */}
         <div className="grid gap-3 text-sm">
-          <div className="flex items-start gap-2">
-            <span className="font-medium text-muted-foreground w-32 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+            <span className="font-medium text-muted-foreground w-full sm:w-32 shrink-0">
               Tipo de Asamblea:
             </span>
             <span>{TYPE_LABELS[convocatoria.type] || convocatoria.type}</span>
           </div>
 
-          <div className="flex items-start gap-2">
-            <span className="font-medium text-muted-foreground w-32 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+            <span className="font-medium text-muted-foreground w-full sm:w-32 shrink-0">
               <MapPin className="inline h-3.5 w-3.5 mr-1" />
               Ubicacion:
             </span>
             <span>{convocatoria.location || 'No especificada'}</span>
           </div>
 
-          <div className="flex items-start gap-2">
-            <span className="font-medium text-muted-foreground w-32 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+            <span className="font-medium text-muted-foreground w-full sm:w-32 shrink-0">
               <Calendar className="inline h-3.5 w-3.5 mr-1" />
               Fecha y Hora:
             </span>
             <span>{formatDateTime(convocatoria.scheduled_date)}</span>
           </div>
 
-          <div className="flex items-start gap-2">
-            <span className="font-medium text-muted-foreground w-32 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+            <span className="font-medium text-muted-foreground w-full sm:w-32 shrink-0">
               <User className="inline h-3.5 w-3.5 mr-1" />
               Convocado por:
             </span>
             <span>{convocatoria.caller_name || 'Administrador'}</span>
           </div>
 
-          <div className="flex items-start gap-2">
-            <span className="font-medium text-muted-foreground w-32 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+            <span className="font-medium text-muted-foreground w-full sm:w-32 shrink-0">
               Fecha de emision:
             </span>
             <span>{formatDateTime(convocatoria.issued_at)}</span>
           </div>
 
-          <div className="flex items-start gap-2">
-            <span className="font-medium text-muted-foreground w-32 shrink-0">
+          <div className="flex flex-col sm:flex-row items-start gap-1 sm:gap-2">
+            <span className="font-medium text-muted-foreground w-full sm:w-32 shrink-0">
               Aviso minimo:
             </span>
             <span>

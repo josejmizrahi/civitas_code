@@ -122,8 +122,8 @@ export function TransactionList() {
             <TableRow>
               <TableHead>Fecha</TableHead>
               <TableHead>Descripción</TableHead>
-              <TableHead>Categoría</TableHead>
-              <TableHead>Tipo</TableHead>
+              <TableHead className="hidden sm:table-cell">Categoría</TableHead>
+              <TableHead className="hidden sm:table-cell">Tipo</TableHead>
               <TableHead className="text-right">Monto</TableHead>
               {canManageTreasury && <TableHead className="w-24">Acciones</TableHead>}
             </TableRow>
@@ -211,14 +211,14 @@ export function TransactionList() {
                   <TableRow key={tx.id}>
                     <TableCell className="text-muted-foreground">{formatDate(tx.date)}</TableCell>
                     <TableCell>{tx.description || '\u2014'}</TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       {tx.category_name ? (
                         <Badge variant="secondary">{tx.category_name}</Badge>
                       ) : (
                         <span className="text-muted-foreground">{'\u2014'}</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       <Badge variant={tx.type === 'income' ? 'success' : 'destructive'}>
                         {tx.type === 'income' ? 'Ingreso' : 'Egreso'}
                       </Badge>

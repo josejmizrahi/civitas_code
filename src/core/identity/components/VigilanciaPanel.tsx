@@ -89,7 +89,7 @@ function ReportForm({ onClose }: { onClose: () => void }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
           <Plus className="h-5 w-5 text-green-600" />
           Nuevo Reporte de Vigilancia
         </CardTitle>
@@ -150,26 +150,28 @@ function ReportForm({ onClose }: { onClose: () => void }) {
             </Button>
           </div>
           {findings.map((f, i) => (
-            <div key={i} className="flex items-start gap-2">
+            <div key={i} className="flex flex-col gap-2 sm:flex-row sm:items-start">
               <Input
                 value={f.finding}
                 onChange={(e) => updateFinding(i, 'finding', e.target.value)}
                 placeholder="Descripcion del hallazgo..."
                 className="flex-1"
               />
-              <Select
-                value={f.severity}
-                onChange={(e) => updateFinding(i, 'severity', e.target.value)}
-                className="w-28"
-              >
-                <option value="low">Bajo</option>
-                <option value="medium">Medio</option>
-                <option value="high">Alto</option>
-                <option value="critical">Critico</option>
-              </Select>
-              <Button variant="ghost" size="icon" onClick={() => removeFinding(i)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={f.severity}
+                  onChange={(e) => updateFinding(i, 'severity', e.target.value)}
+                  className="w-full sm:w-28"
+                >
+                  <option value="low">Bajo</option>
+                  <option value="medium">Medio</option>
+                  <option value="high">Alto</option>
+                  <option value="critical">Critico</option>
+                </Select>
+                <Button variant="ghost" size="icon" onClick={() => removeFinding(i)} className="shrink-0">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
             </div>
           ))}
           {findings.length === 0 && (
@@ -187,25 +189,27 @@ function ReportForm({ onClose }: { onClose: () => void }) {
             </Button>
           </div>
           {recommendations.map((r, i) => (
-            <div key={i} className="flex items-start gap-2">
+            <div key={i} className="flex flex-col gap-2 sm:flex-row sm:items-start">
               <Input
                 value={r.recommendation}
                 onChange={(e) => updateRecommendation(i, 'recommendation', e.target.value)}
                 placeholder="Descripcion de la recomendacion..."
                 className="flex-1"
               />
-              <Select
-                value={r.priority}
-                onChange={(e) => updateRecommendation(i, 'priority', e.target.value)}
-                className="w-28"
-              >
-                <option value="low">Baja</option>
-                <option value="medium">Media</option>
-                <option value="high">Alta</option>
-              </Select>
-              <Button variant="ghost" size="icon" onClick={() => removeRecommendation(i)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={r.priority}
+                  onChange={(e) => updateRecommendation(i, 'priority', e.target.value)}
+                  className="w-full sm:w-28"
+                >
+                  <option value="low">Baja</option>
+                  <option value="medium">Media</option>
+                  <option value="high">Alta</option>
+                </Select>
+                <Button variant="ghost" size="icon" onClick={() => removeRecommendation(i)} className="shrink-0">
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
             </div>
           ))}
           {recommendations.length === 0 && (
@@ -216,7 +220,7 @@ function ReportForm({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-col gap-2 sm:flex-row pt-2">
           <Button
             onClick={handleSubmit}
             disabled={!title.trim() || !period || !content.trim() || createReport.isPending}
@@ -285,19 +289,19 @@ function ReportCard({ report }: { report: VigilanciaReport }) {
   return (
     <div className="rounded-lg border p-4 space-y-3">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{report.title}</span>
+            <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="font-medium truncate">{report.title}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>{report.period}</span>
             {typeBadge(report.report_type)}
             {statusBadge(report.status)}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <span className="text-xs text-muted-foreground">{formatDate(report.created_at)}</span>
           <Button
             variant="ghost"
@@ -411,8 +415,8 @@ export function VigilanciaPanel() {
       {/* Header */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-lg">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <FileText className="h-5 w-5 text-violet-600" />
               Comite de Vigilancia
             </CardTitle>

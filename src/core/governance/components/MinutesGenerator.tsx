@@ -102,13 +102,13 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
               <div className="space-y-1">
                 <p className="text-sm font-medium">Firmas ({existingMinutes.signatures.length}):</p>
                 {existingMinutes.signatures.map((sig, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs">
-                    <Shield className="h-3 w-3 text-green-600" />
+                  <div key={i} className="flex flex-wrap items-center gap-2 text-xs">
+                    <Shield className="h-3 w-3 text-green-600 shrink-0" />
                     <span className="font-medium">{sig.member_name}</span>
                     <span className="text-muted-foreground">
                       — {formatDate(sig.signed_at)}
                     </span>
-                    <span className="font-mono text-[10px] text-muted-foreground">
+                    <span className="font-mono text-[10px] text-muted-foreground break-all">
                       {sig.hash.slice(0, 12)}...
                     </span>
                   </div>
@@ -117,7 +117,7 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
             )}
 
             {/* Action buttons */}
-            <div className="flex gap-2 pt-2">
+            <div className="flex flex-col gap-2 sm:flex-row pt-2">
               {/* Approve button (admin only, not yet approved) */}
               {isAdmin && !existingMinutes.approved && (
                 <Button

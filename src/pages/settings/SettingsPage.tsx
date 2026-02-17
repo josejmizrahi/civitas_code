@@ -180,22 +180,25 @@ export function SettingsPage() {
             <div>
               <label className="text-sm font-medium text-muted-foreground">Nombre de la comunidad</label>
               {editingName ? (
-                <div className="mt-1 flex gap-2">
+                <div className="mt-1 flex flex-col gap-2 sm:flex-row">
                   <Input
                     value={nameValue}
                     onChange={(e) => setNameValue(e.target.value)}
                     autoFocus
+                    className="flex-1"
                   />
-                  <Button
-                    onClick={() => updateCommunityMut.mutate({ name: nameValue })}
-                    disabled={!nameValue.trim() || updateCommunityMut.isPending}
-                    size="sm"
-                  >
-                    Guardar
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setEditingName(false)}>
-                    Cancelar
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => updateCommunityMut.mutate({ name: nameValue })}
+                      disabled={!nameValue.trim() || updateCommunityMut.isPending}
+                      size="sm"
+                    >
+                      Guardar
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setEditingName(false)}>
+                      Cancelar
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="mt-1 flex items-center gap-2">
@@ -284,7 +287,7 @@ export function SettingsPage() {
                 <CardTitle className="text-destructive">Zona de Peligro</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium">Eliminar comunidad</p>
                     <p className="text-sm text-muted-foreground">
@@ -295,11 +298,12 @@ export function SettingsPage() {
                     variant="destructive"
                     disabled
                     title="Contacta soporte para eliminar"
+                    className="w-full sm:w-auto"
                   >
                     Eliminar comunidad
                   </Button>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-medium">Transferir propiedad</p>
                     <p className="text-sm text-muted-foreground">
@@ -310,6 +314,7 @@ export function SettingsPage() {
                     variant="destructive"
                     disabled
                     title="Contacta soporte para transferir"
+                    className="w-full sm:w-auto"
                   >
                     Transferir propiedad
                   </Button>
@@ -347,7 +352,7 @@ export function SettingsPage() {
                     <TableRow>
                       <TableHead>Email</TableHead>
                       <TableHead>Rol</TableHead>
-                      <TableHead>Expira</TableHead>
+                      <TableHead className="hidden sm:table-cell">Expira</TableHead>
                       <TableHead className="w-32">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -358,7 +363,7 @@ export function SettingsPage() {
                         <TableCell>
                           <Badge variant="secondary">{inv.role}</Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="hidden sm:table-cell text-muted-foreground">
                           {formatDate(inv.expires_at)}
                         </TableCell>
                         <TableCell>
@@ -534,8 +539,8 @@ export function SettingsPage() {
                 {/* Mode */}
                 <div className="space-y-2">
                   <Label>Modo de tesorería</Label>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-sm">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Badge variant="secondary" className="text-sm w-fit">
                       {{
                         import: 'Importación',
                         connector: 'Conector bancario',

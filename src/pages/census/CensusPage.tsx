@@ -214,12 +214,12 @@ function CommunityCensusTab() {
                 <TableRow>
                   <TableHead>Fecha</TableHead>
                   <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-right">Activos</TableHead>
+                  <TableHead className="hidden sm:table-cell text-right">Activos</TableHead>
                   <TableHead className="text-right">Al corriente</TableHead>
                   <TableHead className="text-right">Morosos</TableHead>
-                  <TableHead className="text-right">Ingresos</TableHead>
-                  <TableHead className="text-right">Gastos</TableHead>
-                  <TableHead className="text-right">Propuestas</TableHead>
+                  <TableHead className="hidden md:table-cell text-right">Ingresos</TableHead>
+                  <TableHead className="hidden md:table-cell text-right">Gastos</TableHead>
+                  <TableHead className="hidden sm:table-cell text-right">Propuestas</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -227,16 +227,16 @@ function CommunityCensusTab() {
                   <TableRow key={s.id}>
                     <TableCell>{formatDate(s.snapshot_date)}</TableCell>
                     <TableCell className="text-right">{s.total_members}</TableCell>
-                    <TableCell className="text-right">{s.active_members}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-right">{s.active_members}</TableCell>
                     <TableCell className="text-right">
                       <Badge variant="success">{s.members_good_standing}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Badge variant="destructive">{s.members_delinquent}</Badge>
                     </TableCell>
-                    <TableCell className="text-right">{formatCurrency(s.total_income)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(s.total_expenses)}</TableCell>
-                    <TableCell className="text-right">{s.active_proposals}</TableCell>
+                    <TableCell className="hidden md:table-cell text-right">{formatCurrency(s.total_income)}</TableCell>
+                    <TableCell className="hidden md:table-cell text-right">{formatCurrency(s.total_expenses)}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-right">{s.active_proposals}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

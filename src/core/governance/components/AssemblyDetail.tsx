@@ -203,7 +203,7 @@ export function AssemblyDetail({ assemblyId }: Props) {
 
           {/* Actions */}
           {availableActions.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap mt-4 pt-4 border-t">
               {availableActions.map((action) => {
                 const Icon = action.icon
                 return (

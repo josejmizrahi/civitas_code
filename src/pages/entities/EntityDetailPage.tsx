@@ -10,8 +10,8 @@ export function EntityDetailPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Detalle de Entidad</h1>
-        <p className="text-muted-foreground">Información completa del proveedor o parte relacionada</p>
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Detalle de Entidad</h1>
+        <p className="text-sm text-muted-foreground">Información completa del proveedor o parte relacionada</p>
       </div>
       <EntityDetail entityId={entityId} onBack={() => navigate('/entities')} />
     </div>

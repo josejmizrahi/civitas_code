@@ -48,9 +48,9 @@ export function ProposalList({ statusFilter }: Props) {
         <Link key={p.id} to={`/governance/${p.id}`} className="block">
           <Card className="transition-colors hover:bg-muted/50">
             <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <CardTitle className="text-base">{p.title}</CardTitle>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">{TYPE_LABELS[p.type] || p.type}</Badge>
                   <Badge variant={STATUS_VARIANTS[p.status] || 'default'}>
                     {STATUS_LABELS[p.status] || p.status}

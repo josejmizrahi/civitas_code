@@ -276,7 +276,7 @@ export function ProfilePage() {
                 return (
                   <div
                     key={community.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border ${
+                    className={`flex flex-col gap-3 p-4 rounded-lg border sm:flex-row sm:items-center sm:justify-between ${
                       isCurrent ? 'bg-accent border-primary' : 'bg-card'
                     }`}
                   >

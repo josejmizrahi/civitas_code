@@ -25,7 +25,7 @@ function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
   return (
     <div
       className={cn(
-        'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
+        'inline-flex h-auto sm:h-9 items-center rounded-lg bg-muted p-1 text-muted-foreground overflow-x-auto scrollbar-none flex-wrap sm:flex-nowrap gap-0.5 sm:gap-0',
         className
       )}
       {...props}
@@ -40,7 +40,7 @@ function TabsTrigger({ className, value, disabled, ...props }: React.ButtonHTMLA
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-2.5 py-1.5 sm:px-3 sm:py-1 text-xs sm:text-sm font-medium transition-all',
         isActive ? 'bg-background text-foreground shadow' : 'hover:bg-background/50',
         disabled && 'pointer-events-none opacity-50',
         className

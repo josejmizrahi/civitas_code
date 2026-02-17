@@ -116,7 +116,7 @@ export function CreateProposalDialog({ open, onOpenChange }: Props) {
                   <option value="amendment">Enmienda</option>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Quórum requerido (%)</Label>
                   <Input type="number" min="1" max="100" value={quorum} onChange={(e) => setQuorum(e.target.value)} />
@@ -126,7 +126,7 @@ export function CreateProposalDialog({ open, onOpenChange }: Props) {
                   <Input type="number" min="1" max="100" value={majority} onChange={(e) => setMajority(e.target.value)} />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Inicio de votación</Label>
                   <Input type="datetime-local" value={votingStart} onChange={(e) => setVotingStart(e.target.value)} />

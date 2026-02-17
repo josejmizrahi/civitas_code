@@ -118,7 +118,7 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
             {activeProxies.map((proxy) => (
               <div
                 key={proxy.id}
-                className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-md border px-3 py-2 text-sm"
               >
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge variant="outline">{proxy.grantor_name || getMemberName(proxy.grantor_id)}</Badge>

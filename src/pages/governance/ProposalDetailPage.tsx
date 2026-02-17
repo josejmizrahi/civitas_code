@@ -15,7 +15,7 @@ export function ProposalDetailPage() {
             Volver
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Detalle de Propuesta</h1>
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Detalle de Propuesta</h1>
       </div>
 
       {id ? (

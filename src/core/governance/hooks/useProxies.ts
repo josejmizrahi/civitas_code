@@ -15,7 +15,7 @@ export function useAssemblyProxies(assemblyId: string | undefined) {
     queryKey: ['assembly-proxies', assemblyId],
     queryFn: () => getAssemblyProxies(assemblyId!),
     enabled: !!assemblyId,
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
 
@@ -71,6 +71,6 @@ export function useCanRepresent(
     queryKey: ['can-represent', communityId, assemblyId, representativeId],
     queryFn: () => canRepresent(communityId!, assemblyId!, representativeId!),
     enabled: !!communityId && !!assemblyId && !!representativeId,
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 2 * 60 * 1000, // 2 minutes
   })
 }

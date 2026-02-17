@@ -49,7 +49,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
           </p>
         ) : null}
 
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <Button
             variant={myVote?.value === 'yes' ? 'default' : 'outline'}
             className="flex-1"

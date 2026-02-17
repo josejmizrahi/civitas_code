@@ -23,9 +23,9 @@ export function CategoryMapper({ externalCategories, categoryMap, internalCatego
         {externalCategories.map((extName) => {
           const match = categoryMap.get(extName)
           return (
-            <div key={extName} className="flex items-center gap-3 rounded-md border p-2">
-              <span className="w-48 shrink-0 truncate text-sm font-medium">{extName}</span>
-              <span className="text-muted-foreground">→</span>
+            <div key={extName} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 rounded-md border p-2">
+              <span className="sm:w-48 sm:shrink-0 truncate text-sm font-medium">{extName}</span>
+              <span className="hidden sm:inline text-muted-foreground">→</span>
               <Select
                 value={match?.categoryId || ''}
                 onChange={(e) => onChange(extName, e.target.value || null)}

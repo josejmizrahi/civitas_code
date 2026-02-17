@@ -216,7 +216,7 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
               {agenda.map((item, index) => (
                 <div
                   key={index}
-                  className="flex gap-2 items-start rounded-md border p-3"
+                  className="flex flex-col sm:flex-row gap-2 items-start rounded-md border p-3"
                 >
                   <div className="flex flex-col gap-1 pt-1">
                     <button

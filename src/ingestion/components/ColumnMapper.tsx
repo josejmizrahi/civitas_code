@@ -35,8 +35,8 @@ export function ColumnMapper({ headers, mappings, onChange }: Props) {
       </p>
       <div className="grid gap-3">
         {INTERNAL_FIELDS.map((field) => (
-          <div key={field} className="flex items-center gap-3">
-            <Label className="w-40 shrink-0 text-right text-sm">
+          <div key={field} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+            <Label className="sm:w-40 sm:shrink-0 sm:text-right text-sm">
               {FIELD_LABELS[field] || field}
               {(field === 'amount' || field === 'date') && (
                 <span className="text-destructive"> *</span>

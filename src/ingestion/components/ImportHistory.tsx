@@ -39,11 +39,11 @@ export function ImportHistory() {
         <TableHeader>
           <TableRow>
             <TableHead>Fuente</TableHead>
-            <TableHead>Fecha</TableHead>
+            <TableHead className="hidden sm:table-cell">Fecha</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead className="text-right">Importados</TableHead>
-            <TableHead className="text-right">Omitidos</TableHead>
-            <TableHead className="text-right">Total</TableHead>
+            <TableHead className="hidden sm:table-cell text-right">Omitidos</TableHead>
+            <TableHead className="hidden sm:table-cell text-right">Total</TableHead>
             <TableHead>Acciones</TableHead>
           </TableRow>
         </TableHeader>
@@ -51,7 +51,7 @@ export function ImportHistory() {
           {jobs.map((job) => (
             <TableRow key={job.id}>
               <TableCell>{job.source_name || '—'}</TableCell>
-              <TableCell className="text-muted-foreground">
+              <TableCell className="hidden sm:table-cell text-muted-foreground">
                 {job.started_at ? formatDateTime(job.started_at) : '—'}
               </TableCell>
               <TableCell>
@@ -60,8 +60,8 @@ export function ImportHistory() {
                 </Badge>
               </TableCell>
               <TableCell className="text-right">{job.rows_imported}</TableCell>
-              <TableCell className="text-right">{job.rows_skipped}</TableCell>
-              <TableCell className="text-right">{job.rows_total}</TableCell>
+              <TableCell className="hidden sm:table-cell text-right">{job.rows_skipped}</TableCell>
+              <TableCell className="hidden sm:table-cell text-right">{job.rows_total}</TableCell>
               <TableCell>
                 {job.status === 'completed' && (canManageTreasury || isAdmin) && (
                   <Button

@@ -125,7 +125,7 @@ export function DelegationManager({ memberId }: Props) {
 
         {/* Create delegation */}
         {canDelegate.allowed && myDelegations.length === 0 && eligibleMembers.length > 0 && (
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Select
               value={selectedMember}
               onChange={(e) => setSelectedMember(e.target.value)}

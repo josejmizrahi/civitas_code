@@ -57,11 +57,11 @@ export function UnitDirectory() {
             <TableHeader>
               <TableRow>
                 <TableHead>Unidad</TableHead>
-                <TableHead>Piso</TableHead>
-                <TableHead>Torre</TableHead>
+                <TableHead className="hidden sm:table-cell">Piso</TableHead>
+                <TableHead className="hidden sm:table-cell">Torre</TableHead>
                 <TableHead>Propietario</TableHead>
                 <TableHead className="text-right">Indiviso (%)</TableHead>
-                <TableHead className="text-right">Area (m2)</TableHead>
+                <TableHead className="hidden md:table-cell text-right">Area (m2)</TableHead>
                 {isAdmin && <TableHead className="text-right">Acciones</TableHead>}
               </TableRow>
             </TableHeader>
@@ -69,11 +69,11 @@ export function UnitDirectory() {
               {units.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">{u.unit_number}</TableCell>
-                  <TableCell>{u.floor ?? '\u2014'}</TableCell>
-                  <TableCell>{u.tower ?? '\u2014'}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{u.floor ?? '\u2014'}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{u.tower ?? '\u2014'}</TableCell>
                   <TableCell>{u.member_name ?? <span className="text-muted-foreground">Sin asignar</span>}</TableCell>
                   <TableCell className="text-right">{u.indiviso_pct?.toFixed(4) ?? '\u2014'}</TableCell>
-                  <TableCell className="text-right">{u.area_m2 ?? '\u2014'}</TableCell>
+                  <TableCell className="hidden md:table-cell text-right">{u.area_m2 ?? '\u2014'}</TableCell>
                   {isAdmin && (
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

@@ -90,7 +90,7 @@ export function ARCORightsPanel() {
             ))}
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Button onClick={() => setShowForm(!showForm)}>
               <Send className="h-4 w-4 mr-2" />
               Nueva Solicitud ARCO
@@ -138,7 +138,7 @@ export function ARCORightsPanel() {
                 rows={4}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Button onClick={handleSubmit} disabled={createRequest.isPending}>
                 {createRequest.isPending ? 'Enviando...' : 'Enviar Solicitud'}
               </Button>

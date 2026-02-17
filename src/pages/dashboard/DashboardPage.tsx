@@ -38,13 +38,15 @@ export function DashboardPage() {
 
   const isResidential = community?.type === 'residential'
 
-  const isLoading = membersLoading || statsLoading || proposalsLoading || obligationsLoading
   const queryError = membersError || statsError
+  // Only show full-page spinner on very first load (no cached data at all)
+  const hasNoData = !members && !stats && !proposals && !obligations
+  const isFirstLoad = hasNoData && (membersLoading || statsLoading)
 
   const goodStandingCount = members?.filter((m) => !m.financial_standing || m.financial_standing === 'good_standing').length ?? 0
   const delinquentCount = members?.filter((m) => m.financial_standing === 'delinquent').length ?? 0
 
-  if (isLoading) {
+  if (isFirstLoad) {
     return <LoadingSpinner message="Cargando dashboard..." className="py-20" />
   }
 
@@ -76,7 +78,7 @@ export function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{members?.length ?? 0}</div>
+            <div className="text-xl sm:text-2xl font-bold">{members?.length ?? 0}</div>
             <p className="text-xs text-muted-foreground">miembros activos</p>
           </CardContent>
         </Card>
@@ -87,7 +89,7 @@ export function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">
               {stats ? formatCurrency(stats.totalIncome) : '$0.00'}
             </div>
             <p className="text-xs text-muted-foreground">total acumulado</p>
@@ -100,7 +102,7 @@ export function DashboardPage() {
             <TrendingDown className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-xl sm:text-2xl font-bold text-red-600">
               {stats ? formatCurrency(stats.totalExpenses) : '$0.00'}
             </div>
             <p className="text-xs text-muted-foreground">total acumulado</p>
@@ -113,7 +115,7 @@ export function DashboardPage() {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {stats ? formatCurrency(stats.balance) : '$0.00'}
             </div>
             <p className="text-xs text-muted-foreground">disponible</p>
@@ -167,7 +169,7 @@ export function DashboardPage() {
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Ingresos vs Egresos</CardTitle>

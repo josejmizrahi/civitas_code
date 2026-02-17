@@ -111,9 +111,9 @@ export function DocumentRetentionPanel() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Creado</TableHead>
+                  <TableHead className="hidden sm:table-cell">Creado</TableHead>
                   <TableHead>Expira</TableHead>
-                  <TableHead>Hash de integridad</TableHead>
+                  <TableHead className="hidden md:table-cell">Hash de integridad</TableHead>
                   <TableHead>Estado</TableHead>
                 </TableRow>
               </TableHeader>
@@ -136,14 +136,14 @@ export function DocumentRetentionPanel() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
                         {formatDate(record.created_at)}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDate(record.expires_at)}
                       </TableCell>
-                      <TableCell>
-                        <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">
+                      <TableCell className="hidden md:table-cell">
+                        <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono break-all">
                           {truncateHash(record.integrity_hash)}
                         </code>
                       </TableCell>

@@ -15,14 +15,14 @@ export function FinancialDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalIncome)}</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{formatCurrency(stats.totalIncome)}</div>
           </CardContent>
         </Card>
 
@@ -32,7 +32,7 @@ export function FinancialDashboard() {
             <TrendingDown className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalExpenses)}</div>
+            <div className="text-xl sm:text-2xl font-bold text-red-600">{formatCurrency(stats.totalExpenses)}</div>
           </CardContent>
         </Card>
 
@@ -42,7 +42,7 @@ export function FinancialDashboard() {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-xl sm:text-2xl font-bold ${stats.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               {formatCurrency(stats.balance)}
             </div>
           </CardContent>
@@ -56,7 +56,7 @@ export function FinancialDashboard() {
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-yellow-600">
+                <div className="text-xl sm:text-2xl font-bold text-yellow-600">
                   {formatCurrency(collStats.pendingAmount + collStats.overdueAmount)}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -77,7 +77,7 @@ export function FinancialDashboard() {
                 <ArrowUpCircle className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{(collStats.collectionRate * 100).toFixed(0)}%</div>
+                <div className="text-xl sm:text-2xl font-bold">{(collStats.collectionRate * 100).toFixed(0)}%</div>
                 <div className="mt-1 h-2 rounded-full bg-muted">
                   <div
                     className="h-full rounded-full bg-blue-500 transition-all"

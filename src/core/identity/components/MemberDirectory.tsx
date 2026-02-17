@@ -78,11 +78,11 @@ export function MemberDirectory() {
           <TableHeader>
             <TableRow>
               <TableHead>Miembro</TableHead>
-              <TableHead>Correo</TableHead>
+              <TableHead className="hidden md:table-cell">Correo</TableHead>
               <TableHead>Rol</TableHead>
-              <TableHead>Estado</TableHead>
+              <TableHead className="hidden sm:table-cell">Estado</TableHead>
               <TableHead>Standing</TableHead>
-              <TableHead>Desde</TableHead>
+              <TableHead className="hidden sm:table-cell">Desde</TableHead>
               {canManageMembers && <TableHead className="w-24">Acciones</TableHead>}
             </TableRow>
           </TableHeader>
@@ -99,7 +99,7 @@ export function MemberDirectory() {
                     <span className="font-medium">{member.full_name || 'Sin nombre'}</span>
                   </div>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{member.email}</TableCell>
+                <TableCell className="hidden md:table-cell text-muted-foreground">{member.email}</TableCell>
                 <TableCell>
                   {canManageMembers && editingId === member.id ? (
                     <Select
@@ -130,7 +130,7 @@ export function MemberDirectory() {
                     </Badge>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">
                   <Badge variant={member.status === 'active' ? 'success' : 'outline'}>
                     {member.status === 'active' ? 'Activo' : member.status}
                   </Badge>
@@ -145,7 +145,7 @@ export function MemberDirectory() {
                      member.financial_standing === 'grace_period' ? 'Gracia' : '—'}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="hidden sm:table-cell text-muted-foreground">
                   {formatDate(member.joined_at)}
                 </TableCell>
                 {canManageMembers && (

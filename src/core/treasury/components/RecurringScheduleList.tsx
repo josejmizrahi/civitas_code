@@ -114,7 +114,7 @@ export function RecurringScheduleList() {
   return (
     <div className="space-y-4">
       {/* Summary */}
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-4">
             <div className="text-sm text-muted-foreground">Activos</div>
@@ -135,18 +135,18 @@ export function RecurringScheduleList() {
         </Card>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         {canManageTreasury && (
           <Button variant="outline" onClick={() => processAll.mutate(undefined, {
             onSuccess: () => toast.success('Pendientes procesados'),
             onError: () => toast.error('Error al procesar pendientes'),
-          })} disabled={processAll.isPending}>
+          })} disabled={processAll.isPending} className="w-full sm:w-auto">
             <RefreshCw className={`mr-2 h-4 w-4 ${processAll.isPending ? 'animate-spin' : ''}`} />
             Procesar Pendientes
           </Button>
         )}
         {canManageTreasury && (
-          <Button onClick={() => setShowCreate(true)}>
+          <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Nuevo Recurrente
           </Button>
@@ -159,9 +159,9 @@ export function RecurringScheduleList() {
             <TableRow>
               <TableHead>Nombre</TableHead>
               <TableHead>Tipo</TableHead>
-              <TableHead>Frecuencia</TableHead>
+              <TableHead className="hidden sm:table-cell">Frecuencia</TableHead>
               <TableHead className="text-right">Monto</TableHead>
-              <TableHead>Proxima Ejecucion</TableHead>
+              <TableHead className="hidden md:table-cell">Proxima Ejecucion</TableHead>
               <TableHead>Estado</TableHead>
               {canManageTreasury && <TableHead>Acciones</TableHead>}
             </TableRow>
@@ -203,9 +203,9 @@ export function RecurringScheduleList() {
                       {s.type === 'collection' ? 'Cobro' : 'Pago'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{FREQ_LABELS[s.frequency] || s.frequency}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{FREQ_LABELS[s.frequency] || s.frequency}</TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(s.amount)}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1 text-sm">
                       <CalendarClock className="h-3 w-3" />
                       {formatDate(s.next_run_date)}
@@ -257,7 +257,7 @@ export function RecurringScheduleList() {
                 <Label>Descripcion</Label>
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Tipo</Label>
                   <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as 'collection' | 'payment' })}>
@@ -302,7 +302,7 @@ export function RecurringScheduleList() {
                   </Select>
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Fecha inicio</Label>
                   <Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} required />

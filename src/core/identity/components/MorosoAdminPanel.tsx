@@ -41,19 +41,19 @@ function MorosoRow({ member }: { member: Member }) {
       <TableCell className="font-medium">
         {member.full_name ?? member.email ?? member.id.slice(0, 8)}
       </TableCell>
-      <TableCell className="text-center">
+      <TableCell className="hidden md:table-cell text-center">
         {isLoading ? '...' : debt?.ordinary_unpaid ?? 0}
       </TableCell>
-      <TableCell className="text-center">
+      <TableCell className="hidden md:table-cell text-center">
         {isLoading ? '...' : debt?.extraordinary_unpaid ?? 0}
       </TableCell>
       <TableCell className="text-right">
         {isLoading ? '...' : formatCurrency(debt?.total_debt ?? 0)}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden sm:table-cell">
         {formatDate((member as any).moroso_since)}
       </TableCell>
-      <TableCell>
+      <TableCell className="hidden lg:table-cell">
         {(member as any).moroso_notified_at
           ? formatDate((member as any).moroso_notified_at)
           : <span className="text-muted-foreground text-xs">Sin notificar</span>}
@@ -183,16 +183,16 @@ export function MorosoAdminPanel() {
 
         {/* Table */}
         {morosos && morosos.length > 0 ? (
-          <div className="rounded-md border">
+          <div className="overflow-x-auto rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Miembro</TableHead>
-                  <TableHead className="text-center">Ord. pendientes</TableHead>
-                  <TableHead className="text-center">Ext. pendientes</TableHead>
+                  <TableHead className="hidden md:table-cell text-center">Ord. pendientes</TableHead>
+                  <TableHead className="hidden md:table-cell text-center">Ext. pendientes</TableHead>
                   <TableHead className="text-right">Deuda total</TableHead>
-                  <TableHead>Moroso desde</TableHead>
-                  <TableHead>Notificado</TableHead>
+                  <TableHead className="hidden sm:table-cell">Moroso desde</TableHead>
+                  <TableHead className="hidden lg:table-cell">Notificado</TableHead>
                   <TableHead>Restricciones</TableHead>
                 </TableRow>
               </TableHeader>

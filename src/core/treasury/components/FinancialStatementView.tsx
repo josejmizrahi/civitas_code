@@ -86,7 +86,7 @@ export function FinancialStatementView({ statementId, onBack }: FinancialStateme
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" size="sm" onClick={handlePrint}>
             <Printer className="mr-2 h-4 w-4" />
             Imprimir
@@ -106,7 +106,7 @@ export function FinancialStatementView({ statementId, onBack }: FinancialStateme
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <SummaryCard
           label="Saldo Inicial"
           value={formatCurrency(statement.opening_balance)}
@@ -143,7 +143,7 @@ export function FinancialStatementView({ statementId, onBack }: FinancialStateme
                 <TableRow>
                   <TableHead>Fecha</TableHead>
                   <TableHead>Categoria</TableHead>
-                  <TableHead>Descripcion</TableHead>
+                  <TableHead className="hidden sm:table-cell">Descripcion</TableHead>
                   <TableHead className="text-right">Monto</TableHead>
                 </TableRow>
               </TableHeader>
@@ -156,7 +156,7 @@ export function FinancialStatementView({ statementId, onBack }: FinancialStateme
                     <TableCell>
                       <Badge variant="secondary">{item.category}</Badge>
                     </TableCell>
-                    <TableCell>{item.description || '\u2014'}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{item.description || '\u2014'}</TableCell>
                     <TableCell className="text-right font-medium">
                       {formatCurrency(item.amount)}
                     </TableCell>
@@ -197,7 +197,7 @@ function SummaryCard({
   return (
     <div className="rounded-lg border p-4">
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
-      <p className={`mt-1 text-xl font-semibold ${className || ''}`}>{value}</p>
+      <p className={`mt-1 text-lg sm:text-xl font-semibold ${className || ''}`}>{value}</p>
     </div>
   )
 }

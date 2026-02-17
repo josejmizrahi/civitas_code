@@ -84,9 +84,9 @@ function InstallmentView({ contract }: { contract: Contract }) {
             <TableRow>
               <TableHead>#</TableHead>
               <TableHead className="text-right">Monto</TableHead>
-              <TableHead>Vencimiento</TableHead>
+              <TableHead className="hidden sm:table-cell">Vencimiento</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Pagado</TableHead>
+              <TableHead className="hidden sm:table-cell">Pagado</TableHead>
               {canManageTreasury && <TableHead>Accion</TableHead>}
             </TableRow>
           </TableHeader>
@@ -95,7 +95,7 @@ function InstallmentView({ contract }: { contract: Contract }) {
               <TableRow key={inst.id}>
                 <TableCell className="font-medium">{inst.installment_number}</TableCell>
                 <TableCell className="text-right">{formatCurrency(inst.amount)}</TableCell>
-                <TableCell className="text-muted-foreground">{formatDate(inst.due_date)}</TableCell>
+                <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(inst.due_date)}</TableCell>
                 <TableCell>
                   <Badge variant={
                     inst.status === 'paid' ? 'success' :
@@ -105,7 +105,7 @@ function InstallmentView({ contract }: { contract: Contract }) {
                     {inst.status === 'paid' ? 'Pagado' : inst.status === 'overdue' ? 'Vencido' : inst.status === 'pending' ? 'Pendiente' : inst.status}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">
                   {inst.paid_at ? formatDate(inst.paid_at) : '—'}
                 </TableCell>
                 {canManageTreasury && (
@@ -269,7 +269,7 @@ export function ContractList() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
           <Card>
             <CardContent className="pt-4">
               <div className="text-xs text-muted-foreground">Inicio</div>
@@ -305,7 +305,7 @@ export function ContractList() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-4">
             <div className="text-sm text-muted-foreground">Contratos Activos</div>
@@ -329,8 +329,8 @@ export function ContractList() {
         </Card>
       </div>
 
-      <div className="flex items-center justify-between">
-        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-44">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-44">
           <option value="">Todos los estados</option>
           {Object.entries(STATUS_LABELS).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
@@ -348,11 +348,11 @@ export function ContractList() {
           <TableHeader>
             <TableRow>
               <TableHead>Contrato</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Entidad</TableHead>
+              <TableHead className="hidden sm:table-cell">Tipo</TableHead>
+              <TableHead className="hidden md:table-cell">Entidad</TableHead>
               <TableHead className="text-right">Monto Total</TableHead>
-              <TableHead>Parcialidades</TableHead>
-              <TableHead>Cumplimiento</TableHead>
+              <TableHead className="hidden lg:table-cell">Parcialidades</TableHead>
+              <TableHead className="hidden md:table-cell">Cumplimiento</TableHead>
               <TableHead>Estado</TableHead>
               {canManageTreasury && <TableHead>Acciones</TableHead>}
             </TableRow>
@@ -379,16 +379,16 @@ export function ContractList() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell><Badge variant="secondary">{TYPE_LABELS[c.type] || c.type}</Badge></TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{TYPE_LABELS[c.type] || c.type}</Badge></TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <div>
                       <div>{c.entity_name || '—'}</div>
                       {c.member_name && <div className="text-xs text-muted-foreground">Miembro: {c.member_name}</div>}
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(c.total_amount)}</TableCell>
-                  <TableCell>{c.number_of_installments}</TableCell>
-                  <TableCell><ComplianceBar score={c.compliance_score} /></TableCell>
+                  <TableCell className="hidden lg:table-cell">{c.number_of_installments}</TableCell>
+                  <TableCell className="hidden md:table-cell"><ComplianceBar score={c.compliance_score} /></TableCell>
                   <TableCell>
                     <Badge variant={statusVariant(c.status)}>{STATUS_LABELS[c.status] || c.status}</Badge>
                   </TableCell>
@@ -428,7 +428,7 @@ export function ContractList() {
                 <Label>Descripcion</Label>
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Tipo</Label>
                   <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as ContractType })}>

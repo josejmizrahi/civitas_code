@@ -61,11 +61,11 @@ export function MyPayments() {
   return (
     <div className="space-y-6">
       {/* Summary */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm text-muted-foreground">Total Pendiente</div>
-            <div className={`text-2xl font-bold ${totalPending > 0 ? 'text-red-600' : 'text-green-600'}`}>
+            <div className={`text-xl sm:text-2xl font-bold ${totalPending > 0 ? 'text-red-600' : 'text-green-600'}`}>
               {formatCurrency(totalPending)}
             </div>
             <p className="text-xs text-muted-foreground">{pendingObs.length} pagos pendientes</p>
@@ -74,14 +74,14 @@ export function MyPayments() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm text-muted-foreground">Total Pagado</div>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</div>
             <p className="text-xs text-muted-foreground">{paidObs.length} pagos realizados</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="text-sm text-muted-foreground">Estatus Financiero</div>
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               {pendingObs.some(o => o.status === 'overdue') ? (
                 <span className="text-red-600">Moroso</span>
               ) : pendingObs.length > 0 ? (
@@ -112,7 +112,7 @@ export function MyPayments() {
                 <div className="rounded-lg bg-muted p-4 space-y-2">
                   <div>
                     <div className="text-xs text-muted-foreground">CLABE</div>
-                    <code className="text-lg font-mono font-bold tracking-wider">{collectionConfig.clabe}</code>
+                    <code className="text-sm sm:text-lg font-mono font-bold tracking-wider break-all">{collectionConfig.clabe}</code>
                   </div>
                   {collectionConfig.bank_name && (
                     <div>
@@ -161,8 +161,8 @@ export function MyPayments() {
                   <TableHead>Estado</TableHead>
                   <TableHead>Concepto</TableHead>
                   <TableHead className="text-right">Monto</TableHead>
-                  <TableHead>Vencimiento</TableHead>
-                  {hasClabe && <TableHead>Referencia</TableHead>}
+                  <TableHead className="hidden sm:table-cell">Vencimiento</TableHead>
+                  {hasClabe && <TableHead className="hidden sm:table-cell">Referencia</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -180,9 +180,9 @@ export function MyPayments() {
                       </TableCell>
                       <TableCell className="font-medium">{ob.concept}</TableCell>
                       <TableCell className="text-right font-medium">{formatCurrency(ob.amount)}</TableCell>
-                      <TableCell className="text-muted-foreground">{formatDate(ob.due_date)}</TableCell>
+                      <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(ob.due_date)}</TableCell>
                       {hasClabe && (
-                        <TableCell>
+                        <TableCell className="hidden sm:table-cell">
                           {ob.status !== 'paid' ? (
                             <Button
                               size="sm"

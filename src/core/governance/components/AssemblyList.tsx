@@ -66,9 +66,9 @@ export function AssemblyList({ statusFilter }: Props) {
           <Link key={a.id} to={`/governance/assemblies/${a.id}`} className="block">
             <Card className="transition-colors hover:bg-muted/50">
               <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <CardTitle className="text-base">{a.title}</CardTitle>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Badge variant={TYPE_VARIANTS[a.type] || 'secondary'}>
                       {TYPE_LABELS[a.type] || a.type}
                     </Badge>

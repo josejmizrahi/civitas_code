@@ -82,10 +82,10 @@ export function MaintenanceRequestList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <span className="text-sm text-muted-foreground">Filtrar por prioridad:</span>
         <Select
-          className="w-40"
+          className="w-full sm:w-40"
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
         >
@@ -104,8 +104,8 @@ export function MaintenanceRequestList() {
               <TableHead>Descripcion</TableHead>
               <TableHead>Prioridad</TableHead>
               <TableHead>Estado</TableHead>
-              {isAdmin && <TableHead>Asignado a</TableHead>}
-              <TableHead>Fecha</TableHead>
+              {isAdmin && <TableHead className="hidden md:table-cell">Asignado a</TableHead>}
+              <TableHead className="hidden sm:table-cell">Fecha</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -138,7 +138,7 @@ export function MaintenanceRequestList() {
                   )}
                 </TableCell>
                 {isAdmin && (
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <Select
                       className="w-40"
                       value={req.assigned_to ?? ''}
@@ -153,7 +153,7 @@ export function MaintenanceRequestList() {
                     </Select>
                   </TableCell>
                 )}
-                <TableCell className="text-muted-foreground">{formatDate(req.created_at)}</TableCell>
+                <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(req.created_at)}</TableCell>
               </TableRow>
             ))}
           </TableBody>

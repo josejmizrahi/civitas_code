@@ -129,9 +129,9 @@ export function ProposalDetail({ proposalId }: Props) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <CardTitle>{proposal.title}</CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {proposal.result && (
                 <Badge variant="outline" className="text-xs">{proposal.result}</Badge>
               )}
@@ -169,7 +169,7 @@ export function ProposalDetail({ proposalId }: Props) {
             <CountdownTimer endDate={proposal.voting_end} />
           )}
 
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             {canActivate && isAdmin && (
               <Button onClick={handleActivate} disabled={updateStatus.isPending}>
                 Abrir Votación

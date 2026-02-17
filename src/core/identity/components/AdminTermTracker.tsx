@@ -108,7 +108,7 @@ export function AdminTermTracker() {
       {/* Active Terms Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
             <Shield className="h-5 w-5 text-blue-600" />
             Terminos Activos
           </CardTitle>
@@ -124,15 +124,15 @@ export function AdminTermTracker() {
                 key={term.id}
                 className="rounded-lg border p-4 space-y-3"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <UserCheck className="h-4 w-4 text-muted-foreground" />
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <UserCheck className="h-4 w-4 text-muted-foreground shrink-0" />
                     <span className="font-medium">
                       {memberMap.get(term.member_id) ?? term.member_id}
                     </span>
                     <Badge variant="outline">{roleLabels[term.role] ?? term.role}</Badge>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm text-muted-foreground">
                       Periodo {term.term_number} de {maxTerms}
                     </span>
@@ -144,7 +144,7 @@ export function AdminTermTracker() {
 
                 <TermProgressBar term={term} termMonths={termMonths} />
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
                     Duracion: {termMonths} meses
@@ -171,7 +171,7 @@ export function AdminTermTracker() {
       {isAdmin && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <Play className="h-5 w-5 text-green-600" />
               Registrar Nuevo Periodo
             </CardTitle>
@@ -180,13 +180,13 @@ export function AdminTermTracker() {
             <p className="text-sm text-muted-foreground">
               LPCI CDMX Art. 42: Maximo {maxTerms} periodos consecutivos de {termMonths} meses.
             </p>
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="space-y-1">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+              <div className="space-y-1 flex-1 min-w-0">
                 <label className="text-sm font-medium">Miembro</label>
                 <Select
                   value={selectedMemberId}
                   onChange={(e) => setSelectedMemberId(e.target.value)}
-                  className="w-60"
+                  className="w-full sm:w-60"
                 >
                   <option value="">Seleccionar miembro...</option>
                   {(members ?? []).map((m: any) => (
@@ -196,12 +196,12 @@ export function AdminTermTracker() {
                   ))}
                 </Select>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 flex-1 min-w-0">
                 <label className="text-sm font-medium">Cargo</label>
                 <Select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
-                  className="w-52"
+                  className="w-full sm:w-52"
                 >
                   <option value="admin">Administrador</option>
                   <option value="comite_vigilancia">Comite de Vigilancia</option>
@@ -210,6 +210,7 @@ export function AdminTermTracker() {
               <Button
                 onClick={handleStartTerm}
                 disabled={!selectedMemberId || startTermMut.isPending}
+                className="w-full sm:w-auto"
               >
                 {startTermMut.isPending ? 'Registrando...' : 'Iniciar Periodo'}
               </Button>
@@ -227,7 +228,7 @@ export function AdminTermTracker() {
       {completedTerms.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Historial de Periodos</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Historial de Periodos</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto rounded-md border">
@@ -236,9 +237,9 @@ export function AdminTermTracker() {
                   <TableRow>
                     <TableHead>Miembro</TableHead>
                     <TableHead>Cargo</TableHead>
-                    <TableHead>Periodo #</TableHead>
-                    <TableHead>Inicio</TableHead>
-                    <TableHead>Fin</TableHead>
+                    <TableHead className="hidden sm:table-cell">Periodo #</TableHead>
+                    <TableHead className="hidden sm:table-cell">Inicio</TableHead>
+                    <TableHead className="hidden sm:table-cell">Fin</TableHead>
                     <TableHead>Estado</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -249,9 +250,9 @@ export function AdminTermTracker() {
                         {memberMap.get(term.member_id) ?? term.member_id}
                       </TableCell>
                       <TableCell>{roleLabels[term.role] ?? term.role}</TableCell>
-                      <TableCell>{term.term_number}</TableCell>
-                      <TableCell>{formatDate(term.term_start)}</TableCell>
-                      <TableCell>{formatDate(term.term_end)}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{term.term_number}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{formatDate(term.term_start)}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{formatDate(term.term_end)}</TableCell>
                       <TableCell>{statusBadge(term.status)}</TableCell>
                     </TableRow>
                   ))}

@@ -35,7 +35,7 @@ export function MorosoStatusBanner() {
   const restrictions = debt?.restrictions ?? []
 
   return (
-    <div className="rounded-lg border border-red-300 bg-red-50 p-4">
+    <div className="rounded-lg border border-red-300 bg-red-50 p-3 sm:p-4">
       <div className="flex items-start gap-3">
         <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
         <div className="flex-1 space-y-2">
