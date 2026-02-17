@@ -21,6 +21,7 @@ import {
   Menu,
   X,
   User,
+  Shield,
 } from 'lucide-react'
 import { Avatar } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
@@ -231,6 +232,18 @@ export function AppLayout() {
                 Admin Comunidad
               </NavLink>
             </>
+          )}
+
+          {/* Comite de Vigilancia — admin or comite_vigilancia only */}
+          {(userRole === 'admin' || userRole === 'comite_vigilancia') && (
+            <NavLink
+              to="/governance/vigilancia"
+              className={navLinkClassName}
+              onClick={closeMobileSidebar}
+            >
+              <Shield className="h-4 w-4 shrink-0" />
+              Vigilancia
+            </NavLink>
           )}
         </nav>
 

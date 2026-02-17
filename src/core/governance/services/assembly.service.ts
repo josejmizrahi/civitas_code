@@ -131,6 +131,18 @@ export async function createAssembly(
     minimum_notice_days: minNoticeDays,
   })
 
+  // Notify community about new assembly
+  try {
+    const { notifyCommunity } = await import('@/shared/services/notification.service')
+    await notifyCommunity(
+      communityId,
+      'assembly_scheduled',
+      `Nueva asamblea: ${data.title}`,
+      `Programada para ${new Date(data.scheduled_date).toLocaleDateString('es-MX')}. Ubicación: ${data.location}`,
+      { assembly_id: (assembly as any).id }
+    )
+  } catch { /* notifications are best-effort */ }
+
   return assembly as unknown as Assembly
 }
 
@@ -288,10 +300,12 @@ export function calculateAssemblyQuorum(
   attendance: AttendanceRecord[],
   governanceRules: GovernanceRules,
   callNumber: number,
-  assemblyType: string
-): { quorumMet: boolean; currentPct: number; requiredPct: number } {
-  const totalIndiviso = attendance.reduce((sum, r) => sum + r.indiviso_pct, 0)
-  const presentIndiviso = attendance
+  assemblyType: string,
+  morosoMemberIds: string[] = []
+): { quorumMet: boolean; currentPct: number; requiredPct: number; morosExcluded: number } {
+  const eligibleAttendance = attendance.filter(r => !morosoMemberIds.includes(r.member_id))
+  const totalIndiviso = eligibleAttendance.reduce((sum, r) => sum + r.indiviso_pct, 0)
+  const presentIndiviso = eligibleAttendance
     .filter((r) => r.present)
     .reduce((sum, r) => sum + r.indiviso_pct, 0)
 
@@ -324,5 +338,6 @@ export function calculateAssemblyQuorum(
     quorumMet,
     currentPct,
     requiredPct,
+    morosExcluded: attendance.length - eligibleAttendance.length,
   }
 }

@@ -3,7 +3,7 @@ import type { Transaction, Category, Budget, PaymentObligation, DashboardStats, 
 
 export async function getTransactions(
   communityId: string,
-  filters?: { dateFrom?: string; dateTo?: string; categoryId?: string; type?: string }
+  filters?: { dateFrom?: string; dateTo?: string; categoryId?: string; type?: string; fundType?: string }
 ): Promise<Transaction[]> {
   let query = supabase
     .from('transactions')
@@ -15,6 +15,7 @@ export async function getTransactions(
   if (filters?.dateTo) query = query.lte('date', filters.dateTo)
   if (filters?.categoryId) query = query.eq('category_id', filters.categoryId)
   if (filters?.type) query = query.eq('type', filters.type)
+  if (filters?.fundType) query = (query as any).eq('fund_type', filters.fundType)
 
   const { data, error } = await query
   if (error) throw error
@@ -36,12 +37,18 @@ export async function getCategories(communityId: string): Promise<Category[]> {
   return (data ?? []) as Category[]
 }
 
-export async function getBudgets(communityId: string): Promise<Budget[]> {
-  const { data, error } = await supabase
+export async function getBudgets(communityId: string, fundType?: string): Promise<Budget[]> {
+  let query = supabase
     .from('budgets')
     .select('*, categories(name)')
     .eq('community_id', communityId)
     .order('period', { ascending: false })
+
+  if (fundType) {
+    query = (query as any).eq('fund_type', fundType)
+  }
+
+  const { data, error } = await query
 
   if (error) throw error
   return (data ?? []).map((row: any) => ({
@@ -65,11 +72,17 @@ export async function getPaymentObligations(communityId: string, memberId?: stri
   return (data ?? []) as PaymentObligation[]
 }
 
-export async function getDashboardStats(communityId: string): Promise<DashboardStats> {
-  const { data: transactions, error } = await supabase
+export async function getDashboardStats(communityId: string, fundType?: string): Promise<DashboardStats> {
+  let query = supabase
     .from('transactions')
     .select('type, amount, date, categories(name)')
     .eq('community_id', communityId)
+
+  if (fundType) {
+    query = (query as any).eq('fund_type', fundType)
+  }
+
+  const { data: transactions, error } = await query
 
   if (error) throw error
 

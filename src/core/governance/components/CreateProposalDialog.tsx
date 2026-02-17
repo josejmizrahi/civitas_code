@@ -116,6 +116,15 @@ export function CreateProposalDialog({ open, onOpenChange }: Props) {
                   <option value="amendment">Enmienda</option>
                 </Select>
               </div>
+              {type === 'election' && (
+                <div className="flex items-start gap-2 rounded-md bg-blue-50 border border-blue-200 p-3">
+                  <AlertTriangle className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
+                  <p className="text-sm text-blue-800">
+                    Nota: Los miembros morosos no pueden ser electos para cargos de administración (Art. 2 LPCI).
+                    Verifica el estado de pago de los candidatos.
+                  </p>
+                </div>
+              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Quórum requerido (%)</Label>

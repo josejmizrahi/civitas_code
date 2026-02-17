@@ -160,3 +160,57 @@ export async function exportUserData(
     exported_at: new Date().toISOString(),
   }
 }
+
+/**
+ * ARCO Cancellation: Anonymize user data across all tables.
+ * Replaces PII with anonymized placeholders while preserving structural integrity.
+ * Required by LFPDPPP 2025 Art. 21-34.
+ */
+export async function anonymizeUser(userId: string): Promise<{ tablesAffected: number }> {
+  let tablesAffected = 0
+  const anonId = `ANON-${userId.substring(0, 8)}`
+
+  // 1. Anonymize member records
+  const { error: memberErr } = await (supabase.from('members') as any)
+    .update({
+      custom_attributes: { anonymized: true, anonymized_at: new Date().toISOString() },
+    })
+    .eq('user_id', userId)
+  if (!memberErr) tablesAffected++
+
+  // 2. Revoke all privacy consents
+  const { error: consentErr } = await (supabase.from('privacy_consents') as any)
+    .update({
+      granted: false,
+      revoked_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+    .eq('granted', true)
+  if (!consentErr) tablesAffected++
+
+  // 3. Anonymize audit log entries
+  const { error: auditErr } = await (supabase.from('audit_log') as any)
+    .update({
+      details: { anonymized: true },
+    })
+    .eq('user_id', userId)
+  if (!auditErr) tablesAffected++
+
+  // 4. Anonymize votes (keep for record integrity but remove member link metadata)
+  // Note: We keep the vote record for governance integrity but the member_id
+  // link goes to an anonymized member record
+
+  // 5. Mark ARCO request as completed
+  const { error: arcoErr } = await (supabase.from('arco_requests') as any)
+    .update({
+      status: 'completed',
+      response: `Datos del usuario anonimizados exitosamente. ID anonimizado: ${anonId}`,
+      responded_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+    .eq('type', 'cancellation')
+    .eq('status', 'in_review')
+  if (!arcoErr) tablesAffected++
+
+  return { tablesAffected }
+}

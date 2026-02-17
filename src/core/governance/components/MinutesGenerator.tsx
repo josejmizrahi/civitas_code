@@ -101,18 +101,23 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
             {existingMinutes.signatures && existingMinutes.signatures.length > 0 && (
               <div className="space-y-1">
                 <p className="text-sm font-medium">Firmas ({existingMinutes.signatures.length}):</p>
-                {existingMinutes.signatures.map((sig, i) => (
-                  <div key={i} className="flex flex-wrap items-center gap-2 text-xs">
-                    <Shield className="h-3 w-3 text-green-600 shrink-0" />
-                    <span className="font-medium">{sig.member_name}</span>
-                    <span className="text-muted-foreground">
-                      — {formatDate(sig.signed_at)}
-                    </span>
-                    <span className="font-mono text-[10px] text-muted-foreground break-all">
-                      {sig.hash.slice(0, 12)}...
-                    </span>
-                  </div>
-                ))}
+                {existingMinutes.signatures.map((sig, i) => {
+                  const member = members?.find(m => m.id === sig.member_id)
+                  const roleLabel = member?.role === 'admin' ? 'Secretario' : member?.role === 'comite_vigilancia' ? 'Comité Vigilancia' : 'Miembro'
+                  return (
+                    <div key={i} className="flex flex-wrap items-center gap-2 text-xs">
+                      <Shield className="h-3 w-3 text-green-600 shrink-0" />
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">{roleLabel}</Badge>
+                      <span className="font-medium">{sig.member_name}</span>
+                      <span className="text-muted-foreground">
+                        — {formatDate(sig.signed_at)}
+                      </span>
+                      <span className="font-mono text-[10px] text-muted-foreground break-all">
+                        {sig.hash.slice(0, 12)}...
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
             )}
 

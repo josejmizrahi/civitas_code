@@ -220,17 +220,19 @@ export async function getVoteSummary(
 ): Promise<VoteSummary> {
   const votes = await getVotes(proposalId)
 
-  // Get total available weight from all active members
+  // Get total available weight from all active members, excluding morosos (Art. 2 LPCI)
   const { data: members } = await supabase
     .from('members')
-    .select('voting_weight')
+    .select('voting_weight, financial_standing')
     .eq('community_id', communityId)
     .eq('status', 'active')
 
-  const totalAvailableWeight = (members ?? []).reduce(
-    (sum: number, m: any) => sum + (Number(m.voting_weight) || 1),
-    0
-  )
+  const totalAvailableWeight = (members ?? [])
+    .filter((m: any) => m.financial_standing !== 'moroso')
+    .reduce(
+      (sum: number, m: any) => sum + (Number(m.voting_weight) || 1),
+      0
+    )
 
   let yes = 0
   let no = 0
@@ -320,6 +322,19 @@ export async function closeProposal(
     .single()
 
   if (error) throw error
+
+  // Notify community about proposal result
+  try {
+    const { notifyCommunity } = await import('@/shared/services/notification.service')
+    await notifyCommunity(
+      communityId,
+      'proposal_closed',
+      `Propuesta ${resultStatus === 'approved' ? 'aprobada' : 'rechazada'}: ${proposal.title}`,
+      resultText,
+      { proposal_id: proposalId, result: resultStatus }
+    )
+  } catch { /* notifications are best-effort */ }
+
   return data as unknown as Proposal
 }
 
@@ -599,38 +614,94 @@ export async function generateMinutes(
   proposal: Proposal,
   voteSummary: VoteSummary
 ): Promise<Minutes> {
+  // Fetch community info for legal context
+  const { data: community } = await supabase
+    .from('communities')
+    .select('name, type')
+    .eq('id', communityId)
+    .single()
+
+  const communityName = (community as any)?.name || 'Comunidad'
+  const communityType = (community as any)?.type || 'general'
+  const isResidential = communityType === 'residential'
+
   const resultText = voteSummary.majority_met ? 'APROBADA' : 'RECHAZADA'
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('es-MX', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  })
+  const timeStr = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
+
   const content = [
     `ACTA DE VOTACIÓN`,
-    `==================`,
+    `${'='.repeat(60)}`,
     ``,
-    `Propuesta: ${proposal.title}`,
+    `Comunidad: ${communityName}`,
+    `Fecha: ${dateStr}`,
+    `Hora: ${timeStr}`,
+    isResidential ? `Tipo de asamblea: ${proposal.type === 'extraordinary' ? 'Extraordinaria' : 'Ordinaria'}` : '',
+    ``,
+    `PROPUESTA: ${proposal.title}`,
     `Tipo: ${proposal.type}`,
-    `Fecha: ${new Date().toLocaleDateString('es-MX')}`,
     ``,
     `DESCRIPCIÓN:`,
     proposal.description,
     ``,
-    `RESULTADOS:`,
-    `- A favor: ${voteSummary.yes} (peso)`,
-    `- En contra: ${voteSummary.no} (peso)`,
-    `- Abstenciones: ${voteSummary.abstain} (peso)`,
-    `- Participación: ${(voteSummary.participation_pct * 100).toFixed(1)}%`,
-    `- Quórum requerido: ${(proposal.quorum_required * 100).toFixed(0)}%`,
-    `- Quórum alcanzado: ${voteSummary.quorum_met ? 'Sí' : 'No'}`,
+    `${'─'.repeat(60)}`,
+    `RESULTADOS DE VOTACIÓN:`,
+    `${'─'.repeat(60)}`,
+    `- Votos a favor:     ${voteSummary.yes} (peso ponderado)`,
+    `- Votos en contra:   ${voteSummary.no} (peso ponderado)`,
+    `- Abstenciones:      ${voteSummary.abstain} (peso ponderado)`,
+    `- Total participación: ${voteSummary.total} de peso disponible`,
     ``,
+    `- Participación:     ${(voteSummary.participation_pct * 100).toFixed(1)}%`,
+    `- Quórum requerido:  ${(proposal.quorum_required * 100).toFixed(0)}%`,
+    `- Quórum alcanzado:  ${voteSummary.quorum_met ? 'SÍ' : 'NO'}`,
+    `- Mayoría requerida: ${(proposal.majority_required * 100).toFixed(0)}%`,
+    `- Mayoría alcanzada: ${voteSummary.majority_met ? 'SÍ' : 'NO'}`,
+    ``,
+    `${'─'.repeat(60)}`,
     `RESOLUCIÓN: La propuesta ha sido ${resultText}.`,
-    proposal.result ? `\nNota: ${proposal.result}` : '',
-  ].join('\n')
+    proposal.result ? `Nota: ${proposal.result}` : '',
+    ``,
+    `${'─'.repeat(60)}`,
+    `ESPACIOS PARA FIRMA:`,
+    `${'─'.repeat(60)}`,
+    ``,
+    `Presidente de la Asamblea: _________________________`,
+    `Nombre:                    _________________________`,
+    `Fecha:                     _________________________`,
+    ``,
+    `Secretario (Administrador): _________________________`,
+    `Nombre:                     _________________________`,
+    `Fecha:                      _________________________`,
+    ``,
+    isResidential ? `Comité de Vigilancia:       _________________________` : '',
+    isResidential ? `Nombre:                     _________________________` : '',
+    isResidential ? `Fecha:                      _________________________` : '',
+    isResidential ? `` : '',
+    `${'─'.repeat(60)}`,
+    `Este documento fue generado automáticamente por Civitas.`,
+    `La integridad del acta está protegida mediante firma digital SHA-256.`,
+    isResidential ? `Conforme a la Ley de Propiedad en Condominio (LPCI CDMX).` : '',
+  ].filter(Boolean).join('\n')
+
+  // Compute integrity hash
+  const encoder = new TextEncoder()
+  const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(content + now.toISOString()))
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const integrityHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 
   const { data, error } = await (supabase.from('minutes') as any)
     .insert({
       community_id: communityId,
       proposal_id: proposalId,
       content,
-      generated_at: new Date().toISOString(),
+      generated_at: now.toISOString(),
       approved: false,
       signatures: [],
+      integrity_hash: integrityHash,
     })
     .select()
     .single()

@@ -43,7 +43,7 @@ export async function refreshFinancialStandings(communityId: string): Promise<vo
 
 // Check if a member can perform an action based on rules
 export function canPerformAction(
-  action: 'vote' | 'propose' | 'delegate',
+  action: 'vote' | 'propose' | 'delegate' | 'be_elected' | 'quorum_excluded',
   memberRole: string,
   financialStanding: FinancialStanding,
   rules: CommunityRules
@@ -58,8 +58,24 @@ export function canPerformAction(
     return { allowed: false, reason: 'La delegación está desactivada en esta comunidad' }
   }
 
-  // Check financial standing restrictions
-  if (rules.identity.payment_to_vote_enabled && financialStanding !== 'good_standing') {
+  // Check moroso-specific restrictions (LPCI Art. 2, 36)
+  if (financialStanding === 'moroso' && rules.identity.payment_to_vote_enabled) {
+    if (rules.identity.moroso_restrictions.includes(action)) {
+      if (action === 'vote') {
+        return { allowed: false, reason: 'Como moroso, tienes voz pero no voto. Regulariza tus pagos para recuperar tus derechos. (Art. 2 LPCI)' }
+      }
+      if (action === 'be_elected') {
+        return { allowed: false, reason: 'Los morosos no pueden ser electos para cargos de administración. (Art. 2 LPCI)' }
+      }
+      if (action === 'quorum_excluded') {
+        return { allowed: true, reason: 'Los morosos son excluidos del cálculo de quórum. (Art. 2 LPCI)' }
+      }
+      return { allowed: false, reason: 'No puedes realizar esta acción por tener pagos vencidos (moroso). (Art. 2 LPCI)' }
+    }
+  }
+
+  // Check financial standing restrictions for delinquent (non-moroso)
+  if (rules.identity.payment_to_vote_enabled && financialStanding !== 'good_standing' && financialStanding !== 'moroso') {
     if (rules.identity.delinquent_restrictions.includes(action)) {
       if (financialStanding === 'grace_period') {
         return { allowed: true, reason: 'Estás en periodo de gracia. Regulariza tus pagos.' }

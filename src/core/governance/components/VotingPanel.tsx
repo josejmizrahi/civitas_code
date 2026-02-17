@@ -3,6 +3,7 @@ import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { useToast } from '@/shared/components/ui/toast'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { cn } from '@/shared/lib/utils'
 import type { VoteSummary, Vote } from '../types'
 import { ThumbsUp, ThumbsDown, MinusCircle, AlertTriangle } from 'lucide-react'
 
@@ -36,9 +37,25 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
       </CardHeader>
       <CardContent className="space-y-4">
         {!canVote.allowed && (
-          <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 p-3">
-            <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-            <p className="text-sm text-amber-800">{canVote.reason}</p>
+          <div className={cn(
+            "flex items-start gap-2 rounded-md p-3",
+            canVote.reason?.includes('moroso')
+              ? "bg-red-50 border border-red-200"
+              : "bg-amber-50 border border-amber-200"
+          )}>
+            <AlertTriangle className={cn(
+              "h-4 w-4 mt-0.5 shrink-0",
+              canVote.reason?.includes('moroso') ? "text-red-600" : "text-amber-600"
+            )} />
+            <div>
+              <p className={cn(
+                "text-sm",
+                canVote.reason?.includes('moroso') ? "text-red-800" : "text-amber-800"
+              )}>{canVote.reason}</p>
+              {canVote.reason?.includes('moroso') && (
+                <p className="text-xs text-red-600 mt-1">Tienes derecho a voz en la asamblea pero no a voto.</p>
+              )}
+            </div>
           </div>
         )}
 
