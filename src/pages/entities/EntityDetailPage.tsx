@@ -1,0 +1,19 @@
+import { useParams, useNavigate } from 'react-router-dom'
+import { EntityDetail } from '@/core/entities/components/EntityDetail'
+
+export function EntityDetailPage() {
+  const { entityId } = useParams<{ entityId: string }>()
+  const navigate = useNavigate()
+
+  if (!entityId) return null
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Detalle de Entidad</h1>
+        <p className="text-muted-foreground">Información completa del proveedor o parte relacionada</p>
+      </div>
+      <EntityDetail entityId={entityId} onBack={() => navigate('/entities')} />
+    </div>
+  )
+}

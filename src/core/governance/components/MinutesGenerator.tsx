@@ -1,0 +1,180 @@
+import { useState } from 'react'
+import { Button } from '@/shared/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Badge } from '@/shared/components/ui/badge'
+import { generateMinutes, getMinutes } from '../services/governance.service'
+import { useApproveMinutes, useSignMinutes } from '../hooks/useVoting'
+import { useCommunityContext, useAuth } from '@/app/providers'
+import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useMembers } from '@/core/identity/hooks/useMembers'
+import type { Proposal, VoteSummary, Minutes } from '../types'
+import { FileText, Loader2, CheckCircle, PenTool, Shield } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { formatDate } from '@/shared/lib/utils'
+
+interface Props {
+  proposal: Proposal
+  voteSummary: VoteSummary | undefined
+}
+
+export function MinutesGenerator({ proposal, voteSummary }: Props) {
+  const { communityId } = useCommunityContext()
+  const { user } = useAuth()
+  const { isAdmin } = usePermissions()
+  const { data: members } = useMembers()
+  const [generating, setGenerating] = useState(false)
+
+  const approveMinutesMut = useApproveMinutes()
+  const signMinutesMut = useSignMinutes()
+
+  const { data: existingMinutes, refetch } = useQuery({
+    queryKey: ['minutes', proposal.id],
+    queryFn: () => getMinutes(proposal.id),
+  })
+
+  const currentMember = members?.find((m) => m.user_id === user?.id)
+
+  const handleGenerate = async () => {
+    if (!communityId || !voteSummary) return
+    setGenerating(true)
+    try {
+      await generateMinutes(communityId, proposal.id, proposal, voteSummary)
+      refetch()
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const handleApprove = () => {
+    if (!existingMinutes || !user) return
+    approveMinutesMut.mutate(
+      { minutesId: existingMinutes.id, userId: user.id },
+      { onSuccess: () => refetch() }
+    )
+  }
+
+  const handleSign = () => {
+    if (!existingMinutes || !currentMember) return
+    signMinutesMut.mutate(
+      {
+        minutesId: existingMinutes.id,
+        memberId: currentMember.id,
+        memberName: currentMember.full_name || currentMember.email || 'Miembro',
+      },
+      { onSuccess: () => refetch() }
+    )
+  }
+
+  const alreadySigned = existingMinutes?.signatures?.some(
+    (s) => s.member_id === currentMember?.id
+  )
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <FileText className="h-4 w-4" />
+          Acta de Votación
+          {existingMinutes?.approved && (
+            <Badge variant="success" className="ml-2">
+              <CheckCircle className="mr-1 h-3 w-3" />
+              Aprobada
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {existingMinutes ? (
+          <>
+            <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-4 text-sm">
+              {existingMinutes.content}
+            </pre>
+
+            {/* Approval info */}
+            {existingMinutes.approved && existingMinutes.approved_at && (
+              <p className="text-xs text-muted-foreground">
+                Aprobada el {formatDate(existingMinutes.approved_at)}
+              </p>
+            )}
+
+            {/* Signatures */}
+            {existingMinutes.signatures && existingMinutes.signatures.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Firmas ({existingMinutes.signatures.length}):</p>
+                {existingMinutes.signatures.map((sig, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <Shield className="h-3 w-3 text-green-600" />
+                    <span className="font-medium">{sig.member_name}</span>
+                    <span className="text-muted-foreground">
+                      — {formatDate(sig.signed_at)}
+                    </span>
+                    <span className="font-mono text-[10px] text-muted-foreground">
+                      {sig.hash.slice(0, 12)}...
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex gap-2 pt-2">
+              {/* Approve button (admin only, not yet approved) */}
+              {isAdmin && !existingMinutes.approved && (
+                <Button
+                  onClick={handleApprove}
+                  disabled={approveMinutesMut.isPending}
+                  size="sm"
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  {approveMinutesMut.isPending ? 'Aprobando...' : 'Aprobar Acta'}
+                </Button>
+              )}
+
+              {/* Sign button (any member, not already signed) */}
+              {currentMember && !alreadySigned && (
+                <Button
+                  onClick={handleSign}
+                  disabled={signMinutesMut.isPending}
+                  variant="outline"
+                  size="sm"
+                >
+                  <PenTool className="mr-2 h-4 w-4" />
+                  {signMinutesMut.isPending ? 'Firmando...' : 'Firmar Acta'}
+                </Button>
+              )}
+
+              {alreadySigned && (
+                <Badge variant="outline" className="text-green-600">
+                  <CheckCircle className="mr-1 h-3 w-3" /> Ya firmaste
+                </Badge>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Genera el acta automática con los resultados de la votación.
+            </p>
+            <Button
+              onClick={handleGenerate}
+              disabled={generating || !voteSummary || proposal.status === 'active'}
+              variant="outline"
+            >
+              {generating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generar Acta
+                </>
+              )}
+            </Button>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  )
+}

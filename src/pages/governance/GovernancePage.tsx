@@ -1,0 +1,76 @@
+import { useState, useEffect } from 'react'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/tabs'
+import { Button } from '@/shared/components/ui/button'
+import { ProposalList } from '@/core/governance/components/ProposalList'
+import { AssemblyList } from '@/core/governance/components/AssemblyList'
+import { CreateProposalDialog } from '@/core/governance/components/CreateProposalDialog'
+import { CreateAssemblyDialog } from '@/core/governance/components/CreateAssemblyDialog'
+import { usePermissions } from '@/shared/hooks/usePermissions'
+import { processExpiredProposals, processAutoExecutions } from '@/core/governance/services/governance.service'
+import { Plus } from 'lucide-react'
+
+export function GovernancePage() {
+  const [tab, setTab] = useState('active')
+  const [showCreate, setShowCreate] = useState(false)
+  const [showCreateAssembly, setShowCreateAssembly] = useState(false)
+  const { canCreateProposals, isAdmin } = usePermissions()
+
+  // On page load: process expired proposals and auto-executions server-side
+  useEffect(() => {
+    processExpiredProposals()
+    processAutoExecutions()
+  }, [])
+
+  const isAssemblyTab = tab === 'assemblies'
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Gobernanza</h1>
+          <p className="text-sm text-muted-foreground">
+            {isAssemblyTab ? 'Asambleas y convocatorias' : 'Propuestas y votaciones'}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {isAssemblyTab && isAdmin && (
+            <Button onClick={() => setShowCreateAssembly(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Asamblea
+            </Button>
+          )}
+          {!isAssemblyTab && canCreateProposals && (
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Nueva Propuesta
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <Tabs value={tab} onValueChange={setTab}>
+        <TabsList className="flex-wrap overflow-x-auto">
+          <TabsTrigger value="active">Activas</TabsTrigger>
+          <TabsTrigger value="draft">Borradores</TabsTrigger>
+          <TabsTrigger value="all">Todas</TabsTrigger>
+          <TabsTrigger value="assemblies">Asambleas</TabsTrigger>
+        </TabsList>
+        <TabsContent value="active">
+          <ProposalList statusFilter="active" />
+        </TabsContent>
+        <TabsContent value="draft">
+          <ProposalList statusFilter="draft" />
+        </TabsContent>
+        <TabsContent value="all">
+          <ProposalList />
+        </TabsContent>
+        <TabsContent value="assemblies">
+          <AssemblyList />
+        </TabsContent>
+      </Tabs>
+
+      <CreateProposalDialog open={showCreate} onOpenChange={setShowCreate} />
+      <CreateAssemblyDialog open={showCreateAssembly} onOpenChange={setShowCreateAssembly} />
+    </div>
+  )
+}
