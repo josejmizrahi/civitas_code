@@ -23,7 +23,7 @@ const IngestionPage = lazy(() => import('@/pages/ingestion/IngestionPage').then(
 const GovernancePage = lazy(() => import('@/pages/governance/GovernancePage').then(m => ({ default: m.GovernancePage })))
 const ProposalDetailPage = lazy(() => import('@/pages/governance/ProposalDetailPage').then(m => ({ default: m.ProposalDetailPage })))
 const AssemblyDetailPage = lazy(() => import('@/pages/governance/AssemblyDetailPage').then(m => ({ default: m.AssemblyDetailPage })))
-const ResidentialPage = lazy(() => import('@/pages/residential/ResidentialPage').then(m => ({ default: m.ResidentialPage })))
+
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage').then(m => ({ default: m.SettingsPage })))
 const CensusPage = lazy(() => import('@/pages/census/CensusPage').then(m => ({ default: m.CensusPage })))
 const DocumentsPage = lazy(() => import('@/pages/documents/DocumentsPage').then(m => ({ default: m.DocumentsPage })))
@@ -109,7 +109,7 @@ export function AppRouter() {
           <Route path="/governance/archive" element={<LazyPage><DecisionArchivePage /></LazyPage>} />
           <Route path="/governance/:proposalId" element={<LazyPage><ProposalDetailPage /></LazyPage>} />
           <Route path="/rules" element={<LazyPage><RulesPage /></LazyPage>} />
-          <Route path="/residential" element={<LazyPage><ResidentialPage /></LazyPage>} />
+
           <Route path="/census" element={<LazyPage><CensusPage /></LazyPage>} />
           <Route path="/documents" element={<LazyPage><DocumentsPage /></LazyPage>} />
           <Route path="/entities" element={<LazyPage><EntitiesPage /></LazyPage>} />
