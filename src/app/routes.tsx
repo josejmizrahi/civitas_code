@@ -31,6 +31,9 @@ const EntitiesPage = lazy(() => import('@/pages/entities/EntitiesPage').then(m =
 const EntityDetailPage = lazy(() => import('@/pages/entities/EntityDetailPage').then(m => ({ default: m.EntityDetailPage })))
 const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage').then(m => ({ default: m.ProfilePage })))
 const VigilanciaPage = lazy(() => import('@/pages/governance/VigilanciaPage').then(m => ({ default: m.VigilanciaPage })))
+const DecisionArchivePage = lazy(() => import('@/pages/governance/DecisionArchivePage').then(m => ({ default: m.DecisionArchivePage })))
+const RulesPage = lazy(() => import('@/pages/rules/RulesPage').then(m => ({ default: m.RulesPage })))
+const AuditLogPage = lazy(() => import('@/pages/settings/AuditLogPage').then(m => ({ default: m.AuditLogPage })))
 const OnboardingWizard = lazy(() => import('@/pages/onboarding/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
@@ -103,7 +106,9 @@ export function AppRouter() {
           <Route path="/governance" element={<LazyPage><GovernancePage /></LazyPage>} />
           <Route path="/governance/assemblies/:assemblyId" element={<LazyPage><AssemblyDetailPage /></LazyPage>} />
           <Route path="/governance/vigilancia" element={<LazyPage><VigilanciaPage /></LazyPage>} />
+          <Route path="/governance/archive" element={<LazyPage><DecisionArchivePage /></LazyPage>} />
           <Route path="/governance/:proposalId" element={<LazyPage><ProposalDetailPage /></LazyPage>} />
+          <Route path="/rules" element={<LazyPage><RulesPage /></LazyPage>} />
           <Route path="/residential" element={<LazyPage><ResidentialPage /></LazyPage>} />
           <Route path="/census" element={<LazyPage><CensusPage /></LazyPage>} />
           <Route path="/documents" element={<LazyPage><DocumentsPage /></LazyPage>} />
@@ -111,6 +116,7 @@ export function AppRouter() {
           <Route path="/entities/:entityId" element={<LazyPage><EntityDetailPage /></LazyPage>} />
           <Route path="/profile" element={<LazyPage><ProfilePage /></LazyPage>} />
           <Route path="/settings" element={<RoleGuard requiredRole="admin"><LazyPage><SettingsPage /></LazyPage></RoleGuard>} />
+          <Route path="/settings/audit" element={<RoleGuard requiredRole="admin"><LazyPage><AuditLogPage /></LazyPage></RoleGuard>} />
         </Route>
 
         {/* Catch all — 404 */}

@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useProposal, useUpdateProposalStatus, useStartDiscussion, useOpenVoting, useDeclareOutcome, useAppealProposal } from '../hooks/useProposals'
-import { useVotes, useVoteSummary, useCloseProposal, useExecuteProposal } from '../hooks/useVoting'
+import { useVotes, useVoteSummary, useCloseProposal, useExecuteProposal, useCastVoteWithDelegations } from '../hooks/useVoting'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { useAuth, useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { VotingPanel } from './VotingPanel'
+import { ConsensusVotingPanel } from './ConsensusVotingPanel'
+import { MultipleChoiceVotingPanel } from './MultipleChoiceVotingPanel'
+import { VotingVisualization } from './VotingVisualization'
 import { QuorumIndicator } from './QuorumIndicator'
 import { MinutesGenerator } from './MinutesGenerator'
 import { DelegationManager } from './DelegationManager'
 import { ProposalLifecycleIndicator } from './ProposalLifecycleIndicator'
+import { DiscussionThread } from '@/core/deliberation/components/DiscussionThread'
+import { ImplementationTracker } from '@/core/accountability/components/ImplementationTracker'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
@@ -110,6 +115,7 @@ export function ProposalDetail({ proposalId }: Props) {
   const openVotingMut = useOpenVoting()
   const declareOutcomeMut = useDeclareOutcome()
   const appealMut = useAppealProposal()
+  const castVoteMut = useCastVoteWithDelegations()
   const toast = useToast()
 
   // Discussion hours input for starting discussion
@@ -432,21 +438,87 @@ export function ProposalDetail({ proposalId }: Props) {
         </Card>
       )}
 
-      <QuorumIndicator voteSummary={voteSummary} quorumRequired={proposal.quorum_required} />
-
-      {currentMember && (
-        <VotingPanel
+      {/* Discussion Thread — DL-001..DL-011 */}
+      {(proposal.status === 'discussion' || proposal.status === 'active' || isClosed) && (
+        <DiscussionThread
           proposalId={proposalId}
-          memberId={currentMember.id}
-          voteSummary={voteSummary}
-          existingVotes={votes ?? []}
-          disabled={!isVotingOpen}
+          canComment={proposal.status === 'discussion' || proposal.status === 'active'}
         />
       )}
+
+      <QuorumIndicator voteSummary={voteSummary} quorumRequired={proposal.quorum_required} />
+
+      {/* Voting Visualization — GV-017 */}
+      {(votes ?? []).length > 0 && (
+        <VotingVisualization
+          votes={votes ?? []}
+          voteSummary={voteSummary}
+          votingModel={proposal.voting_model || 'simple'}
+          votingOptions={proposal.voting_options}
+        />
+      )}
+
+      {/* Voting Panel — conditional by model */}
+      {currentMember && (() => {
+        const votingModel = proposal.voting_model || 'simple'
+        const handleVote = (value: string, blockReason?: string) => {
+          castVoteMut.mutate(
+            { proposalId, memberId: currentMember.id, value, blockReason },
+            {
+              onSuccess: () => toast.success('Voto registrado'),
+              onError: (err: any) => toast.error(err?.message || 'Error al registrar voto'),
+            }
+          )
+        }
+
+        if (votingModel === 'consensus') {
+          return (
+            <ConsensusVotingPanel
+              proposalId={proposalId}
+              memberId={currentMember.id}
+              existingVotes={votes ?? []}
+              voteSummary={voteSummary}
+              disabled={!isVotingOpen}
+              onVote={handleVote}
+              isPending={castVoteMut.isPending}
+            />
+          )
+        }
+
+        if (votingModel === 'multiple_choice' && proposal.voting_options?.length > 0) {
+          return (
+            <MultipleChoiceVotingPanel
+              proposalId={proposalId}
+              memberId={currentMember.id}
+              options={proposal.voting_options}
+              existingVotes={votes ?? []}
+              disabled={!isVotingOpen}
+              onVote={handleVote}
+              isPending={castVoteMut.isPending}
+            />
+          )
+        }
+
+        // Default: simple voting panel
+        return (
+          <VotingPanel
+            proposalId={proposalId}
+            memberId={currentMember.id}
+            voteSummary={voteSummary}
+            existingVotes={votes ?? []}
+            disabled={!isVotingOpen}
+          />
+        )
+      })()}
 
       {/* B3: Delegation info */}
       {currentMember && proposal.status === 'active' && (
         <DelegationManager memberId={currentMember.id} />
+      )}
+
+      {/* Implementation Tracker — AC-001..AC-005 */}
+      {(proposal.status === 'approved' || proposal.status === 'executed') && (
+        <ImplementationTracker proposalId={proposalId} />
       )}
 
       {/* B6: Manual execution of financial proposals */}

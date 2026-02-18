@@ -44,9 +44,11 @@ export async function createProposal(
     financial_instruction?: Record<string, unknown>
     template_id?: string
     discussion_min_hours?: number
+    voting_model?: string
+    voting_options?: { id: string; label: string }[]
   }
 ): Promise<Proposal> {
-  const { financial_instruction, template_id, discussion_min_hours, ...rest } = proposal
+  const { financial_instruction, template_id, discussion_min_hours, voting_model, voting_options, ...rest } = proposal
   const insertData: Record<string, unknown> = {
     community_id: communityId,
     status: 'draft',
@@ -61,6 +63,12 @@ export async function createProposal(
   }
   if (discussion_min_hours != null) {
     insertData.discussion_min_hours = discussion_min_hours
+  }
+  if (voting_model) {
+    insertData.voting_model = voting_model
+  }
+  if (voting_options && voting_options.length > 0) {
+    insertData.voting_options = voting_options
   }
 
   const { data, error } = await supabase.from('proposals')
@@ -290,12 +298,16 @@ export async function getVotes(proposalId: string): Promise<Vote[]> {
 
 /**
  * Cast vote using the member's actual voting_weight.
- * Validates proposal is active and voting_end hasn't passed.
+ * Validates proposal is active, voting_end hasn't passed, and vote value
+ * is compatible with the proposal's voting model.
+ * GV-012: consensus (agree/disagree/abstain/block with mandatory reason)
+ * GV-016: multiple_choice (option_1..option_N validated against voting_options)
  */
 export async function castVote(vote: {
   proposal_id: string
   member_id: string
   value: string
+  block_reason?: string
 }): Promise<Vote> {
   // 1. Validate proposal is active and within voting window
   const proposal = await getProposal(vote.proposal_id)
@@ -306,7 +318,19 @@ export async function castVote(vote: {
     throw new Error('El periodo de votación ha terminado')
   }
 
-  // 2. Get the member's voting weight
+  // 2. Validate vote value against voting model
+  const model = proposal.voting_model || 'simple'
+  const validValues = getValidVoteValues(model, proposal.voting_options)
+  if (!validValues.includes(vote.value)) {
+    throw new Error(`Valor de voto "${vote.value}" no válido para modelo ${model}`)
+  }
+
+  // 3. Consensus block requires reason
+  if (model === 'consensus' && vote.value === 'block' && !vote.block_reason?.trim()) {
+    throw new Error('El bloqueo requiere una razón obligatoria')
+  }
+
+  // 4. Get the member's voting weight
   const { data: member, error: memberErr } = await supabase
     .from('members')
     .select('voting_weight')
@@ -316,24 +340,47 @@ export async function castVote(vote: {
   if (memberErr) throw memberErr
   const weight = Number((member as any)?.voting_weight) || 1
 
-  // 3. Delete existing vote if any (upsert pattern)
+  // 5. Delete existing vote if any (upsert pattern)
   await (supabase.from('votes') as any)
     .delete()
     .eq('proposal_id', vote.proposal_id)
     .eq('member_id', vote.member_id)
 
-  // 4. Insert new vote with real weight
+  // 6. Insert new vote with real weight
+  const insertData: Record<string, unknown> = {
+    proposal_id: vote.proposal_id,
+    member_id: vote.member_id,
+    value: vote.value,
+    weight,
+    cast_at: new Date().toISOString(),
+  }
+  if (vote.block_reason) {
+    insertData.block_reason = vote.block_reason
+  }
+
   const { data, error } = await (supabase.from('votes') as any)
-    .insert({
-      ...vote,
-      weight,
-      cast_at: new Date().toISOString(),
-    })
+    .insert(insertData)
     .select()
     .single()
 
   if (error) throw error
   return data as Vote
+}
+
+/**
+ * Get valid vote values for a given voting model.
+ */
+function getValidVoteValues(model: string, options?: { id: string; label: string }[]): string[] {
+  switch (model) {
+    case 'consensus':
+      return ['agree', 'disagree', 'abstain', 'block']
+    case 'multiple_choice':
+      // Generate option_1..option_N based on available options
+      return (options ?? []).map((_, i) => `option_${i + 1}`)
+    case 'simple':
+    default:
+      return ['yes', 'no', 'abstain']
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -349,12 +396,13 @@ export async function castVoteWithDelegations(
   proposalId: string,
   memberId: string,
   value: string,
-  communityId: string
+  communityId: string,
+  blockReason?: string
 ): Promise<Vote[]> {
   const results: Vote[] = []
 
   // Cast the member's own vote
-  const ownVote = await castVote({ proposal_id: proposalId, member_id: memberId, value })
+  const ownVote = await castVote({ proposal_id: proposalId, member_id: memberId, value, block_reason: blockReason })
   results.push(ownVote)
 
   // Find active delegations TO this member
@@ -409,6 +457,11 @@ export async function castVoteWithDelegations(
 /**
  * Compute vote summary using actual weights, not member count.
  * participation_pct = totalWeightVoted / totalAvailableWeight
+ *
+ * Supports all three voting models:
+ * - simple: yes/no/abstain → yes needs majorityRequired of (yes+no)
+ * - consensus: agree/disagree/abstain/block → ANY block = not approved; agree maps to yes
+ * - multiple_choice: option_1..N → highest-voted option wins; agree/disagree not applicable
  */
 export async function getVoteSummary(
   proposalId: string,
@@ -416,7 +469,9 @@ export async function getVoteSummary(
   quorumRequired: number,
   majorityRequired: number
 ): Promise<VoteSummary> {
+  const proposal = await getProposal(proposalId)
   const votes = await getVotes(proposalId)
+  const model = proposal.voting_model || 'simple'
 
   // Get total available weight from all active members, excluding morosos (Art. 2 LPCI)
   const { data: members } = await supabase
@@ -436,20 +491,67 @@ export async function getVoteSummary(
   let no = 0
   let abstain = 0
 
-  for (const v of votes) {
-    const w = v.weight || 1
-    if (v.value === 'yes') yes += w
-    else if (v.value === 'no') no += w
-    else abstain += w
+  if (model === 'consensus') {
+    // Consensus model: agree=yes, disagree=no, block=no (special), abstain=abstain
+    for (const v of votes) {
+      const w = v.weight || 1
+      if (v.value === 'agree') yes += w
+      else if (v.value === 'disagree') no += w
+      else if (v.value === 'block') no += w
+      else abstain += w
+    }
+
+    const total = yes + no + abstain
+    const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
+    const quorum_met = participation_pct >= quorumRequired
+
+    // GV-012: ANY block vote stops the proposal regardless of majority
+    const hasBlocks = votes.some((v) => v.value === 'block')
+    const votesForMajority = yes + no
+    const majority_met = !hasBlocks && (votesForMajority > 0 ? yes / votesForMajority >= majorityRequired : false)
+
+    return { yes, no, abstain, total, quorum_met, majority_met, participation_pct }
+  } else if (model === 'multiple_choice') {
+    // Multiple choice: count total participation, majority is by plurality (highest wins)
+    const optionCounts: Record<string, number> = {}
+    let total = 0
+    for (const v of votes) {
+      const w = v.weight || 1
+      optionCounts[v.value] = (optionCounts[v.value] ?? 0) + w
+      total += w
+    }
+
+    const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
+    const quorum_met = participation_pct >= quorumRequired
+
+    // Find the winning option
+    let maxVotes = 0
+    for (const count of Object.values(optionCounts)) {
+      if (count > maxVotes) maxVotes = count
+    }
+
+    // majority_met is true if there is a clear winner (plurality)
+    const majority_met = quorum_met && maxVotes > 0
+
+    // Map the highest-voted option count to "yes" for summary compatibility
+    return { yes: maxVotes, no: total - maxVotes, abstain: 0, total, quorum_met, majority_met, participation_pct }
+  } else {
+    // Simple model: yes/no/abstain
+    for (const v of votes) {
+      const w = v.weight || 1
+      if (v.value === 'yes') yes += w
+      else if (v.value === 'no') no += w
+      else abstain += w
+    }
+
+    const total = yes + no + abstain
+    const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
+    const quorum_met = participation_pct >= quorumRequired
+    const votesForMajority = yes + no
+    const majority_met = votesForMajority > 0 ? yes / votesForMajority >= majorityRequired : false
+
+    return { yes, no, abstain, total, quorum_met, majority_met, participation_pct }
   }
-
-  const total = yes + no + abstain
-  const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
-  const quorum_met = participation_pct >= quorumRequired
-  const votesForMajority = yes + no
-  const majority_met = votesForMajority > 0 ? yes / votesForMajority >= majorityRequired : false
-
-  return { yes, no, abstain, total, quorum_met, majority_met, participation_pct }
 }
 
 // ---------------------------------------------------------------------------
@@ -473,10 +575,14 @@ export async function closeProposal(
     proposal.majority_required
   )
 
+  const model = proposal.voting_model || 'simple'
+  const hasBlocks = model === 'consensus' && (await getVotes(proposalId)).some((v) => v.value === 'block')
   const resultStatus = summary.quorum_met && summary.majority_met ? 'approved' : 'rejected'
-  const resultText = summary.quorum_met
-    ? (summary.majority_met ? 'Aprobada por mayoría' : 'Rechazada - no alcanzó mayoría')
-    : 'Rechazada - no alcanzó quórum'
+  const resultText = hasBlocks
+    ? 'Rechazada - bloqueada por un miembro (consenso)'
+    : summary.quorum_met
+      ? (summary.majority_met ? 'Aprobada por mayoría' : 'Rechazada - no alcanzó mayoría')
+      : 'Rechazada - no alcanzó quórum'
 
   const updateData: Record<string, unknown> = {
     status: resultStatus,

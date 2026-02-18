@@ -12,7 +12,8 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Label } from '@/shared/components/ui/label'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
-import { Settings, Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock } from 'lucide-react'
+import { Settings, Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { formatDate } from '@/shared/lib/utils'
 import type { CommunityRules } from '@/shared/types/rules'
 import { DEFAULT_RULES } from '@/shared/types/rules'
@@ -39,8 +40,10 @@ export function SettingsPage() {
     }
   }, [community])
 
+  const navigate = useNavigate()
+
   const updateRulesMut = useMutation({
-    mutationFn: (newRules: CommunityRules) => updateCommunityRules(communityId!, newRules),
+    mutationFn: (newRules: CommunityRules) => updateCommunityRules(communityId!, newRules, 'Actualización directa desde configuración'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['community', communityId] })
       setRulesSaved(true)
@@ -686,13 +689,24 @@ export function SettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Save button */}
-            <div className="flex items-center gap-3">
+            {/* Save button + shortcuts */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button
                 onClick={() => updateRulesMut.mutate(rules)}
                 disabled={updateRulesMut.isPending}
               >
                 {updateRulesMut.isPending ? 'Guardando...' : 'Guardar Reglas'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/governance', { state: { openProposal: true, template: 'cambio_regla' } })}
+              >
+                <Vote className="h-3.5 w-3.5 mr-1" />
+                Cambiar Regla via Propuesta
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/rules')}>
+                <BookOpen className="h-3.5 w-3.5 mr-1" />
+                Ver Reglas Vigentes
               </Button>
               {updateRulesMut.isError && (
                 <span className="text-sm text-destructive">

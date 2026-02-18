@@ -1,5 +1,10 @@
-import type { ProposalStatus, ProposalType, VoteValue } from '@/shared/types'
+import type { ProposalStatus, ProposalType, VoteValue, VotingModel } from '@/shared/types'
 import type { FinancialInstruction, ExecutionStatus } from '@/shared/types/rules'
+
+export interface VotingOption {
+  id: string
+  label: string
+}
 
 export interface Proposal {
   id: string
@@ -31,6 +36,9 @@ export interface Proposal {
   appealed: boolean
   // Template — GV-003
   template_id: string | null
+  // Voting model — GV-012, GV-016
+  voting_model: VotingModel
+  voting_options: VotingOption[]
   // Executable governance fields
   financial_instruction: FinancialInstruction | null
   execution_status: ExecutionStatus | null
@@ -49,6 +57,8 @@ export interface Vote {
   weight: number
   delegated_from: string | null
   cast_at: string
+  block_reason: string | null
+  is_override: boolean
   // Joined
   member_name?: string
 }

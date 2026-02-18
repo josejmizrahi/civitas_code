@@ -51,8 +51,8 @@ export function useCastVoteWithDelegations() {
   const { communityId } = useCommunityContext()
 
   return useMutation({
-    mutationFn: ({ proposalId, memberId, value }: { proposalId: string; memberId: string; value: string }) =>
-      castVoteWithDelegations(proposalId, memberId, value, communityId!),
+    mutationFn: ({ proposalId, memberId, value, blockReason }: { proposalId: string; memberId: string; value: string; blockReason?: string }) =>
+      castVoteWithDelegations(proposalId, memberId, value, communityId!, blockReason),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['votes', variables.proposalId] })
       queryClient.invalidateQueries({ queryKey: ['vote-summary', variables.proposalId] })

@@ -12,6 +12,7 @@ import {
   appealProposal,
 } from '../services/governance.service'
 import type { FinancialInstruction } from '@/shared/types/rules'
+import type { VotingModel } from '@/shared/types'
 
 export function useProposals(status?: string) {
   const { communityId } = useCommunityContext()
@@ -48,6 +49,8 @@ export function useCreateProposal() {
       financial_instruction?: FinancialInstruction
       template_id?: string
       discussion_min_hours?: number
+      voting_model?: VotingModel
+      voting_options?: { id: string; label: string }[]
     }) =>
       createProposal(communityId!, {
         ...proposal,

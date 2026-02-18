@@ -11,7 +11,8 @@ export function usePermissions() {
     canCreateProposals: hasPermission(role, 'miembro'),
     canVote: hasPermission(role, 'miembro'),
     canImportData: hasPermission(role, 'tesorero'),
-    isAdmin: role === 'admin',
+    isAdmin: role === 'admin' || role === 'platform_admin',
+    isPlatformAdmin: role === 'platform_admin',
     role,
   }
 }

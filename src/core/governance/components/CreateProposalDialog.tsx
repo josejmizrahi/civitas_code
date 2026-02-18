@@ -24,7 +24,7 @@ import {
   Info,
 } from 'lucide-react'
 import type { FinancialInstruction } from '@/shared/types/rules'
-import type { ProposalType } from '@/shared/types'
+import type { ProposalType, VotingModel } from '@/shared/types'
 
 const TEMPLATE_ICONS: Record<string, typeof Banknote> = {
   Banknote,
@@ -63,6 +63,10 @@ export function CreateProposalDialog({ open, onOpenChange }: Props) {
   // Discussion period
   const [includeDiscussion, setIncludeDiscussion] = useState(rules.governance.mandatory_discussion_enabled)
   const [discussionHours, setDiscussionHours] = useState(String(rules.governance.default_discussion_hours))
+
+  // Voting model — GV-012, GV-016
+  const [votingModel, setVotingModel] = useState<VotingModel>('simple')
+  const [multipleChoiceOptions, setMultipleChoiceOptions] = useState<string[]>(['', ''])
 
   // Financial instruction fields
   const [hasFinancialInstruction, setHasFinancialInstruction] = useState(false)
@@ -105,6 +109,8 @@ export function CreateProposalDialog({ open, onOpenChange }: Props) {
     setInstrDescription('')
     setIncludeDiscussion(rules.governance.mandatory_discussion_enabled)
     setDiscussionHours(String(rules.governance.default_discussion_hours))
+    setVotingModel('simple')
+    setMultipleChoiceOptions(['', ''])
     setError('')
   }
 
@@ -127,6 +133,13 @@ export function CreateProposalDialog({ open, onOpenChange }: Props) {
           }
         : undefined
 
+      // Build voting options for multiple choice
+      const votingOptions = votingModel === 'multiple_choice'
+        ? multipleChoiceOptions
+            .filter((opt) => opt.trim())
+            .map((label, idx) => ({ id: `option_${idx + 1}`, label: label.trim() }))
+        : undefined
+
       await createProposal.mutateAsync({
         title,
         description,
@@ -138,6 +151,8 @@ export function CreateProposalDialog({ open, onOpenChange }: Props) {
         financial_instruction: financialInstruction,
         template_id: selectedTemplate?.id,
         discussion_min_hours: includeDiscussion ? parseInt(discussionHours) : undefined,
+        voting_model: votingModel,
+        voting_options: votingOptions,
       })
       onOpenChange(false)
       // Reset form
@@ -257,6 +272,72 @@ export function CreateProposalDialog({ open, onOpenChange }: Props) {
                   <Input type="number" min="1" max="100" value={majority} onChange={(e) => setMajority(e.target.value)} />
                 </div>
               </div>
+
+              {/* Voting Model — GV-012, GV-016 */}
+              <Card className="border-dashed">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <PieChart className="h-4 w-4" />
+                    Modelo de Votación
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Select value={votingModel} onChange={(e) => setVotingModel(e.target.value as VotingModel)}>
+                    <option value="simple">Simple (A favor / En contra / Abstención)</option>
+                    <option value="consensus">Consenso (Acuerdo / Desacuerdo / Abstención / Bloqueo)</option>
+                    <option value="multiple_choice">Opción Múltiple</option>
+                  </Select>
+                  {votingModel === 'consensus' && (
+                    <p className="text-xs text-muted-foreground">
+                      En modelo de consenso, cualquier miembro puede bloquear una propuesta con una razón obligatoria.
+                    </p>
+                  )}
+                  {votingModel === 'multiple_choice' && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">
+                        Agrega las opciones entre las que los miembros podrán elegir:
+                      </p>
+                      {multipleChoiceOptions.map((opt, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground w-6">{idx + 1}.</span>
+                          <Input
+                            value={opt}
+                            onChange={(e) => {
+                              const updated = [...multipleChoiceOptions]
+                              updated[idx] = e.target.value
+                              setMultipleChoiceOptions(updated)
+                            }}
+                            placeholder={`Opción ${idx + 1}`}
+                            className="flex-1"
+                          />
+                          {multipleChoiceOptions.length > 2 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setMultipleChoiceOptions(multipleChoiceOptions.filter((_, i) => i !== idx))}
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                            >
+                              ×
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                      {multipleChoiceOptions.length < 10 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setMultipleChoiceOptions([...multipleChoiceOptions, ''])}
+                          className="text-xs"
+                        >
+                          + Agregar opción
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Discussion Period Section — GV-006 */}
               <Card className="border-dashed">

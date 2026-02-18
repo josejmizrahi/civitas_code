@@ -14,8 +14,26 @@ export function getCommunityRules(config: Record<string, unknown> | null, rules?
 
 export async function updateCommunityRules(
   communityId: string,
-  rules: CommunityRules
+  rules: CommunityRules,
+  changeReason?: string,
+  proposalId?: string
 ): Promise<void> {
+  // Snapshot current rules in rule_versions before updating
+  const { data: nextVersion } = await (supabase as any).rpc('get_next_rule_version', {
+    p_community_id: communityId,
+  })
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  await (supabase.from('rule_versions') as any).insert({
+    community_id: communityId,
+    version_number: nextVersion ?? 1,
+    rules: rules as any,
+    changed_by: user?.id ?? null,
+    change_reason: changeReason ?? null,
+    proposal_id: proposalId ?? null,
+  })
+
   const { error } = await (supabase.from('communities') as any)
     .update({ rules: rules as any })
     .eq('id', communityId)

@@ -10,8 +10,10 @@ import { Input } from '@/shared/components/ui/input'
 import { Select } from '@/shared/components/ui/select'
 import { Button } from '@/shared/components/ui/button'
 import { formatCurrency, formatDate, downloadAsCSV, downloadAsExcel } from '@/shared/lib/utils'
-import { Pencil, Trash2, Check, X, Download } from 'lucide-react'
+import { Pencil, Trash2, Check, X, Download, ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { verifyTransaction } from '../services/receipt.service'
 import type { Transaction } from '../types'
 
 export function TransactionList() {
@@ -26,6 +28,17 @@ export function TransactionList() {
   const updateTx = useUpdateTransaction()
   const deleteTx = useDeleteTransaction()
   const toast = useToast()
+  const queryClient = useQueryClient()
+
+  const verifyMut = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'verified' | 'disputed' }) =>
+      verifyTransaction(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      toast.success('Estado de verificacion actualizado')
+    },
+    onError: () => toast.error('Error al verificar transaccion'),
+  })
 
   const { data: categories } = useQuery({
     queryKey: ['categories', communityId],
@@ -124,18 +137,19 @@ export function TransactionList() {
               <TableHead>Descripción</TableHead>
               <TableHead className="hidden sm:table-cell">Categoría</TableHead>
               <TableHead className="hidden sm:table-cell">Tipo</TableHead>
+              <TableHead className="hidden md:table-cell">Verificacion</TableHead>
               <TableHead className="text-right">Monto</TableHead>
-              {canManageTreasury && <TableHead className="w-24">Acciones</TableHead>}
+              {canManageTreasury && <TableHead className="w-28">Acciones</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={canManageTreasury ? 6 : 5} className="text-center text-muted-foreground">Cargando...</TableCell>
+                <TableCell colSpan={canManageTreasury ? 7 : 6} className="text-center text-muted-foreground">Cargando...</TableCell>
               </TableRow>
             ) : transactions?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canManageTreasury ? 6 : 5} className="text-center text-muted-foreground">
+                <TableCell colSpan={canManageTreasury ? 7 : 6} className="text-center text-muted-foreground">
                   Sin transacciones. Importa datos para comenzar.
                 </TableCell>
               </TableRow>
@@ -223,12 +237,32 @@ export function TransactionList() {
                         {tx.type === 'income' ? 'Ingreso' : 'Egreso'}
                       </Badge>
                     </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {(() => {
+                        const vs = (tx as any).verification_status || 'reported'
+                        if (vs === 'verified') return <Badge variant="success" className="gap-1"><ShieldCheck className="h-3 w-3" />Verificada</Badge>
+                        if (vs === 'disputed') return <Badge variant="destructive" className="gap-1"><ShieldAlert className="h-3 w-3" />Disputada</Badge>
+                        return <Badge variant="secondary" className="gap-1"><ShieldQuestion className="h-3 w-3" />Reportada</Badge>
+                      })()}
+                    </TableCell>
                     <TableCell className={`text-right font-medium ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                       {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                     </TableCell>
                     {canManageTreasury && (
                       <TableCell>
                         <div className="flex gap-1">
+                          {(tx as any).verification_status !== 'verified' && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => verifyMut.mutate({ id: tx.id, status: 'verified' })}
+                              disabled={verifyMut.isPending}
+                              aria-label="Verificar"
+                              title="Verificar transaccion"
+                            >
+                              <ShieldCheck className="h-4 w-4 text-green-600" />
+                            </Button>
+                          )}
                           <Button size="icon" variant="ghost" onClick={() => startEdit(tx)} aria-label="Editar">
                             <Pencil className="h-4 w-4" />
                           </Button>

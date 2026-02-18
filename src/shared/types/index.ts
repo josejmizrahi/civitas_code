@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'comite_vigilancia' | 'tesorero' | 'miembro' | 'observador'
+export type Role = 'platform_admin' | 'admin' | 'comite_vigilancia' | 'tesorero' | 'miembro' | 'observador'
 
 export type MemberStatus = 'active' | 'inactive' | 'pending'
 
@@ -6,7 +6,11 @@ export type ProposalStatus = 'draft' | 'discussion' | 'active' | 'closed' | 'app
 
 export type ProposalType = 'ordinary' | 'extraordinary' | 'budget' | 'election' | 'amendment'
 
-export type VoteValue = 'yes' | 'no' | 'abstain'
+export type VoteValue = 'yes' | 'no' | 'abstain' | 'agree' | 'disagree' | 'block'
+  | 'option_1' | 'option_2' | 'option_3' | 'option_4' | 'option_5'
+  | 'option_6' | 'option_7' | 'option_8' | 'option_9' | 'option_10'
+
+export type VotingModel = 'simple' | 'consensus' | 'multiple_choice'
 
 export type TransactionType = 'income' | 'expense'
 
@@ -41,6 +45,7 @@ export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'bimonthly'
 export type RatingTargetType = 'entity' | 'member'
 
 export const ROLE_HIERARCHY: Record<Role, number> = {
+  platform_admin: 5,
   admin: 4,
   comite_vigilancia: 3,
   tesorero: 3,
