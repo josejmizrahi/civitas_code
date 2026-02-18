@@ -26,9 +26,7 @@ export const VERTICALS: Record<CommunityType, VerticalConfig> = {
     type: 'residential',
     label: 'Residencial',
     icon: Home,
-    navItems: [
-      { name: 'Residencial', href: '/residential', icon: Home },
-    ],
+    navItems: [],
   },
   religious: {
     type: 'religious',
