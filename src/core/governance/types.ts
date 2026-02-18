@@ -18,6 +18,19 @@ export interface Proposal {
   created_by: string
   created_at: string
   assembly_id?: string | null
+  // Discussion phase — GV-001, GV-006
+  discussion_start: string | null
+  discussion_end: string | null
+  discussion_min_hours: number | null
+  // Outcome declaration — GV-001
+  outcome_declared: string | null
+  outcome_declared_by: string | null
+  outcome_declared_at: string | null
+  // Grace period (appeal window) — GV-043
+  grace_period_end: string | null
+  appealed: boolean
+  // Template — GV-003
+  template_id: string | null
   // Executable governance fields
   financial_instruction: FinancialInstruction | null
   execution_status: ExecutionStatus | null

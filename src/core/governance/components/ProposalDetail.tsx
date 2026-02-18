@@ -1,19 +1,35 @@
 import { useEffect, useState } from 'react'
-import { useProposal, useUpdateProposalStatus } from '../hooks/useProposals'
+import { useProposal, useUpdateProposalStatus, useStartDiscussion, useOpenVoting, useDeclareOutcome, useAppealProposal } from '../hooks/useProposals'
 import { useVotes, useVoteSummary, useCloseProposal, useExecuteProposal } from '../hooks/useVoting'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { useAuth, useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { VotingPanel } from './VotingPanel'
 import { QuorumIndicator } from './QuorumIndicator'
 import { MinutesGenerator } from './MinutesGenerator'
 import { DelegationManager } from './DelegationManager'
+import { ProposalLifecycleIndicator } from './ProposalLifecycleIndicator'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Textarea } from '@/shared/components/ui/textarea'
+import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
 import { formatDate, formatDateTime } from '@/shared/lib/utils'
-import { Clock, AlertTriangle, Play, CheckCircle2, Timer, XCircle } from 'lucide-react'
+import {
+  Clock,
+  AlertTriangle,
+  Play,
+  CheckCircle2,
+  Timer,
+  XCircle,
+  MessageSquare,
+  Shield,
+  Gavel,
+  ArrowRight,
+} from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
 
 interface Props {
@@ -22,13 +38,25 @@ interface Props {
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Borrador',
-  active: 'Activa',
+  discussion: 'En Discusión',
+  active: 'Votación Activa',
   closed: 'Cerrada',
   approved: 'Aprobada',
   rejected: 'Rechazada',
+  executed: 'Ejecutada',
 }
 
-function CountdownTimer({ endDate }: { endDate: string }) {
+const STATUS_VARIANTS: Record<string, string> = {
+  draft: 'default',
+  discussion: 'secondary',
+  active: 'default',
+  closed: 'outline',
+  approved: 'success',
+  rejected: 'destructive',
+  executed: 'success',
+}
+
+function CountdownTimer({ endDate, label }: { endDate: string; label?: string }) {
   const [timeLeft, setTimeLeft] = useState('')
   const [expired, setExpired] = useState(false)
 
@@ -62,7 +90,7 @@ function CountdownTimer({ endDate }: { endDate: string }) {
   return (
     <div className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${expired ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
       {expired ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
-      {expired ? 'Tiempo de votación expirado' : `Tiempo restante: ${timeLeft}`}
+      {expired ? `${label || 'Tiempo'} expirado` : `${label || 'Tiempo restante'}: ${timeLeft}`}
     </div>
   )
 }
@@ -71,13 +99,28 @@ export function ProposalDetail({ proposalId }: Props) {
   const { user } = useAuth()
   const { communityId } = useCommunityContext()
   const { isAdmin } = usePermissions()
+  const { rules } = useRulesEngine()
   const { data: proposal, isLoading, refetch: refetchProposal } = useProposal(proposalId)
   const { data: members } = useMembers()
   const { data: votes } = useVotes(proposalId)
   const updateStatus = useUpdateProposalStatus()
   const closeProposalMut = useCloseProposal()
   const executeMut = useExecuteProposal()
+  const startDiscussionMut = useStartDiscussion()
+  const openVotingMut = useOpenVoting()
+  const declareOutcomeMut = useDeclareOutcome()
+  const appealMut = useAppealProposal()
   const toast = useToast()
+
+  // Discussion hours input for starting discussion
+  const [discussionHours, setDiscussionHours] = useState(
+    String(rules.governance.default_discussion_hours)
+  )
+  // Voting end date for opening voting from discussion
+  const [votingEndInput, setVotingEndInput] = useState('')
+  // Outcome declaration text
+  const [outcomeText, setOutcomeText] = useState('')
+  const [showOutcomeForm, setShowOutcomeForm] = useState(false)
 
   const { data: voteSummary } = useVoteSummary(
     proposalId,
@@ -104,17 +147,46 @@ export function ProposalDetail({ proposalId }: Props) {
   if (isLoading) return <LoadingSpinner message="Cargando propuesta..." className="py-12" />
   if (!proposal) return <div className="text-muted-foreground">Propuesta no encontrada.</div>
 
-  const canActivate = proposal.status === 'draft'
+  const canStartDiscussion = proposal.status === 'draft' && isAdmin
+  const canActivate = (proposal.status === 'draft' || proposal.status === 'discussion') && isAdmin
   const canClose = proposal.status === 'active'
   const isVotingOpen = proposal.status === 'active' &&
     (!proposal.voting_end || new Date(proposal.voting_end) > new Date())
-  const isClosed = ['closed', 'approved', 'rejected'].includes(proposal.status)
+  const isClosed = ['closed', 'approved', 'rejected', 'executed'].includes(proposal.status)
 
-  const handleActivate = () => {
-    updateStatus.mutate({ proposalId, status: 'active' }, {
-      onSuccess: () => toast.success('Votación abierta'),
-      onError: () => toast.error('Error al abrir votación'),
-    })
+  // Discussion period expired check
+  const discussionExpired = proposal.status === 'discussion' && proposal.discussion_end &&
+    new Date(proposal.discussion_end) <= new Date()
+
+  // Grace period check
+  const hasGracePeriod = proposal.grace_period_end && new Date(proposal.grace_period_end) > new Date()
+  const canAppeal = proposal.status === 'approved' && hasGracePeriod && !proposal.appealed && currentMember
+
+  const handleStartDiscussion = () => {
+    startDiscussionMut.mutate(
+      { proposalId, discussionHours: parseInt(discussionHours) },
+      {
+        onSuccess: () => { toast.success('Periodo de discusión iniciado'); refetchProposal() },
+        onError: (err: any) => toast.error(err?.message || 'Error al iniciar discusión'),
+      }
+    )
+  }
+
+  const handleOpenVoting = () => {
+    if (proposal.status === 'discussion') {
+      openVotingMut.mutate(
+        { proposalId, votingEnd: votingEndInput || null },
+        {
+          onSuccess: () => { toast.success('Votación abierta'); refetchProposal() },
+          onError: (err: any) => toast.error(err?.message || 'Error al abrir votación'),
+        }
+      )
+    } else {
+      updateStatus.mutate({ proposalId, status: 'active' }, {
+        onSuccess: () => toast.success('Votación abierta'),
+        onError: () => toast.error('Error al abrir votación'),
+      })
+    }
   }
 
   const handleClose = () => {
@@ -125,17 +197,59 @@ export function ProposalDetail({ proposalId }: Props) {
     )
   }
 
+  const handleDeclareOutcome = () => {
+    if (!user || !outcomeText.trim()) return
+    declareOutcomeMut.mutate(
+      { proposalId, outcome: outcomeText, userId: user.id },
+      {
+        onSuccess: () => {
+          toast.success('Resultado declarado')
+          setShowOutcomeForm(false)
+          setOutcomeText('')
+          refetchProposal()
+        },
+        onError: (err: any) => toast.error(err?.message || 'Error al declarar resultado'),
+      }
+    )
+  }
+
+  const handleAppeal = () => {
+    if (!user) return
+    appealMut.mutate(
+      { proposalId, userId: user.id },
+      {
+        onSuccess: () => { toast.success('Propuesta apelada — ejecución pausada'); refetchProposal() },
+        onError: (err: any) => toast.error(err?.message || 'Error al apelar'),
+      }
+    )
+  }
+
   return (
     <div className="space-y-6">
+      {/* Lifecycle Indicator */}
+      <ProposalLifecycleIndicator
+        status={proposal.status}
+        appealed={proposal.appealed}
+        className="justify-center"
+      />
+
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <CardTitle>{proposal.title}</CardTitle>
             <div className="flex flex-wrap items-center gap-2">
+              {proposal.template_id && (
+                <Badge variant="outline" className="text-[10px]">
+                  {proposal.template_id}
+                </Badge>
+              )}
               {proposal.result && (
                 <Badge variant="outline" className="text-xs">{proposal.result}</Badge>
               )}
-              <Badge variant={proposal.status === 'approved' ? 'success' : proposal.status === 'rejected' ? 'destructive' : 'default'}>
+              {proposal.appealed && (
+                <Badge variant="destructive" className="text-xs">Apelada</Badge>
+              )}
+              <Badge variant={(STATUS_VARIANTS[proposal.status] || 'default') as any}>
                 {STATUS_LABELS[proposal.status] || proposal.status}
               </Badge>
             </div>
@@ -145,7 +259,8 @@ export function ProposalDetail({ proposalId }: Props) {
           <p className="whitespace-pre-wrap text-sm">{proposal.description}</p>
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
             <span>Creada: {formatDate(proposal.created_at)}</span>
-            {proposal.voting_start && <span>Inicio: {formatDate(proposal.voting_start)}</span>}
+            {proposal.discussion_start && <span>Discusión: {formatDate(proposal.discussion_start)}</span>}
+            {proposal.voting_start && <span>Inicio votación: {formatDate(proposal.voting_start)}</span>}
             {proposal.voting_end && <span>Cierre: {formatDate(proposal.voting_end)}</span>}
             <span>Quórum: {(proposal.quorum_required * 100).toFixed(0)}%</span>
             <span>Mayoría: {(proposal.majority_required * 100).toFixed(0)}%</span>
@@ -164,25 +279,158 @@ export function ProposalDetail({ proposalId }: Props) {
             </div>
           )}
 
-          {/* B4: Countdown timer */}
-          {proposal.status === 'active' && proposal.voting_end && (
-            <CountdownTimer endDate={proposal.voting_end} />
+          {/* Discussion countdown */}
+          {proposal.status === 'discussion' && proposal.discussion_end && (
+            <CountdownTimer endDate={proposal.discussion_end} label="Discusión" />
           )}
 
+          {/* Voting countdown */}
+          {proposal.status === 'active' && proposal.voting_end && (
+            <CountdownTimer endDate={proposal.voting_end} label="Votación" />
+          )}
+
+          {/* Grace period countdown */}
+          {proposal.status === 'approved' && proposal.grace_period_end && (
+            <div className="space-y-2">
+              <CountdownTimer endDate={proposal.grace_period_end} label="Periodo de apelación" />
+              {proposal.appealed && (
+                <div className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+                  <Shield className="h-4 w-4" />
+                  <span>Esta propuesta fue apelada — la ejecución automática está pausada</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Action buttons */}
           <div className="flex flex-col gap-2 sm:flex-row">
-            {canActivate && isAdmin && (
-              <Button onClick={handleActivate} disabled={updateStatus.isPending}>
-                Abrir Votación
+            {/* Draft → Discussion */}
+            {canStartDiscussion && proposal.discussion_min_hours && (
+              <div className="flex items-end gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Horas de discusión</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="720"
+                    value={discussionHours}
+                    onChange={(e) => setDiscussionHours(e.target.value)}
+                    className="w-24 h-9"
+                  />
+                </div>
+                <Button
+                  onClick={handleStartDiscussion}
+                  disabled={startDiscussionMut.isPending}
+                  variant="secondary"
+                >
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  {startDiscussionMut.isPending ? 'Iniciando...' : 'Iniciar Discusión'}
+                </Button>
+              </div>
+            )}
+
+            {/* Discussion → Voting (only when discussion ended) */}
+            {proposal.status === 'discussion' && isAdmin && discussionExpired && (
+              <div className="flex items-end gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Cierre de votación</Label>
+                  <Input
+                    type="datetime-local"
+                    value={votingEndInput}
+                    onChange={(e) => setVotingEndInput(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <Button
+                  onClick={handleOpenVoting}
+                  disabled={openVotingMut.isPending}
+                >
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                  {openVotingMut.isPending ? 'Abriendo...' : 'Abrir Votación'}
+                </Button>
+              </div>
+            )}
+
+            {/* Draft → Active (skip discussion) */}
+            {proposal.status === 'draft' && isAdmin && (
+              <Button onClick={handleOpenVoting} disabled={updateStatus.isPending}>
+                Abrir Votación Directa
               </Button>
             )}
+
+            {/* Close voting */}
             {canClose && isAdmin && (
               <Button variant="outline" onClick={handleClose} disabled={closeProposalMut.isPending}>
                 Cerrar Votación
               </Button>
             )}
+
+            {/* Appeal button — GV-043 */}
+            {canAppeal && (
+              <Button
+                variant="outline"
+                onClick={handleAppeal}
+                disabled={appealMut.isPending}
+                className="border-amber-300 text-amber-700 hover:bg-amber-50"
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                {appealMut.isPending ? 'Apelando...' : 'Apelar Propuesta'}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Outcome Declaration — GV-001 */}
+      {isClosed && isAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Gavel className="h-4 w-4" />
+              Declaración de Resultado
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {proposal.outcome_declared ? (
+              <div className="space-y-2">
+                <div className="rounded-md bg-muted p-3 text-sm">
+                  <p className="font-medium">Resultado declarado:</p>
+                  <p className="mt-1 whitespace-pre-wrap">{proposal.outcome_declared}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Declarado el {proposal.outcome_declared_at ? formatDateTime(proposal.outcome_declared_at) : ''}
+                </p>
+              </div>
+            ) : showOutcomeForm ? (
+              <div className="space-y-3">
+                <Textarea
+                  value={outcomeText}
+                  onChange={(e) => setOutcomeText(e.target.value)}
+                  placeholder="Describe el resultado oficial de esta propuesta..."
+                  rows={3}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleDeclareOutcome}
+                    disabled={declareOutcomeMut.isPending || !outcomeText.trim()}
+                    size="sm"
+                  >
+                    {declareOutcomeMut.isPending ? 'Declarando...' : 'Declarar Resultado'}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setShowOutcomeForm(false)}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setShowOutcomeForm(true)}>
+                <Gavel className="mr-2 h-4 w-4" />
+                Declarar Resultado
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <QuorumIndicator voteSummary={voteSummary} quorumRequired={proposal.quorum_required} />
 
@@ -202,7 +450,7 @@ export function ProposalDetail({ proposalId }: Props) {
       )}
 
       {/* B6: Manual execution of financial proposals */}
-      {proposal.status === 'approved' && proposal.financial_instruction && (
+      {(proposal.status === 'approved' || proposal.status === 'executed') && proposal.financial_instruction && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Instrucción Financiera</CardTitle>
@@ -233,12 +481,17 @@ export function ProposalDetail({ proposalId }: Props) {
               })()}
             </div>
 
-            {proposal.execution_status === 'executed' ? (
+            {(proposal.execution_status === 'executed' || proposal.status === 'executed') ? (
               <div className="flex items-center gap-2 text-green-600">
                 <CheckCircle2 className="h-5 w-5" />
                 <span className="text-sm font-medium">
                   Ejecutada el {proposal.executed_at ? formatDate(proposal.executed_at) : ''}
                 </span>
+              </div>
+            ) : proposal.appealed ? (
+              <div className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+                <Shield className="h-4 w-4" />
+                <span>Ejecución pausada por apelación</span>
               </div>
             ) : proposal.execution_status === 'cool_down' && proposal.cool_down_until ? (
               <div className="space-y-3">
@@ -290,7 +543,7 @@ export function ProposalDetail({ proposalId }: Props) {
                 )}
               </div>
             ) : (
-              isAdmin && (
+              isAdmin && proposal.status === 'approved' && (
                 <Button
                   onClick={() => user && executeMut.mutate(
                     { proposalId, userId: user.id },

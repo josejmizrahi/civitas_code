@@ -29,6 +29,7 @@ const typeConfig: Record<string, { icon: typeof Bell; colorClass: string }> = {
   proposal_closing_soon: { icon: Clock, colorClass: 'text-orange-500' },
   proposal_closed: { icon: XCircle, colorClass: 'text-gray-500' },
   proposal_approved: { icon: CheckCircle, colorClass: 'text-green-500' },
+  pre_execution: { icon: AlertTriangle, colorClass: 'text-amber-500' },
   payment_due: { icon: DollarSign, colorClass: 'text-yellow-500' },
   payment_overdue: { icon: AlertTriangle, colorClass: 'text-red-500' },
   obligation_created: { icon: Receipt, colorClass: 'text-blue-500' },
@@ -43,6 +44,7 @@ function getNotificationRoute(notification: Notification): string | null {
     case 'proposal_closing_soon':
     case 'proposal_closed':
     case 'proposal_approved':
+    case 'pre_execution':
       return meta?.proposalId ? `/governance/${meta.proposalId}` : '/governance'
     case 'payment_due':
     case 'payment_overdue':

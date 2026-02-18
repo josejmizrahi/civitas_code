@@ -42,9 +42,11 @@ export async function createProposal(
     voting_end: string | null
     created_by: string
     financial_instruction?: Record<string, unknown>
+    template_id?: string
+    discussion_min_hours?: number
   }
 ): Promise<Proposal> {
-  const { financial_instruction, ...rest } = proposal
+  const { financial_instruction, template_id, discussion_min_hours, ...rest } = proposal
   const insertData: Record<string, unknown> = {
     community_id: communityId,
     status: 'draft',
@@ -54,6 +56,12 @@ export async function createProposal(
     insertData.financial_instruction = financial_instruction
     insertData.execution_status = 'pending'
   }
+  if (template_id) {
+    insertData.template_id = template_id
+  }
+  if (discussion_min_hours != null) {
+    insertData.discussion_min_hours = discussion_min_hours
+  }
 
   const { data, error } = await supabase.from('proposals')
     .insert(insertData as any)
@@ -61,6 +69,196 @@ export async function createProposal(
     .single()
 
   if (error) throw error
+  return data as unknown as Proposal
+}
+
+// ---------------------------------------------------------------------------
+// Governance Lifecycle — GV-001, GV-006, GV-043
+// ---------------------------------------------------------------------------
+
+/**
+ * Start discussion phase for a proposal.
+ * Transitions status from 'draft' to 'discussion'.
+ */
+export async function startDiscussion(
+  proposalId: string,
+  communityId: string,
+  discussionHours: number
+): Promise<Proposal> {
+  const proposal = await getProposal(proposalId)
+  if (proposal.status !== 'draft') {
+    throw new Error('Solo se puede iniciar discusión desde el estado borrador')
+  }
+
+  const now = new Date()
+  const discussionEnd = new Date(now.getTime() + discussionHours * 60 * 60 * 1000)
+
+  const { data, error } = await (supabase.from('proposals') as any)
+    .update({
+      status: 'discussion',
+      discussion_start: now.toISOString(),
+      discussion_end: discussionEnd.toISOString(),
+      discussion_min_hours: discussionHours,
+    })
+    .eq('id', proposalId)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  // Notify community
+  try {
+    const { notifyCommunity } = await import('@/shared/services/notification.service')
+    await notifyCommunity(
+      communityId,
+      'proposal_opened',
+      `Nueva propuesta en discusión: ${proposal.title}`,
+      `Se ha abierto un periodo de discusión de ${discussionHours}h`,
+      { proposal_id: proposalId }
+    )
+  } catch { /* notifications are best-effort */ }
+
+  return data as unknown as Proposal
+}
+
+/**
+ * Open voting from discussion phase.
+ * Transitions status from 'discussion' to 'active'.
+ * Validates that minimum discussion period has elapsed.
+ */
+export async function openVotingFromDiscussion(
+  proposalId: string,
+  communityId: string,
+  votingEnd: string | null
+): Promise<Proposal> {
+  const proposal = await getProposal(proposalId)
+  if (proposal.status !== 'discussion') {
+    throw new Error('Solo se puede abrir votación desde discusión')
+  }
+
+  // Validate minimum discussion period
+  if (proposal.discussion_end) {
+    const endTime = new Date(proposal.discussion_end).getTime()
+    if (Date.now() < endTime) {
+      const hoursLeft = Math.ceil((endTime - Date.now()) / (1000 * 60 * 60))
+      throw new Error(`El periodo de discusión no ha terminado. Faltan ~${hoursLeft}h`)
+    }
+  }
+
+  const updateData: Record<string, unknown> = {
+    status: 'active',
+    voting_start: new Date().toISOString(),
+  }
+  if (votingEnd) {
+    updateData.voting_end = votingEnd
+  }
+
+  const { data, error } = await (supabase.from('proposals') as any)
+    .update(updateData)
+    .eq('id', proposalId)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  // Notify community
+  try {
+    const { notifyCommunity } = await import('@/shared/services/notification.service')
+    await notifyCommunity(
+      communityId,
+      'proposal_opened',
+      `Votación abierta: ${proposal.title}`,
+      votingEnd ? `La votación cierra el ${new Date(votingEnd).toLocaleDateString('es-MX')}` : 'Votación sin fecha límite',
+      { proposal_id: proposalId }
+    )
+  } catch { /* notifications are best-effort */ }
+
+  return data as unknown as Proposal
+}
+
+/**
+ * Declare outcome for a closed/approved/rejected proposal.
+ * Records who declared the outcome and when.
+ */
+export async function declareOutcome(
+  proposalId: string,
+  outcome: string,
+  declaredByUserId: string
+): Promise<Proposal> {
+  const proposal = await getProposal(proposalId)
+  if (!['closed', 'approved', 'rejected', 'executed'].includes(proposal.status)) {
+    throw new Error('Solo se puede declarar resultado de propuestas cerradas')
+  }
+
+  const { data, error } = await (supabase.from('proposals') as any)
+    .update({
+      outcome_declared: outcome,
+      outcome_declared_by: declaredByUserId,
+      outcome_declared_at: new Date().toISOString(),
+    })
+    .eq('id', proposalId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as unknown as Proposal
+}
+
+/**
+ * Appeal a proposal during the grace period.
+ * Prevents auto-execution until the appeal is resolved.
+ */
+export async function appealProposal(
+  proposalId: string,
+  communityId: string,
+  appealedByUserId: string
+): Promise<Proposal> {
+  const proposal = await getProposal(proposalId)
+
+  if (proposal.status !== 'approved') {
+    throw new Error('Solo se pueden apelar propuestas aprobadas')
+  }
+
+  // Validate we're within the grace period
+  if (proposal.grace_period_end) {
+    const graceEnd = new Date(proposal.grace_period_end).getTime()
+    if (Date.now() > graceEnd) {
+      throw new Error('El periodo de apelación ha expirado')
+    }
+  }
+
+  const { data, error } = await (supabase.from('proposals') as any)
+    .update({ appealed: true })
+    .eq('id', proposalId)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  // Log the appeal in audit trail
+  try {
+    await (supabase.from('audit_log') as any).insert({
+      community_id: communityId,
+      user_id: appealedByUserId,
+      action: 'appeal_proposal',
+      entity_type: 'proposal',
+      entity_id: proposalId,
+      details: { appealed_at: new Date().toISOString() },
+    })
+  } catch { /* audit is best-effort */ }
+
+  // Notify community
+  try {
+    const { notifyCommunity } = await import('@/shared/services/notification.service')
+    await notifyCommunity(
+      communityId,
+      'proposal_closed',
+      `Propuesta apelada: ${proposal.title}`,
+      'La ejecución ha sido pausada por una apelación',
+      { proposal_id: proposalId }
+    )
+  } catch { /* notifications are best-effort */ }
+
   return data as unknown as Proposal
 }
 
@@ -312,6 +510,13 @@ export async function closeProposal(
       const coolDownUntil = new Date(Date.now() + coolDownHours * 60 * 60 * 1000).toISOString()
       updateData.execution_status = 'cool_down'
       updateData.cool_down_until = coolDownUntil
+    }
+
+    // Set grace period for appeals — GV-043
+    const gracePeriodHours = rules.governance.grace_period_hours || 0
+    if (gracePeriodHours > 0) {
+      const gracePeriodEnd = new Date(Date.now() + gracePeriodHours * 60 * 60 * 1000).toISOString()
+      updateData.grace_period_end = gracePeriodEnd
     }
   }
 

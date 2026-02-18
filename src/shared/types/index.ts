@@ -2,7 +2,7 @@ export type Role = 'admin' | 'comite_vigilancia' | 'tesorero' | 'miembro' | 'obs
 
 export type MemberStatus = 'active' | 'inactive' | 'pending'
 
-export type ProposalStatus = 'draft' | 'active' | 'closed' | 'approved' | 'rejected'
+export type ProposalStatus = 'draft' | 'discussion' | 'active' | 'closed' | 'approved' | 'rejected' | 'executed'
 
 export type ProposalType = 'ordinary' | 'extraordinary' | 'budget' | 'election' | 'amendment'
 

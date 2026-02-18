@@ -2,6 +2,22 @@
 // Each community defines rules for how Identity ↔ Treasury ↔ Governance interact
 // Compliant with: LPCI CDMX, LFPDPPP 2025, Código de Comercio, NOM-151
 
+export interface QuorumByType {
+  ordinary: number
+  extraordinary: number
+  budget: number
+  election: number
+  amendment: number
+}
+
+export interface MajorityByType {
+  ordinary: number
+  extraordinary: number
+  budget: number
+  election: number
+  amendment: number
+}
+
 export interface GovernanceRules {
   default_quorum: number          // 0-1, e.g. 0.5 = 50%
   default_majority: number        // 0-1, e.g. 0.5 = 50%
@@ -10,6 +26,14 @@ export interface GovernanceRules {
   cool_down_hours: number         // hours between vote and execution
   auto_execution_enabled: boolean // when vote passes, auto-execute financial instruction
   auto_execution_threshold: number // auto-execute only below this amount (0 = no limit)
+  // Discussion phase — GV-001, GV-006
+  mandatory_discussion_enabled: boolean  // require discussion before voting
+  default_discussion_hours: number       // default discussion period in hours
+  // Grace period (appeal window) — GV-043
+  grace_period_hours: number             // hours after approval for appeals
+  // Differentiated quorum/majority by proposal type — GV-036
+  quorum_by_type: QuorumByType
+  majority_by_type: MajorityByType
   // Mexican legal compliance — LPCI CDMX Art. 33
   quorum_first_call: number       // 1st call quorum (75% indiviso) — Art. 33
   quorum_second_call: number      // 2nd call quorum (50%+1) — Art. 33
@@ -86,6 +110,26 @@ export const DEFAULT_RULES: CommunityRules = {
     cool_down_hours: 48,
     auto_execution_enabled: false,
     auto_execution_threshold: 0,
+    // Discussion phase defaults
+    mandatory_discussion_enabled: false,
+    default_discussion_hours: 48,
+    // Grace period defaults
+    grace_period_hours: 0,
+    // Differentiated quorum/majority by type
+    quorum_by_type: {
+      ordinary: 0.5,
+      extraordinary: 0.75,
+      budget: 0.5,
+      election: 0.5,
+      amendment: 0.75,
+    },
+    majority_by_type: {
+      ordinary: 0.5,
+      extraordinary: 0.66,
+      budget: 0.5,
+      election: 0.5,
+      amendment: 0.66,
+    },
     // Mexican legal defaults — LPCI CDMX
     quorum_first_call: 0.75,
     quorum_second_call: 0.5001,
