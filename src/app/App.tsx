@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, CommunityProvider } from './providers'
 import { AppRouter } from './routes'
 import { ToastProvider } from '@/shared/components/ui/toast'
+import { ConfirmProvider } from '@/shared/components/ConfirmDialog'
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary'
 
 const queryClient = new QueryClient({
@@ -22,11 +23,13 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          <AuthProvider>
-            <CommunityProvider>
-              <AppRouter />
-            </CommunityProvider>
-          </AuthProvider>
+          <ConfirmProvider>
+            <AuthProvider>
+              <CommunityProvider>
+                <AppRouter />
+              </CommunityProvider>
+            </AuthProvider>
+          </ConfirmProvider>
         </ToastProvider>
       </QueryClientProvider>
     </ErrorBoundary>
