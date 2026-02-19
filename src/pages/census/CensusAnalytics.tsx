@@ -76,8 +76,8 @@ export function CensusAnalytics() {
     // Growth rate
     const first = snapshots[0] as any
     const last = snapshots[snapshots.length - 1] as any
-    const growthRate = first?.total_members > 0
-      ? ((last.total_members - first.total_members) / first.total_members) * 100
+    const growthRate = last?.total_members > 0
+      ? ((first.total_members - last.total_members) / last.total_members) * 100
       : 0
 
     return {

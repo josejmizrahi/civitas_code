@@ -22,8 +22,10 @@ const roleBadgeVariant: Record<string, 'default' | 'secondary' | 'outline' | 'su
 }
 
 const roleLabels: Record<string, string> = {
+  platform_admin: 'Admin Plataforma',
   admin: 'Administrador',
   tesorero: 'Tesorero',
+  comite_vigilancia: 'Comité de Vigilancia',
   miembro: 'Miembro',
   observador: 'Observador',
 }
@@ -117,6 +119,7 @@ export function MemberDirectory() {
                     >
                       <option value="admin">Administrador</option>
                       <option value="tesorero">Tesorero</option>
+                      <option value="comite_vigilancia">Comité de Vigilancia</option>
                       <option value="miembro">Miembro</option>
                       <option value="observador">Observador</option>
                     </Select>
@@ -138,10 +141,10 @@ export function MemberDirectory() {
                 <TableCell>
                   <Badge variant={
                     member.financial_standing === 'good_standing' ? 'success' :
-                    member.financial_standing === 'delinquent' ? 'destructive' : 'warning'
+                    member.financial_standing === 'delinquent' || member.financial_standing === 'moroso' ? 'destructive' : 'warning'
                   }>
                     {member.financial_standing === 'good_standing' ? 'Al corriente' :
-                     member.financial_standing === 'delinquent' ? 'Moroso' :
+                     member.financial_standing === 'delinquent' || member.financial_standing === 'moroso' ? 'Moroso' :
                      member.financial_standing === 'grace_period' ? 'Gracia' : '—'}
                   </Badge>
                 </TableCell>

@@ -161,7 +161,8 @@ export async function approvePaymentPlan(
     plan.start_date,
     plan.number_of_installments,
     plan.installment_amount,
-    plan.frequency
+    plan.frequency,
+    plan.total_debt
   )
 
   const { error: instError } = await (supabase.from('payment_plan_installments') as any)
@@ -209,9 +210,19 @@ export async function markInstallmentPaid(
   installmentId: string,
   paidAmount: number
 ): Promise<PlanInstallment> {
+  const { data: existing, error: fetchError } = await supabase
+    .from('payment_plan_installments')
+    .select('amount')
+    .eq('id', installmentId)
+    .single()
+
+  if (fetchError) throw fetchError
+
+  const expectedAmount = (existing as { amount: number }).amount
+
   const { data, error } = await (supabase.from('payment_plan_installments') as any)
     .update({
-      status: paidAmount >= 0 ? 'paid' : 'partial',
+      status: paidAmount >= expectedAmount ? 'paid' : 'partial',
       paid_at: new Date().toISOString(),
       paid_amount: paidAmount,
     })
@@ -243,7 +254,8 @@ function generateInstallmentDates(
   startDate: string,
   count: number,
   amount: number,
-  frequency: string
+  frequency: string,
+  totalDebt: number
 ): { dueDate: string; amount: number }[] {
   const result: { dueDate: string; amount: number }[] = []
   const start = new Date(startDate)
@@ -264,9 +276,14 @@ function generateInstallmentDates(
         break
     }
 
+    const isLast = i === count - 1
+    const installmentAmount = isLast
+      ? Math.round((totalDebt - amount * (count - 1)) * 100) / 100
+      : amount
+
     result.push({
       dueDate: date.toISOString().split('T')[0],
-      amount,
+      amount: installmentAmount,
     })
   }
 

@@ -19,7 +19,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
   const castVote = useCastVoteWithDelegations()
   const { canVote } = useRulesEngine()
   const toast = useToast()
-  const myVote = existingVotes.find((v) => v.member_id === memberId)
+  const myVote = existingVotes.find((v) => v.member_id === memberId && !v.delegated_from)
 
   const handleVote = (value: string) => {
     castVote.mutate({ proposalId, memberId, value }, {

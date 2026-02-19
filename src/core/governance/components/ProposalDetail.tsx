@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useProposal, useUpdateProposalStatus, useStartDiscussion, useOpenVoting, useDeclareOutcome, useAppealProposal } from '../hooks/useProposals'
 import { useVotes, useVoteSummary, useCloseProposal, useExecuteProposal, useCastVoteWithDelegations } from '../hooks/useVoting'
 import { useMembers } from '@/core/identity/hooks/useMembers'
@@ -137,11 +137,14 @@ export function ProposalDetail({ proposalId }: Props) {
   const currentMember = members?.find((m) => m.user_id === user?.id)
 
   // B4: Auto-close if voting_end has passed and proposal is still active
+  const hasAutoClosedRef = useRef<string | null>(null)
   useEffect(() => {
     if (!proposal || !user) return
+    if (hasAutoClosedRef.current === proposalId) return
     if (proposal.status === 'active' && proposal.voting_end) {
       const end = new Date(proposal.voting_end).getTime()
       if (Date.now() > end) {
+        hasAutoClosedRef.current = proposalId
         closeProposalMut.mutate(
           { proposalId, userId: user.id },
           { onSuccess: () => refetchProposal() }

@@ -738,6 +738,7 @@ export function OnboardingWizard() {
       const community = await createCommunity(user.id, {
         name: name.trim(),
         type: communityType,
+        description: description.trim() || undefined,
       })
       await updateCommunityRules(community.id, rules)
       setCommunityId(community.id)

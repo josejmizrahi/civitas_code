@@ -19,7 +19,7 @@ export async function logAuditAction(
   details?: Record<string, unknown>
 ): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
-  await (supabase.from('audit_log') as any).insert({
+  const { error } = await (supabase.from('audit_log') as any).insert({
     community_id: communityId,
     user_id: user?.id ?? null,
     action,
@@ -27,6 +27,7 @@ export async function logAuditAction(
     entity_id: entityId ?? null,
     details: details ?? {},
   })
+  if (error) console.warn('Audit log insert failed:', error.message)
 }
 
 export async function getAuditLog(

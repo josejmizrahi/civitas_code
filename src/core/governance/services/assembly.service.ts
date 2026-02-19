@@ -200,6 +200,7 @@ export async function recordAttendance(
     .update({
       attendance: attendanceRecords,
       quorum_pct: quorumPct,
+      quorum_met: quorumPct >= 50,
     })
     .eq('id', assemblyId)
 

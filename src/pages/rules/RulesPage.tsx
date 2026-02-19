@@ -168,7 +168,7 @@ export function RulesPage() {
           <RuleRow label="Votacion requerida arriba de">
             ${rules.treasury.require_vote_above.toLocaleString()} {rules.treasury.currency}
           </RuleRow>
-          <RuleRow label="Fondo de reserva">{pct(rules.treasury.reserva_fund_percentage)}</RuleRow>
+          <RuleRow label="Fondo de reserva">{rules.treasury.reserva_fund_percentage}%</RuleRow>
           <RuleRow label="Estado financiero mensual automatico">
             <BoolBadge value={rules.treasury.monthly_statement_auto} />
           </RuleRow>

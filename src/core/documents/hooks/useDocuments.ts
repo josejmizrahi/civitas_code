@@ -17,8 +17,10 @@ export function useCreateDocument() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (doc: { title: string; file_url: string; category: string }) =>
-      createDocument(communityId!, { ...doc, uploaded_by: user!.id }),
+    mutationFn: (doc: { title: string; file_url: string; category: string }) => {
+      if (!user || !communityId) throw new Error('Not authenticated')
+      return createDocument(communityId, { ...doc, uploaded_by: user.id })
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['documents', communityId] }),
   })
 }

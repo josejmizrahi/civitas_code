@@ -44,7 +44,7 @@ interface Props {
 export function AuditLog({ entityType, compact }: Props) {
   const [page, setPage] = useState(0)
   const limit = compact ? 5 : PAGE_SIZE
-  const { data: entries, isLoading } = useAuditLog({ limit: limit + 1, entityType })
+  const { data: entries, isLoading } = useAuditLog({ limit: limit + 1, entityType, offset: page * limit })
 
   const hasMore = (entries?.length ?? 0) > limit
   const display = entries?.slice(0, limit) ?? []

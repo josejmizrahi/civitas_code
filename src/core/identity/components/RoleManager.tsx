@@ -18,6 +18,7 @@ export function RoleManager({ memberId, currentRole }: RoleManagerProps) {
     >
       <option value="admin">Administrador</option>
       <option value="tesorero">Tesorero</option>
+      <option value="comite_vigilancia">Comité de Vigilancia</option>
       <option value="miembro">Miembro</option>
       <option value="observador">Observador</option>
     </Select>

@@ -54,7 +54,7 @@ export function FinancialStatementView({ statementId, onBack }: FinancialStateme
   if (!statement) return <p className="text-muted-foreground">Estado financiero no encontrado.</p>
 
   const incomeItems = (statement.line_items ?? []).filter((item) => Number(item.amount) > 0)
-  const expenseItems = (statement.line_items ?? []).filter((item) => Number(item.amount) > 0)
+  const expenseItems = (statement.line_items ?? []).filter((item) => Number(item.amount) < 0)
 
   // Group line items by type based on category patterns or just show all
   const allItems = statement.line_items ?? []

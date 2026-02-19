@@ -54,7 +54,10 @@ export function useMarkAllAsRead() {
   const { currentMember } = useCommunityContext()
 
   return useMutation({
-    mutationFn: () => markAllAsRead(currentMember!.id),
+    mutationFn: () => {
+      if (!currentMember) throw new Error('No member context')
+      return markAllAsRead(currentMember.id)
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications', currentMember?.id] })
       queryClient.invalidateQueries({ queryKey: ['notifications-unread', currentMember?.id] })

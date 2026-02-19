@@ -197,6 +197,7 @@ export function TransactionList() {
                           <option value="expense">Egreso</option>
                         </Select>
                       </TableCell>
+                      <TableCell className="hidden md:table-cell" />
                       <TableCell>
                         <Input
                           type="number"

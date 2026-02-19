@@ -131,10 +131,10 @@ export function FinancialAnalytics() {
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Tasa de Cobranza</p>
             <p className="text-lg font-bold">
-              {analytics.collectionRate !== null ? `${analytics.collectionRate.toFixed(1)}%` : '—'}
+              {analytics.collectionRate !== null ? `${(analytics.collectionRate * 100).toFixed(1)}%` : '—'}
             </p>
             {analytics.collectionRate !== null && (
-              <Progress value={analytics.collectionRate} className="mt-1 h-1.5" />
+              <Progress value={analytics.collectionRate * 100} className="mt-1 h-1.5" />
             )}
           </CardContent>
         </Card>

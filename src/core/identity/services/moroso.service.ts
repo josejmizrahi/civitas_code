@@ -120,7 +120,7 @@ export async function getMemberDebtSummary(
     restrictions: Array.isArray(row.restrictions)
       ? row.restrictions
       : typeof row.restrictions === 'string'
-        ? JSON.parse(row.restrictions)
+        ? (() => { try { return JSON.parse(row.restrictions) } catch { return [] } })()
         : [],
   }
 }

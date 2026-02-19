@@ -17,6 +17,9 @@ export interface Transaction {
   import_job_id: string | null
   created_by: string | null
   created_at: string
+  verification_status?: 'reported' | 'verified' | 'disputed'
+  verified_by?: string | null
+  verified_at?: string | null
   // Joined
   category_name?: string
 }
