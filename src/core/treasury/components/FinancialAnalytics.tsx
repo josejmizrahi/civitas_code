@@ -157,17 +157,19 @@ export function FinancialAnalytics() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analytics.monthlyTrends}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip formatter={(val: any) => formatCurrency(Number(val))} />
-                <Legend />
-                <Bar dataKey="income" name="Ingresos" fill="#16a34a" radius={[2, 2, 0, 0]} />
-                <Bar dataKey="expenses" name="Egresos" fill="#dc2626" radius={[2, 2, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="w-full overflow-hidden">
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={analytics.monthlyTrends} margin={{ left: -10, right: 5, top: 5, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} width={55} />
+                  <Tooltip formatter={(val: any) => formatCurrency(Number(val))} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="income" name="Ingresos" fill="#16a34a" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="expenses" name="Egresos" fill="#dc2626" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -183,16 +185,19 @@ export function FinancialAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie data={analytics.expensePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }: any) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
-                    {analytics.expensePieData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(val: any) => formatCurrency(Number(val))} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="w-full overflow-hidden">
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie data={analytics.expensePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={false}>
+                      {analytics.expensePieData.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(val: any) => formatCurrency(Number(val))} />
+                    <Legend layout="horizontal" wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -206,16 +211,19 @@ export function FinancialAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie data={analytics.incomePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }: any) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
-                    {analytics.incomePieData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(val: any) => formatCurrency(Number(val))} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="w-full overflow-hidden">
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie data={analytics.incomePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={false}>
+                      {analytics.incomePieData.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(val: any) => formatCurrency(Number(val))} />
+                    <Legend layout="horizontal" wrapperStyle={{ fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -227,7 +235,7 @@ export function FinancialAnalytics() {
           <CardTitle className="text-base">Proyeccion Anual</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-3">
             <div>
               <p className="text-xs text-muted-foreground">Ingreso Proyectado</p>
               <p className="text-lg font-bold text-green-600">

@@ -23,7 +23,7 @@ const TOC = [
 // ---------------------------------------------------------------------------
 export function WhitepaperPage() {
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-background overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
@@ -439,7 +439,8 @@ export function WhitepaperPage() {
                   rendir cuentas. Comenzamos con los verticales de mayor urgencia y volumen en Latinoamerica.
                 </p>
               </div>
-              <div className="mt-6 overflow-x-auto">
+              {/* Mobile: card layout / Desktop: table */}
+              <div className="mt-6 hidden sm:block">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
@@ -456,6 +457,23 @@ export function WhitepaperPage() {
                     <tr><td className="py-3 pr-4">Network States</td><td className="py-3 pr-4 font-medium text-foreground">Emergente</td><td className="py-3">Comunidades digitales que buscan gobernanza soberana.</td></tr>
                   </tbody>
                 </table>
+              </div>
+              <div className="mt-6 space-y-3 sm:hidden">
+                {[
+                  { seg: 'Condominios', vol: '930,000+', note: 'Solo en Mexico. Mayor urgencia de digitalizacion.' },
+                  { seg: 'Cooperativas', vol: '60,000+', note: 'Agricolas, de ahorro, de vivienda. En toda Latinoamerica.' },
+                  { seg: 'Comunidades religiosas', vol: '50,000+', note: 'Parroquias y templos con necesidad de transparencia.' },
+                  { seg: 'Asociaciones industriales', vol: '15,000+', note: 'Camaras, clusters y gremios.' },
+                  { seg: 'Network States', vol: 'Emergente', note: 'Comunidades digitales con gobernanza soberana.' },
+                ].map((r) => (
+                  <div key={r.seg} className="rounded-lg border p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold">{r.seg}</span>
+                      <span className="text-sm font-bold text-foreground">{r.vol}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{r.note}</p>
+                  </div>
+                ))}
               </div>
             </section>
 

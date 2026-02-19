@@ -91,12 +91,15 @@
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-family: system-ui, -apple-system, sans-serif;
     padding-bottom: env(safe-area-inset-bottom, 0);
+    overflow-x: hidden;
+    width: 100%;
   }
 
   /* Ensure touch targets are at least 44px for mobile */

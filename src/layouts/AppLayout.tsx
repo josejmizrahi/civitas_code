@@ -144,7 +144,7 @@ export function AppLayout() {
   const isBottomNavActive = (href: string) => location.pathname.startsWith(href)
 
   return (
-    <div className="flex h-dvh flex-col md:flex-row">
+    <div className="flex h-dvh flex-col overflow-x-hidden md:flex-row">
       {/* ============ MOBILE TOP BAR ============ */}
       <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur-sm px-4 md:hidden">
         <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -343,12 +343,12 @@ export function AppLayout() {
       </aside>
 
       {/* ============ MAIN CONTENT ============ */}
-      <main className="flex-1 overflow-y-auto pt-14 pb-[4.5rem] md:pt-0 md:pb-0">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pt-14 pb-[4.5rem] md:pt-0 md:pb-0 min-w-0">
         <PrivacyGate communityName={community?.name}>
           {!communityId ? (
             <NoCommunityView />
           ) : (
-            <div className="mx-auto max-w-7xl p-4 md:p-6">
+            <div className="mx-auto max-w-7xl w-full p-4 md:p-6 overflow-hidden">
               <Outlet />
             </div>
           )}

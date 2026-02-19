@@ -243,7 +243,7 @@ export function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh bg-background overflow-x-hidden">
       {/* ─── Nav ─── */}
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
@@ -795,12 +795,12 @@ export function LandingPage() {
       {/* ─── Footer ─── */}
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-6 sm:flex-row sm:justify-between sm:px-6 sm:py-8">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
+          <div className="flex items-center gap-2 shrink-0">
+            <Shield className="h-5 w-5 shrink-0" />
             <span className="font-semibold">Civitas</span>
-            <span className="text-sm text-muted-foreground">/ Infrastructure for Network States</span>
+            <span className="hidden text-sm text-muted-foreground sm:inline">/ Infrastructure for Network States</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground sm:gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground sm:gap-x-6">
             <a href="#system" className="hover:text-foreground transition-colors">Sistema</a>
             <a href="#features" className="hover:text-foreground transition-colors">Funcionalidades</a>
             <Link to="/whitepaper" className="hover:text-foreground transition-colors">Whitepaper</Link>
