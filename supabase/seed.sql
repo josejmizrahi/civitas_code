@@ -5,7 +5,7 @@
 -- ============================================================================
 
 -- ============================================================================
--- 1. AUTH USERS (6 demo users)
+-- 1. AUTH USERS (8 demo users — one per role)
 -- ============================================================================
 
 -- ============================================================================
@@ -55,7 +55,7 @@ BEGIN
   END IF;
 END $cleanup$;
 
-DELETE FROM auth.users WHERE email IN ('carlos@laspalmas.mx','maria@laspalmas.mx','roberto@laspalmas.mx','ana@laspalmas.mx','pedro@laspalmas.mx','laura@laspalmas.mx','vecino@laspalmas.mx');
+DELETE FROM auth.users WHERE email IN ('superadmin@civitas.app','carlos@laspalmas.mx','maria@laspalmas.mx','roberto@laspalmas.mx','ana@laspalmas.mx','pedro@laspalmas.mx','laura@laspalmas.mx','vecino@laspalmas.mx');
 
 INSERT INTO auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -65,6 +65,18 @@ INSERT INTO auth.users (
   email_change_token_current, email_change_confirm_status,
   reauthentication_token, is_sso_user, is_anonymous
 ) VALUES
+  (
+    '00000000-0000-0000-0000-000000000000',
+    'a0000000-0000-0000-0000-000000000000',
+    'authenticated', 'authenticated',
+    'superadmin@civitas.app',
+    crypt('password123', gen_salt('bf', 10)),
+    now(), now(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"sub":"a0000000-0000-0000-0000-000000000000","email":"superadmin@civitas.app","full_name":"Alejandro Reyes (Super Admin)","email_verified":true,"phone_verified":false}'::jsonb,
+    now() - interval '12 months', now(), '', '',
+    '', '', '', '', '', 0, '', false, false
+  ),
   (
     '00000000-0000-0000-0000-000000000000',
     'a0000000-0000-0000-0000-000000000001',
@@ -155,6 +167,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO auth.identities (
   id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
 ) VALUES
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000000', '{"sub":"a0000000-0000-0000-0000-000000000000","email":"superadmin@civitas.app","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000000', now(), now(), now()),
   (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000001', '{"sub":"a0000000-0000-0000-0000-000000000001","email":"carlos@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000001', now(), now(), now()),
   (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000002', '{"sub":"a0000000-0000-0000-0000-000000000002","email":"maria@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000002', now(), now(), now()),
   (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000003', '{"sub":"a0000000-0000-0000-0000-000000000003","email":"roberto@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000003', now(), now(), now()),
@@ -214,10 +227,18 @@ INSERT INTO communities (id, name, slug, type, config, rules) VALUES (
 );
 
 -- ============================================================================
--- 3. MEMBERS (6 members with different roles)
+-- 3. MEMBERS (8 members — one per role, plus extra miembros for realism)
 -- ============================================================================
 
 INSERT INTO members (id, community_id, user_id, role, status, financial_standing, voting_weight, custom_attributes, joined_at) VALUES
+  (
+    'b0000000-0000-0000-0000-000000000000',
+    '00000000-0000-0000-0000-000000000001',
+    'a0000000-0000-0000-0000-000000000000',
+    'platform_admin', 'active', 'good_standing', 1.0000,
+    '{"phone": "+52 55 0000 0001", "notes": "Administrador de la plataforma Civitas"}'::jsonb,
+    now() - interval '12 months'
+  ),
   (
     'b0000000-0000-0000-0000-000000000001',
     '00000000-0000-0000-0000-000000000001',
@@ -776,12 +797,12 @@ ON CONFLICT DO NOTHING;
 -- ============================================================================
 
 INSERT INTO census_snapshots (community_id, total_members, active_members, members_good_standing, members_delinquent, total_income, total_expenses, active_proposals, snapshot_date) VALUES
-  ('00000000-0000-0000-0000-000000000001', 6, 6, 6, 0, 168000, 82000, 0, '2025-09-30'),
-  ('00000000-0000-0000-0000-000000000001', 6, 6, 6, 0, 429200, 175900, 2, '2025-10-31'),
-  ('00000000-0000-0000-0000-000000000001', 6, 6, 5, 1, 591700, 290600, 1, '2025-11-30'),
-  ('00000000-0000-0000-0000-000000000001', 6, 6, 5, 1, 867900, 400300, 1, '2025-12-31'),
-  ('00000000-0000-0000-0000-000000000001', 6, 6, 5, 1, 1025400, 502300, 0, '2026-01-31'),
-  ('00000000-0000-0000-0000-000000000001', 6, 6, 5, 1, 1175900, 547300, 3, '2026-02-15')
+  ('00000000-0000-0000-0000-000000000001', 8, 8, 8, 0, 168000, 82000, 0, '2025-09-30'),
+  ('00000000-0000-0000-0000-000000000001', 8, 8, 8, 0, 429200, 175900, 2, '2025-10-31'),
+  ('00000000-0000-0000-0000-000000000001', 8, 8, 7, 1, 591700, 290600, 1, '2025-11-30'),
+  ('00000000-0000-0000-0000-000000000001', 8, 8, 7, 1, 867900, 400300, 1, '2025-12-31'),
+  ('00000000-0000-0000-0000-000000000001', 8, 8, 7, 1, 1025400, 502300, 0, '2026-01-31'),
+  ('00000000-0000-0000-0000-000000000001', 8, 8, 7, 1, 1175900, 547300, 3, '2026-02-15')
 ON CONFLICT (community_id, snapshot_date) DO NOTHING;
 
 -- ============================================================================
@@ -989,5 +1010,72 @@ INSERT INTO member_gamification (id, community_id, member_id, xp, level, current
   -- Diego (miembro regular) - Level 2, moderately active
   ('1f000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000007',
    320, 2, 4, 7, CURRENT_DATE,
-   '[{"id":"first_vote","earnedAt":"2025-11-15"},{"id":"pagador_puntual","earnedAt":"2025-12-01"},{"id":"comentarista","earnedAt":"2026-01-20"}]'::jsonb)
+   '[{"id":"first_vote","earnedAt":"2025-11-15"},{"id":"pagador_puntual","earnedAt":"2025-12-01"},{"id":"comentarista","earnedAt":"2026-01-20"}]'::jsonb),
+  -- Alejandro (platform_admin) - Level 6, most active
+  ('1f000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000000',
+   2500, 6, 20, 45, CURRENT_DATE,
+   '[{"id":"first_vote","earnedAt":"2025-03-01"},{"id":"first_proposal","earnedAt":"2025-03-10"},{"id":"pagador_puntual","earnedAt":"2025-04-01"},{"id":"streak_7","earnedAt":"2025-05-01"},{"id":"streak_30","earnedAt":"2025-06-15"},{"id":"voter_10","earnedAt":"2025-08-01"},{"id":"proposer_5","earnedAt":"2025-09-01"},{"id":"comentarista","earnedAt":"2025-04-15"},{"id":"admin_hero","earnedAt":"2025-10-01"}]'::jsonb)
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- 33. ENDORSEMENTS (proposals need community support)
+-- ============================================================================
+
+INSERT INTO proposal_endorsements (id, proposal_id, member_id, community_id, endorsed_at) VALUES
+  -- Endorsements for fee increase proposal (3 endorsements → met threshold)
+  ('20000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', now() - interval '8 days'),
+  ('20000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', now() - interval '7 days'),
+  ('20000000-0000-0000-0000-000000000003', 'f0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', now() - interval '7 days'),
+  -- Endorsements for security provider selection (2 endorsements)
+  ('20000000-0000-0000-0000-000000000004', 'f0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', now() - interval '6 days'),
+  ('20000000-0000-0000-0000-000000000005', 'f0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', now() - interval '5 days'),
+  -- Endorsements for cameras proposal (in discussion, 3 endorsements)
+  ('20000000-0000-0000-0000-000000000006', 'f0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', now() - interval '2 days'),
+  ('20000000-0000-0000-0000-000000000007', 'f0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', now() - interval '2 days'),
+  ('20000000-0000-0000-0000-000000000008', 'f0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', now() - interval '1 day')
+ON CONFLICT DO NOTHING;
+
+-- Mark endorsements_met on proposals that reached threshold
+UPDATE proposals SET endorsements_required = 3, endorsements_met = true
+WHERE id IN ('f0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000004');
+
+UPDATE proposals SET endorsements_required = 3, endorsements_met = true
+WHERE id = 'f0000000-0000-0000-0000-000000000003';
+
+-- ============================================================================
+-- 34. GAMIFICATION EVENTS (activity history)
+-- ============================================================================
+
+INSERT INTO gamification_events (id, member_id, community_id, action, xp_earned, metadata, created_at) VALUES
+  -- Carlos (admin) recent events
+  ('21000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'vote', 50, '{"proposal":"Incremento de cuota"}'::jsonb, now() - interval '2 days'),
+  ('21000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'propose', 100, '{"proposal":"Instalación de cámaras"}'::jsonb, now() - interval '5 days'),
+  ('21000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'comment', 25, '{"proposal":"Instalación de cámaras"}'::jsonb, now() - interval '12 hours'),
+  ('21000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'pay', 30, '{"concept":"Cuota Feb 2026"}'::jsonb, now() - interval '14 days'),
+  ('21000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'endorse', 15, '{"proposal":"Selección proveedor seguridad"}'::jsonb, now() - interval '6 days'),
+  -- María (tesorero) recent events
+  ('21000000-0000-0000-0000-000000000010', 'b0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'vote', 50, '{"proposal":"Incremento de cuota"}'::jsonb, now() - interval '1 day'),
+  ('21000000-0000-0000-0000-000000000011', 'b0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'pay', 30, '{"concept":"Cuota Feb 2026"}'::jsonb, now() - interval '14 days'),
+  ('21000000-0000-0000-0000-000000000012', 'b0000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'endorse', 15, '{"proposal":"Incremento de cuota"}'::jsonb, now() - interval '8 days'),
+  -- Roberto (comité vigilancia) recent events
+  ('21000000-0000-0000-0000-000000000020', 'b0000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'comment', 25, '{"proposal":"Instalación de cámaras"}'::jsonb, now() - interval '6 hours'),
+  ('21000000-0000-0000-0000-000000000021', 'b0000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'endorse', 15, '{"proposal":"Instalación de cámaras"}'::jsonb, now() - interval '2 days'),
+  -- Ana (miembro) recent events
+  ('21000000-0000-0000-0000-000000000030', 'b0000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'propose', 100, '{"proposal":"Instalación de cámaras"}'::jsonb, now() - interval '1 day'),
+  ('21000000-0000-0000-0000-000000000031', 'b0000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'pay', 30, '{"concept":"Cuota Feb 2026"}'::jsonb, now() - interval '10 days'),
+  ('21000000-0000-0000-0000-000000000032', 'b0000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'endorse', 15, '{"proposal":"Incremento de cuota"}'::jsonb, now() - interval '7 days'),
+  -- Diego (miembro) recent events
+  ('21000000-0000-0000-0000-000000000040', 'b0000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'endorse', 15, '{"proposal":"Instalación de cámaras"}'::jsonb, now() - interval '1 day'),
+  ('21000000-0000-0000-0000-000000000041', 'b0000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'pay', 30, '{"concept":"Cuota Ene 2026"}'::jsonb, now() - interval '45 days'),
+  -- Alejandro (platform_admin) recent events
+  ('21000000-0000-0000-0000-000000000050', 'b0000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000001', 'login', 5, '{}'::jsonb, now()),
+  ('21000000-0000-0000-0000-000000000051', 'b0000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000001', 'vote', 50, '{"proposal":"Incremento de cuota"}'::jsonb, now() - interval '1 day')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- 35. ADD UNIT FOR DIEGO (was missing)
+-- ============================================================================
+
+INSERT INTO units (id, community_id, member_id, unit_number, floor, tower, indiviso_pct, area_m2) VALUES
+  ('18000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000007', 'C-101', 1, 'C', 2.0833, 75.00)
 ON CONFLICT DO NOTHING;
