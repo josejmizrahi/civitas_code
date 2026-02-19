@@ -1,5 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
-import type { Member } from '../types'
+import type { Member, MorosoNotice, MorosoNoticeType } from '../types'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -142,6 +142,85 @@ export async function notifyMorosos(
     .update({ moroso_notified_at: new Date().toISOString() })
     .eq('community_id', communityId)
     .eq('financial_standing', 'moroso')
+
+  if (error) throw error
+}
+
+// ---------------------------------------------------------------------------
+// Moroso notices (formal notifications per Art. 59 LPCI)
+// ---------------------------------------------------------------------------
+
+export async function getMorosoNotices(
+  communityId: string,
+): Promise<MorosoNotice[]> {
+  const { data, error } = await supabase
+    .from('moroso_notices')
+    .select('*')
+    .eq('community_id', communityId)
+    .order('issued_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as MorosoNotice[]
+}
+
+export async function getMemberNotices(
+  communityId: string,
+  memberId: string,
+): Promise<MorosoNotice[]> {
+  const { data, error } = await supabase
+    .from('moroso_notices')
+    .select('*')
+    .eq('community_id', communityId)
+    .eq('member_id', memberId)
+    .order('issued_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as MorosoNotice[]
+}
+
+export async function createMorosoNotice(
+  communityId: string,
+  memberId: string,
+  noticeType: MorosoNoticeType,
+  outstandingAmount: number,
+  opts?: { assemblyId?: string; deadline?: string; obligations?: Record<string, unknown>[] },
+): Promise<MorosoNotice> {
+  const { data, error } = await supabase
+    .from('moroso_notices')
+    .insert({
+      community_id: communityId,
+      member_id: memberId,
+      notice_type: noticeType,
+      outstanding_amount: outstandingAmount,
+      assembly_id: opts?.assemblyId ?? null,
+      deadline: opts?.deadline ?? null,
+      outstanding_obligations: opts?.obligations ?? [],
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as MorosoNotice
+}
+
+export async function acknowledgeMorosoNotice(
+  noticeId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('moroso_notices')
+    .update({ status: 'acknowledged', response_at: new Date().toISOString() })
+    .eq('id', noticeId)
+
+  if (error) throw error
+}
+
+export async function resolveMorosoNotice(
+  noticeId: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from('moroso_notices')
+    .update({ status: 'resolved', response_at: new Date().toISOString() })
+    .eq('id', noticeId)
 
   if (error) throw error
 }
