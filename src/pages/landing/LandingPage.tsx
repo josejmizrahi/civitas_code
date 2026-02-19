@@ -29,6 +29,7 @@ import {
   TrendingUp,
   Clock,
   Settings2,
+  X,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
@@ -508,7 +509,7 @@ export function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2">
               {[
                 { icon: Eye, label: 'Transparencia', value: 'Cada peso rastreable, cada voto verificable' },
                 { icon: Vote, label: 'Democracia', value: 'Votaciones con peso real y delegacion liquida' },
@@ -568,7 +569,7 @@ export function LandingPage() {
           </div>
           <div className="mx-auto mt-16 max-w-3xl">
             <div className="rounded-xl border overflow-hidden">
-              <div className="grid grid-cols-2 bg-muted/50 px-6 py-3 text-sm font-semibold">
+              <div className="hidden sm:grid grid-cols-2 bg-muted/50 px-6 py-3 text-sm font-semibold">
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-primary" /> Civitas
                 </div>
@@ -578,7 +579,7 @@ export function LandingPage() {
                 <div
                   key={i}
                   className={cn(
-                    'grid grid-cols-2 px-6 py-4 text-sm',
+                    'flex flex-col gap-2 px-4 py-4 sm:grid sm:grid-cols-2 sm:gap-0 sm:px-6 text-sm',
                     i % 2 === 0 ? 'bg-card' : 'bg-muted/20'
                   )}
                 >
@@ -586,8 +587,8 @@ export function LandingPage() {
                     <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
                     <span>{adv.us}</span>
                   </div>
-                  <div className="flex items-start gap-2 text-muted-foreground">
-                    <span className="mt-0.5 shrink-0 text-red-400">✕</span>
+                  <div className="flex items-start gap-2 text-muted-foreground pl-6 sm:pl-0">
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
                     <span>{adv.them}</span>
                   </div>
                 </div>
@@ -609,7 +610,7 @@ export function LandingPage() {
               gobernarse, cobrar y rendir cuentas.
             </p>
           </div>
-          <div className="mt-12 grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="mt-12 grid gap-4 grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
             {MARKET_SEGMENTS.map((seg) => (
               <div
                 key={seg.name}
