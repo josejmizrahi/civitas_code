@@ -1,14 +1,9 @@
-// Supabase Edge Function: reset-password
-// Handles password reset requests server-side using Supabase Admin API.
-// Sends a branded password reset email via the send-email Edge Function.
-// Invoke via: supabase.functions.invoke('reset-password', { body: { email } })
-
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from 'https://deno.land/std@0.220.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-const SITE_URL = Deno.env.get('SITE_URL') || 'https://civitas.app'
+const SITE_URL = Deno.env.get('SITE_URL') || 'https://civitas-code.vercel.app'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,7 +16,6 @@ interface ResetPasswordRequest {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -45,7 +39,6 @@ serve(async (req) => {
 
     const normalizedEmail = email.trim().toLowerCase()
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(normalizedEmail)) {
       return new Response(
@@ -54,7 +47,6 @@ serve(async (req) => {
       )
     }
 
-    // Create admin client
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: {
         autoRefreshToken: false,
@@ -62,7 +54,6 @@ serve(async (req) => {
       },
     })
 
-    // Generate password reset link via Supabase Admin API
     const { data, error } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
       email: normalizedEmail,
@@ -73,7 +64,6 @@ serve(async (req) => {
 
     if (error) {
       console.error('[reset-password] Error generating reset link:', error.message)
-      // Return a generic success to avoid user enumeration
       return new Response(
         JSON.stringify({
           success: true,
@@ -83,7 +73,6 @@ serve(async (req) => {
       )
     }
 
-    // Send branded email via the send-email Edge Function
     const resetLink = data?.properties?.action_link
     if (resetLink) {
       try {
@@ -95,16 +84,29 @@ serve(async (req) => {
               reset_link: resetLink,
               app_url: SITE_URL,
               email: normalizedEmail,
+              community_name: 'CIVITAS',
             },
           },
         })
       } catch (emailErr) {
-        console.warn('[reset-password] Failed to send branded email, falling back to Supabase default:', emailErr)
-        // If the branded email fails, Supabase's default email is still sent
+        console.error('[reset-password] Failed to send branded email:', emailErr)
+        // generateLink does NOT send an email by itself — if send-email fails,
+        // we must fall back to resetPasswordForEmail which sends its own email.
+        try {
+          await supabaseAdmin.auth.resetPasswordForEmail(normalizedEmail, {
+            redirectTo: `${SITE_URL}/reset-password`,
+          })
+        } catch (fallbackErr) {
+          console.error('[reset-password] Fallback email also failed:', fallbackErr)
+        }
       }
+    } else {
+      // No action_link means generateLink didn't produce a link — use the standard method
+      await supabaseAdmin.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${SITE_URL}/reset-password`,
+      })
     }
 
-    // Always return success to prevent email enumeration
     return new Response(
       JSON.stringify({
         success: true,

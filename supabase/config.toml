@@ -4,7 +4,7 @@ project_id = "civitas-local"
 enabled = true
 port = 54321
 schemas = ["public"]
-extra_search_path = ["public"]
+extra_search_path = ["public", "extensions"]
 
 [db]
 port = 54322
@@ -13,7 +13,7 @@ major_version = 17
 [auth]
 enabled = true
 site_url = "http://localhost:5173"
-additional_redirect_urls = ["http://localhost:5173"]
+additional_redirect_urls = ["http://localhost:5173", "https://civitas-code.vercel.app"]
 jwt_expiry = 3600
 enable_signup = true
 
@@ -24,3 +24,9 @@ enable_confirmations = false
 [storage]
 enabled = true
 file_size_limit = "50MiB"
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.reset-password]
+verify_jwt = false

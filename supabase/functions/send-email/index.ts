@@ -1,8 +1,4 @@
-// Supabase Edge Function: send-email
-// Sends transactional emails via Resend API for critical notifications.
-// Invoke via: supabase.functions.invoke('send-email', { body: { ... } })
-
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from 'https://deno.land/std@0.220.0/http/server.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'notificaciones@civitas.app'
@@ -17,7 +13,7 @@ const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, u
   proposal_new: {
     subject: 'Nueva propuesta: {title}',
     body: (d) => `
-      <h2>Nueva Propuesta en ${d.community_name}</h2>
+      <h2>Nueva Propuesta en ${d.community_name || 'tu comunidad'}</h2>
       <p><strong>${d.title}</strong></p>
       <p>${d.description || 'Sin descripción'}</p>
       <p>Tipo: ${d.proposal_type} | Creada por: ${d.author_name}</p>
@@ -91,13 +87,21 @@ const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, u
   },
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 function renderTemplate(type: string, data: Record<string, unknown>): { subject: string; html: string } | null {
   const template = TEMPLATES[type]
   if (!template) return null
 
   let subject = template.subject
   for (const [key, val] of Object.entries(data)) {
-    subject = subject.replace(`{${key}}`, String(val ?? ''))
+    subject = subject.replace(`{${key}}`, escapeHtml(String(val ?? '')))
   }
 
   const html = `
@@ -124,7 +128,7 @@ serve(async (req) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'authorization, content-type',
+        'Access-Control-Allow-Headers': 'authorization, content-type, x-client-info, apikey',
       },
     })
   }
