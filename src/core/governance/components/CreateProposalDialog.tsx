@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useCreateProposal } from '../hooks/useProposals'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { PROPOSAL_TEMPLATES, type ProposalTemplate } from '../services/proposal-templates'
+import { useEntities, useCreateEntity } from '@/core/entities/hooks/useEntities'
+import type { Entity } from '@/core/entities/types'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -22,6 +24,8 @@ import {
   FileText,
   MessageSquare,
   Info,
+  Plus,
+  Search,
 } from 'lucide-react'
 import type { FinancialInstruction } from '@/shared/types/rules'
 import type { ProposalType, VotingModel } from '@/shared/types'
@@ -47,6 +51,8 @@ interface Props {
 export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: Props) {
   const createProposal = useCreateProposal()
   const { rules, canPropose } = useRulesEngine()
+  const { data: entities } = useEntities({ status: 'active' })
+  const createEntityMut = useCreateEntity()
 
   // Template selection step
   const [selectedTemplate, setSelectedTemplate] = useState<ProposalTemplate | null>(null)
@@ -55,11 +61,19 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<string>('ordinary')
-  const [quorum, setQuorum] = useState(String(rules.governance.default_quorum * 100))
-  const [majority, setMajority] = useState(String(rules.governance.default_majority * 100))
   const [votingStart, setVotingStart] = useState('')
   const [votingEnd, setVotingEnd] = useState('')
   const [error, setError] = useState('')
+
+  // Quorum/majority are derived from rules — NOT user-editable
+  const resolvedQuorum = (() => {
+    const proposalType = type as ProposalType
+    return rules.governance.quorum_by_type?.[proposalType] ?? rules.governance.default_quorum
+  })()
+  const resolvedMajority = (() => {
+    const proposalType = type as ProposalType
+    return rules.governance.majority_by_type?.[proposalType] ?? rules.governance.default_majority
+  })()
 
   // Discussion period
   const [includeDiscussion, setIncludeDiscussion] = useState(rules.governance.mandatory_discussion_enabled)
@@ -75,6 +89,16 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
   const [instrAmount, setInstrAmount] = useState('')
   const [instrRecipient, setInstrRecipient] = useState('')
   const [instrDescription, setInstrDescription] = useState('')
+
+  // Entity selector (for beneficiario)
+  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null)
+  const [entitySearch, setEntitySearch] = useState('')
+  const [showEntityDropdown, setShowEntityDropdown] = useState(false)
+  const [showNewEntityForm, setShowNewEntityForm] = useState(false)
+  const [newEntityName, setNewEntityName] = useState('')
+  const [newEntityType, setNewEntityType] = useState<string>('proveedor')
+  const [newEntityPhone, setNewEntityPhone] = useState('')
+  const entityDropdownRef = useRef<HTMLDivElement>(null)
 
   const appliedInitialRef = useRef(false)
   // When opened with initialTemplateId (e.g. from Settings "Cambiar Regla via Propuesta"), preselect template once
@@ -93,11 +117,6 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
           setType(template.type)
           setHasFinancialInstruction(template.hasFinancialInstruction)
           if (template.defaultInstructionType) setInstrType(template.defaultInstructionType)
-          const proposalType = template.type as ProposalType
-          const typeQuorum = rules.governance.quorum_by_type?.[proposalType]
-          const typeMajority = rules.governance.majority_by_type?.[proposalType]
-          setQuorum(String((template.suggestedQuorum ?? typeQuorum ?? rules.governance.default_quorum) * 100))
-          setMajority(String((template.suggestedMajority ?? typeMajority ?? rules.governance.default_majority) * 100))
           if (template.suggestedDiscussionHours) {
             setDiscussionHours(String(template.suggestedDiscussionHours))
             setIncludeDiscussion(true)
@@ -105,7 +124,18 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
         })
       }
     }
-  }, [open, initialTemplateId, rules.governance.default_quorum, rules.governance.default_majority, rules.governance.quorum_by_type, rules.governance.majority_by_type])
+  }, [open, initialTemplateId])
+
+  // Close entity dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (entityDropdownRef.current && !entityDropdownRef.current.contains(e.target as Node)) {
+        setShowEntityDropdown(false)
+      }
+    }
+    if (showEntityDropdown) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showEntityDropdown])
 
   const handleSelectTemplate = (template: ProposalTemplate) => {
     setSelectedTemplate(template)
@@ -115,13 +145,6 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
     if (template.defaultInstructionType) {
       setInstrType(template.defaultInstructionType)
     }
-    // Apply suggested quorum/majority from template or differentiated rules
-    const proposalType = template.type as ProposalType
-    const typeQuorum = rules.governance.quorum_by_type?.[proposalType]
-    const typeMajority = rules.governance.majority_by_type?.[proposalType]
-    setQuorum(String((template.suggestedQuorum ?? typeQuorum ?? rules.governance.default_quorum) * 100))
-    setMajority(String((template.suggestedMajority ?? typeMajority ?? rules.governance.default_majority) * 100))
-    // Set discussion hours from template suggestion
     if (template.suggestedDiscussionHours) {
       setDiscussionHours(String(template.suggestedDiscussionHours))
       setIncludeDiscussion(true)
@@ -133,8 +156,6 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
     setTitle('')
     setDescription('')
     setType('ordinary')
-    setQuorum(String(rules.governance.default_quorum * 100))
-    setMajority(String(rules.governance.default_majority * 100))
     setHasFinancialInstruction(false)
     setInstrAmount('')
     setInstrRecipient('')
@@ -143,6 +164,12 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
     setDiscussionHours(String(rules.governance.default_discussion_hours))
     setVotingModel('simple')
     setMultipleChoiceOptions(['', ''])
+    setSelectedEntityId(null)
+    setEntitySearch('')
+    setShowNewEntityForm(false)
+    setNewEntityName('')
+    setNewEntityType('proveedor')
+    setNewEntityPhone('')
     setError('')
   }
 
@@ -156,11 +183,16 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
     }
 
     try {
+      // Resolve beneficiary name from selected entity or manual input
+      const recipientName = selectedEntityId
+        ? entities?.find((e) => e.id === selectedEntityId)?.name ?? instrRecipient
+        : instrRecipient
+
       const financialInstruction: FinancialInstruction | undefined = hasFinancialInstruction
         ? {
             type: instrType,
             amount: instrAmount ? parseFloat(instrAmount) : undefined,
-            recipient_name: instrRecipient || undefined,
+            recipient_name: recipientName || undefined,
             description: instrDescription || undefined,
           }
         : undefined
@@ -176,8 +208,8 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
         title,
         description,
         type,
-        quorum_required: parseFloat(quorum) / 100,
-        majority_required: parseFloat(majority) / 100,
+        quorum_required: resolvedQuorum,
+        majority_required: resolvedMajority,
         voting_start: votingStart || null,
         voting_end: votingEnd || null,
         financial_instruction: financialInstruction,
@@ -294,15 +326,19 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Quórum requerido (%)</Label>
-                  <Input type="number" min="1" max="100" value={quorum} onChange={(e) => setQuorum(e.target.value)} />
+              {/* Quórum y mayoría — definidos por las reglas de la comunidad */}
+              <div className="flex items-center gap-4 rounded-lg bg-muted/50 border border-dashed px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Quórum:</span>
+                  <Badge variant="secondary">{Math.round(resolvedQuorum * 100)}%</Badge>
                 </div>
-                <div className="space-y-2">
-                  <Label>Mayoría requerida (%)</Label>
-                  <Input type="number" min="1" max="100" value={majority} onChange={(e) => setMajority(e.target.value)} />
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Mayoría:</span>
+                  <Badge variant="secondary">{Math.round(resolvedMajority * 100)}%</Badge>
                 </div>
+                <span className="text-[10px] text-muted-foreground ml-auto">
+                  Definido por las reglas de tu comunidad
+                </span>
               </div>
 
               {/* Voting Model — GV-012, GV-016 */}
@@ -465,7 +501,134 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
                       {instrType === 'disbursement' && (
                         <div className="space-y-2">
                           <Label>Beneficiario</Label>
-                          <Input value={instrRecipient} onChange={(e) => setInstrRecipient(e.target.value)} placeholder="Nombre del proveedor o beneficiario" />
+                          {!showNewEntityForm ? (
+                            <div className="relative" ref={entityDropdownRef}>
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  value={selectedEntityId ? entities?.find((e) => e.id === selectedEntityId)?.name ?? entitySearch : entitySearch}
+                                  onChange={(e) => {
+                                    setEntitySearch(e.target.value)
+                                    setSelectedEntityId(null)
+                                    setInstrRecipient(e.target.value)
+                                    setShowEntityDropdown(true)
+                                  }}
+                                  onFocus={() => setShowEntityDropdown(true)}
+                                  placeholder="Buscar proveedor o beneficiario..."
+                                  className="pl-9"
+                                />
+                              </div>
+                              {showEntityDropdown && (
+                                <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-48 overflow-y-auto">
+                                  {entities
+                                    ?.filter((e) =>
+                                      !entitySearch ||
+                                      e.name.toLowerCase().includes(entitySearch.toLowerCase()) ||
+                                      (e.contact_person && e.contact_person.toLowerCase().includes(entitySearch.toLowerCase()))
+                                    )
+                                    .slice(0, 8)
+                                    .map((entity) => (
+                                      <button
+                                        key={entity.id}
+                                        type="button"
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left hover:bg-accent transition-colors"
+                                        onClick={() => {
+                                          setSelectedEntityId(entity.id)
+                                          setInstrRecipient(entity.name)
+                                          setEntitySearch('')
+                                          setShowEntityDropdown(false)
+                                        }}
+                                      >
+                                        <span className="font-medium">{entity.name}</span>
+                                        <Badge variant="secondary" className="text-[10px] ml-auto">
+                                          {entity.type === 'proveedor' ? 'Proveedor' : entity.type === 'contratista' ? 'Contratista' : entity.type}
+                                        </Badge>
+                                      </button>
+                                    ))}
+                                  <button
+                                    type="button"
+                                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left text-primary hover:bg-accent transition-colors border-t"
+                                    onClick={() => {
+                                      setShowEntityDropdown(false)
+                                      setShowNewEntityForm(true)
+                                      setNewEntityName(entitySearch)
+                                    }}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                    <span>Crear nuevo proveedor{entitySearch ? `: "${entitySearch}"` : ''}</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            /* Inline new entity creation */
+                            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium">Nuevo proveedor</span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setShowNewEntityForm(false)}
+                                  className="h-6 text-xs"
+                                >
+                                  Cancelar
+                                </Button>
+                              </div>
+                              <div className="space-y-2">
+                                <Input
+                                  value={newEntityName}
+                                  onChange={(e) => setNewEntityName(e.target.value)}
+                                  placeholder="Nombre del proveedor"
+                                />
+                              </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <Select value={newEntityType} onChange={(e) => setNewEntityType(e.target.value)}>
+                                  <option value="proveedor">Proveedor</option>
+                                  <option value="contratista">Contratista</option>
+                                  <option value="socio_comercial">Socio Comercial</option>
+                                  <option value="otro">Otro</option>
+                                </Select>
+                                <Input
+                                  value={newEntityPhone}
+                                  onChange={(e) => setNewEntityPhone(e.target.value)}
+                                  placeholder="Teléfono (opcional)"
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                size="sm"
+                                disabled={!newEntityName.trim() || createEntityMut.isPending}
+                                onClick={async () => {
+                                  try {
+                                    const created = await createEntityMut.mutateAsync({
+                                      name: newEntityName.trim(),
+                                      type: newEntityType as Entity['type'],
+                                      status: 'active',
+                                      rfc: null,
+                                      email: null,
+                                      phone: newEntityPhone || null,
+                                      address: null,
+                                      clabe: null,
+                                      bank_name: null,
+                                      contact_person: null,
+                                      notes: null,
+                                      created_by: null,
+                                    })
+                                    setSelectedEntityId(created.id)
+                                    setInstrRecipient(created.name)
+                                    setShowNewEntityForm(false)
+                                    setNewEntityName('')
+                                    setNewEntityPhone('')
+                                  } catch {
+                                    setError('Error al crear el proveedor')
+                                  }
+                                }}
+                              >
+                                {createEntityMut.isPending ? 'Creando...' : 'Crear y seleccionar'}
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       )}
                       <div className="space-y-2">
