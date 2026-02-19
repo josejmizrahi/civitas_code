@@ -224,6 +224,17 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
       return
     }
 
+    // Client-side validation
+    if (!title.trim()) { setError('El título es obligatorio'); return }
+    if (!description.trim()) { setError('La descripción es obligatoria'); return }
+    if (!type) { setError('Selecciona un tipo de propuesta'); return }
+    if (!resolvedQuorum || resolvedQuorum <= 0 || resolvedQuorum > 1) {
+      setError('Error en quórum. Contacta al administrador.'); return
+    }
+    if (!resolvedMajority || resolvedMajority <= 0 || resolvedMajority > 1) {
+      setError('Error en mayoría. Contacta al administrador.'); return
+    }
+
     try {
       // Resolve beneficiary name from selected entity or manual input
       const recipientName = selectedEntityId
@@ -266,7 +277,14 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
       // Reset form
       handleBack()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al crear propuesta')
+      console.error('Error creating proposal:', err)
+      const message =
+        err instanceof Error
+          ? err.message
+          : (err && typeof err === 'object' && 'message' in err)
+            ? String((err as any).message)
+            : 'Error al crear propuesta'
+      setError(message)
     }
   }
 

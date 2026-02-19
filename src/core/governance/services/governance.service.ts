@@ -116,7 +116,10 @@ export async function createProposal(
     .select()
     .single()
 
-  if (error) throw error
+  if (error) {
+    console.error('Supabase proposals INSERT error:', { code: error.code, message: error.message, details: (error as any).details, hint: (error as any).hint })
+    throw new Error(error.message || 'Error al insertar propuesta')
+  }
 
   const created = data as unknown as Proposal
 
