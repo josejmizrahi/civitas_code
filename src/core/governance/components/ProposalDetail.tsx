@@ -12,6 +12,7 @@ import { VotingVisualization } from './VotingVisualization'
 import { QuorumIndicator } from './QuorumIndicator'
 import { MinutesGenerator } from './MinutesGenerator'
 import { DelegationManager } from './DelegationManager'
+import { EndorsementBar } from './EndorsementBar'
 import { ProposalLifecycleIndicator } from './ProposalLifecycleIndicator'
 import { DiscussionThread } from '@/core/deliberation/components/DiscussionThread'
 import { ImplementationTracker } from '@/core/accountability/components/ImplementationTracker'
@@ -171,7 +172,8 @@ export function ProposalDetail({ proposalId }: Props) {
     )
   }
 
-  const canStartDiscussion = proposal.status === 'draft' && isAdmin
+  const endorsementsOk = proposal.endorsements_required === 0 || proposal.endorsements_met
+  const canStartDiscussion = proposal.status === 'draft' && isAdmin && endorsementsOk
   const _canActivate = (proposal.status === 'draft' || proposal.status === 'discussion') && isAdmin
   const canClose = proposal.status === 'active'
   const isVotingOpen = proposal.status === 'active' &&
@@ -326,6 +328,11 @@ export function ProposalDetail({ proposalId }: Props) {
             </div>
           )}
 
+          {/* Endorsement bar for draft proposals */}
+          {proposal.status === 'draft' && proposal.endorsements_required > 0 && (
+            <EndorsementBar proposal={proposal} />
+          )}
+
           {/* Action buttons */}
           <div className="flex flex-col gap-2 sm:flex-row">
             {/* Draft → Discussion */}
@@ -376,7 +383,7 @@ export function ProposalDetail({ proposalId }: Props) {
             )}
 
             {/* Draft → Active (skip discussion) */}
-            {proposal.status === 'draft' && isAdmin && (
+            {proposal.status === 'draft' && isAdmin && endorsementsOk && (
               <Button onClick={handleOpenVoting} disabled={updateStatus.isPending}>
                 Abrir Votación Directa
               </Button>

@@ -1,7 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
 import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
 import { sendEmailToMembers } from '@/shared/services/email.service'
-import type { Proposal, Vote, VoteSummary, Delegation, Minutes } from '../types'
+import type { Proposal, Vote, VoteSummary, Delegation, Minutes, Endorsement } from '../types'
 
 /**
  * List proposals for a community, optionally filtered by status.
@@ -60,10 +60,38 @@ export async function createProposal(
     voting_options?: { id: string; label: string }[]
   }
 ): Promise<Proposal> {
+  // Fetch community rules to determine endorsement requirements
+  const { data: community } = await supabase
+    .from('communities')
+    .select('config, rules')
+    .eq('id', communityId)
+    .single()
+
+  const rules = getCommunityRules(
+    (community as any)?.config ?? null,
+    (community as any)?.rules ?? null
+  )
+
+  // Determine if this creator bypasses endorsements (admin/tesorero)
+  const { data: creatorMember } = await supabase
+    .from('members')
+    .select('role')
+    .eq('community_id', communityId)
+    .eq('user_id', proposal.created_by)
+    .single()
+
+  const creatorRole = (creatorMember as any)?.role ?? 'miembro'
+  const bypassRoles = rules.governance.endorsement_bypass_roles ?? ['admin', 'tesorero']
+  const canBypass = bypassRoles.includes(creatorRole)
+  const minEndorsements = rules.governance.min_endorsements ?? 0
+  const endorsementsRequired = (canBypass || minEndorsements === 0) ? 0 : minEndorsements
+
   const { financial_instruction, template_id, discussion_min_hours, voting_model, voting_options, ...rest } = proposal
   const insertData: Record<string, unknown> = {
     community_id: communityId,
     status: 'draft',
+    endorsements_required: endorsementsRequired,
+    endorsements_met: endorsementsRequired === 0,
     ...rest,
   }
   if (financial_instruction && financial_instruction.type !== 'none') {
@@ -91,15 +119,19 @@ export async function createProposal(
   if (error) throw error
 
   const created = data as unknown as Proposal
-  sendEmailToMembers(communityId, 'proposal_new', {
-    title: created.title,
-    description: created.description,
-    proposal_type: created.type,
-    author_name: proposal.created_by,
-    proposal_id: created.id,
-    community_name: communityId,
-    app_url: window.location.origin,
-  }).catch(() => {})
+
+  // Only notify everyone if endorsements are not required (admin/tesorero bypass)
+  if (endorsementsRequired === 0) {
+    sendEmailToMembers(communityId, 'proposal_new', {
+      title: created.title,
+      description: created.description,
+      proposal_type: created.type,
+      author_name: proposal.created_by,
+      proposal_id: created.id,
+      community_name: communityId,
+      app_url: window.location.origin,
+    }).catch(() => {})
+  }
 
   return created
 }
@@ -120,6 +152,17 @@ export async function startDiscussion(
   const proposal = await getProposal(proposalId)
   if (proposal.status !== 'draft') {
     throw new Error('Solo se puede iniciar discusión desde el estado borrador')
+  }
+
+  // Check endorsement requirement
+  if (proposal.endorsements_required > 0 && !proposal.endorsements_met) {
+    const endorsements = await getEndorsements(proposalId)
+    if (endorsements.length < proposal.endorsements_required) {
+      throw new Error(
+        `Se requieren ${proposal.endorsements_required} avales para avanzar. ` +
+        `Tiene ${endorsements.length}.`
+      )
+    }
   }
 
   const now = new Date()
@@ -902,6 +945,108 @@ export async function executeProposal(
       .eq('id', proposalId)
 
     throw execError
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Endorsements — anti-spam system
+// ---------------------------------------------------------------------------
+
+/** Get all endorsements for a proposal. */
+export async function getEndorsements(proposalId: string): Promise<Endorsement[]> {
+  const { data, error } = await (supabase as any).from('proposal_endorsements')
+    .select('*')
+    .eq('proposal_id', proposalId)
+    .order('endorsed_at', { ascending: true })
+
+  if (error) throw error
+  return (data ?? []) as unknown as Endorsement[]
+}
+
+/** Add an endorsement to a proposal. Returns updated endorsement list. */
+export async function addEndorsement(
+  proposalId: string,
+  memberId: string,
+  communityId: string
+): Promise<{ endorsements: Endorsement[]; thresholdMet: boolean }> {
+  const proposal = await getProposal(proposalId)
+  if (proposal.status !== 'draft') {
+    throw new Error('Solo se pueden avalar propuestas en borrador')
+  }
+  if (proposal.created_by === memberId) {
+    throw new Error('No puedes avalar tu propia propuesta')
+  }
+
+  const { error } = await (supabase as any).from('proposal_endorsements')
+    .insert({
+      proposal_id: proposalId,
+      member_id: memberId,
+      community_id: communityId,
+    })
+
+  if (error) {
+    if (error.code === '23505') throw new Error('Ya avalaste esta propuesta')
+    throw error
+  }
+
+  const endorsements = await getEndorsements(proposalId)
+  const thresholdMet = proposal.endorsements_required > 0 &&
+    endorsements.length >= proposal.endorsements_required
+
+  // If threshold met, update the proposal and notify everyone
+  if (thresholdMet && !proposal.endorsements_met) {
+    await (supabase.from('proposals') as any)
+      .update({ endorsements_met: true })
+      .eq('id', proposalId)
+
+    // NOW send the notification to everyone
+    sendEmailToMembers(communityId, 'proposal_new', {
+      title: proposal.title,
+      description: proposal.description,
+      proposal_type: proposal.type,
+      author_name: proposal.created_by,
+      proposal_id: proposal.id,
+      community_name: communityId,
+      app_url: window.location.origin,
+    }).catch(() => {})
+
+    try {
+      const { notifyCommunity } = await import('@/shared/services/notification.service')
+      await notifyCommunity(
+        communityId,
+        'proposal_new',
+        `Propuesta avalada: ${proposal.title}`,
+        `La propuesta ha reunido los avales necesarios y está lista para avanzar`,
+        { proposal_id: proposalId }
+      )
+    } catch { /* notifications are best-effort */ }
+  }
+
+  return { endorsements, thresholdMet }
+}
+
+/** Remove an endorsement from a proposal. */
+export async function removeEndorsement(
+  proposalId: string,
+  memberId: string
+): Promise<void> {
+  const { error } = await (supabase as any).from('proposal_endorsements')
+    .delete()
+    .eq('proposal_id', proposalId)
+    .eq('member_id', memberId)
+
+  if (error) throw error
+
+  // Re-check threshold
+  const proposal = await getProposal(proposalId)
+  const endorsements = await getEndorsements(proposalId)
+  const stillMet = proposal.endorsements_required === 0 ||
+    endorsements.length >= proposal.endorsements_required
+
+  if (!stillMet && proposal.endorsements_met) {
+    await (supabase.from('proposals') as any)
+      .update({ endorsements_met: false })
+      .eq('id', proposalId)
   }
 }
 

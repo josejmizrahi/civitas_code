@@ -34,6 +34,9 @@ export interface GovernanceRules {
   // Differentiated quorum/majority by proposal type — GV-036
   quorum_by_type: QuorumByType
   majority_by_type: MajorityByType
+  // Endorsement system — anti-spam
+  min_endorsements: number           // minimum endorsements to advance draft (0 = disabled)
+  endorsement_bypass_roles: string[] // roles that skip endorsement requirement
   // Mexican legal compliance — LPCI CDMX Art. 33
   quorum_first_call: number       // 1st call quorum (75% indiviso) — Art. 33
   quorum_second_call: number      // 2nd call quorum (50%+1) — Art. 33
@@ -130,6 +133,9 @@ export const DEFAULT_RULES: CommunityRules = {
       election: 0.5,
       amendment: 0.66,
     },
+    // Endorsement defaults
+    min_endorsements: 3,
+    endorsement_bypass_roles: ['admin', 'tesorero'],
     // Mexican legal defaults — LPCI CDMX
     quorum_first_call: 0.75,
     quorum_second_call: 0.5001,
