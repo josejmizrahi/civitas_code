@@ -16,6 +16,7 @@ import { EndorsementBar } from './EndorsementBar'
 import { ProposalLifecycleIndicator } from './ProposalLifecycleIndicator'
 import { DiscussionThread } from '@/core/deliberation/components/DiscussionThread'
 import { ImplementationTracker } from '@/core/accountability/components/ImplementationTracker'
+import { ProposalContextPanel } from './ProposalContextPanel'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
@@ -284,12 +285,18 @@ export function ProposalDetail({ proposalId }: Props) {
         <CardContent className="space-y-4">
           <p className="whitespace-pre-wrap text-sm">{proposal.description}</p>
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+            {(proposal as any).creator_name && <span>Por: <span className="font-medium text-foreground">{(proposal as any).creator_name}</span></span>}
             <span>Creada: {formatDate(proposal.created_at)}</span>
             {proposal.discussion_start && <span>Discusión: {formatDate(proposal.discussion_start)}</span>}
             {proposal.voting_start && <span>Inicio votación: {formatDate(proposal.voting_start)}</span>}
             {proposal.voting_end && <span>Cierre: {formatDate(proposal.voting_end)}</span>}
             <span>Quórum: {(proposal.quorum_required * 100).toFixed(0)}%</span>
             <span>Mayoría: {(proposal.majority_required * 100).toFixed(0)}%</span>
+            {proposal.voting_model && proposal.voting_model !== 'simple' && (
+              <Badge variant="outline" className="text-[10px]">
+                {proposal.voting_model === 'consensus' ? 'Consenso' : proposal.voting_model === 'multiple_choice' ? 'Opción múltiple' : proposal.voting_model}
+              </Badge>
+            )}
           </div>
 
           {proposal.closed_at && (
@@ -411,6 +418,9 @@ export function ProposalDetail({ proposalId }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Template-specific context panel — connects to Rules, Treasury, Identity */}
+      <ProposalContextPanel proposal={proposal} />
 
       {/* Outcome Declaration — GV-001 */}
       {isClosed && isAdmin && (
