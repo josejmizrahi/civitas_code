@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
+import { GamificationSummary } from '@/core/gamification/components/GamificationSummary'
+import { Leaderboard } from '@/core/gamification/components/Leaderboard'
 
 export function DashboardPage() {
   const { community } = useCommunityContext()
@@ -212,6 +214,19 @@ export function DashboardPage() {
               </Link>
             </div>
 
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gamification: Progress + Leaderboard */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <GamificationSummary />
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Tabla de Líderes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Leaderboard limit={5} compact />
           </CardContent>
         </Card>
       </div>

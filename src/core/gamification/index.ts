@@ -1,0 +1,12 @@
+// Gamification module exports
+export * from './types'
+export * from './constants'
+export * from './hooks/useGamification'
+export * from './services/gamification.service'
+export { XpBar } from './components/XpBar'
+export { LevelBadge } from './components/LevelBadge'
+export { StreakCounter } from './components/StreakCounter'
+export { BadgeGrid } from './components/BadgeGrid'
+export { Leaderboard } from './components/Leaderboard'
+export { GamificationSummary } from './components/GamificationSummary'
+export { useAchievementToast } from './components/AchievementToast'

@@ -28,6 +28,9 @@ import { Button } from '@/shared/components/ui/button'
 import { NotificationBell } from '@/shared/components/NotificationBell'
 import { cn } from '@/shared/lib/utils'
 import { PrivacyGate } from '@/core/privacy/components/PrivacyGate'
+import { XpBar } from '@/core/gamification/components/XpBar'
+import { StreakCounter } from '@/core/gamification/components/StreakCounter'
+import { useMyGamification } from '@/core/gamification/hooks/useGamification'
 
 const coreNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
@@ -67,6 +70,7 @@ export function AppLayout() {
   }
 
   const userRole = (currentMember?.role ?? 'observador') as Role
+  const { data: gamProfile } = useMyGamification()
 
   // Build navigation: core items filtered by role + vertical items
   const navigation = [
@@ -246,6 +250,18 @@ export function AppLayout() {
             </NavLink>
           )}
         </nav>
+
+        {/* Gamification XP bar */}
+        {gamProfile && communityId && (
+          <div className="border-t px-3 py-2.5 space-y-1.5">
+            <XpBar compact />
+            {gamProfile.current_streak > 0 && (
+              <div className="flex justify-center">
+                <StreakCounter streak={gamProfile.current_streak} compact />
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="border-t p-3">
           <div className="flex items-center justify-between gap-2">

@@ -6,6 +6,7 @@ import {
   addEndorsement,
   removeEndorsement,
 } from '../services/governance.service'
+import { awardXp } from '@/core/gamification/services/gamification.service'
 
 export function useEndorsements(proposalId: string | undefined) {
   return useQuery({
@@ -27,6 +28,10 @@ export function useAddEndorsement() {
       queryClient.invalidateQueries({ queryKey: ['endorsements', variables.proposalId] })
       queryClient.invalidateQueries({ queryKey: ['proposals', communityId] })
       queryClient.invalidateQueries({ queryKey: ['proposal', variables.proposalId] })
+      // Award XP for endorsing
+      if (communityId) {
+        awardXp(variables.memberId, communityId, 'endorse', { proposal_id: variables.proposalId }).catch(() => {})
+      }
     },
   })
 }
