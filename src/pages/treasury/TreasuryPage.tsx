@@ -19,9 +19,11 @@ import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityContext } from '@/app/providers'
 import {
   Plus, FileSpreadsheet, CreditCard, BarChart3, Receipt, PiggyBank,
-  Banknote, User, RefreshCw, FileText, CalendarClock, ClipboardList,
+  Banknote, User, RefreshCw, FileText, CalendarClock, ClipboardList, Download,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useTransactions } from '@/core/treasury/hooks/useTransactions'
+import { exportToPDF, exportToExcel } from '@/shared/services/export.service'
 import type { TreasuryRules, FundType } from '@/shared/types/rules'
 
 export function TreasuryPage() {
@@ -36,8 +38,30 @@ export function TreasuryPage() {
   const navigate = useNavigate()
   const hasRun = useRef(false)
 
+  const { data: transactions } = useTransactions()
+
   const rules = community?.rules as { treasury?: TreasuryRules } | null
   const treasuryMode = rules?.treasury?.mode || 'import'
+
+  const handleExportExcel = () => {
+    const rows = (transactions ?? []).map((tx) => ({
+      Fecha: tx.date,
+      Tipo: tx.type === 'income' ? 'Ingreso' : 'Egreso',
+      Monto: tx.amount,
+      Categoria: tx.category_name || '',
+      Descripcion: tx.description || '',
+      Referencia: tx.external_ref || '',
+    }))
+    exportToExcel(rows, { filename: 'tesoreria', sheetName: 'Transacciones' })
+  }
+
+  const handleExportPDF = () => {
+    exportToPDF('treasury-content', {
+      filename: 'tesoreria',
+      title: 'Reporte de Tesorería',
+      subtitle: community?.name,
+    })
+  }
 
   useEffect(() => {
     if (hasRun.current) return
@@ -55,7 +79,7 @@ export function TreasuryPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div id="treasury-content" className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Tesorería</h1>
@@ -68,6 +92,14 @@ export function TreasuryPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={handleExportPDF}>
+            <Download className="mr-1 h-4 w-4" />
+            PDF
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={!transactions?.length}>
+            <Download className="mr-1 h-4 w-4" />
+            Excel
+          </Button>
           {canImportData && (
             <Button variant="outline" onClick={() => navigate('/ingestion')}>
               <FileSpreadsheet className="mr-2 h-4 w-4" />
