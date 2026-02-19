@@ -57,7 +57,7 @@ export function useRealtimeNotifications() {
         { event: 'INSERT', schema: 'public', table: 'notifications' },
         () => {
           queryClient.invalidateQueries({ queryKey: ['notifications'] })
-          queryClient.invalidateQueries({ queryKey: ['unread-count'] })
+          queryClient.invalidateQueries({ queryKey: ['notifications-unread'] })
         }
       )
       .subscribe()

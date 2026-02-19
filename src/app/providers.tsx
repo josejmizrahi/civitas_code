@@ -36,6 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+    }).catch(() => {
+      setSession(null)
+      setUser(null)
+      setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -177,6 +181,7 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
           setCommunityError(err?.message || 'Error al cargar comunidad')
           setCommunity(null)
           setCurrentMember(null)
+          handleSetCommunityId(null)
         }
       })
       .finally(() => {

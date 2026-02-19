@@ -7,18 +7,22 @@ import { Link } from 'react-router-dom'
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Borrador',
+  discussion: 'En Discusión',
   active: 'Activa',
   closed: 'Cerrada',
   approved: 'Aprobada',
   rejected: 'Rechazada',
+  executed: 'Ejecutada',
 }
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
   draft: 'secondary',
+  discussion: 'secondary',
   active: 'warning',
   closed: 'default',
   approved: 'success',
   rejected: 'destructive',
+  executed: 'success',
 }
 
 const TYPE_LABELS: Record<string, string> = {

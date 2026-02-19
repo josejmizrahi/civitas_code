@@ -42,8 +42,10 @@ export function useCreateEntity() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (entity: Omit<Entity, 'id' | 'community_id' | 'created_at' | 'updated_at' | 'metadata'>) =>
-      createEntity(communityId!, { ...entity, created_by: user!.id }),
+    mutationFn: (entity: Omit<Entity, 'id' | 'community_id' | 'created_at' | 'updated_at' | 'metadata'>) => {
+      if (!user || !communityId) throw new Error('Not authenticated')
+      return createEntity(communityId, { ...entity, created_by: user.id })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: entityKeys.all })
     },

@@ -78,7 +78,7 @@ export async function createComment(comment: {
         await notifyMember(
           comment.community_id,
           mention.member_id,
-          'proposal_opened',
+          'comment_mention',
           `Te mencionaron en una discusión`,
           `Alguien te mencionó en un comentario sobre una propuesta`,
           { proposal_id: comment.proposal_id, comment_id: data.id }

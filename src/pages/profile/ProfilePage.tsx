@@ -20,8 +20,10 @@ const roleBadgeVariant: Record<string, 'default' | 'secondary' | 'outline' | 'su
 }
 
 const roleLabels: Record<string, string> = {
+  platform_admin: 'Admin Plataforma',
   admin: 'Administrador',
   tesorero: 'Tesorero',
+  comite_vigilancia: 'Comité de Vigilancia',
   miembro: 'Miembro',
   observador: 'Observador',
 }
@@ -30,12 +32,14 @@ const financialStandingLabels: Record<string, string> = {
   good_standing: 'Al día',
   grace_period: 'Período de gracia',
   delinquent: 'Moroso',
+  moroso: 'Moroso',
 }
 
 const financialStandingVariant: Record<string, 'success' | 'warning' | 'destructive'> = {
   good_standing: 'success',
   grace_period: 'warning',
   delinquent: 'destructive',
+  moroso: 'destructive',
 }
 
 export function ProfilePage() {

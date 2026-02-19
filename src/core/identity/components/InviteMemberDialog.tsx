@@ -125,6 +125,7 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
                   >
                     <option value="miembro">Miembro</option>
                     <option value="tesorero">Tesorero</option>
+                    <option value="comite_vigilancia">Comité de Vigilancia</option>
                     <option value="observador">Observador</option>
                     <option value="admin">Administrador</option>
                   </Select>

@@ -20,8 +20,10 @@ import type { Member } from '@/core/identity/types'
 import type { Role } from '@/shared/types'
 
 const roleLabels: Record<string, string> = {
+  platform_admin: 'Admin Plataforma',
   admin: 'Administrador',
   tesorero: 'Tesorero',
+  comite_vigilancia: 'Comité de Vigilancia',
   miembro: 'Miembro',
   observador: 'Observador',
 }
@@ -37,12 +39,14 @@ const standingLabels: Record<string, string> = {
   good_standing: 'Al día',
   grace_period: 'Período de gracia',
   delinquent: 'Moroso',
+  moroso: 'Moroso',
 }
 
 const standingVariant: Record<string, 'success' | 'warning' | 'destructive'> = {
   good_standing: 'success',
   grace_period: 'warning',
   delinquent: 'destructive',
+  moroso: 'destructive',
 }
 
 interface PaymentObligation {
@@ -234,6 +238,7 @@ export function MemberDetailPage() {
                 >
                   <option value="admin">Administrador</option>
                   <option value="tesorero">Tesorero</option>
+                  <option value="comite_vigilancia">Comité de Vigilancia</option>
                   <option value="miembro">Miembro</option>
                   <option value="observador">Observador</option>
                 </Select>

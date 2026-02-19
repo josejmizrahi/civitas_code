@@ -14,8 +14,9 @@ import { Shield, Clock, AlertTriangle, UserCheck, Play, Square } from 'lucide-re
 import type { AdminTerm } from '../services/terms.service'
 
 const roleLabels: Record<string, string> = {
+  platform_admin: 'Admin Plataforma',
   admin: 'Administrador',
-  comite_vigilancia: 'Comite de Vigilancia',
+  comite_vigilancia: 'Comité de Vigilancia',
   tesorero: 'Tesorero',
   miembro: 'Miembro',
   observador: 'Observador',

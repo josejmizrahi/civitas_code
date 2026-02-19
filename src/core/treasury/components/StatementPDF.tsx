@@ -121,7 +121,7 @@ export function StatementPDF({ statement, communityName, onClose }: Props) {
             )}
 
             {/* Approval status */}
-            {statement.approved && (
+            {statement.approved && statement.approved_at && (
               <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-center">
                 <p className="text-sm text-green-800 font-medium">
                   Aprobado el {formatDate(statement.approved_at)}

@@ -27,7 +27,7 @@ export function useVoteSummary(
   const { communityId } = useCommunityContext()
 
   return useQuery({
-    queryKey: ['vote-summary', proposalId],
+    queryKey: ['vote-summary', proposalId, quorumRequired, majorityRequired],
     queryFn: () => getVoteSummary(proposalId!, communityId!, quorumRequired, majorityRequired),
     enabled: !!proposalId && !!communityId,
   })

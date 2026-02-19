@@ -171,7 +171,7 @@ export async function getUserCommunities(
 
   if (error) throw error
 
-  return (data ?? []).map((row: any) => row.communities) as Community[]
+  return (data ?? []).map((row: any) => row.communities).filter(Boolean) as Community[]
 }
 
 export async function joinCommunity(

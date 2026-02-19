@@ -91,12 +91,14 @@ export async function startTerm(
   const termNumber = lastTerm ? (lastTerm as any).term_number + 1 : 1
 
   // End any currently active term for this role in the community
-  await (supabase
+  const { error: endError } = await (supabase
     .from('admin_terms' as any) as any)
     .update({ status: 'completed', term_end: new Date().toISOString() })
     .eq('community_id', communityId)
     .eq('role', role)
     .eq('status', 'active')
+
+  if (endError) throw endError
 
   const { data, error } = await (supabase
     .from('admin_terms' as any) as any)

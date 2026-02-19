@@ -29,6 +29,7 @@ export function MentionAutocomplete({ members, onSelect, query, visible, positio
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!(e.target instanceof HTMLTextAreaElement)) return
       if (!visible || filtered.length === 0) return
 
       if (e.key === 'ArrowDown') {

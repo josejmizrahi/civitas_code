@@ -857,6 +857,7 @@ export async function executeProposal(
     // Mark proposal as executed
     const { data, error } = await (supabase.from('proposals') as any)
       .update({
+        status: 'executed',
         execution_status: 'executed',
         executed_at: new Date().toISOString(),
       })
