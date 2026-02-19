@@ -109,7 +109,7 @@ export const DEFAULT_RULES: CommunityRules = {
     default_quorum: 0.5,
     default_majority: 0.5,
     delegation_enabled: true,
-    proposal_rights: ['admin', 'tesorero', 'miembro'],
+    proposal_rights: ['admin', 'comite_vigilancia', 'tesorero', 'miembro'],
     cool_down_hours: 48,
     auto_execution_enabled: false,
     auto_execution_threshold: 0,

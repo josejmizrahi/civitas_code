@@ -56,9 +56,10 @@ interface Props {
   onOpenChange: (open: boolean) => void
   initialTemplateId?: string
   initialRuleId?: string
+  onCreated?: (info: { endorsementsRequired: number }) => void
 }
 
-export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, initialRuleId }: Props) {
+export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, initialRuleId, onCreated }: Props) {
   const createProposal = useCreateProposal()
   const { rules, canPropose } = useRulesEngine()
   const { data: entities } = useEntities({ status: 'active' })
@@ -246,7 +247,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
             .map((label, idx) => ({ id: `option_${idx + 1}`, label: label.trim() }))
         : undefined
 
-      await createProposal.mutateAsync({
+      const created = await createProposal.mutateAsync({
         title,
         description,
         type,
@@ -261,6 +262,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
         voting_options: votingOptions,
       })
       onOpenChange(false)
+      onCreated?.({ endorsementsRequired: (created as any)?.endorsements_required ?? 0 })
       // Reset form
       handleBack()
     } catch (err: unknown) {

@@ -186,15 +186,15 @@ INSERT INTO communities (id, name, slug, type, config, rules) VALUES (
       "default_quorum": 0.5,
       "default_majority": 0.5,
       "delegation_enabled": true,
-      "proposal_rights": ["admin", "tesorero", "miembro"],
+      "proposal_rights": ["admin", "comite_vigilancia", "tesorero", "miembro"],
       "cool_down_hours": 48,
       "auto_execution_enabled": true,
       "auto_execution_threshold": 50000,
       "mandatory_discussion_enabled": true,
       "default_discussion_hours": 72,
       "grace_period_hours": 48,
-      "quorum_by_type": {"ordinary": 0.5, "extraordinary": 0.66, "budget": 0.5, "amendment": 0.66},
-      "majority_by_type": {"ordinary": 0.5, "extraordinary": 0.66, "budget": 0.5, "amendment": 0.66}
+      "quorum_by_type": {"ordinary": 0.5, "extraordinary": 0.66, "budget": 0.5, "election": 0.5, "amendment": 0.66},
+      "majority_by_type": {"ordinary": 0.5, "extraordinary": 0.66, "budget": 0.5, "election": 0.5, "amendment": 0.66}
     },
     "treasury": {
       "mode": "import",
