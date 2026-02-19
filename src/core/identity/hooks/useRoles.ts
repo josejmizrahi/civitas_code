@@ -24,7 +24,7 @@ async function getRoles(communityId: string): Promise<Role[]> {
     .order('name', { ascending: true })
 
   if (error) throw error
-  return (data ?? []) as Role[]
+  return (data ?? []) as unknown as Role[]
 }
 
 // ---------------------------------------------------------------------------
