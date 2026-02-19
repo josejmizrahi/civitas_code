@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCreateProposal } from '../hooks/useProposals'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { PROPOSAL_TEMPLATES, type ProposalTemplate } from '../services/proposal-templates'
@@ -41,14 +41,44 @@ const TEMPLATE_ICONS: Record<string, typeof Banknote> = {
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialTemplateId?: string
 }
 
-export function CreateProposalDialog({ open, onOpenChange }: Props) {
+export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: Props) {
   const createProposal = useCreateProposal()
   const { rules, canPropose } = useRulesEngine()
 
   // Template selection step
   const [selectedTemplate, setSelectedTemplate] = useState<ProposalTemplate | null>(null)
+
+  const appliedInitialRef = useRef(false)
+  // When opened with initialTemplateId (e.g. from Settings "Cambiar Regla via Propuesta"), preselect template once
+  useEffect(() => {
+    if (!open) {
+      appliedInitialRef.current = false
+      return
+    }
+    if (initialTemplateId && !appliedInitialRef.current) {
+      const template = PROPOSAL_TEMPLATES.find((t) => t.id === initialTemplateId)
+      if (template) {
+        appliedInitialRef.current = true
+        setSelectedTemplate(template)
+        setTitle(template.defaultTitle)
+        setType(template.type)
+        setHasFinancialInstruction(template.hasFinancialInstruction)
+        if (template.defaultInstructionType) setInstrType(template.defaultInstructionType)
+        const proposalType = template.type as ProposalType
+        const typeQuorum = rules.governance.quorum_by_type?.[proposalType]
+        const typeMajority = rules.governance.majority_by_type?.[proposalType]
+        setQuorum(String((template.suggestedQuorum ?? typeQuorum ?? rules.governance.default_quorum) * 100))
+        setMajority(String((template.suggestedMajority ?? typeMajority ?? rules.governance.default_majority) * 100))
+        if (template.suggestedDiscussionHours) {
+          setDiscussionHours(String(template.suggestedDiscussionHours))
+          setIncludeDiscussion(true)
+        }
+      }
+    }
+  }, [open, initialTemplateId, rules.governance.default_quorum, rules.governance.default_majority, rules.governance.quorum_by_type, rules.governance.majority_by_type])
 
   // Form fields
   const [title, setTitle] = useState('')

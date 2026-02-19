@@ -14,7 +14,7 @@ import { MorosoStatusBanner } from '@/core/identity/components/MorosoStatusBanne
 import { formatCurrency, formatDateTime } from '@/shared/lib/utils'
 import {
   Users, Wallet, Vote, Upload, TrendingUp, TrendingDown,
-  AlertTriangle, AlertCircle, Home, Shield, UserCheck, BarChart3,
+  AlertTriangle, AlertCircle, Shield, UserCheck, BarChart3,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
@@ -35,8 +35,6 @@ export function DashboardPage() {
   const overdueObligations = obligations?.filter(
     (o) => o.status === 'pending' && new Date(o.due_date) < new Date()
   ) ?? []
-
-  const isResidential = community?.type === 'residential'
 
   const queryError = membersError || statsError
   // Only show full-page spinner on very first load (no cached data at all)
@@ -214,20 +212,6 @@ export function DashboardPage() {
               </Link>
             </div>
 
-            {isResidential && (
-              <div className="flex items-center justify-between rounded-md border p-3">
-                <div className="flex items-center gap-3">
-                  <Home className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">Residencial</p>
-                    <p className="text-xs text-muted-foreground">Unidades y mantenimiento</p>
-                  </div>
-                </div>
-                <Link to="/residential">
-                  <Button variant="outline" size="sm">Ver</Button>
-                </Link>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>

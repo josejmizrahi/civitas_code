@@ -30,10 +30,8 @@ export function RegisterPage() {
     setLoading(true)
     try {
       await signUp(email, password, fullName)
-      setTimeout(() => {
-        setNeedsConfirmation(true)
-        setLoading(false)
-      }, 500)
+      setNeedsConfirmation(true)
+      setLoading(false)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al registrarse')
       setLoading(false)

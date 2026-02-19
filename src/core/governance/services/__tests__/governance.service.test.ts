@@ -115,21 +115,21 @@ describe('executeProposal', () => {
 
 describe('getVoteSummary', () => {
   it('computes correct vote summary', async () => {
-    // Mock getVotes: returns votes via proposals -> votes table
+    const proposalBuilder = createBuilder({ id: 'p1', voting_model: 'simple' })
     const votesBuilder = createBuilder([
       { value: 'yes', weight: 2 },
       { value: 'yes', weight: 1 },
       { value: 'no', weight: 1 },
     ])
     const membersBuilder = createBuilder([
-      { voting_weight: 2 },
-      { voting_weight: 1 },
-      { voting_weight: 1 },
-      { voting_weight: 1 },
+      { voting_weight: 2, financial_standing: 'good_standing' },
+      { voting_weight: 1, financial_standing: 'good_standing' },
+      { voting_weight: 1, financial_standing: 'good_standing' },
+      { voting_weight: 1, financial_standing: 'good_standing' },
     ])
 
-    let callCount = 0
     mockFrom.mockImplementation((table: string) => {
+      if (table === 'proposals') return proposalBuilder
       if (table === 'votes') return votesBuilder
       if (table === 'members') return membersBuilder
       return createBuilder()

@@ -12,8 +12,9 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Label } from '@/shared/components/ui/label'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
-import { Settings, Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote, Bell, BellOff, Loader2 } from 'lucide-react'
+import { Settings, Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote, Bell, BellOff, Loader2, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { InviteMemberDialog } from '@/core/identity/components/InviteMemberDialog'
 import { formatDate } from '@/shared/lib/utils'
 import type { CommunityRules } from '@/shared/types/rules'
 import { DEFAULT_RULES } from '@/shared/types/rules'
@@ -28,6 +29,7 @@ export function SettingsPage() {
   const { isAdmin } = usePermissions()
   const queryClient = useQueryClient()
   const [tab, setTab] = useState('general')
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
 
   // Push notification state
   const [pushSubscribed, setPushSubscribed] = useState<boolean | null>(null)
@@ -164,6 +166,9 @@ export function SettingsPage() {
   if (!isAdmin) {
     return (
       <div className="space-y-6">
+        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" /> Volver al panel
+        </Button>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Configuración de la Comunidad</h1>
@@ -184,19 +189,19 @@ export function SettingsPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex-wrap overflow-x-auto">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="categories">Categorías</TabsTrigger>
-          <TabsTrigger value="invitations">Invitaciones</TabsTrigger>
-          <TabsTrigger value="rules" className="flex items-center gap-1.5">
+        <TabsList className="flex flex-nowrap overflow-x-auto overflow-y-hidden scrollbar-thin sm:flex-wrap sm:overflow-visible">
+          <TabsTrigger value="general" className="shrink-0 whitespace-nowrap">General</TabsTrigger>
+          <TabsTrigger value="categories" className="shrink-0 whitespace-nowrap">Categorías</TabsTrigger>
+          <TabsTrigger value="invitations" className="shrink-0 whitespace-nowrap">Invitaciones</TabsTrigger>
+          <TabsTrigger value="rules" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <Sliders className="h-3.5 w-3.5" />
             Reglas
           </TabsTrigger>
-          <TabsTrigger value="privacy" className="flex items-center gap-1.5">
+          <TabsTrigger value="privacy" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <ScrollText className="h-3.5 w-3.5" />
             Privacidad
           </TabsTrigger>
-          <TabsTrigger value="terminos" className="flex items-center gap-1.5">
+          <TabsTrigger value="terminos" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <CalendarClock className="h-3.5 w-3.5" />
             Terminos
           </TabsTrigger>
@@ -317,7 +322,12 @@ export function SettingsPage() {
                   Notificaciones Push
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
+                {!import.meta.env.VITE_VAPID_PUBLIC_KEY && (
+                  <div className="rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+                    La clave pública VAPID no está configurada (VITE_VAPID_PUBLIC_KEY). Las notificaciones push no estarán disponibles hasta que se configure en el servidor.
+                  </div>
+                )}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm">
@@ -411,10 +421,17 @@ export function SettingsPage() {
         {/* Invitations Tab */}
         <TabsContent value="invitations">
           <div className="rounded-lg border p-6">
-            <div className="mb-4 flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Invitaciones Pendientes</h2>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                <h2 className="text-lg font-semibold">Invitaciones Pendientes</h2>
+              </div>
+              <Button onClick={() => setInviteDialogOpen(true)} className="w-full sm:w-auto">
+                <UserCheck className="h-4 w-4 mr-2" />
+                Crear invitación
+              </Button>
             </div>
+            <InviteMemberDialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen} />
 
             {pendingInvitations.length === 0 ? (
               <p className="text-muted-foreground">No hay invitaciones pendientes.</p>

@@ -40,15 +40,21 @@ export function MemberDirectory() {
   const [inviteOpen, setInviteOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [roleFilter, setRoleFilter] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<string>('')
 
   // Determine current user's role for permission checks
   const currentUserRole = members?.find((m) => m.is_current_user)?.role as Role | undefined
   const canManageMembers = currentUserRole ? hasPermission(currentUserRole, 'admin') : false
 
   const filteredMembers = members?.filter((m) => {
-    if (!search) return true
-    const q = search.toLowerCase()
-    return (m.full_name?.toLowerCase().includes(q)) || (m.email?.toLowerCase().includes(q)) || (m.role?.toLowerCase().includes(q))
+    if (search) {
+      const q = search.toLowerCase()
+      if (!(m.full_name?.toLowerCase().includes(q)) && !(m.email?.toLowerCase().includes(q)) && !(m.role?.toLowerCase().includes(q))) return false
+    }
+    if (roleFilter && m.role !== roleFilter) return false
+    if (statusFilter && (m.status ?? 'active') !== statusFilter) return false
+    return true
   }) ?? []
 
   if (isLoading) {
@@ -58,14 +64,28 @@ export function MemberDirectory() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por nombre, correo o rol..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-1 sm:max-w-2xl">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por nombre, correo o rol..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="w-full sm:w-40">
+            <option value="">Todos los roles</option>
+            {Object.entries(roleLabels).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </Select>
+          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-36">
+            <option value="">Todos los estados</option>
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+            <option value="pending">Pendiente</option>
+          </Select>
         </div>
         {canManageMembers && (
           <Button onClick={() => setInviteOpen(true)} className="w-full sm:w-auto">

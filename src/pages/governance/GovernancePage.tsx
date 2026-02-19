@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/tabs'
 import { Button } from '@/shared/components/ui/button'
 import { ProposalList } from '@/core/governance/components/ProposalList'
@@ -13,15 +14,31 @@ import { formatDate } from '@/shared/lib/utils'
 import { Plus, Download } from 'lucide-react'
 
 export function GovernancePage() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [tab, setTab] = useState('active')
   const [showCreate, setShowCreate] = useState(false)
   const [showCreateAssembly, setShowCreateAssembly] = useState(false)
+  const [initialTemplateId, setInitialTemplateId] = useState<string | undefined>()
+  const processedRpcRef = useRef(false)
   const { canCreateProposals, isAdmin } = usePermissions()
   const { data: allProposals } = useProposals()
 
+  // Consume location.state from Settings "Cambiar Regla via Propuesta"
   useEffect(() => {
-    processExpiredProposals()
-    processAutoExecutions()
+    const state = location.state as { openProposal?: boolean; template?: string } | null
+    if (state?.openProposal && state?.template) {
+      setShowCreate(true)
+      setInitialTemplateId(state.template)
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.state, location.pathname, navigate])
+
+  useEffect(() => {
+    if (processedRpcRef.current) return
+    processedRpcRef.current = true
+    processExpiredProposals().catch(() => {})
+    processAutoExecutions().catch(() => {})
   }, [])
 
   const isAssemblyTab = tab === 'assemblies'
@@ -71,15 +88,23 @@ export function GovernancePage() {
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex-wrap overflow-x-auto">
           <TabsTrigger value="active">Activas</TabsTrigger>
+          <TabsTrigger value="discussion">En Discusión</TabsTrigger>
           <TabsTrigger value="draft">Borradores</TabsTrigger>
+          <TabsTrigger value="closed">Cerradas</TabsTrigger>
           <TabsTrigger value="all">Todas</TabsTrigger>
           <TabsTrigger value="assemblies">Asambleas</TabsTrigger>
         </TabsList>
         <TabsContent value="active">
           <ProposalList statusFilter="active" />
         </TabsContent>
+        <TabsContent value="discussion">
+          <ProposalList statusFilter="discussion" />
+        </TabsContent>
         <TabsContent value="draft">
           <ProposalList statusFilter="draft" />
+        </TabsContent>
+        <TabsContent value="closed">
+          <ProposalList statusFilter="closed" />
         </TabsContent>
         <TabsContent value="all">
           <ProposalList />
@@ -89,7 +114,7 @@ export function GovernancePage() {
         </TabsContent>
       </Tabs>
 
-      <CreateProposalDialog open={showCreate} onOpenChange={setShowCreate} />
+      <CreateProposalDialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) setInitialTemplateId(undefined) }} initialTemplateId={initialTemplateId} />
       <CreateAssemblyDialog open={showCreateAssembly} onOpenChange={setShowCreateAssembly} />
     </div>
   )

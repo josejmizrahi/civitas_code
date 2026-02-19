@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTransactions, useUpdateTransaction, useDeleteTransaction } from '../hooks/useTransactions'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { getCategories } from '../services/treasury.service'
@@ -9,19 +9,36 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Input } from '@/shared/components/ui/input'
 import { Select } from '@/shared/components/ui/select'
 import { Button } from '@/shared/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
+import { Label } from '@/shared/components/ui/label'
 import { formatCurrency, formatDate, downloadAsCSV, downloadAsExcel } from '@/shared/lib/utils'
 import { Pencil, Trash2, Check, X, Download, ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { verifyTransaction } from '../services/receipt.service'
 import type { Transaction } from '../types'
+import type { FundType } from '@/shared/types/rules'
 
-export function TransactionList() {
+const MD_BREAKPOINT = 768
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < MD_BREAKPOINT)
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MD_BREAKPOINT - 1}px)`)
+    const update = () => setIsMobile(mql.matches)
+    update()
+    mql.addEventListener('change', update)
+    return () => mql.removeEventListener('change', update)
+  }, [])
+  return isMobile
+}
+
+export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
   const [type, setType] = useState<string>('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Partial<Transaction>>({})
+  const isMobile = useIsMobile()
 
   const { communityId } = useCommunityContext()
   const { canManageTreasury } = usePermissions()
@@ -50,11 +67,11 @@ export function TransactionList() {
     ...(type && { type }),
     ...(dateFrom && { dateFrom }),
     ...(dateTo && { dateTo }),
+    ...(fundType && { fundType }),
   }
 
-  const { data: transactions, isLoading } = useTransactions(
-    Object.keys(filters).length > 0 ? filters : undefined
-  )
+  const hasFilters = fundType || type || dateFrom || dateTo
+  const { data: transactions, isLoading } = useTransactions(hasFilters ? filters : undefined)
 
   const startEdit = (tx: Transaction) => {
     setEditingId(tx.id)
@@ -156,8 +173,9 @@ export function TransactionList() {
             ) : (
               transactions?.map((tx) => {
                 const isEditing = editingId === tx.id
+                const showInlineEdit = isEditing && !isMobile
 
-                if (isEditing) {
+                if (showInlineEdit) {
                   return (
                     <TableRow key={tx.id}>
                       <TableCell>
@@ -280,6 +298,74 @@ export function TransactionList() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Mobile edit dialog */}
+      {isMobile && (
+        <Dialog open={!!editingId} onOpenChange={(open) => !open && cancelEdit()}>
+          <DialogContent className="max-w-sm sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Editar transacción</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label>Fecha</Label>
+                <Input
+                  type="date"
+                  value={editValues.date || ''}
+                  onChange={(e) => setEditValues({ ...editValues, date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Descripción</Label>
+                <Input
+                  value={editValues.description || ''}
+                  onChange={(e) => setEditValues({ ...editValues, description: e.target.value })}
+                  placeholder="Descripción"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo</Label>
+                <Select
+                  value={editValues.type || ''}
+                  onChange={(e) => setEditValues({ ...editValues, type: e.target.value as any })}
+                >
+                  <option value="income">Ingreso</option>
+                  <option value="expense">Egreso</option>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Categoría</Label>
+                <Select
+                  value={editValues.category_id || ''}
+                  onChange={(e) => setEditValues({ ...editValues, category_id: e.target.value || null })}
+                >
+                  <option value="">Sin categoría</option>
+                  {categories?.filter((c) => c.type === editValues.type).map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Monto</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editValues.amount ?? ''}
+                  onChange={(e) => setEditValues({ ...editValues, amount: parseFloat(e.target.value) || 0 })}
+                  className="text-right"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={cancelEdit}>Cancelar</Button>
+              <Button onClick={saveEdit} disabled={updateTx.isPending}>
+                {updateTx.isPending ? 'Guardando...' : 'Guardar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

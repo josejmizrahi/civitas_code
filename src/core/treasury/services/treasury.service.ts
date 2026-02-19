@@ -1,6 +1,10 @@
 import { supabase } from '@/shared/lib/supabase'
 import type { Transaction, Category, Budget, PaymentObligation, DashboardStats, CollectionConfig } from '../types'
 
+/**
+ * List transactions for a community with optional filters (date range, category, type, fund).
+ * Returns rows with joined category name.
+ */
 export async function getTransactions(
   communityId: string,
   filters?: { dateFrom?: string; dateTo?: string; categoryId?: string; type?: string; fundType?: string }
@@ -26,6 +30,7 @@ export async function getTransactions(
   }))
 }
 
+/** List categories for a community (income/expense). */
 export async function getCategories(communityId: string): Promise<Category[]> {
   const { data, error } = await supabase
     .from('categories')

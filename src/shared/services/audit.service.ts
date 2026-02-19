@@ -32,7 +32,7 @@ export async function logAuditAction(
 
 export async function getAuditLog(
   communityId: string,
-  options?: { limit?: number; offset?: number; entityType?: string }
+  options?: { limit?: number; offset?: number; entityType?: string; userId?: string }
 ): Promise<AuditEntry[]> {
   let query = supabase
     .from('audit_log')
@@ -41,6 +41,7 @@ export async function getAuditLog(
     .order('created_at', { ascending: false })
 
   if (options?.entityType) query = query.eq('entity_type', options.entityType)
+  if (options?.userId) query = query.eq('user_id', options.userId)
   if (options?.limit) query = query.limit(options.limit)
   if (options?.offset) query = query.range(options.offset, options.offset + (options?.limit ?? 50) - 1)
 

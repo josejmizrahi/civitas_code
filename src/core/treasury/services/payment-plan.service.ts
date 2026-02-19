@@ -247,10 +247,10 @@ export async function markInstallmentPaid(
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Helpers (exported for unit tests)
 // ---------------------------------------------------------------------------
 
-function generateInstallmentDates(
+export function generateInstallmentDates(
   startDate: string,
   count: number,
   amount: number,

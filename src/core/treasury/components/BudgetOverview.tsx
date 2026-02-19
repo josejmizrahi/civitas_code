@@ -17,12 +17,13 @@ import { formatCurrency } from '@/shared/lib/utils'
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
 import type { Budget } from '../types'
+import type { FundType } from '@/shared/types/rules'
 
-export function BudgetOverview() {
+export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
   const { communityId } = useCommunityContext()
   const { canManageTreasury } = usePermissions()
-  const { data: budgets, isLoading } = useBudgets()
-  const { data: transactions } = useTransactions()
+  const { data: budgets, isLoading } = useBudgets(fundType)
+  const { data: transactions } = useTransactions(fundType ? { fundType } : undefined)
   const createBudget = useCreateBudget()
   const updateBudget = useUpdateBudget()
   const deleteBudget = useDeleteBudget()

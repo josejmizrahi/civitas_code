@@ -5,13 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { IncomeVsExpenseChart } from './IncomeVsExpenseChart'
 import { formatCurrency } from '@/shared/lib/utils'
 import { TrendingUp, TrendingDown, Wallet, AlertTriangle, ArrowUpCircle } from 'lucide-react'
+import type { FundType } from '@/shared/types/rules'
 
-export function FinancialDashboard() {
-  const { data: stats, isLoading } = useDashboard()
+export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
+  const { data: stats, isLoading } = useDashboard(fundType)
   const { data: collStats } = useCollectionStats()
 
   if (isLoading) return <LoadingSpinner message="Cargando datos financieros..." className="py-12" />
-  if (!stats) return null
+  if (!stats) {
+    return (
+      <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+        <Wallet className="mx-auto h-10 w-10 opacity-50" />
+        <p className="mt-2 font-medium">Sin datos financieros</p>
+        <p className="text-sm">Registra transacciones o importa datos para ver el resumen aquí.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
-import { useUpdateMemberRole, useDeactivateMember, useReactivateMember } from '@/core/identity/hooks/useMembers'
+import { useMember, useUpdateMemberRole, useDeactivateMember, useReactivateMember } from '@/core/identity/hooks/useMembers'
+import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
+import { getAuditLog } from '@/shared/services/audit.service'
 import { supabase } from '@/shared/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
@@ -13,8 +16,8 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/utils'
 import {
-  ArrowLeft, User, Wallet, Vote, Activity, Shield,
-  UserMinus, UserCheck, AlertCircle, CheckCircle, Clock, XCircle,
+  ArrowLeft, Wallet, Vote, Activity, Shield,
+  UserMinus, UserCheck, AlertCircle, CheckCircle, Clock,
 } from 'lucide-react'
 import type { Member } from '@/core/identity/types'
 import type { Role } from '@/shared/types'
@@ -67,13 +70,15 @@ interface VoteRecord {
   proposal_title?: string
 }
 
-interface AuditEntry {
-  id: string
-  action: string
-  entity_type: string
-  entity_id: string | null
-  details: Record<string, unknown> | null
-  created_at: string
+async function fetchMemberVotes(memberId: string): Promise<VoteRecord[]> {
+  const { data } = await supabase
+    .from('votes')
+    .select('*, proposals(title)')
+    .eq('member_id', memberId)
+  return (data ?? []).map((v: any) => ({
+    ...v,
+    proposal_title: v.proposals?.title || 'Propuesta sin título',
+  })) as VoteRecord[]
 }
 
 export function MemberDetailPage() {
@@ -84,91 +89,27 @@ export function MemberDetailPage() {
   const updateRole = useUpdateMemberRole()
   const deactivate = useDeactivateMember()
   const reactivate = useReactivateMember()
-
-  const [member, setMember] = useState<Member | null>(null)
-  const [obligations, setObligations] = useState<PaymentObligation[]>([])
-  const [votes, setVotes] = useState<VoteRecord[]>([])
-  const [auditLog, setAuditLog] = useState<AuditEntry[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [editingRole, setEditingRole] = useState(false)
 
-  useEffect(() => {
-    if (!memberId || !communityId) return
+  const memberQuery = useMember(memberId)
+  const obligationsQuery = usePaymentObligations(memberId)
+  const votesQuery = useQuery({
+    queryKey: ['member-votes', memberId],
+    queryFn: () => fetchMemberVotes(memberId!),
+    enabled: !!memberId,
+  })
+  const auditQuery = useQuery({
+    queryKey: ['audit-log', communityId, memberQuery.data?.user_id],
+    queryFn: () => getAuditLog(communityId!, { userId: memberQuery.data!.user_id!, limit: 30 }),
+    enabled: !!communityId && !!memberQuery.data?.user_id,
+  })
 
-    let cancelled = false
-    setLoading(true)
-
-    async function fetchAll() {
-      try {
-        // Fetch member profile
-        const { data: memberData, error: memberErr } = await (supabase
-          .from('member_profiles' as any) as any)
-          .select('*')
-          .eq('id', memberId)
-          .single()
-
-        if (memberErr) {
-          const { data: fallback, error: fbErr } = await supabase
-            .from('members')
-            .select('*')
-            .eq('id', memberId!)
-            .single()
-          if (fbErr) throw fbErr
-          if (!cancelled) setMember(fallback as Member)
-        } else {
-          if (!cancelled) setMember(memberData as Member)
-        }
-
-        const userId = memberData?.user_id || ((await supabase
-          .from('members').select('user_id').eq('id', memberId!).single()
-        ).data as any)?.user_id
-
-        // Fetch payment obligations
-        const { data: oblData } = await supabase
-          .from('payment_obligations')
-          .select('*')
-          .eq('community_id', communityId!)
-          .eq('member_id', memberId!)
-          .order('due_date', { ascending: false })
-
-        if (!cancelled) setObligations((oblData ?? []) as PaymentObligation[])
-
-        // Fetch votes with proposal titles
-        if (userId) {
-          const { data: voteData } = await supabase
-            .from('votes')
-            .select('*, proposals(title)')
-            .eq('member_id', memberId!)
-
-          if (!cancelled) {
-            setVotes((voteData ?? []).map((v: any) => ({
-              ...v,
-              proposal_title: v.proposals?.title || 'Propuesta sin título',
-            })) as VoteRecord[])
-          }
-
-          // Fetch audit log
-          const { data: logData } = await supabase
-            .from('audit_log')
-            .select('*')
-            .eq('community_id', communityId!)
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false })
-            .limit(30)
-
-          if (!cancelled) setAuditLog((logData ?? []) as AuditEntry[])
-        }
-      } catch (err: any) {
-        if (!cancelled) setError(err?.message || 'Error al cargar el miembro')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-
-    fetchAll()
-    return () => { cancelled = true }
-  }, [memberId, communityId])
+  const member = memberQuery.data
+  const loading = memberQuery.isLoading
+  const error = memberQuery.error ? (memberQuery.error as Error).message : null
+  const obligations = (obligationsQuery.data ?? []) as PaymentObligation[]
+  const votes = (votesQuery.data ?? []) as VoteRecord[]
+  const auditLog = auditQuery.data ?? []
 
   if (loading) return <LoadingSpinner message="Cargando perfil del miembro..." className="py-20" />
 
@@ -192,19 +133,16 @@ export function MemberDetailPage() {
 
   const handleRoleChange = async (newRole: string) => {
     await updateRole.mutateAsync({ memberId: member.id, role: newRole as Role })
-    setMember(prev => prev ? { ...prev, role: newRole as Role } : null)
     setEditingRole(false)
   }
 
   const handleDeactivate = async () => {
     if (!confirm(`¿Desactivar a ${member.full_name || member.email}?`)) return
     await deactivate.mutateAsync(member.id)
-    setMember(prev => prev ? { ...prev, status: 'inactive' as any } : null)
   }
 
   const handleReactivate = async () => {
     await reactivate.mutateAsync(member.id)
-    setMember(prev => prev ? { ...prev, status: 'active' as any } : null)
   }
 
   return (

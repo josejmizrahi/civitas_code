@@ -3,6 +3,7 @@ import { useCommunityContext } from '@/app/providers'
 import { useAuth } from './useAuth'
 import {
   getMembers,
+  getMemberProfile,
   updateMemberRole,
   createInvitation,
   deactivateMember,
@@ -17,6 +18,7 @@ import type { Role } from '@/shared/types'
 const memberKeys = {
   all: ['members'] as const,
   list: (communityId: string) => [...memberKeys.all, 'list', communityId] as const,
+  detail: (memberId: string) => [...memberKeys.all, 'detail', memberId] as const,
 }
 
 // ---------------------------------------------------------------------------
@@ -34,6 +36,14 @@ export function useMembers() {
   })
 }
 
+export function useMember(memberId: string | undefined) {
+  return useQuery({
+    queryKey: memberKeys.detail(memberId!),
+    queryFn: () => getMemberProfile(memberId!),
+    enabled: !!memberId,
+  })
+}
+
 // ---------------------------------------------------------------------------
 // Mutations
 // ---------------------------------------------------------------------------
@@ -45,10 +55,9 @@ export function useUpdateMemberRole() {
   return useMutation({
     mutationFn: ({ memberId, role }: { memberId: string; role: Role }) =>
       updateMemberRole(memberId, role),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: memberKeys.list(communityId!),
-      })
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: memberKeys.list(communityId!) })
+      queryClient.invalidateQueries({ queryKey: memberKeys.detail(variables.memberId) })
     },
   })
 }
@@ -59,10 +68,9 @@ export function useDeactivateMember() {
 
   return useMutation({
     mutationFn: (memberId: string) => deactivateMember(memberId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: memberKeys.list(communityId!),
-      })
+    onSuccess: (_data, memberId) => {
+      queryClient.invalidateQueries({ queryKey: memberKeys.list(communityId!) })
+      queryClient.invalidateQueries({ queryKey: memberKeys.detail(memberId) })
     },
   })
 }
@@ -73,10 +81,9 @@ export function useReactivateMember() {
 
   return useMutation({
     mutationFn: (memberId: string) => reactivateMember(memberId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: memberKeys.list(communityId!),
-      })
+    onSuccess: (_data, memberId) => {
+      queryClient.invalidateQueries({ queryKey: memberKeys.list(communityId!) })
+      queryClient.invalidateQueries({ queryKey: memberKeys.detail(memberId) })
     },
   })
 }
@@ -90,9 +97,8 @@ export function useInviteMember() {
     mutationFn: ({ email, role }: { email: string; role: Role }) =>
       createInvitation(communityId!, email, role, user!.id),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: memberKeys.list(communityId!),
-      })
+      queryClient.invalidateQueries({ queryKey: memberKeys.list(communityId!) })
+      queryClient.invalidateQueries({ queryKey: ['invitations', communityId] })
     },
   })
 }

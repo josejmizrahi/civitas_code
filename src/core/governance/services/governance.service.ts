@@ -3,6 +3,10 @@ import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules
 import { sendEmailToMembers } from '@/shared/services/email.service'
 import type { Proposal, Vote, VoteSummary, Delegation, Minutes } from '../types'
 
+/**
+ * List proposals for a community, optionally filtered by status.
+ * Use status `'closed'` to include closed, approved, rejected, and executed.
+ */
 export async function getProposals(
   communityId: string,
   status?: string
@@ -13,13 +17,20 @@ export async function getProposals(
     .eq('community_id', communityId)
     .order('created_at', { ascending: false })
 
-  if (status) query = query.eq('status', status)
+  if (status) {
+    if (status === 'closed') {
+      query = query.in('status', ['closed', 'approved', 'rejected', 'executed'])
+    } else {
+      query = query.eq('status', status)
+    }
+  }
 
   const { data, error } = await query
   if (error) throw error
   return (data ?? []) as unknown as Proposal[]
 }
 
+/** Fetch a single proposal by ID. */
 export async function getProposal(proposalId: string): Promise<Proposal> {
   const { data, error } = await supabase
     .from('proposals')
@@ -468,13 +479,70 @@ export async function castVoteWithDelegations(
 // ---------------------------------------------------------------------------
 
 /**
- * Compute vote summary using actual weights, not member count.
+ * Pure function: compute vote summary from votes and params.
  * participation_pct = totalWeightVoted / totalAvailableWeight
- *
- * Supports all three voting models:
- * - simple: yes/no/abstain → yes needs majorityRequired of (yes+no)
- * - consensus: agree/disagree/abstain/block → ANY block = not approved; agree maps to yes
- * - multiple_choice: option_1..N → highest-voted option wins; agree/disagree not applicable
+ * Supports simple, consensus, and multiple_choice models.
+ */
+export function computeVoteSummary(
+  votes: Pick<Vote, 'value' | 'weight'>[],
+  model: string,
+  totalAvailableWeight: number,
+  quorumRequired: number,
+  majorityRequired: number
+): VoteSummary {
+  let yes = 0
+  let no = 0
+  let abstain = 0
+
+  if (model === 'consensus') {
+    for (const v of votes) {
+      const w = v.weight || 1
+      if (v.value === 'agree') yes += w
+      else if (v.value === 'disagree') no += w
+      else if (v.value === 'block') no += w
+      else abstain += w
+    }
+    const total = yes + no + abstain
+    const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
+    const quorum_met = participation_pct >= quorumRequired
+    const hasBlocks = votes.some((v) => v.value === 'block')
+    const votesForMajority = yes + no
+    const majority_met = !hasBlocks && (votesForMajority > 0 ? yes / votesForMajority >= majorityRequired : false)
+    return { yes, no, abstain, total, quorum_met, majority_met, participation_pct }
+  }
+
+  if (model === 'multiple_choice') {
+    const optionCounts: Record<string, number> = {}
+    let total = 0
+    for (const v of votes) {
+      const w = v.weight || 1
+      optionCounts[v.value] = (optionCounts[v.value] ?? 0) + w
+      total += w
+    }
+    const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
+    const quorum_met = participation_pct >= quorumRequired
+    const maxVotes = Math.max(0, ...Object.values(optionCounts))
+    const majority_met = quorum_met && maxVotes > 0
+    return { yes: maxVotes, no: total - maxVotes, abstain: 0, total, quorum_met, majority_met, participation_pct }
+  }
+
+  // Simple model
+  for (const v of votes) {
+    const w = v.weight || 1
+    if (v.value === 'yes') yes += w
+    else if (v.value === 'no') no += w
+    else abstain += w
+  }
+  const total = yes + no + abstain
+  const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
+  const quorum_met = participation_pct >= quorumRequired
+  const votesForMajority = yes + no
+  const majority_met = votesForMajority > 0 ? yes / votesForMajority >= majorityRequired : false
+  return { yes, no, abstain, total, quorum_met, majority_met, participation_pct }
+}
+
+/**
+ * Fetch proposal, votes, and member weights then compute vote summary.
  */
 export async function getVoteSummary(
   proposalId: string,
@@ -486,7 +554,6 @@ export async function getVoteSummary(
   const votes = await getVotes(proposalId)
   const model = proposal.voting_model || 'simple'
 
-  // Get total available weight from all active members, excluding morosos (Art. 2 LPCI)
   const { data: members } = await supabase
     .from('members')
     .select('voting_weight, financial_standing')
@@ -500,71 +567,7 @@ export async function getVoteSummary(
       0
     )
 
-  let yes = 0
-  let no = 0
-  let abstain = 0
-
-  if (model === 'consensus') {
-    // Consensus model: agree=yes, disagree=no, block=no (special), abstain=abstain
-    for (const v of votes) {
-      const w = v.weight || 1
-      if (v.value === 'agree') yes += w
-      else if (v.value === 'disagree') no += w
-      else if (v.value === 'block') no += w
-      else abstain += w
-    }
-
-    const total = yes + no + abstain
-    const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
-    const quorum_met = participation_pct >= quorumRequired
-
-    // GV-012: ANY block vote stops the proposal regardless of majority
-    const hasBlocks = votes.some((v) => v.value === 'block')
-    const votesForMajority = yes + no
-    const majority_met = !hasBlocks && (votesForMajority > 0 ? yes / votesForMajority >= majorityRequired : false)
-
-    return { yes, no, abstain, total, quorum_met, majority_met, participation_pct }
-  } else if (model === 'multiple_choice') {
-    // Multiple choice: count total participation, majority is by plurality (highest wins)
-    const optionCounts: Record<string, number> = {}
-    let total = 0
-    for (const v of votes) {
-      const w = v.weight || 1
-      optionCounts[v.value] = (optionCounts[v.value] ?? 0) + w
-      total += w
-    }
-
-    const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
-    const quorum_met = participation_pct >= quorumRequired
-
-    // Find the winning option
-    let maxVotes = 0
-    for (const count of Object.values(optionCounts)) {
-      if (count > maxVotes) maxVotes = count
-    }
-
-    // majority_met is true if there is a clear winner (plurality)
-    const majority_met = quorum_met && maxVotes > 0
-
-    // Map the highest-voted option count to "yes" for summary compatibility
-    return { yes: maxVotes, no: total - maxVotes, abstain: 0, total, quorum_met, majority_met, participation_pct }
-  } else {
-    // Simple model: yes/no/abstain
-    for (const v of votes) {
-      const w = v.weight || 1
-      if (v.value === 'yes') yes += w
-      else if (v.value === 'no') no += w
-      else abstain += w
-    }
-
-    const total = yes + no + abstain
-    const participation_pct = totalAvailableWeight > 0 ? total / totalAvailableWeight : 0
-    const quorum_met = participation_pct >= quorumRequired
-    const votesForMajority = yes + no
-    const majority_met = votesForMajority > 0 ? yes / votesForMajority >= majorityRequired : false
-
-    return { yes, no, abstain, total, quorum_met, majority_met, participation_pct }
-  }
+  return computeVoteSummary(votes, model, totalAvailableWeight, quorumRequired, majorityRequired)
 }
 
 // ---------------------------------------------------------------------------

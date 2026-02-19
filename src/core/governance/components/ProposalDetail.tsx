@@ -36,6 +36,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { Link } from 'react-router-dom'
 
 interface Props {
   proposalId: string
@@ -154,7 +155,21 @@ export function ProposalDetail({ proposalId }: Props) {
   }, [proposal?.status, proposal?.voting_end])
 
   if (isLoading) return <LoadingSpinner message="Cargando propuesta..." className="py-12" />
-  if (!proposal) return <div className="text-muted-foreground">Propuesta no encontrada.</div>
+  if (!proposal) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+          <p className="text-muted-foreground">Propuesta no encontrada o no tienes acceso.</p>
+          <Link to="/governance">
+            <Button variant="outline" size="sm">
+              <ArrowRight className="mr-2 h-4 w-4 rotate-180" />
+              Volver a Gobernanza
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    )
+  }
 
   const canStartDiscussion = proposal.status === 'draft' && isAdmin
   const canActivate = (proposal.status === 'draft' || proposal.status === 'discussion') && isAdmin

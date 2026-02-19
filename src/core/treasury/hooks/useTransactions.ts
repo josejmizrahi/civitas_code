@@ -7,7 +7,7 @@ const txKeys = {
   list: (communityId: string, filters?: any) => [...txKeys.all, 'list', communityId, filters] as const,
 }
 
-export function useTransactions(filters?: { dateFrom?: string; dateTo?: string; categoryId?: string; type?: string }) {
+export function useTransactions(filters?: { dateFrom?: string; dateTo?: string; categoryId?: string; type?: string; fundType?: string }) {
   const { communityId } = useCommunityContext()
 
   return useQuery({

@@ -80,7 +80,7 @@ export function TreasuryPage() {
 
   return (
     <div id="treasury-content" className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="no-print flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Tesorería</h1>
           <p className="text-sm text-muted-foreground">
@@ -116,49 +116,51 @@ export function TreasuryPage() {
       </div>
 
       {/* Fund Selector — LPCI CDMX Art. 57-58 dual fund toggle */}
-      <FundSelector value={selectedFund} onChange={setSelectedFund} />
+      <div className="no-print">
+        <FundSelector value={selectedFund} onChange={setSelectedFund} />
+      </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex-wrap overflow-x-auto">
-          <TabsTrigger value="dashboard" className="gap-1">
+        <TabsList className="no-print flex w-full overflow-x-auto overflow-y-hidden flex-nowrap sm:flex-wrap gap-1 min-w-0">
+          <TabsTrigger value="dashboard" className="shrink-0 gap-1 whitespace-nowrap">
             <BarChart3 className="h-3.5 w-3.5" />
-            Dashboard
+            <span className="hidden sm:inline">Dashboard</span>
           </TabsTrigger>
-          <TabsTrigger value="collection" className="gap-1">
+          <TabsTrigger value="collection" className="shrink-0 gap-1 whitespace-nowrap">
             <Banknote className="h-3.5 w-3.5" />
-            Cobranza
+            <span className="hidden sm:inline">Cobranza</span>
           </TabsTrigger>
-          <TabsTrigger value="recurring" className="gap-1">
+          <TabsTrigger value="recurring" className="shrink-0 gap-1 whitespace-nowrap">
             <RefreshCw className="h-3.5 w-3.5" />
-            Recurrentes
+            <span className="hidden sm:inline">Recurrentes</span>
           </TabsTrigger>
-          <TabsTrigger value="contracts" className="gap-1">
+          <TabsTrigger value="contracts" className="shrink-0 gap-1 whitespace-nowrap">
             <FileText className="h-3.5 w-3.5" />
-            Contratos
+            <span className="hidden sm:inline">Contratos</span>
           </TabsTrigger>
-          <TabsTrigger value="obligations" className="gap-1">
+          <TabsTrigger value="obligations" className="shrink-0 gap-1 whitespace-nowrap">
             <Receipt className="h-3.5 w-3.5" />
-            Obligaciones
+            <span className="hidden sm:inline">Obligaciones</span>
           </TabsTrigger>
-          <TabsTrigger value="my-payments" className="gap-1">
+          <TabsTrigger value="my-payments" className="shrink-0 gap-1 whitespace-nowrap">
             <User className="h-3.5 w-3.5" />
-            Mis Pagos
+            <span className="hidden sm:inline">Mis Pagos</span>
           </TabsTrigger>
-          <TabsTrigger value="transactions" className="gap-1">
+          <TabsTrigger value="transactions" className="shrink-0 gap-1 whitespace-nowrap">
             <CreditCard className="h-3.5 w-3.5" />
-            Transacciones
+            <span className="hidden sm:inline">Transacciones</span>
           </TabsTrigger>
-          <TabsTrigger value="budgets" className="gap-1">
+          <TabsTrigger value="budgets" className="shrink-0 gap-1 whitespace-nowrap">
             <PiggyBank className="h-3.5 w-3.5" />
-            Presupuestos
+            <span className="hidden sm:inline">Presupuestos</span>
           </TabsTrigger>
-          <TabsTrigger value="statements" className="gap-1">
+          <TabsTrigger value="statements" className="shrink-0 gap-1 whitespace-nowrap">
             <ClipboardList className="h-3.5 w-3.5" />
-            Estados Financieros
+            <span className="hidden sm:inline">Estados Financieros</span>
           </TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">
-          <FinancialDashboard />
+          <FinancialDashboard fundType={selectedFund} />
         </TabsContent>
         <TabsContent value="collection">
           <CollectionView />
@@ -176,10 +178,10 @@ export function TreasuryPage() {
           <MyPayments />
         </TabsContent>
         <TabsContent value="transactions">
-          <TransactionList />
+          <TransactionList fundType={selectedFund} />
         </TabsContent>
         <TabsContent value="budgets">
-          <BudgetOverview />
+          <BudgetOverview fundType={selectedFund} />
         </TabsContent>
         <TabsContent value="statements">
           <StatementList fundType={selectedFund} />

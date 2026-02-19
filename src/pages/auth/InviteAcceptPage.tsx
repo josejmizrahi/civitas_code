@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth, useCommunityContext } from '@/app/providers'
-import { getInvitationByToken, acceptInvitation } from '@/core/identity/services/identity.service'
+import { getInvitationByToken, acceptInvitation, getCommunity } from '@/core/identity/services/identity.service'
 import type { Invitation } from '@/core/identity/types'
 import { Button } from '@/shared/components/ui/button'
 import { Building2, CheckCircle, XCircle, Loader2 } from 'lucide-react'
@@ -13,17 +13,23 @@ export function InviteAcceptPage() {
   const navigate = useNavigate()
 
   const [invitation, setInvitation] = useState<Invitation | null>(null)
+  const [communityName, setCommunityName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [accepting, setAccepting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [accepted, setAccepted] = useState(false)
 
-  // Fetch invitation details
+  // Fetch invitation details and community name
   useEffect(() => {
     if (!token) return
     getInvitationByToken(token)
       .then((inv) => {
         setInvitation(inv)
+        if (inv.community_id) {
+          getCommunity(inv.community_id)
+            .then((c) => setCommunityName(c.name))
+            .catch(() => setCommunityName(null))
+        }
         setLoading(false)
       })
       .catch(() => {
@@ -88,8 +94,12 @@ export function InviteAcceptPage() {
           <Building2 className="mx-auto h-12 w-12 text-primary" />
           <h1 className="mt-4 text-xl font-semibold">Has sido invitado</h1>
           <p className="mt-2 text-muted-foreground">
-            Se te ha invitado con el rol de <strong>{invitation.role}</strong>.
-            Crea una cuenta o inicia sesión para aceptar.
+            {communityName ? (
+              <>Te han invitado a <strong>{communityName}</strong> con el rol de <strong>{invitation.role}</strong>.</>
+            ) : (
+              <>Se te ha invitado con el rol de <strong>{invitation.role}</strong>.</>
+            )}
+            {' '}Crea una cuenta o inicia sesión para aceptar.
           </p>
           <div className="mt-6 flex gap-3 justify-center">
             <Link to={`/register?invite=${token}`}>
@@ -126,7 +136,11 @@ export function InviteAcceptPage() {
         <Building2 className="mx-auto h-12 w-12 text-primary" />
         <h1 className="mt-4 text-xl font-semibold">Invitación pendiente</h1>
         <p className="mt-2 text-muted-foreground">
-          Has sido invitado como <strong>{invitation.role}</strong>.
+          {communityName ? (
+            <>Te han invitado a <strong>{communityName}</strong> como <strong>{invitation.role}</strong>.</>
+          ) : (
+            <>Has sido invitado como <strong>{invitation.role}</strong>.</>
+          )}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
           Invitado a: <strong>{invitation.email}</strong>

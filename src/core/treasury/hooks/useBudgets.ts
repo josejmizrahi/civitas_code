@@ -4,15 +4,15 @@ import { getBudgets, createBudget, updateBudget, deleteBudget } from '../service
 
 const budgetKeys = {
   all: ['budgets'] as const,
-  list: (communityId: string) => [...budgetKeys.all, 'list', communityId] as const,
+  list: (communityId: string, fundType?: string) => [...budgetKeys.all, 'list', communityId, fundType] as const,
 }
 
-export function useBudgets() {
+export function useBudgets(fundType?: string) {
   const { communityId } = useCommunityContext()
 
   return useQuery({
-    queryKey: budgetKeys.list(communityId!),
-    queryFn: () => getBudgets(communityId!),
+    queryKey: budgetKeys.list(communityId!, fundType),
+    queryFn: () => getBudgets(communityId!, fundType),
     enabled: !!communityId,
   })
 }

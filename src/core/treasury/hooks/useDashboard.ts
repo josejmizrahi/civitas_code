@@ -4,7 +4,7 @@ import { useCommunityContext } from '@/app/providers'
 import { getDashboardStats } from '../services/treasury.service'
 import { supabase } from '@/shared/lib/supabase'
 
-export function useDashboard() {
+export function useDashboard(fundType?: string) {
   const { communityId } = useCommunityContext()
   const queryClient = useQueryClient()
 
@@ -30,8 +30,8 @@ export function useDashboard() {
   }, [communityId, queryClient])
 
   return useQuery({
-    queryKey: ['dashboard', communityId],
-    queryFn: () => getDashboardStats(communityId!),
+    queryKey: ['dashboard', communityId, fundType],
+    queryFn: () => getDashboardStats(communityId!, fundType),
     enabled: !!communityId,
   })
 }

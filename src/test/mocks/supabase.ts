@@ -1,57 +1,87 @@
 import { vi } from 'vitest'
 
-function createQueryBuilder(returnData: any = [], returnError: any = null) {
-  const builder: any = {
-    select: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    delete: vi.fn().mockReturnThis(),
-    upsert: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    neq: vi.fn().mockReturnThis(),
-    gt: vi.fn().mockReturnThis(),
-    gte: vi.fn().mockReturnThis(),
-    lt: vi.fn().mockReturnThis(),
-    lte: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    is: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockReturnThis(),
-    range: vi.fn().mockReturnThis(),
-    single: vi.fn().mockResolvedValue({ data: Array.isArray(returnData) ? returnData[0] : returnData, error: returnError }),
-    maybeSingle: vi.fn().mockResolvedValue({ data: Array.isArray(returnData) ? returnData[0] : returnData, error: returnError }),
-    then: undefined as any,
-  }
-  // Make it thenable (default resolution for queries without .single())
-  const promise = Promise.resolve({ data: returnData, error: returnError })
-  builder.then = promise.then.bind(promise)
-  builder.catch = promise.catch.bind(promise)
-  return builder
-}
+type MockData = unknown
+type MockError = { message: string } | null
 
-export function createMockSupabase(overrides?: {
-  fromData?: Record<string, { data?: any; error?: any }>
-  rpcData?: Record<string, { data?: any; error?: any }>
-}) {
-  const mock = {
-    from: vi.fn((table: string) => {
-      const tableConfig = overrides?.fromData?.[table]
-      return createQueryBuilder(tableConfig?.data ?? [], tableConfig?.error ?? null)
-    }),
-    rpc: vi.fn((fn: string, _args?: any) => {
-      const rpcConfig = overrides?.rpcData?.[fn]
-      return Promise.resolve({ data: rpcConfig?.data ?? null, error: rpcConfig?.error ?? null })
-    }),
-    auth: {
-      getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
-      getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
-      onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
-      signInWithPassword: vi.fn().mockResolvedValue({ data: {}, error: null }),
-      signUp: vi.fn().mockResolvedValue({ data: {}, error: null }),
-      signOut: vi.fn().mockResolvedValue({ error: null }),
-      resetPasswordForEmail: vi.fn().mockResolvedValue({ error: null }),
-      updateUser: vi.fn().mockResolvedValue({ data: {}, error: null }),
+/**
+ * Chainable mock for Supabase client used in tests.
+ * Usage:
+ *   createSupabaseMock()
+ *     .from('members').select('*').eq('id', 'x').single()  -> { data: null, error: null }
+ *   createSupabaseMock({ data: mockMember })
+ *     .from('members').select('*').eq('id', 'x').single()  -> { data: mockMember, error: null }
+ */
+function chain() {
+  let data: MockData = null
+  let error: MockError = null
+
+  const from = vi.fn((_table: string) => ({
+    select: vi.fn((_columns = '*') => ({
+      eq: vi.fn((_column: string, _value: unknown) => ({
+        single: vi.fn(() => Promise.resolve({ data, error })),
+        maybeSingle: vi.fn(() => Promise.resolve({ data, error })),
+        order: vi.fn((_column: string, _opts?: { ascending?: boolean }) => ({
+          limit: vi.fn((_n: number) => Promise.resolve({ data: Array.isArray(data) ? data : [], error })),
+          then: (resolve: (r: { data: unknown[]; error: MockError }) => void) =>
+            Promise.resolve({ data: Array.isArray(data) ? data : [], error }).then(resolve),
+        })),
+        then: (resolve: (r: { data: unknown[]; error: MockError }) => void) =>
+          Promise.resolve({ data: Array.isArray(data) ? data : [], error }).then(resolve),
+      })),
+      order: vi.fn((_column: string, _opts?: { ascending?: boolean }) => ({
+        limit: vi.fn((_n: number) => Promise.resolve({ data: Array.isArray(data) ? data : [], error })),
+        then: (resolve: (r: { data: unknown[]; error: MockError }) => void) =>
+          Promise.resolve({ data: Array.isArray(data) ? data : [], error }).then(resolve),
+      })),
+      single: vi.fn(() => Promise.resolve({ data, error })),
+      maybeSingle: vi.fn(() => Promise.resolve({ data, error })),
+    })),
+    insert: vi.fn((_payload: unknown) => ({
+      select: vi.fn(() => ({ single: vi.fn(() => Promise.resolve({ data, error })) })),
+    })),
+    update: vi.fn((_payload: unknown) => ({
+      eq: vi.fn((_column: string, _value: unknown) => ({
+        select: vi.fn(() => ({ single: vi.fn(() => Promise.resolve({ data, error })) })),
+      })),
+    })),
+    delete: vi.fn(() => ({
+      eq: vi.fn(() => Promise.resolve({ error: null })),
+    })),
+    in: vi.fn((_column: string, _values: unknown[]) => ({
+      order: vi.fn(() => ({ then: (resolve: (r: { data: unknown[]; error: MockError }) => void) => Promise.resolve({ data: [], error }).then(resolve) })),
+    })),
+  }))
+
+  return {
+    from,
+    setData(d: MockData) {
+      data = d
+      return this
+    },
+    setError(e: MockError) {
+      error = e
+      return this
     },
   }
-  return mock
+}
+
+export function createSupabaseMock(initial?: { data?: MockData; error?: MockError }) {
+  const c = chain()
+  if (initial?.data != null) c.setData(initial.data)
+  if (initial?.error != null) c.setError(initial.error)
+  return c
+}
+
+/** Helper to build a mock supabase client that returns the given data from .from().select().eq().single() */
+export function mockSupabaseSingle<T>(data: T) {
+  return {
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(() => Promise.resolve({ data, error: null })),
+          maybeSingle: vi.fn(() => Promise.resolve({ data, error: null })),
+        })),
+      })),
+    })),
+  }
 }

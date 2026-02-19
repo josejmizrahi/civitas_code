@@ -6,6 +6,10 @@ import type { Member, Invitation, Community } from '../types'
 // Members
 // ---------------------------------------------------------------------------
 
+/**
+ * List members of a community (from member_profiles view when available).
+ * Optionally marks the current user with is_current_user.
+ */
 export async function getMembers(communityId: string, currentUserId?: string): Promise<Member[]> {
   // Use the member_profiles view which joins auth.users for email/full_name
   const { data, error } = await (supabase
@@ -31,6 +35,7 @@ export async function getMembers(communityId: string, currentUserId?: string): P
   })) as Member[]
 }
 
+/** Fetch a single member by ID from the members table. */
 export async function getMember(memberId: string): Promise<Member> {
   const { data, error } = await supabase
     .from('members')
@@ -39,6 +44,29 @@ export async function getMember(memberId: string): Promise<Member> {
     .single()
 
   if (error) throw error
+  return data as Member
+}
+
+/**
+ * Fetches a single member with profile data (email, full_name from member_profiles view).
+ * Falls back to members table if the view is unavailable.
+ */
+export async function getMemberProfile(memberId: string): Promise<Member> {
+  const { data, error } = await (supabase
+    .from('member_profiles' as any) as any)
+    .select('*')
+    .eq('id', memberId)
+    .single()
+
+  if (error) {
+    const { data: fallback, error: fbErr } = await supabase
+      .from('members')
+      .select('*')
+      .eq('id', memberId)
+      .single()
+    if (fbErr) throw fbErr
+    return fallback as Member
+  }
   return data as Member
 }
 
