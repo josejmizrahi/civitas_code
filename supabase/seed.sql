@@ -8,90 +8,148 @@
 -- 1. AUTH USERS (6 demo users)
 -- ============================================================================
 
+-- ============================================================================
+-- 0. CLEANUP: Remove existing demo data to allow re-seeding
+-- ============================================================================
+DO $cleanup$
+DECLARE
+  v_community_id uuid;
+BEGIN
+  SELECT id INTO v_community_id FROM communities WHERE slug = 'las-palmas';
+  IF v_community_id IS NOT NULL THEN
+    DELETE FROM audit_log WHERE community_id = v_community_id;
+    DELETE FROM notifications WHERE community_id = v_community_id;
+    DELETE FROM comment_reactions WHERE comment_id IN (SELECT id FROM discussion_comments WHERE community_id = v_community_id);
+    DELETE FROM discussion_comments WHERE community_id = v_community_id;
+    DELETE FROM contract_installments WHERE community_id = v_community_id;
+    DELETE FROM ratings WHERE community_id = v_community_id;
+    DELETE FROM contracts WHERE community_id = v_community_id;
+    DELETE FROM votes WHERE proposal_id IN (SELECT id FROM proposals WHERE community_id = v_community_id);
+    DELETE FROM implementation_tasks WHERE community_id = v_community_id;
+    DELETE FROM budgets WHERE community_id = v_community_id;
+    DELETE FROM proposals WHERE community_id = v_community_id;
+    DELETE FROM payment_plan_installments WHERE plan_id IN (SELECT id FROM payment_plans WHERE community_id = v_community_id);
+    DELETE FROM payment_plans WHERE community_id = v_community_id;
+    DELETE FROM payment_obligations WHERE community_id = v_community_id;
+    DELETE FROM transactions WHERE community_id = v_community_id;
+    DELETE FROM recurring_schedules WHERE community_id = v_community_id;
+    DELETE FROM categories WHERE community_id = v_community_id;
+    DELETE FROM entity_contacts WHERE entity_id IN (SELECT id FROM entities WHERE community_id = v_community_id);
+    DELETE FROM entities WHERE community_id = v_community_id;
+    DELETE FROM delegations WHERE community_id = v_community_id;
+    DELETE FROM vigilancia_reports WHERE community_id = v_community_id;
+    DELETE FROM admin_terms WHERE community_id = v_community_id;
+    DELETE FROM census_snapshots WHERE community_id = v_community_id;
+    DELETE FROM convocatorias WHERE community_id = v_community_id;
+    DELETE FROM assemblies WHERE community_id = v_community_id;
+    DELETE FROM documents WHERE community_id = v_community_id;
+    DELETE FROM minutes WHERE community_id = v_community_id;
+    DELETE FROM maintenance_requests WHERE unit_id IN (SELECT id FROM units WHERE community_id = v_community_id);
+    DELETE FROM units WHERE community_id = v_community_id;
+    DELETE FROM common_areas WHERE community_id = v_community_id;
+    DELETE FROM roles WHERE community_id = v_community_id;
+    DELETE FROM invitations WHERE community_id = v_community_id;
+    DELETE FROM financial_statements WHERE community_id = v_community_id;
+    DELETE FROM members WHERE community_id = v_community_id;
+    DELETE FROM communities WHERE id = v_community_id;
+  END IF;
+END $cleanup$;
+
+DELETE FROM auth.users WHERE email IN ('carlos@laspalmas.mx','maria@laspalmas.mx','roberto@laspalmas.mx','ana@laspalmas.mx','pedro@laspalmas.mx','laura@laspalmas.mx');
+
 INSERT INTO auth.users (
   instance_id, id, aud, role, email, encrypted_password,
-  email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
-  created_at, updated_at, confirmation_token, recovery_token
+  email_confirmed_at, confirmed_at, raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at, confirmation_token, recovery_token,
+  email_change_token_new, email_change, phone_change, phone_change_token,
+  email_change_token_current, email_change_confirm_status,
+  reauthentication_token, is_sso_user, is_anonymous
 ) VALUES
   (
     '00000000-0000-0000-0000-000000000000',
     'a0000000-0000-0000-0000-000000000001',
     'authenticated', 'authenticated',
     'carlos@laspalmas.mx',
-    crypt('password123', gen_salt('bf')),
-    now(),
+    crypt('password123', gen_salt('bf', 10)),
+    now(), now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
-    '{"full_name":"Carlos Martínez"}'::jsonb,
-    now() - interval '6 months', now(), '', ''
+    '{"sub":"a0000000-0000-0000-0000-000000000001","email":"carlos@laspalmas.mx","full_name":"Carlos Martínez","email_verified":true,"phone_verified":false}'::jsonb,
+    now() - interval '6 months', now(), '', '',
+    '', '', '', '', '', 0, '', false, false
   ),
   (
     '00000000-0000-0000-0000-000000000000',
     'a0000000-0000-0000-0000-000000000002',
     'authenticated', 'authenticated',
     'maria@laspalmas.mx',
-    crypt('password123', gen_salt('bf')),
-    now(),
+    crypt('password123', gen_salt('bf', 10)),
+    now(), now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
-    '{"full_name":"María González"}'::jsonb,
-    now() - interval '6 months', now(), '', ''
+    '{"sub":"a0000000-0000-0000-0000-000000000002","email":"maria@laspalmas.mx","full_name":"María González","email_verified":true,"phone_verified":false}'::jsonb,
+    now() - interval '6 months', now(), '', '',
+    '', '', '', '', '', 0, '', false, false
   ),
   (
     '00000000-0000-0000-0000-000000000000',
     'a0000000-0000-0000-0000-000000000003',
     'authenticated', 'authenticated',
     'roberto@laspalmas.mx',
-    crypt('password123', gen_salt('bf')),
-    now(),
+    crypt('password123', gen_salt('bf', 10)),
+    now(), now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
-    '{"full_name":"Roberto López"}'::jsonb,
-    now() - interval '5 months', now(), '', ''
+    '{"sub":"a0000000-0000-0000-0000-000000000003","email":"roberto@laspalmas.mx","full_name":"Roberto López","email_verified":true,"phone_verified":false}'::jsonb,
+    now() - interval '5 months', now(), '', '',
+    '', '', '', '', '', 0, '', false, false
   ),
   (
     '00000000-0000-0000-0000-000000000000',
     'a0000000-0000-0000-0000-000000000004',
     'authenticated', 'authenticated',
     'ana@laspalmas.mx',
-    crypt('password123', gen_salt('bf')),
-    now(),
+    crypt('password123', gen_salt('bf', 10)),
+    now(), now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
-    '{"full_name":"Ana Rodríguez"}'::jsonb,
-    now() - interval '5 months', now(), '', ''
+    '{"sub":"a0000000-0000-0000-0000-000000000004","email":"ana@laspalmas.mx","full_name":"Ana Rodríguez","email_verified":true,"phone_verified":false}'::jsonb,
+    now() - interval '5 months', now(), '', '',
+    '', '', '', '', '', 0, '', false, false
   ),
   (
     '00000000-0000-0000-0000-000000000000',
     'a0000000-0000-0000-0000-000000000005',
     'authenticated', 'authenticated',
     'pedro@laspalmas.mx',
-    crypt('password123', gen_salt('bf')),
-    now(),
+    crypt('password123', gen_salt('bf', 10)),
+    now(), now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
-    '{"full_name":"Pedro Sánchez"}'::jsonb,
-    now() - interval '4 months', now(), '', ''
+    '{"sub":"a0000000-0000-0000-0000-000000000005","email":"pedro@laspalmas.mx","full_name":"Pedro Sánchez","email_verified":true,"phone_verified":false}'::jsonb,
+    now() - interval '4 months', now(), '', '',
+    '', '', '', '', '', 0, '', false, false
   ),
   (
     '00000000-0000-0000-0000-000000000000',
     'a0000000-0000-0000-0000-000000000006',
     'authenticated', 'authenticated',
     'laura@laspalmas.mx',
-    crypt('password123', gen_salt('bf')),
-    now(),
+    crypt('password123', gen_salt('bf', 10)),
+    now(), now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
-    '{"full_name":"Laura Torres"}'::jsonb,
-    now() - interval '3 months', now(), '', ''
+    '{"sub":"a0000000-0000-0000-0000-000000000006","email":"laura@laspalmas.mx","full_name":"Laura Torres","email_verified":true,"phone_verified":false}'::jsonb,
+    now() - interval '3 months', now(), '', '',
+    '', '', '', '', '', 0, '', false, false
   )
 ON CONFLICT (id) DO NOTHING;
 
--- Auth identities (required for Supabase auth to work)
+-- Auth identities (required for Supabase GoTrue to work)
 INSERT INTO auth.identities (
   id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
 ) VALUES
-  ('a0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', '{"sub":"a0000000-0000-0000-0000-000000000001","email":"carlos@laspalmas.mx"}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000001', now(), now(), now()),
-  ('a0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000002', '{"sub":"a0000000-0000-0000-0000-000000000002","email":"maria@laspalmas.mx"}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000002', now(), now(), now()),
-  ('a0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000003', '{"sub":"a0000000-0000-0000-0000-000000000003","email":"roberto@laspalmas.mx"}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000003', now(), now(), now()),
-  ('a0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000004', '{"sub":"a0000000-0000-0000-0000-000000000004","email":"ana@laspalmas.mx"}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000004', now(), now(), now()),
-  ('a0000000-0000-0000-0000-000000000005', 'a0000000-0000-0000-0000-000000000005', '{"sub":"a0000000-0000-0000-0000-000000000005","email":"pedro@laspalmas.mx"}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000005', now(), now(), now()),
-  ('a0000000-0000-0000-0000-000000000006', 'a0000000-0000-0000-0000-000000000006', '{"sub":"a0000000-0000-0000-0000-000000000006","email":"laura@laspalmas.mx"}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000006', now(), now(), now())
-ON CONFLICT (id) DO NOTHING;
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000001', '{"sub":"a0000000-0000-0000-0000-000000000001","email":"carlos@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000001', now(), now(), now()),
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000002', '{"sub":"a0000000-0000-0000-0000-000000000002","email":"maria@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000002', now(), now(), now()),
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000003', '{"sub":"a0000000-0000-0000-0000-000000000003","email":"roberto@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000003', now(), now(), now()),
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000004', '{"sub":"a0000000-0000-0000-0000-000000000004","email":"ana@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000004', now(), now(), now()),
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000005', '{"sub":"a0000000-0000-0000-0000-000000000005","email":"pedro@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000005', now(), now(), now()),
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000006', '{"sub":"a0000000-0000-0000-0000-000000000006","email":"laura@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000006', now(), now(), now())
+ON CONFLICT (provider_id, provider) DO NOTHING;
 
 -- ============================================================================
 -- 2. COMMUNITY (demo condo)
@@ -140,9 +198,7 @@ INSERT INTO communities (id, name, slug, type, config, rules) VALUES (
       "delinquent_restrictions": ["vote", "propose"]
     }
   }'::jsonb
-) ON CONFLICT (id) DO UPDATE SET
-  rules = EXCLUDED.rules,
-  config = EXCLUDED.config;
+);
 
 -- ============================================================================
 -- 3. MEMBERS (6 members with different roles)

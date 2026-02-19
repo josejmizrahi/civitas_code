@@ -8,8 +8,10 @@
 ALTER TABLE transactions
   ADD COLUMN IF NOT EXISTS fund_type text NOT NULL DEFAULT 'mantenimiento';
 
-ALTER TABLE transactions
-  ADD CONSTRAINT valid_fund_type CHECK (fund_type IN ('mantenimiento', 'reserva'));
+DO $$ BEGIN
+  ALTER TABLE transactions DROP CONSTRAINT IF EXISTS valid_fund_type;
+  ALTER TABLE transactions ADD CONSTRAINT valid_fund_type CHECK (fund_type IN ('mantenimiento', 'reserva'));
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_transactions_fund_type
   ON transactions(community_id, fund_type);
@@ -18,8 +20,10 @@ CREATE INDEX IF NOT EXISTS idx_transactions_fund_type
 ALTER TABLE budgets
   ADD COLUMN IF NOT EXISTS fund_type text NOT NULL DEFAULT 'mantenimiento';
 
-ALTER TABLE budgets
-  ADD CONSTRAINT valid_budget_fund_type CHECK (fund_type IN ('mantenimiento', 'reserva'));
+DO $$ BEGIN
+  ALTER TABLE budgets DROP CONSTRAINT IF EXISTS valid_budget_fund_type;
+  ALTER TABLE budgets ADD CONSTRAINT valid_budget_fund_type CHECK (fund_type IN ('mantenimiento', 'reserva'));
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_budgets_fund_type
   ON budgets(community_id, fund_type);
@@ -28,8 +32,10 @@ CREATE INDEX IF NOT EXISTS idx_budgets_fund_type
 ALTER TABLE payment_obligations
   ADD COLUMN IF NOT EXISTS fund_type text NOT NULL DEFAULT 'mantenimiento';
 
-ALTER TABLE payment_obligations
-  ADD CONSTRAINT valid_obligation_fund_type CHECK (fund_type IN ('mantenimiento', 'reserva'));
+DO $$ BEGIN
+  ALTER TABLE payment_obligations DROP CONSTRAINT IF EXISTS valid_obligation_fund_type;
+  ALTER TABLE payment_obligations ADD CONSTRAINT valid_obligation_fund_type CHECK (fund_type IN ('mantenimiento', 'reserva'));
+END $$;
 
 CREATE INDEX IF NOT EXISTS idx_obligations_fund_type
   ON payment_obligations(community_id, fund_type);
@@ -69,22 +75,38 @@ CREATE INDEX IF NOT EXISTS idx_statements_fund_type
 ALTER TABLE financial_statements ENABLE ROW LEVEL SECURITY;
 
 -- All community members can view financial statements (transparency — Art. 43)
-CREATE POLICY "Members can view financial statements"
-  ON financial_statements FOR SELECT
-  USING (community_id IN (SELECT get_user_community_ids()));
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can view financial statements') THEN
+    CREATE POLICY "Members can view financial statements"
+      ON financial_statements FOR SELECT
+      USING (community_id IN (SELECT get_user_community_ids()));
+  END IF;
+END $$;
 
 -- Admin/Tesorero can generate and manage statements
-CREATE POLICY "Admin/Tesorero can insert statements"
-  ON financial_statements FOR INSERT
-  WITH CHECK (get_user_role(community_id) IN ('admin', 'tesorero'));
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admin/Tesorero can insert statements') THEN
+    CREATE POLICY "Admin/Tesorero can insert statements"
+      ON financial_statements FOR INSERT
+      WITH CHECK (get_user_role(community_id) IN ('admin', 'tesorero'));
+  END IF;
+END $$;
 
-CREATE POLICY "Admin/Tesorero can update statements"
-  ON financial_statements FOR UPDATE
-  USING (get_user_role(community_id) IN ('admin', 'tesorero'));
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admin/Tesorero can update statements') THEN
+    CREATE POLICY "Admin/Tesorero can update statements"
+      ON financial_statements FOR UPDATE
+      USING (get_user_role(community_id) IN ('admin', 'tesorero'));
+  END IF;
+END $$;
 
-CREATE POLICY "Admin/Tesorero can delete statements"
-  ON financial_statements FOR DELETE
-  USING (get_user_role(community_id) IN ('admin', 'tesorero'));
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admin/Tesorero can delete statements') THEN
+    CREATE POLICY "Admin/Tesorero can delete statements"
+      ON financial_statements FOR DELETE
+      USING (get_user_role(community_id) IN ('admin', 'tesorero'));
+  END IF;
+END $$;
 
 -- 6. SQL function to generate monthly statement
 CREATE OR REPLACE FUNCTION generate_monthly_statement(

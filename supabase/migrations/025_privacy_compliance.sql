@@ -1,5 +1,5 @@
 -- Privacy consent tracking — LFPDPPP 2025
-CREATE TABLE privacy_consents (
+CREATE TABLE IF NOT EXISTS privacy_consents (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   version text NOT NULL,
@@ -14,10 +14,10 @@ CREATE TABLE privacy_consents (
   CONSTRAINT valid_consent_type CHECK (consent_type IN ('privacy_notice', 'sensitive_data', 'marketing'))
 );
 
-CREATE INDEX idx_privacy_consents_user ON privacy_consents(user_id);
+CREATE INDEX IF NOT EXISTS idx_privacy_consents_user ON privacy_consents(user_id);
 
 -- ARCO rights requests — LFPDPPP 2025 Art. 21-34
-CREATE TABLE arco_requests (
+CREATE TABLE IF NOT EXISTS arco_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id),
   type text NOT NULL,
@@ -33,21 +33,54 @@ CREATE TABLE arco_requests (
   CONSTRAINT valid_arco_status CHECK (status IN ('pending', 'in_review', 'completed', 'denied'))
 );
 
-CREATE INDEX idx_arco_requests_user ON arco_requests(user_id);
-CREATE INDEX idx_arco_requests_status ON arco_requests(status);
+CREATE INDEX IF NOT EXISTS idx_arco_requests_user ON arco_requests(user_id);
+CREATE INDEX IF NOT EXISTS idx_arco_requests_status ON arco_requests(status);
 
 -- RLS
 ALTER TABLE privacy_consents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE arco_requests ENABLE ROW LEVEL SECURITY;
 
 -- Users can see/manage their own consents
-CREATE POLICY "Users can view own consents" ON privacy_consents FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Users can insert own consents" ON privacy_consents FOR INSERT WITH CHECK (user_id = auth.uid());
-CREATE POLICY "Users can update own consents" ON privacy_consents FOR UPDATE USING (user_id = auth.uid());
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own consents') THEN
+    CREATE POLICY "Users can view own consents" ON privacy_consents FOR SELECT USING (user_id = auth.uid());
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can insert own consents') THEN
+    CREATE POLICY "Users can insert own consents" ON privacy_consents FOR INSERT WITH CHECK (user_id = auth.uid());
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can update own consents') THEN
+    CREATE POLICY "Users can update own consents" ON privacy_consents FOR UPDATE USING (user_id = auth.uid());
+  END IF;
+END $$;
 
 -- Users can create ARCO requests and view their own
-CREATE POLICY "Users can view own arco requests" ON arco_requests FOR SELECT USING (user_id = auth.uid());
-CREATE POLICY "Users can create arco requests" ON arco_requests FOR INSERT WITH CHECK (user_id = auth.uid());
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can view own arco requests') THEN
+    CREATE POLICY "Users can view own arco requests" ON arco_requests FOR SELECT USING (user_id = auth.uid());
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Users can create arco requests') THEN
+    CREATE POLICY "Users can create arco requests" ON arco_requests FOR INSERT WITH CHECK (user_id = auth.uid());
+  END IF;
+END $$;
+
 -- Admins can view all ARCO requests (via community membership check is complex; use permissive for now)
-CREATE POLICY "Authenticated can view arco requests" ON arco_requests FOR SELECT USING (auth.uid() IS NOT NULL);
-CREATE POLICY "Authenticated can update arco requests" ON arco_requests FOR UPDATE USING (auth.uid() IS NOT NULL);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Authenticated can view arco requests') THEN
+    CREATE POLICY "Authenticated can view arco requests" ON arco_requests FOR SELECT USING (auth.uid() IS NOT NULL);
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Authenticated can update arco requests') THEN
+    CREATE POLICY "Authenticated can update arco requests" ON arco_requests FOR UPDATE USING (auth.uid() IS NOT NULL);
+  END IF;
+END $$;

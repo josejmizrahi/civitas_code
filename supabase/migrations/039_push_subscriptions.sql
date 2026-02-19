@@ -25,9 +25,13 @@ CREATE INDEX IF NOT EXISTS idx_push_subscriptions_member ON push_subscriptions(m
 ALTER TABLE push_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Users can manage their own subscriptions
-CREATE POLICY push_subscriptions_own ON push_subscriptions
-  FOR ALL USING (user_id = auth.uid())
-  WITH CHECK (user_id = auth.uid());
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'push_subscriptions_own') THEN
+    CREATE POLICY push_subscriptions_own ON push_subscriptions
+      FOR ALL USING (user_id = auth.uid())
+      WITH CHECK (user_id = auth.uid());
+  END IF;
+END $$;
 
 -- ---------------------------------------------------------------------------
 -- Notification delivery tracking columns

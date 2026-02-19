@@ -59,8 +59,11 @@ ALTER TABLE proposals ADD COLUMN IF NOT EXISTS template_id text;
 -- ---------------------------------------------------------------------------
 
 -- Discussion end must be after discussion start
-ALTER TABLE proposals ADD CONSTRAINT valid_discussion_period
-  CHECK (discussion_end IS NULL OR discussion_start IS NULL OR discussion_end > discussion_start);
+DO $$ BEGIN
+  ALTER TABLE proposals DROP CONSTRAINT IF EXISTS valid_discussion_period;
+  ALTER TABLE proposals ADD CONSTRAINT valid_discussion_period
+    CHECK (discussion_end IS NULL OR discussion_start IS NULL OR discussion_end > discussion_start);
+END $$;
 
 -- ---------------------------------------------------------------------------
 -- 7. Pre-execution notification function (GV-045)

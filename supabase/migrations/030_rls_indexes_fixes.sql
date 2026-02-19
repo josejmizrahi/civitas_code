@@ -19,13 +19,17 @@ DROP POLICY IF EXISTS "Authenticated can insert audit log" ON audit_log;
 -- Add a new policy that restricts regular user inserts:
 --   a) community_id must be one the user belongs to
 --   b) user_id in the inserted row must match auth.uid()
-CREATE POLICY "Members insert own audit log"
-  ON audit_log FOR INSERT
-  TO authenticated
-  WITH CHECK (
-    user_id = auth.uid()
-    AND community_id IN (SELECT get_user_community_ids())
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members insert own audit log') THEN
+    CREATE POLICY "Members insert own audit log"
+      ON audit_log FOR INSERT
+      TO authenticated
+      WITH CHECK (
+        user_id = auth.uid()
+        AND community_id IN (SELECT get_user_community_ids())
+      );
+  END IF;
+END $$;
 
 -- ============================================================
 -- 2. FIX notifications INSERT policy
@@ -38,18 +42,22 @@ CREATE POLICY "Members insert own audit log"
 
 DROP POLICY IF EXISTS "System can insert notifications" ON notifications;
 
-CREATE POLICY "Admins insert community notifications"
-  ON notifications FOR INSERT
-  TO authenticated
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM members
-      WHERE members.user_id = auth.uid()
-        AND members.role = 'admin'
-        AND members.community_id = notifications.community_id
-        AND members.status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins insert community notifications') THEN
+    CREATE POLICY "Admins insert community notifications"
+      ON notifications FOR INSERT
+      TO authenticated
+      WITH CHECK (
+        EXISTS (
+          SELECT 1 FROM members
+          WHERE members.user_id = auth.uid()
+            AND members.role = 'admin'
+            AND members.community_id = notifications.community_id
+            AND members.status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
 -- ============================================================
 -- 3. arco_requests — verified OK (fixed in migration 029)

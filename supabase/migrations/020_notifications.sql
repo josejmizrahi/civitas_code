@@ -1,5 +1,5 @@
 -- Notifications table for in-app notification system
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   community_id uuid REFERENCES communities(id) NOT NULL,
   member_id uuid REFERENCES members(id) NOT NULL,
@@ -11,18 +11,30 @@ CREATE TABLE notifications (
   created_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX idx_notifications_member ON notifications(member_id, read, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_member ON notifications(member_id, read, created_at DESC);
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Members see own notifications" ON notifications FOR SELECT USING (
-  member_id IN (SELECT id FROM members WHERE user_id = auth.uid())
-);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members see own notifications') THEN
+    CREATE POLICY "Members see own notifications" ON notifications FOR SELECT USING (
+      member_id IN (SELECT id FROM members WHERE user_id = auth.uid())
+    );
+  END IF;
+END $$;
 
-CREATE POLICY "System can insert notifications" ON notifications FOR INSERT WITH CHECK (true);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'System can insert notifications') THEN
+    CREATE POLICY "System can insert notifications" ON notifications FOR INSERT WITH CHECK (true);
+  END IF;
+END $$;
 
-CREATE POLICY "Members can update own notifications" ON notifications FOR UPDATE USING (
-  member_id IN (SELECT id FROM members WHERE user_id = auth.uid())
-);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can update own notifications') THEN
+    CREATE POLICY "Members can update own notifications" ON notifications FOR UPDATE USING (
+      member_id IN (SELECT id FROM members WHERE user_id = auth.uid())
+    );
+  END IF;
+END $$;
 
 -- Helper: notify all active members of a community
 CREATE OR REPLACE FUNCTION notify_community(

@@ -29,29 +29,41 @@ CREATE INDEX IF NOT EXISTS idx_assembly_proxies_grantor ON assembly_proxies(gran
 -- RLS for assembly_proxies
 ALTER TABLE assembly_proxies ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Members can view proxies for their community"
-  ON assembly_proxies FOR SELECT
-  USING (
-    community_id IN (
-      SELECT community_id FROM members WHERE user_id = auth.uid() AND status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can view proxies for their community') THEN
+    CREATE POLICY "Members can view proxies for their community"
+      ON assembly_proxies FOR SELECT
+      USING (
+        community_id IN (
+          SELECT community_id FROM members WHERE user_id = auth.uid() AND status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Members can insert proxies for their community"
-  ON assembly_proxies FOR INSERT
-  WITH CHECK (
-    community_id IN (
-      SELECT community_id FROM members WHERE user_id = auth.uid() AND status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can insert proxies for their community') THEN
+    CREATE POLICY "Members can insert proxies for their community"
+      ON assembly_proxies FOR INSERT
+      WITH CHECK (
+        community_id IN (
+          SELECT community_id FROM members WHERE user_id = auth.uid() AND status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Members can update proxies for their community"
-  ON assembly_proxies FOR UPDATE
-  USING (
-    community_id IN (
-      SELECT community_id FROM members WHERE user_id = auth.uid() AND status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can update proxies for their community') THEN
+    CREATE POLICY "Members can update proxies for their community"
+      ON assembly_proxies FOR UPDATE
+      USING (
+        community_id IN (
+          SELECT community_id FROM members WHERE user_id = auth.uid() AND status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
 -- ---------------------------------------------------------------------------
 -- 2. Validate proxy limits function (Art. 36 LPCI CDMX)
@@ -142,26 +154,38 @@ CREATE INDEX IF NOT EXISTS idx_document_retention_document ON document_retention
 -- RLS for document_retention
 ALTER TABLE document_retention ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Members can view retention records for their community"
-  ON document_retention FOR SELECT
-  USING (
-    community_id IN (
-      SELECT community_id FROM members WHERE user_id = auth.uid() AND status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can view retention records for their community') THEN
+    CREATE POLICY "Members can view retention records for their community"
+      ON document_retention FOR SELECT
+      USING (
+        community_id IN (
+          SELECT community_id FROM members WHERE user_id = auth.uid() AND status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Admins can insert retention records"
-  ON document_retention FOR INSERT
-  WITH CHECK (
-    community_id IN (
-      SELECT community_id FROM members WHERE user_id = auth.uid() AND role = 'admin' AND status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can insert retention records') THEN
+    CREATE POLICY "Admins can insert retention records"
+      ON document_retention FOR INSERT
+      WITH CHECK (
+        community_id IN (
+          SELECT community_id FROM members WHERE user_id = auth.uid() AND role = 'admin' AND status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Admins can update retention records"
-  ON document_retention FOR UPDATE
-  USING (
-    community_id IN (
-      SELECT community_id FROM members WHERE user_id = auth.uid() AND role = 'admin' AND status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can update retention records') THEN
+    CREATE POLICY "Admins can update retention records"
+      ON document_retention FOR UPDATE
+      USING (
+        community_id IN (
+          SELECT community_id FROM members WHERE user_id = auth.uid() AND role = 'admin' AND status = 'active'
+        )
+      );
+  END IF;
+END $$;

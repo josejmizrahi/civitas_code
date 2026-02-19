@@ -63,80 +63,104 @@ ALTER TABLE payment_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payment_plan_installments ENABLE ROW LEVEL SECURITY;
 
 -- Members can see their own plans, admins can see all in their community
-CREATE POLICY payment_plans_select ON payment_plans FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM members m
-      WHERE m.id = payment_plans.member_id
-      AND m.user_id = auth.uid()
-    )
-    OR
-    EXISTS (
-      SELECT 1 FROM members m
-      WHERE m.community_id = payment_plans.community_id
-      AND m.user_id = auth.uid()
-      AND m.role IN ('admin', 'tesorero')
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'payment_plans_select') THEN
+    CREATE POLICY payment_plans_select ON payment_plans FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1 FROM members m
+          WHERE m.id = payment_plans.member_id
+          AND m.user_id = auth.uid()
+        )
+        OR
+        EXISTS (
+          SELECT 1 FROM members m
+          WHERE m.community_id = payment_plans.community_id
+          AND m.user_id = auth.uid()
+          AND m.role IN ('admin', 'tesorero')
+        )
+      );
+  END IF;
+END $$;
 
 -- Members can propose their own plans
-CREATE POLICY payment_plans_insert ON payment_plans FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM members m
-      WHERE m.id = payment_plans.member_id
-      AND m.user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'payment_plans_insert') THEN
+    CREATE POLICY payment_plans_insert ON payment_plans FOR INSERT
+      WITH CHECK (
+        EXISTS (
+          SELECT 1 FROM members m
+          WHERE m.id = payment_plans.member_id
+          AND m.user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- Admins/tesorero can update plans (approve/reject)
-CREATE POLICY payment_plans_update ON payment_plans FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM members m
-      WHERE m.community_id = payment_plans.community_id
-      AND m.user_id = auth.uid()
-      AND m.role IN ('admin', 'tesorero')
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'payment_plans_update') THEN
+    CREATE POLICY payment_plans_update ON payment_plans FOR UPDATE
+      USING (
+        EXISTS (
+          SELECT 1 FROM members m
+          WHERE m.community_id = payment_plans.community_id
+          AND m.user_id = auth.uid()
+          AND m.role IN ('admin', 'tesorero')
+        )
+      );
+  END IF;
+END $$;
 
 -- Installments: same visibility as parent plan
-CREATE POLICY plan_installments_select ON payment_plan_installments FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM payment_plans pp
-      JOIN members m ON m.id = pp.member_id
-      WHERE pp.id = payment_plan_installments.plan_id
-      AND (
-        m.user_id = auth.uid()
-        OR EXISTS (
-          SELECT 1 FROM members m2
-          WHERE m2.community_id = pp.community_id
-          AND m2.user_id = auth.uid()
-          AND m2.role IN ('admin', 'tesorero')
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'plan_installments_select') THEN
+    CREATE POLICY plan_installments_select ON payment_plan_installments FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1 FROM payment_plans pp
+          JOIN members m ON m.id = pp.member_id
+          WHERE pp.id = payment_plan_installments.plan_id
+          AND (
+            m.user_id = auth.uid()
+            OR EXISTS (
+              SELECT 1 FROM members m2
+              WHERE m2.community_id = pp.community_id
+              AND m2.user_id = auth.uid()
+              AND m2.role IN ('admin', 'tesorero')
+            )
+          )
         )
-      )
-    )
-  );
+      );
+  END IF;
+END $$;
 
 -- Installments insert/update by admin/tesorero
-CREATE POLICY plan_installments_insert ON payment_plan_installments FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM payment_plans pp
-      JOIN members m ON m.community_id = pp.community_id
-      WHERE pp.id = payment_plan_installments.plan_id
-      AND m.user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'plan_installments_insert') THEN
+    CREATE POLICY plan_installments_insert ON payment_plan_installments FOR INSERT
+      WITH CHECK (
+        EXISTS (
+          SELECT 1 FROM payment_plans pp
+          JOIN members m ON m.community_id = pp.community_id
+          WHERE pp.id = payment_plan_installments.plan_id
+          AND m.user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY plan_installments_update ON payment_plan_installments FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM payment_plans pp
-      JOIN members m ON m.community_id = pp.community_id
-      WHERE pp.id = payment_plan_installments.plan_id
-      AND m.user_id = auth.uid()
-      AND m.role IN ('admin', 'tesorero')
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'plan_installments_update') THEN
+    CREATE POLICY plan_installments_update ON payment_plan_installments FOR UPDATE
+      USING (
+        EXISTS (
+          SELECT 1 FROM payment_plans pp
+          JOIN members m ON m.community_id = pp.community_id
+          WHERE pp.id = payment_plan_installments.plan_id
+          AND m.user_id = auth.uid()
+          AND m.role IN ('admin', 'tesorero')
+        )
+      );
+  END IF;
+END $$;
