@@ -41,3 +41,22 @@ export interface Invitation {
   created_by: string
   created_at: string
 }
+
+export type MorosoNoticeType = 'pre_assembly' | 'warning' | 'suspension'
+export type MorosoNoticeStatus = 'pending' | 'acknowledged' | 'resolved' | 'expired'
+
+export interface MorosoNotice {
+  id: string
+  community_id: string
+  member_id: string
+  notice_type: MorosoNoticeType
+  assembly_id: string | null
+  outstanding_amount: number
+  outstanding_obligations: Record<string, unknown>[]
+  issued_at: string
+  deadline: string | null
+  response_at: string | null
+  status: MorosoNoticeStatus
+  created_at: string
+  member_name?: string
+}
