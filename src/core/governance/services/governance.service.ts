@@ -410,26 +410,18 @@ export async function castVote(vote: {
   if (memberErr) throw memberErr
   const weight = Number((member as any)?.voting_weight) || 1
 
-  // 5. Delete existing vote if any (upsert pattern)
-  await (supabase.from('votes') as any)
-    .delete()
-    .eq('proposal_id', vote.proposal_id)
-    .eq('member_id', vote.member_id)
-
-  // 6. Insert new vote with real weight
-  const insertData: Record<string, unknown> = {
+  // 5. Atomic upsert: insert or update on (proposal_id, member_id)
+  const upsertData: Record<string, unknown> = {
     proposal_id: vote.proposal_id,
     member_id: vote.member_id,
     value: vote.value,
     weight,
     cast_at: new Date().toISOString(),
-  }
-  if (vote.block_reason) {
-    insertData.block_reason = vote.block_reason
+    block_reason: vote.block_reason || null,
   }
 
   const { data, error } = await (supabase.from('votes') as any)
-    .insert(insertData)
+    .upsert(upsertData, { onConflict: 'proposal_id,member_id' })
     .select()
     .single()
 

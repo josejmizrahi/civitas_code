@@ -240,15 +240,15 @@ export async function getLeaderboard(
   if (error) throw error
   if (!data || data.length === 0) return []
 
-  // Fetch member names
+  // Fetch member names via member_profiles view (has email from auth.users)
   const memberIds = (data as any[]).map((d) => d.member_id)
-  const { data: members } = await supabase
-    .from('members')
-    .select('id, full_name, email')
+  const { data: profiles } = await supabase
+    .from('member_profiles' as any)
+    .select('id, email, full_name')
     .in('id', memberIds)
 
   const nameMap = new Map<string, string>()
-  for (const m of (members ?? []) as any[]) {
+  for (const m of (profiles ?? []) as any[]) {
     nameMap.set(m.id, m.full_name || m.email || 'Miembro')
   }
 

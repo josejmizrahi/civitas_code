@@ -10,7 +10,7 @@ export async function getTasks(proposalId: string): Promise<ImplementationTask[]
     .from('implementation_tasks')
     .select(`
       *,
-      responsible:members!responsible_member_id (display_name)
+      responsible:members!responsible_member_id (id, role, user_id)
     `)
     .eq('proposal_id', proposalId)
     .order('created_at', { ascending: true })
@@ -19,7 +19,7 @@ export async function getTasks(proposalId: string): Promise<ImplementationTask[]
 
   return ((data ?? []) as any[]).map((t) => ({
     ...t,
-    responsible_name: t.responsible?.display_name ?? null,
+    responsible_name: null,
     responsible: undefined,
   })) as ImplementationTask[]
 }
@@ -29,7 +29,7 @@ export async function getTasksByCommunity(communityId: string): Promise<Implemen
     .from('implementation_tasks')
     .select(`
       *,
-      responsible:members!responsible_member_id (display_name),
+      responsible:members!responsible_member_id (id, role, user_id),
       proposal:proposals!proposal_id (title)
     `)
     .eq('community_id', communityId)
@@ -39,7 +39,7 @@ export async function getTasksByCommunity(communityId: string): Promise<Implemen
 
   return ((data ?? []) as any[]).map((t) => ({
     ...t,
-    responsible_name: t.responsible?.display_name ?? null,
+    responsible_name: null,
     proposal_title: t.proposal?.title ?? null,
     responsible: undefined,
     proposal: undefined,

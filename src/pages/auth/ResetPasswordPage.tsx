@@ -41,26 +41,32 @@ export function ResetPasswordPage() {
   const [isValidSession, setIsValidSession] = useState(false)
   const [checkingSession, setCheckingSession] = useState(true)
 
-  // Listen for PASSWORD_RECOVERY event to confirm valid reset session
+  // Only allow password reset through a valid PASSWORD_RECOVERY flow
+  // or if the URL contains recovery tokens (hash fragment from email link)
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    let receivedRecoveryEvent = false
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, _session) => {
       if (event === 'PASSWORD_RECOVERY') {
-        setIsValidSession(true)
-        setCheckingSession(false)
-      } else if (session) {
-        // User has an active session (may have arrived via reset link already processed)
+        receivedRecoveryEvent = true
         setIsValidSession(true)
         setCheckingSession(false)
       }
     })
 
-    // Also check if there's already a session (e.g., page reload after token exchange)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setIsValidSession(true)
+    // Check for recovery tokens in the URL hash (from Supabase email link)
+    const hash = window.location.hash
+    const hasRecoveryToken = hash.includes('type=recovery') || hash.includes('type=magiclink')
+
+    // Give the auth state change a moment to fire before falling back
+    setTimeout(() => {
+      if (!receivedRecoveryEvent) {
+        if (hasRecoveryToken) {
+          setIsValidSession(true)
+        }
+        setCheckingSession(false)
       }
-      setCheckingSession(false)
-    })
+    }, 2000)
 
     return () => subscription.unsubscribe()
   }, [])

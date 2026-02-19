@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
 import { supabase } from '@/shared/lib/supabase'
@@ -16,10 +16,12 @@ export function useRealtimeSubscription(
   const queryClient = useQueryClient()
   const enabled = options?.enabled !== false && !!communityId
   const event = options?.event ?? '*'
+  const stableKeys = useMemo(() => queryKeys.join(','), [queryKeys.join(',')])
 
   useEffect(() => {
     if (!enabled || !communityId) return
 
+    const keys = stableKeys.split(',')
     const channel = supabase
       .channel(`realtime-${table}-${communityId}`)
       .on(
@@ -31,7 +33,7 @@ export function useRealtimeSubscription(
           filter: `community_id=eq.${communityId}`,
         },
         () => {
-          for (const key of queryKeys) {
+          for (const key of keys) {
             queryClient.invalidateQueries({ queryKey: [key, communityId] })
             queryClient.invalidateQueries({ queryKey: [key] })
           }
@@ -40,7 +42,7 @@ export function useRealtimeSubscription(
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [communityId, table, event, enabled, queryClient, ...queryKeys])
+  }, [communityId, table, event, enabled, queryClient, stableKeys])
 }
 
 /**

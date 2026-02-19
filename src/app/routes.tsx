@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './providers'
 import { AppLayout } from '@/layouts/AppLayout'
 import { AuthLayout } from '@/layouts/AuthLayout'
@@ -55,6 +55,14 @@ function PublicRoute({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
+function ProtectedRouteWithReturnUrl({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth()
+  const location = useLocation()
+  if (loading) return <LoadingSpinner message="Cargando..." fullPage />
+  if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />
+  return <>{children}</>
+}
+
 function LandingRedirect() {
   const { user, loading } = useAuth()
   if (loading) return <LoadingSpinner message="Cargando..." fullPage />
@@ -63,7 +71,8 @@ function LandingRedirect() {
 }
 
 function RoleGuard({ requiredRole, children }: { requiredRole: string; children: ReactNode }) {
-  const { currentMember } = useCommunityContext()
+  const { currentMember, communityLoading } = useCommunityContext()
+  if (communityLoading) return <LoadingSpinner message="Cargando..." className="py-20" />
   const role = (currentMember?.role ?? 'observador') as Role
   if (!hasPermission(role, requiredRole as Role)) {
     return <Navigate to="/dashboard" replace />
@@ -97,7 +106,7 @@ export function AppRouter() {
         <Route path="/onboarding" element={<ProtectedRoute><LazyPage><OnboardingWizard /></LazyPage></ProtectedRoute>} />
 
         {/* Protected routes */}
-        <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route element={<ProtectedRouteWithReturnUrl><AppLayout /></ProtectedRouteWithReturnUrl>}>
           <Route path="/dashboard" element={<LazyPage><DashboardPage /></LazyPage>} />
           <Route path="/members" element={<LazyPage><MembersPage /></LazyPage>} />
           <Route path="/members/:memberId" element={<LazyPage><MemberDetailPage /></LazyPage>} />
@@ -105,7 +114,7 @@ export function AppRouter() {
           <Route path="/ingestion" element={<RoleGuard requiredRole="tesorero"><LazyPage><IngestionPage /></LazyPage></RoleGuard>} />
           <Route path="/governance" element={<LazyPage><GovernancePage /></LazyPage>} />
           <Route path="/governance/assemblies/:assemblyId" element={<LazyPage><AssemblyDetailPage /></LazyPage>} />
-          <Route path="/governance/vigilancia" element={<LazyPage><VigilanciaPage /></LazyPage>} />
+          <Route path="/governance/vigilancia" element={<RoleGuard requiredRole="comite_vigilancia"><LazyPage><VigilanciaPage /></LazyPage></RoleGuard>} />
           <Route path="/governance/archive" element={<LazyPage><DecisionArchivePage /></LazyPage>} />
           <Route path="/governance/:proposalId" element={<LazyPage><ProposalDetailPage /></LazyPage>} />
           <Route path="/rules" element={<LazyPage><RulesPage /></LazyPage>} />

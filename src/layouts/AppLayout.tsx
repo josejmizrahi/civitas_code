@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth, useCommunityContext } from '@/app/providers'
 import { NoCommunityView } from '@/core/identity/components/NoCommunityView'
 import { VERTICALS } from '@/shared/config/verticals'
@@ -119,8 +120,16 @@ export function AppLayout() {
     }
   }
 
+  const queryClient = useQueryClient()
+
   const handleSignOut = async () => {
-    await signOut()
+    try {
+      await signOut()
+    } catch {
+      // Network error — still clear local state
+    }
+    localStorage.removeItem('civitas_community_id')
+    queryClient.clear()
     navigate('/login')
   }
 

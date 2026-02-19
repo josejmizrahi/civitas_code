@@ -141,7 +141,7 @@ export async function exportUserData(
   const [profile, members, votes, consents] = await Promise.all([
     supabase.auth.getUser(),
     supabase.from('members').select('*').eq('user_id', userId),
-    supabase.from('votes').select('*').eq('user_id', userId),
+    supabase.from('votes').select('*, members!inner(user_id)').eq('members.user_id', userId),
     supabase.from('privacy_consents').select('*').eq('user_id', userId),
   ])
 
