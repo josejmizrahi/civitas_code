@@ -188,7 +188,7 @@ export function SettingsPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex flex-nowrap overflow-x-auto overflow-y-hidden scrollbar-thin sm:flex-wrap sm:overflow-visible">
+        <TabsList className="flex w-full flex-nowrap overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible gap-1">
           <TabsTrigger value="general" className="shrink-0 whitespace-nowrap">General</TabsTrigger>
           <TabsTrigger value="categories" className="shrink-0 whitespace-nowrap">Categorías</TabsTrigger>
           <TabsTrigger value="invitations" className="shrink-0 whitespace-nowrap">Invitaciones</TabsTrigger>
@@ -514,7 +514,7 @@ export function SettingsPage() {
                     max={100}
                     value={Math.round(rules.governance.default_quorum * 100)}
                     onChange={(e) => updateGovernance('default_quorum', Number(e.target.value) / 100)}
-                    className="w-full accent-blue-600"
+                    className="w-full accent-primary h-2 cursor-pointer rounded-lg appearance-none bg-muted"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>0%</span>
@@ -532,7 +532,7 @@ export function SettingsPage() {
                     max={100}
                     value={Math.round(rules.governance.default_majority * 100)}
                     onChange={(e) => updateGovernance('default_majority', Number(e.target.value) / 100)}
-                    className="w-full accent-blue-600"
+                    className="w-full accent-primary h-2 cursor-pointer rounded-lg appearance-none bg-muted"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>0%</span>
@@ -547,7 +547,7 @@ export function SettingsPage() {
                     type="checkbox"
                     checked={rules.governance.delegation_enabled}
                     onChange={(e) => updateGovernance('delegation_enabled', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300"
+                    className="h-4 w-4 rounded border-input accent-primary"
                   />
                   <span className="text-sm">Delegación habilitada</span>
                 </label>
@@ -562,7 +562,7 @@ export function SettingsPage() {
                           type="checkbox"
                           checked={rules.governance.proposal_rights.includes(role)}
                           onChange={() => toggleProposalRight(role)}
-                          className="h-4 w-4 rounded border-gray-300"
+                          className="h-4 w-4 rounded border-input accent-primary"
                         />
                         <span className="text-sm capitalize">{role}</span>
                       </label>
@@ -609,7 +609,7 @@ export function SettingsPage() {
                     type="checkbox"
                     checked={rules.governance.auto_execution_enabled}
                     onChange={(e) => updateGovernance('auto_execution_enabled', e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300"
+                    className="h-4 w-4 rounded border-input accent-primary"
                   />
                   <span className="text-sm">Auto-ejecución habilitada</span>
                 </label>
@@ -724,7 +724,7 @@ export function SettingsPage() {
                       type="checkbox"
                       checked={rules.identity.payment_to_vote_enabled}
                       onChange={(e) => updateIdentity('payment_to_vote_enabled', e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300"
+                      className="h-4 w-4 rounded border-input accent-primary"
                     />
                     <div>
                       <span className="text-sm font-medium">Pago condiciona voto</span>
@@ -759,7 +759,7 @@ export function SettingsPage() {
                         type="checkbox"
                         checked={rules.identity.auto_restore_on_payment}
                         onChange={(e) => updateIdentity('auto_restore_on_payment', e.target.checked)}
-                        className="h-4 w-4 rounded border-gray-300"
+                        className="h-4 w-4 rounded border-input accent-primary"
                       />
                       <div>
                         <span className="text-sm">Restaurar derechos automáticamente al pagar</span>
@@ -780,7 +780,7 @@ export function SettingsPage() {
                               type="checkbox"
                               checked={rules.identity.delinquent_restrictions.includes(opt.value)}
                               onChange={() => toggleRestriction(opt.value)}
-                              className="h-4 w-4 rounded border-gray-300"
+                              className="h-4 w-4 rounded border-input accent-primary"
                             />
                             <span className="text-sm">{opt.label}</span>
                           </label>

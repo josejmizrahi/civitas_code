@@ -24,7 +24,7 @@ export function LoadingSpinner({ message, className, size = 'md', fullPage }: Pr
 
   if (fullPage) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-dvh items-center justify-center">
         {content}
       </div>
     )
