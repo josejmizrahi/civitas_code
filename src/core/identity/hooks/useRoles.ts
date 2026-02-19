@@ -1,6 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import type { Role } from '@/shared/types'
-
 // ---------------------------------------------------------------------------
 // Static role definitions — Role is a string union, not a DB entity
 // ---------------------------------------------------------------------------

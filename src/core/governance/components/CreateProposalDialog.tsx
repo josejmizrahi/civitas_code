@@ -51,35 +51,6 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
   // Template selection step
   const [selectedTemplate, setSelectedTemplate] = useState<ProposalTemplate | null>(null)
 
-  const appliedInitialRef = useRef(false)
-  // When opened with initialTemplateId (e.g. from Settings "Cambiar Regla via Propuesta"), preselect template once
-  useEffect(() => {
-    if (!open) {
-      appliedInitialRef.current = false
-      return
-    }
-    if (initialTemplateId && !appliedInitialRef.current) {
-      const template = PROPOSAL_TEMPLATES.find((t) => t.id === initialTemplateId)
-      if (template) {
-        appliedInitialRef.current = true
-        setSelectedTemplate(template)
-        setTitle(template.defaultTitle)
-        setType(template.type)
-        setHasFinancialInstruction(template.hasFinancialInstruction)
-        if (template.defaultInstructionType) setInstrType(template.defaultInstructionType)
-        const proposalType = template.type as ProposalType
-        const typeQuorum = rules.governance.quorum_by_type?.[proposalType]
-        const typeMajority = rules.governance.majority_by_type?.[proposalType]
-        setQuorum(String((template.suggestedQuorum ?? typeQuorum ?? rules.governance.default_quorum) * 100))
-        setMajority(String((template.suggestedMajority ?? typeMajority ?? rules.governance.default_majority) * 100))
-        if (template.suggestedDiscussionHours) {
-          setDiscussionHours(String(template.suggestedDiscussionHours))
-          setIncludeDiscussion(true)
-        }
-      }
-    }
-  }, [open, initialTemplateId, rules.governance.default_quorum, rules.governance.default_majority, rules.governance.quorum_by_type, rules.governance.majority_by_type])
-
   // Form fields
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -104,6 +75,37 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
   const [instrAmount, setInstrAmount] = useState('')
   const [instrRecipient, setInstrRecipient] = useState('')
   const [instrDescription, setInstrDescription] = useState('')
+
+  const appliedInitialRef = useRef(false)
+  // When opened with initialTemplateId (e.g. from Settings "Cambiar Regla via Propuesta"), preselect template once
+  useEffect(() => {
+    if (!open) {
+      appliedInitialRef.current = false
+      return
+    }
+    if (initialTemplateId && !appliedInitialRef.current) {
+      const template = PROPOSAL_TEMPLATES.find((t) => t.id === initialTemplateId)
+      if (template) {
+        appliedInitialRef.current = true
+        queueMicrotask(() => {
+          setSelectedTemplate(template)
+          setTitle(template.defaultTitle)
+          setType(template.type)
+          setHasFinancialInstruction(template.hasFinancialInstruction)
+          if (template.defaultInstructionType) setInstrType(template.defaultInstructionType)
+          const proposalType = template.type as ProposalType
+          const typeQuorum = rules.governance.quorum_by_type?.[proposalType]
+          const typeMajority = rules.governance.majority_by_type?.[proposalType]
+          setQuorum(String((template.suggestedQuorum ?? typeQuorum ?? rules.governance.default_quorum) * 100))
+          setMajority(String((template.suggestedMajority ?? typeMajority ?? rules.governance.default_majority) * 100))
+          if (template.suggestedDiscussionHours) {
+            setDiscussionHours(String(template.suggestedDiscussionHours))
+            setIncludeDiscussion(true)
+          }
+        })
+      }
+    }
+  }, [open, initialTemplateId, rules.governance.default_quorum, rules.governance.default_majority, rules.governance.quorum_by_type, rules.governance.majority_by_type])
 
   const handleSelectTemplate = (template: ProposalTemplate) => {
     setSelectedTemplate(template)

@@ -19,7 +19,6 @@ import {
   ArrowLeft, Wallet, Vote, Activity, Shield,
   UserMinus, UserCheck, AlertCircle, CheckCircle, Clock,
 } from 'lucide-react'
-import type { Member } from '@/core/identity/types'
 import type { Role } from '@/shared/types'
 
 const roleLabels: Record<string, string> = {

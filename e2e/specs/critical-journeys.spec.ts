@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test'
  * Skip when credentials are not set.
  */
 test.describe('Critical journeys', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async () => {
     if (!process.env.E2E_LOGIN_EMAIL || !process.env.E2E_LOGIN_PASSWORD) {
       test.skip()
     }

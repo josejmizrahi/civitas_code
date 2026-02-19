@@ -61,8 +61,12 @@ describe('VotingPanel', () => {
         existingVotes={[{ id: 'v1', proposal_id: 'p1', member_id: 'm1', value: 'yes', weight: 1, cast_at: '', delegated_from: null, block_reason: null, is_override: false } as any]}
       />
     )
-    expect(screen.getByText(/ya votaste/i)).toBeInTheDocument()
-    expect(screen.getByText(/a favor/i)).toBeInTheDocument()
+    expect(screen.getByText((_content, element) =>
+      element?.tagName === 'P' && /ya votaste/i.test(element.textContent ?? '')
+    )).toBeInTheDocument()
+    expect(screen.getByText((_content, element) =>
+      element?.tagName === 'STRONG' && element.textContent === 'A favor'
+    )).toBeInTheDocument()
   })
 
   it('disables buttons when disabled prop is true', () => {

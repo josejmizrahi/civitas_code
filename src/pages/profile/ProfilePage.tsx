@@ -5,7 +5,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
-import { Avatar } from '@/shared/components/ui/avatar'
+
 import { supabase } from '@/shared/lib/supabase'
 import { User, Lock, Building2, Shield, CheckCircle, AlertCircle, ScrollText } from 'lucide-react'
 import { formatDate } from '@/shared/lib/utils'

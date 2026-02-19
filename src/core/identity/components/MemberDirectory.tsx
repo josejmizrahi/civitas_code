@@ -147,7 +147,7 @@ export function MemberDirectory() {
                     <Badge
                       variant={roleBadgeVariant[member.role] || 'secondary'}
                       className={canManageMembers ? 'cursor-pointer' : ''}
-                      onClick={(e) => { e.stopPropagation(); canManageMembers && setEditingId(member.id) }}
+                      onClick={(e) => { e.stopPropagation(); if (canManageMembers) setEditingId(member.id) }}
                     >
                       {roleLabels[member.role] || member.role}
                     </Badge>

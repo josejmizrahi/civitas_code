@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth, useCommunityContext } from '@/app/providers'
-import { createCommunity, getUserCommunities } from '../services/identity.service'
-import type { Community } from '../types'
+import { createCommunity } from '../services/identity.service'
 import type { CommunityType } from '@/shared/types'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Input } from '@/shared/components/ui/input'

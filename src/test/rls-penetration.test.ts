@@ -40,7 +40,7 @@ const skipIfNoKey = SUPABASE_ANON_KEY ? describe : describe.skip
 
 skipIfNoKey('RLS Penetration Tests', () => {
   let memberClient: SupabaseClient
-  let adminClient: SupabaseClient
+  let _adminClient: SupabaseClient
   let otherClient: SupabaseClient
   let anonClient: SupabaseClient
 
@@ -49,7 +49,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
 
     try {
       memberClient = await createAuthenticatedClient(MEMBER_EMAIL, MEMBER_PASSWORD)
-      adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
+      _adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
       otherClient = await createAuthenticatedClient(OTHER_COMMUNITY_MEMBER_EMAIL, OTHER_COMMUNITY_MEMBER_PASSWORD)
     } catch (e) {
       console.warn('Skipping RLS tests — test accounts not available:', (e as Error).message)
@@ -61,7 +61,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
   // =========================================================================
   describe('Unauthenticated access', () => {
     it('should not read communities without auth', async () => {
-      const { data, error } = await anonClient.from('communities').select('*')
+      const { data, error: _error } = await anonClient.from('communities').select('*')
       expect(data?.length ?? 0).toBe(0)
     })
 
@@ -177,7 +177,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data: communities } = await memberClient.from('communities').select('id').limit(1)
       if (!communities?.length) return
 
-      const { error } = await (memberClient.from('communities') as any)
+      const { error: _error } = await (memberClient.from('communities') as any)
         .update({ rules: { test: true } })
         .eq('id', communities[0].id)
 

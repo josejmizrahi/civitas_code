@@ -1,4 +1,4 @@
-import type { ParsedRow, NormalizedTransaction, ColumnMapping } from '../types'
+import type { ParsedRow, NormalizedTransaction } from '../types'
 
 export function normalizeTransaction(
   row: ParsedRow,

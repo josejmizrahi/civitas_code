@@ -25,16 +25,18 @@ export function CommonAreaForm({ open, onOpenChange, area }: Props) {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (area) {
-      setName(area.name)
-      setRules(area.rules ?? '')
-      setReservationEnabled(area.reservation_enabled)
-    } else {
-      setName('')
-      setRules('')
-      setReservationEnabled(false)
-    }
-    setError('')
+    queueMicrotask(() => {
+      if (area) {
+        setName(area.name)
+        setRules(area.rules ?? '')
+        setReservationEnabled(area.reservation_enabled)
+      } else {
+        setName('')
+        setRules('')
+        setReservationEnabled(false)
+      }
+      setError('')
+    })
   }, [area, open])
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -11,7 +11,7 @@ import {
   markInstallmentPaid,
   refreshOverdueInstallments,
 } from '../services/contracts.service'
-import type { Contract, ContractInstallment } from '../types'
+import type { ContractInstallment } from '../types'
 
 const contractKeys = {
   all: ['contracts'] as const,

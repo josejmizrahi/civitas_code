@@ -25,10 +25,10 @@ const CONSENSUS_OPTIONS = [
 ] as const
 
 export function ConsensusVotingPanel({
-  proposalId,
+  proposalId: _proposalId,
   memberId,
   existingVotes,
-  voteSummary,
+  voteSummary: _voteSummary,
   disabled,
   onVote,
   isPending,

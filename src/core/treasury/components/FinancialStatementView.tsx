@@ -8,8 +8,6 @@ import { Badge } from '@/shared/components/ui/badge'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
 import { CheckCircle, Printer, ArrowLeft } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
-import type { FinancialStatement } from '../services/statement.service'
-
 interface FinancialStatementViewProps {
   statementId: string
   onBack: () => void
@@ -53,8 +51,8 @@ export function FinancialStatementView({ statementId, onBack }: FinancialStateme
   if (isLoading) return <LoadingSpinner message="Cargando estado financiero..." className="py-8" />
   if (!statement) return <p className="text-muted-foreground">Estado financiero no encontrado.</p>
 
-  const incomeItems = (statement.line_items ?? []).filter((item) => Number(item.amount) > 0)
-  const expenseItems = (statement.line_items ?? []).filter((item) => Number(item.amount) < 0)
+  const _incomeItems = (statement.line_items ?? []).filter((item) => Number(item.amount) > 0)
+  const _expenseItems = (statement.line_items ?? []).filter((item) => Number(item.amount) < 0)
 
   // Group line items by type based on category patterns or just show all
   const allItems = statement.line_items ?? []

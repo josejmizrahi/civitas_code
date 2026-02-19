@@ -19,7 +19,7 @@ import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityContext } from '@/app/providers'
 import {
   Plus, FileSpreadsheet, CreditCard, BarChart3, Receipt, PiggyBank,
-  Banknote, User, RefreshCw, FileText, CalendarClock, ClipboardList, Download,
+  Banknote, User, RefreshCw, FileText, ClipboardList, Download,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTransactions } from '@/core/treasury/hooks/useTransactions'

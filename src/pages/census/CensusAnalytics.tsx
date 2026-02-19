@@ -1,12 +1,10 @@
 import { useMemo } from 'react'
 import { useCensusSnapshots, useLatestCensus } from '@/census/hooks/useCensus'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
+
 import { Progress } from '@/shared/components/ui/progress'
 import { formatDate } from '@/shared/lib/utils'
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
   XAxis,

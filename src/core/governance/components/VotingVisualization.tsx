@@ -57,7 +57,7 @@ export function VotingVisualization({ votes, voteSummary, votingModel, votingOpt
     ? buildConsensusData(votes)
     : buildSimpleData(voteSummary)
 
-  const labels = model === 'consensus' ? CONSENSUS_LABELS : SIMPLE_LABELS
+  const _labels = model === 'consensus' ? CONSENSUS_LABELS : SIMPLE_LABELS
 
   return (
     <Card>

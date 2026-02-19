@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { Card, CardContent } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
-import { Download, Printer } from 'lucide-react'
+import { Printer } from 'lucide-react'
 import type { DigitalReceiptData } from '../services/receipt.service'
 
 interface Props {
