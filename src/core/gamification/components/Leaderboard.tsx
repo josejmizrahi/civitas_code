@@ -2,13 +2,15 @@ import { useLeaderboard } from '../hooks/useGamification'
 import { useCommunityContext } from '@/app/providers'
 import { getLevelForXp } from '../constants'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { DynamicIcon } from '@/shared/components/DynamicIcon'
+import { Flame } from 'lucide-react'
 
 interface Props {
   limit?: number
   compact?: boolean
 }
 
-const RANK_DECORATIONS = ['🥇', '🥈', '🥉']
+const RANK_COLORS = ['text-amber-500', 'text-gray-400', 'text-amber-700']
 
 /** Community leaderboard showing top members by XP. */
 export function Leaderboard({ limit = 10, compact }: Props) {
@@ -18,7 +20,7 @@ export function Leaderboard({ limit = 10, compact }: Props) {
   if (isLoading) return <LoadingSpinner message="" className="py-4" />
 
   if (!entries || entries.length === 0) {
-    return <p className="text-sm text-muted-foreground py-4">Sin datos de participación aún.</p>
+    return <p className="text-sm text-muted-foreground py-4">Sin datos de participacion aun.</p>
   }
 
   if (compact) {
@@ -34,10 +36,10 @@ export function Leaderboard({ limit = 10, compact }: Props) {
                 isMe ? 'bg-primary/5 font-semibold' : ''
               }`}
             >
-              <span className="w-5 text-center text-xs">
-                {entry.rank <= 3 ? RANK_DECORATIONS[entry.rank - 1] : `${entry.rank}`}
+              <span className={`w-5 text-center text-xs font-bold ${entry.rank <= 3 ? RANK_COLORS[entry.rank - 1] : 'text-muted-foreground'}`}>
+                {entry.rank}
               </span>
-              <span className="text-sm">{level.icon}</span>
+              <DynamicIcon name={level.icon} className="h-3.5 w-3.5" style={{ color: level.color }} />
               <span className="flex-1 truncate">{entry.member_name}</span>
               <span className="text-xs font-mono text-muted-foreground">{entry.xp}</span>
             </div>
@@ -64,20 +66,28 @@ export function Leaderboard({ limit = 10, compact }: Props) {
                   : 'hover:bg-muted/50'
             }`}
           >
-            <span className="w-6 text-center font-bold text-sm">
-              {entry.rank <= 3 ? RANK_DECORATIONS[entry.rank - 1] : `#${entry.rank}`}
+            <span className={`w-6 text-center font-bold text-sm ${entry.rank <= 3 ? RANK_COLORS[entry.rank - 1] : 'text-muted-foreground'}`}>
+              {entry.rank <= 3 ? `${entry.rank}` : `#${entry.rank}`}
             </span>
-            <span className="text-lg">{level.icon}</span>
+            <DynamicIcon name={level.icon} className="h-4.5 w-4.5" style={{ color: level.color }} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className={`text-sm truncate ${isMe ? 'font-bold' : 'font-medium'}`}>
                   {entry.member_name}
-                  {isMe && <span className="text-xs text-muted-foreground ml-1">(Tú)</span>}
+                  {isMe && <span className="text-xs text-muted-foreground ml-1">(Tu)</span>}
                 </span>
               </div>
-              <div className="text-[10px] text-muted-foreground">
-                Niv.{entry.level} · {entry.badge_count} logros
-                {entry.current_streak > 0 && ` · 🔥${entry.current_streak}`}
+              <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <span>Niv.{entry.level}</span>
+                <span>·</span>
+                <span>{entry.badge_count} logros</span>
+                {entry.current_streak > 0 && (
+                  <>
+                    <span>·</span>
+                    <Flame className="inline h-2.5 w-2.5 text-orange-500" />
+                    <span>{entry.current_streak}</span>
+                  </>
+                )}
               </div>
             </div>
             <div className="text-right">

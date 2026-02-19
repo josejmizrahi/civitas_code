@@ -3,6 +3,7 @@ import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { useProposals } from '@/core/governance/hooks/useProposals'
 import { useLeaderboard } from '../hooks/useGamification'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Activity, Wallet, Users, Vote } from 'lucide-react'
 
 /**
  * Community Pulse — collective health meter.
@@ -40,7 +41,8 @@ export function CommunityPulse() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-base">
-          💓 Pulso de la Comunidad
+          <Activity className="h-4 w-4" />
+          Pulso de la Comunidad
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -61,19 +63,19 @@ export function CommunityPulse() {
         {/* Breakdown */}
         <div className="space-y-3">
           <PulseMetric
-            icon="💰"
+            icon={<Wallet className="h-3.5 w-3.5" />}
             label="Pagos al corriente"
             value={paymentPct}
             detail={`${paidObligations} de ${totalObligations} pagados`}
           />
           <PulseMetric
-            icon="👥"
+            icon={<Users className="h-3.5 w-3.5" />}
             label="Vecinos activos"
             value={participationPct}
             detail={`${activeMembers} de ${totalMembers} participando`}
           />
           <PulseMetric
-            icon="🗳️"
+            icon={<Vote className="h-3.5 w-3.5" />}
             label="Actividad"
             value={activityPct}
             detail={activeProposals > 0 ? `${activeProposals} propuesta${activeProposals > 1 ? 's' : ''} activa${activeProposals > 1 ? 's' : ''}` : 'Sin propuestas activas'}
@@ -85,7 +87,7 @@ export function CommunityPulse() {
 }
 
 function PulseMetric({ icon, label, value, detail }: {
-  icon: string
+  icon: React.ReactNode
   label: string
   value: number
   detail: string
@@ -95,9 +97,9 @@ function PulseMetric({ icon, label, value, detail }: {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
-        <span className="flex items-center gap-1.5">
-          <span>{icon}</span>
-          <span className="text-muted-foreground">{label}</span>
+        <span className="flex items-center gap-1.5 text-muted-foreground">
+          {icon}
+          <span>{label}</span>
         </span>
         <span className="font-bold">{value}%</span>
       </div>

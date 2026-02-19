@@ -3,12 +3,12 @@ import { useProposals } from '@/core/governance/hooks/useProposals'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { useLeaderboard } from '../hooks/useGamification'
+import { DynamicIcon } from '@/shared/components/DynamicIcon'
 import type { SocialNudge as SocialNudgeType } from '../types'
 
 /**
- * Social Nudge — peer proof and FOMO.
- * "3 vecinos ya votaron" — drives belonging and action.
- * Shows what OTHER people are doing so you feel like you should too.
+ * Social Nudge -- peer proof.
+ * Shows what other members are doing to encourage participation.
  */
 export function SocialNudge() {
   const { data: proposals } = useProposals('active')
@@ -18,7 +18,7 @@ export function SocialNudge() {
 
   const nudges: SocialNudgeType[] = []
 
-  // Payment nudge — how many are paid
+  // Payment nudge
   const totalMembers = members?.length ?? 0
   if (obligations) {
     const currentMonth = new Date().toISOString().slice(0, 7)
@@ -28,14 +28,14 @@ export function SocialNudge() {
       nudges.push({
         type: 'payment',
         message: `${paidCount} vecino${paidCount > 1 ? 's' : ''} ya pagaron su cuota este mes`,
-        icon: '💰',
+        icon: 'wallet',
         href: '/treasury',
       })
     } else if (paidCount === totalMembers && totalMembers > 0) {
       nudges.push({
         type: 'payment',
-        message: '¡Todos al corriente este mes! 🎉',
-        icon: '✅',
+        message: 'Todos al corriente este mes',
+        icon: 'check-circle',
       })
     }
   }
@@ -45,7 +45,7 @@ export function SocialNudge() {
     nudges.push({
       type: 'vote',
       message: `Hay ${proposals.length} propuesta${proposals.length > 1 ? 's' : ''} esperando votos`,
-      icon: '🗳️',
+      icon: 'vote',
       href: '/governance',
     })
   }
@@ -56,7 +56,7 @@ export function SocialNudge() {
     nudges.push({
       type: 'general',
       message: `${top.member_name.split(' ')[0]} lidera con ${top.xp} puntos`,
-      icon: '🏆',
+      icon: 'trophy',
     })
   }
 
@@ -73,7 +73,7 @@ export function SocialNudge() {
             }`}
             style={{ animationDelay: `${i * 100}ms` }}
           >
-            <span className="shrink-0">{nudge.icon}</span>
+            <DynamicIcon name={nudge.icon} className="h-4 w-4 shrink-0 text-muted-foreground" />
             <span className="text-muted-foreground">{nudge.message}</span>
           </div>
         )

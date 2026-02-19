@@ -2,12 +2,13 @@ import { Link } from 'react-router-dom'
 import { useProposals } from '@/core/governance/hooks/useProposals'
 import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { useCommunityContext } from '@/app/providers'
+import { DynamicIcon } from '@/shared/components/DynamicIcon'
+import { ChevronRight } from 'lucide-react'
 import type { QuickAction } from '../types'
 
 /**
- * Quick Actions — reduce friction to 1 tap.
- * Shows the most important thing the member should do RIGHT NOW.
- * Big, friendly buttons. No jargon.
+ * Quick Actions -- reduce friction to 1 tap.
+ * Shows the most important thing the member should do right now.
  */
 export function QuickActions() {
   const { currentMember } = useCommunityContext()
@@ -16,14 +17,14 @@ export function QuickActions() {
 
   const actions: QuickAction[] = []
 
-  // Overdue payments — highest urgency
+  // Overdue payments -- highest urgency
   const overduePayments = obligations?.filter((o) => o.status === 'overdue') ?? []
   if (overduePayments.length > 0) {
     actions.push({
       id: 'overdue',
       title: 'Ponte al corriente',
       subtitle: `Tienes ${overduePayments.length} pago${overduePayments.length > 1 ? 's' : ''} vencido${overduePayments.length > 1 ? 's' : ''}`,
-      icon: '⚠️',
+      icon: 'alert-triangle',
       href: '/treasury',
       urgency: 'high',
     })
@@ -36,8 +37,8 @@ export function QuickActions() {
       title: 'Vota ahora',
       subtitle: proposals.length === 1
         ? proposals[0].title
-        : `${proposals.length} propuestas esperan tu opinión`,
-      icon: '🗳️',
+        : `${proposals.length} propuestas esperan tu opinion`,
+      icon: 'vote',
       href: '/governance',
       urgency: 'medium',
       badge: `${proposals.length}`,
@@ -51,7 +52,7 @@ export function QuickActions() {
       id: 'payment',
       title: 'Revisa tu cuota',
       subtitle: 'Tienes pagos pendientes',
-      icon: '💰',
+      icon: 'wallet',
       href: '/treasury',
       urgency: 'low',
     })
@@ -67,14 +68,14 @@ export function QuickActions() {
 
   return (
     <div className="space-y-2">
-      <h3 className="text-sm font-semibold text-muted-foreground px-1">¿Qué hago ahora?</h3>
+      <h3 className="text-sm font-semibold text-muted-foreground px-1">Acciones pendientes</h3>
       {actions.slice(0, 3).map((action) => (
         <Link
           key={action.id}
           to={action.href}
           className={`flex items-center gap-3 rounded-xl border p-4 transition-all hover:shadow-md ${urgencyStyles[action.urgency]}`}
         >
-          <span className="text-2xl shrink-0">{action.icon}</span>
+          <DynamicIcon name={action.icon} className="h-6 w-6 shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="font-bold">{action.title}</p>
             <p className="text-sm opacity-80 truncate">{action.subtitle}</p>
@@ -84,7 +85,7 @@ export function QuickActions() {
               {action.badge}
             </span>
           )}
-          <span className="text-lg opacity-50">→</span>
+          <ChevronRight className="h-4 w-4 opacity-50 shrink-0" />
         </Link>
       ))}
     </div>

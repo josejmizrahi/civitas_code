@@ -27,7 +27,7 @@ export function useAchievementToast() {
     if (result.leveled_up && result.new_level) {
       const level = getLevelForXp(result.total_xp)
       setTimeout(() => {
-        toast.success(`🎉 ¡Subiste a ${level.icon} ${level.title}! ¡Felicidades!`)
+        toast.success(`Subiste a ${level.title}. Felicidades.`)
       }, 800)
     }
 
@@ -36,7 +36,7 @@ export function useAchievementToast() {
       const badge = getBadgeById(result.new_badges[i])
       if (badge) {
         setTimeout(() => {
-          toast.success(`🏅 ¡Nuevo logro! ${badge.icon} ${badge.name}: ${badge.description}`)
+          toast.success(`Nuevo logro: ${badge.name} - ${badge.description}`)
         }, 1500 + i * 700)
       }
     }
