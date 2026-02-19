@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
+import { sendEmailToMembers } from '@/shared/services/email.service'
 import type { Proposal, Vote, VoteSummary, Delegation, Minutes } from '../types'
 
 export async function getProposals(
@@ -77,7 +78,19 @@ export async function createProposal(
     .single()
 
   if (error) throw error
-  return data as unknown as Proposal
+
+  const created = data as unknown as Proposal
+  sendEmailToMembers(communityId, 'proposal_new', {
+    title: created.title,
+    description: created.description,
+    proposal_type: created.type,
+    author_name: proposal.created_by,
+    proposal_id: created.id,
+    community_name: communityId,
+    app_url: window.location.origin,
+  }).catch(() => {})
+
+  return created
 }
 
 // ---------------------------------------------------------------------------
@@ -645,6 +658,17 @@ export async function closeProposal(
       { proposal_id: proposalId, result: resultStatus }
     )
   } catch { /* notifications are best-effort */ }
+
+  if (resultStatus === 'approved') {
+    sendEmailToMembers(communityId, 'proposal_approved', {
+      title: proposal.title,
+      proposal_id: proposalId,
+      votes_for: summary.yes,
+      votes_against: summary.no,
+      community_name: communityId,
+      app_url: window.location.origin,
+    }).catch(() => {})
+  }
 
   return data as unknown as Proposal
 }

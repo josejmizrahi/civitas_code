@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { getCommunityRules } from '@/shared/services/rules.service'
+import { sendEmailToMembers } from '@/shared/services/email.service'
 import type { GovernanceRules } from '@/shared/types/rules'
 import type {
   Assembly,
@@ -245,7 +246,19 @@ export async function createConvocatoria(
     .single()
 
   if (error) throw error
-  return convocatoria as unknown as Convocatoria
+
+  const created = convocatoria as unknown as Convocatoria
+  sendEmailToMembers(communityId, 'convocatoria', {
+    title: `Convocatoria ${data.call_number}ª llamada — ${data.type}`,
+    date: new Date(data.scheduled_date).toLocaleDateString('es-MX'),
+    location: data.location,
+    description: data.agenda.map((a: AgendaItem) => a.topic).join(', '),
+    assembly_id: data.assembly_id,
+    community_name: communityId,
+    app_url: window.location.origin,
+  }).catch(() => {})
+
+  return created
 }
 
 export async function getConvocatorias(

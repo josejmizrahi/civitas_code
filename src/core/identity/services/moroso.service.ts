@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { sendEmail } from '@/shared/services/email.service'
 import type { Member, MorosoNotice, MorosoNoticeType } from '../types'
 
 // ---------------------------------------------------------------------------
@@ -200,7 +201,29 @@ export async function createMorosoNotice(
     .single()
 
   if (error) throw error
-  return data as MorosoNotice
+
+  const notice = data as MorosoNotice
+  // Send moroso email to the affected member (fire-and-forget)
+  Promise.resolve(
+    supabase
+      .from('member_profiles' as any)
+      .select('email')
+      .eq('id', memberId)
+      .single()
+  ).then(({ data: profile }) => {
+    const email = (profile as any)?.email
+    if (email) {
+      sendEmail(email, 'moroso_notice', {
+        overdue_count: opts?.obligations?.length ?? 1,
+        total_debt: outstandingAmount,
+        currency: 'MXN',
+        community_name: communityId,
+        app_url: window.location.origin,
+      })
+    }
+  }).catch(() => {})
+
+  return notice
 }
 
 export async function acknowledgeMorosoNotice(

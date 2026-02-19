@@ -12,7 +12,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Label } from '@/shared/components/ui/label'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
-import { Settings, Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote } from 'lucide-react'
+import { Settings, Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote, Bell, BellOff, Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { formatDate } from '@/shared/lib/utils'
 import type { CommunityRules } from '@/shared/types/rules'
@@ -21,12 +21,37 @@ import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules
 import { ARCOAdminPanel } from '@/core/privacy/components/ARCOAdminPanel'
 import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
+import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
 
 export function SettingsPage() {
-  const { communityId, community } = useCommunityContext()
+  const { communityId, community, currentMember } = useCommunityContext()
   const { isAdmin } = usePermissions()
   const queryClient = useQueryClient()
   const [tab, setTab] = useState('general')
+
+  // Push notification state
+  const [pushSubscribed, setPushSubscribed] = useState<boolean | null>(null)
+  const [pushLoading, setPushLoading] = useState(false)
+
+  useEffect(() => {
+    isPushSubscribed().then(setPushSubscribed)
+  }, [])
+
+  const togglePush = async () => {
+    if (!currentMember) return
+    setPushLoading(true)
+    try {
+      if (pushSubscribed) {
+        await unsubscribeFromPush()
+        setPushSubscribed(false)
+      } else {
+        const ok = await subscribeToPush(currentMember.id)
+        setPushSubscribed(ok)
+      }
+    } finally {
+      setPushLoading(false)
+    }
+  }
 
   // Rules state
   const [rules, setRules] = useState<CommunityRules>(() =>
@@ -283,6 +308,51 @@ export function SettingsPage() {
               <label className="text-sm font-medium text-muted-foreground">ID de comunidad</label>
               <p className="mt-1 font-mono text-sm text-muted-foreground">{communityId}</p>
             </div>
+
+            {/* Push Notifications */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Bell className="h-5 w-5 text-amber-600" />
+                  Notificaciones Push
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm">
+                      {pushSubscribed === null
+                        ? 'Verificando estado...'
+                        : pushSubscribed
+                          ? 'Las notificaciones push están activadas en este dispositivo.'
+                          : 'Las notificaciones push están desactivadas.'}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Recibe alertas de votaciones, cuotas y anuncios importantes.
+                    </p>
+                  </div>
+                  <Button
+                    variant={pushSubscribed ? 'outline' : 'default'}
+                    onClick={togglePush}
+                    disabled={pushLoading || pushSubscribed === null}
+                    className="w-full sm:w-auto"
+                  >
+                    {pushLoading ? (
+                      <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                    ) : pushSubscribed ? (
+                      <BellOff className="h-4 w-4 mr-1.5" />
+                    ) : (
+                      <Bell className="h-4 w-4 mr-1.5" />
+                    )}
+                    {pushLoading
+                      ? 'Procesando...'
+                      : pushSubscribed
+                        ? 'Desactivar'
+                        : 'Activar notificaciones'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Danger Zone */}
             <Card className="border-destructive">

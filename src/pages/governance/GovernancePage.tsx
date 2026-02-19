@@ -7,21 +7,37 @@ import { CreateProposalDialog } from '@/core/governance/components/CreateProposa
 import { CreateAssemblyDialog } from '@/core/governance/components/CreateAssemblyDialog'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { processExpiredProposals, processAutoExecutions } from '@/core/governance/services/governance.service'
-import { Plus } from 'lucide-react'
+import { useProposals } from '@/core/governance/hooks/useProposals'
+import { exportToExcel } from '@/shared/services/export.service'
+import { formatDate } from '@/shared/lib/utils'
+import { Plus, Download } from 'lucide-react'
 
 export function GovernancePage() {
   const [tab, setTab] = useState('active')
   const [showCreate, setShowCreate] = useState(false)
   const [showCreateAssembly, setShowCreateAssembly] = useState(false)
   const { canCreateProposals, isAdmin } = usePermissions()
+  const { data: allProposals } = useProposals()
 
-  // On page load: process expired proposals and auto-executions server-side
   useEffect(() => {
     processExpiredProposals()
     processAutoExecutions()
   }, [])
 
   const isAssemblyTab = tab === 'assemblies'
+
+  const handleExport = () => {
+    const rows = (allProposals ?? []).map((p) => ({
+      Título: p.title,
+      Tipo: p.type,
+      Estado: p.status,
+      Descripción: p.description || '',
+      Creada: formatDate(p.created_at),
+      'Inicio Votación': p.voting_start ? formatDate(p.voting_start) : '',
+      'Cierre Votación': p.voting_end ? formatDate(p.voting_end) : '',
+    }))
+    exportToExcel(rows, { filename: 'propuestas', sheetName: 'Propuestas' })
+  }
 
   return (
     <div className="space-y-6">
@@ -33,6 +49,10 @@ export function GovernancePage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport} disabled={!allProposals?.length}>
+            <Download className="mr-1 h-4 w-4" />
+            Exportar
+          </Button>
           {isAssemblyTab && isAdmin && (
             <Button onClick={() => setShowCreateAssembly(true)}>
               <Plus className="mr-2 h-4 w-4" />
