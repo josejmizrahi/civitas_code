@@ -20,17 +20,19 @@ export function GovernancePage() {
   const [showCreate, setShowCreate] = useState(false)
   const [showCreateAssembly, setShowCreateAssembly] = useState(false)
   const [initialTemplateId, setInitialTemplateId] = useState<string | undefined>()
+  const [initialRuleId, setInitialRuleId] = useState<string | undefined>()
   const processedRpcRef = useRef(false)
   const { canCreateProposals, isAdmin } = usePermissions()
   const { data: allProposals } = useProposals()
 
-  // Consume location.state from Settings "Cambiar Regla via Propuesta"
+  // Consume location.state from Settings "Cambiar Regla via Propuesta" or Reglamento "Proponer cambio"
   useEffect(() => {
-    const state = location.state as { openProposal?: boolean; template?: string } | null
+    const state = location.state as { openProposal?: boolean; template?: string; ruleId?: string } | null
     if (state?.openProposal && state?.template) {
       queueMicrotask(() => {
         setShowCreate(true)
         setInitialTemplateId(state.template)
+        if (state.ruleId) setInitialRuleId(state.ruleId)
       })
       navigate(location.pathname, { replace: true, state: {} })
     }
@@ -116,7 +118,7 @@ export function GovernancePage() {
         </TabsContent>
       </Tabs>
 
-      <CreateProposalDialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) setInitialTemplateId(undefined) }} initialTemplateId={initialTemplateId} />
+      <CreateProposalDialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) { setInitialTemplateId(undefined); setInitialRuleId(undefined) } }} initialTemplateId={initialTemplateId} initialRuleId={initialRuleId} />
       <CreateAssemblyDialog open={showCreateAssembly} onOpenChange={setShowCreateAssembly} />
     </div>
   )

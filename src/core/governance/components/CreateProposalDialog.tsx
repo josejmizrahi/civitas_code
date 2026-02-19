@@ -4,6 +4,12 @@ import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { PROPOSAL_TEMPLATES, type ProposalTemplate } from '../services/proposal-templates'
 import { useEntities, useCreateEntity } from '@/core/entities/hooks/useEntities'
 import type { Entity } from '@/core/entities/types'
+import {
+  RULES_CATALOG,
+  getRuleCatalogEntry,
+  CATEGORY_LABELS,
+  type RuleCatalogEntry,
+} from '@/shared/config/rules-catalog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -26,6 +32,9 @@ import {
   Info,
   Plus,
   Search,
+  BookOpen,
+  ChevronDown,
+  Scale,
 } from 'lucide-react'
 import type { FinancialInstruction } from '@/shared/types/rules'
 import type { ProposalType, VotingModel } from '@/shared/types'
@@ -46,9 +55,10 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialTemplateId?: string
+  initialRuleId?: string
 }
 
-export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: Props) {
+export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, initialRuleId }: Props) {
   const createProposal = useCreateProposal()
   const { rules, canPropose } = useRulesEngine()
   const { data: entities } = useEntities({ status: 'active' })
@@ -100,8 +110,14 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
   const [newEntityPhone, setNewEntityPhone] = useState('')
   const entityDropdownRef = useRef<HTMLDivElement>(null)
 
+  // Rule picker (for cambio_regla template)
+  const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null)
+  const [ruleSearch, setRuleSearch] = useState('')
+  const [showRulePicker, setShowRulePicker] = useState(false)
+  const rulePickerRef = useRef<HTMLDivElement>(null)
+
   const appliedInitialRef = useRef(false)
-  // When opened with initialTemplateId (e.g. from Settings "Cambiar Regla via Propuesta"), preselect template once
+  // When opened with initialTemplateId (e.g. from Settings or Reglamento), preselect template once
   useEffect(() => {
     if (!open) {
       appliedInitialRef.current = false
@@ -121,10 +137,21 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
             setDiscussionHours(String(template.suggestedDiscussionHours))
             setIncludeDiscussion(true)
           }
+          // Pre-select rule if coming from Reglamento
+          if (initialRuleId) {
+            const ruleEntry = getRuleCatalogEntry(initialRuleId)
+            if (ruleEntry) {
+              setSelectedRuleId(initialRuleId)
+              setTitle(`Cambio de regla: ${ruleEntry.label}`)
+              setDescription(
+                `Propongo cambiar la regla "${ruleEntry.label}".\n\nValor actual: ${ruleEntry.format(rules)}\nNuevo valor propuesto: [completar]\n\nJustificación: [explicar por qué es necesario el cambio]`
+              )
+            }
+          }
         })
       }
     }
-  }, [open, initialTemplateId])
+  }, [open, initialTemplateId, initialRuleId, rules])
 
   // Close entity dropdown on outside click
   useEffect(() => {
@@ -136,6 +163,17 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
     if (showEntityDropdown) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showEntityDropdown])
+
+  // Close rule picker on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (rulePickerRef.current && !rulePickerRef.current.contains(e.target as Node)) {
+        setShowRulePicker(false)
+      }
+    }
+    if (showRulePicker) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showRulePicker])
 
   const handleSelectTemplate = (template: ProposalTemplate) => {
     setSelectedTemplate(template)
@@ -170,6 +208,9 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
     setNewEntityName('')
     setNewEntityType('proveedor')
     setNewEntityPhone('')
+    setSelectedRuleId(null)
+    setRuleSearch('')
+    setShowRulePicker(false)
     setError('')
   }
 
@@ -194,6 +235,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
             amount: instrAmount ? parseFloat(instrAmount) : undefined,
             recipient_name: recipientName || undefined,
             description: instrDescription || undefined,
+            config_key: selectedRuleId || undefined,
           }
         : undefined
 
@@ -288,6 +330,117 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId }: 
                 <div className="flex items-start gap-2 rounded-md bg-blue-50 border border-blue-200 p-3">
                   <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                   <p className="text-sm text-blue-800">{selectedTemplate.guidance}</p>
+                </div>
+              )}
+
+              {/* Rule Picker — shown for cambio_regla template */}
+              {selectedTemplate.id === 'cambio_regla' && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5">
+                    <BookOpen className="h-4 w-4" />
+                    Regla a modificar
+                  </Label>
+                  <div className="relative" ref={rulePickerRef}>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        value={selectedRuleId ? (getRuleCatalogEntry(selectedRuleId)?.label ?? ruleSearch) : ruleSearch}
+                        onChange={(e) => {
+                          setRuleSearch(e.target.value)
+                          setSelectedRuleId(null)
+                          setShowRulePicker(true)
+                        }}
+                        onFocus={() => setShowRulePicker(true)}
+                        placeholder="Buscar regla que quieres cambiar..."
+                        className="pl-9"
+                      />
+                    </div>
+                    {showRulePicker && (
+                      <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-64 overflow-y-auto">
+                        {(['governance', 'treasury', 'identity'] as const).map((cat) => {
+                          const catRules = RULES_CATALOG.filter(
+                            (r) =>
+                              r.category === cat &&
+                              (!ruleSearch ||
+                                r.label.toLowerCase().includes(ruleSearch.toLowerCase()) ||
+                                r.description.toLowerCase().includes(ruleSearch.toLowerCase()))
+                          )
+                          if (catRules.length === 0) return null
+                          return (
+                            <div key={cat}>
+                              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted/50 sticky top-0">
+                                {CATEGORY_LABELS[cat]}
+                              </div>
+                              {catRules.map((rule) => (
+                                <button
+                                  key={rule.id}
+                                  type="button"
+                                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left hover:bg-accent transition-colors"
+                                  onClick={() => {
+                                    setSelectedRuleId(rule.id)
+                                    setRuleSearch('')
+                                    setShowRulePicker(false)
+                                    // Pre-fill title and description
+                                    setTitle(`Cambio de regla: ${rule.label}`)
+                                    if (!description || description.startsWith('Propongo cambiar la regla')) {
+                                      setDescription(
+                                        `Propongo cambiar la regla "${rule.label}".\n\nValor actual: ${rule.format(rules)}\nNuevo valor propuesto: [completar]\n\nJustificación: [explicar por qué es necesario el cambio]`
+                                      )
+                                    }
+                                  }}
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <span className="font-medium">{rule.label}</span>
+                                    <p className="text-xs text-muted-foreground truncate">{rule.description}</p>
+                                  </div>
+                                  <Badge variant="secondary" className="text-[10px] shrink-0 font-mono">
+                                    {rule.format(rules)}
+                                  </Badge>
+                                </button>
+                              ))}
+                            </div>
+                          )
+                        })}
+                        {RULES_CATALOG.filter(
+                          (r) =>
+                            !ruleSearch ||
+                            r.label.toLowerCase().includes(ruleSearch.toLowerCase()) ||
+                            r.description.toLowerCase().includes(ruleSearch.toLowerCase())
+                        ).length === 0 && (
+                          <div className="px-3 py-4 text-sm text-muted-foreground text-center">
+                            No se encontraron reglas
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {selectedRuleId && (() => {
+                    const rule = getRuleCatalogEntry(selectedRuleId)
+                    if (!rule) return null
+                    return (
+                      <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{rule.label}</span>
+                          <Badge variant="secondary" className="text-[10px]">
+                            {CATEGORY_LABELS[rule.category]}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{rule.description}</p>
+                        <div className="flex items-center gap-2 pt-1">
+                          <span className="text-xs text-muted-foreground">Valor actual:</span>
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {rule.format(rules)}
+                          </Badge>
+                        </div>
+                        {rule.legalRef && (
+                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 pt-1">
+                            <Scale className="h-3 w-3" />
+                            {rule.legalRef}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
               )}
 

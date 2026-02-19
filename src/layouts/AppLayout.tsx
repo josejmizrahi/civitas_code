@@ -22,6 +22,7 @@ import {
   X,
   User,
   Shield,
+  BookOpen,
 } from 'lucide-react'
 import { Avatar } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
@@ -36,6 +37,7 @@ const coreNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
   { name: 'Tesorería', href: '/treasury', icon: Wallet, minRole: 'observador' as Role },
   { name: 'Gobernanza', href: '/governance', icon: Vote, minRole: 'observador' as Role },
+  { name: 'Reglamento', href: '/rules', icon: BookOpen, minRole: 'observador' as Role },
   { name: 'Miembros', href: '/members', icon: Users, minRole: 'observador' as Role },
   { name: 'Partes Relacionadas', href: '/entities', icon: Building2, minRole: 'observador' as Role },
   { name: 'Documentos', href: '/documents', icon: FileText, minRole: 'observador' as Role },

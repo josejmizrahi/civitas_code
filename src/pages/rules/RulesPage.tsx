@@ -1,11 +1,21 @@
+import { useState } from 'react'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/shared/lib/supabase'
 import { getCommunityRules } from '@/shared/services/rules.service'
+import {
+  RULES_CATALOG,
+  getRulesForCategory,
+  CATEGORY_LABELS,
+  CATEGORY_DESCRIPTIONS,
+  type RuleCategory,
+  type RuleCatalogEntry,
+} from '@/shared/config/rules-catalog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
+import { Input } from '@/shared/components/ui/input'
 import { formatDate } from '@/shared/lib/utils'
 import {
   BookOpen,
@@ -13,9 +23,14 @@ import {
   Wallet,
   UserCheck,
   History,
-  ExternalLink,
+  ChevronRight,
+  ChevronDown,
+  Scale,
+  Search,
+  Pencil,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import type { CommunityRules } from '@/shared/types/rules'
 
 interface RuleVersion {
   id: string
@@ -24,20 +39,144 @@ interface RuleVersion {
   created_at: string
 }
 
-function BoolBadge({ value, yes = 'Sí', no = 'No' }: { value: boolean; yes?: string; no?: string }) {
+const CATEGORY_ICON_MAP: Record<RuleCategory, typeof Shield> = {
+  governance: Shield,
+  treasury: Wallet,
+  identity: UserCheck,
+}
+
+const CATEGORY_COLOR_MAP: Record<RuleCategory, string> = {
+  governance: 'text-blue-600',
+  treasury: 'text-emerald-600',
+  identity: 'text-violet-600',
+}
+
+function RuleDetailPanel({
+  rule,
+  rules,
+  onProposeChange,
+}: {
+  rule: RuleCatalogEntry
+  rules: CommunityRules
+  onProposeChange: (rule: RuleCatalogEntry) => void
+}) {
   return (
-    <Badge variant={value ? 'success' : 'secondary'}>
-      {value ? yes : no}
-    </Badge>
+    <div className="rounded-lg border bg-muted/30 p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+      <div className="space-y-1">
+        <p className="text-sm">{rule.description}</p>
+        {rule.legalRef && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Scale className="h-3 w-3" />
+            Referencia legal: {rule.legalRef}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">Valor actual:</span>
+        <Badge variant="secondary" className="font-mono">
+          {rule.format(rules)}
+        </Badge>
+      </div>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => onProposeChange(rule)}
+        className="gap-1.5"
+      >
+        <Pencil className="h-3.5 w-3.5" />
+        Proponer cambio
+      </Button>
+    </div>
   )
 }
 
-function RuleRow({ label, children }: { label: string; children: React.ReactNode }) {
+function RuleRow({
+  rule,
+  rules,
+  isExpanded,
+  onToggle,
+  onProposeChange,
+}: {
+  rule: RuleCatalogEntry
+  rules: CommunityRules
+  isExpanded: boolean
+  onToggle: () => void
+  onProposeChange: (rule: RuleCatalogEntry) => void
+}) {
+  const ChevronIcon = isExpanded ? ChevronDown : ChevronRight
+
   return (
-    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between py-2 border-b last:border-0">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <div className="text-sm font-medium">{children}</div>
+    <div className="border-b last:border-0">
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center gap-3 py-3 px-1 text-left transition-colors hover:bg-accent/50 rounded-md"
+      >
+        <ChevronIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <span className="text-sm flex-1">{rule.label}</span>
+        <span className="text-sm font-medium text-muted-foreground">
+          {rule.format(rules)}
+        </span>
+      </button>
+      {isExpanded && (
+        <div className="pl-8 pb-3">
+          <RuleDetailPanel rule={rule} rules={rules} onProposeChange={onProposeChange} />
+        </div>
+      )}
     </div>
+  )
+}
+
+function CategorySection({
+  category,
+  rules,
+  searchQuery,
+  expandedRuleId,
+  onToggleRule,
+  onProposeChange,
+}: {
+  category: RuleCategory
+  rules: CommunityRules
+  searchQuery: string
+  expandedRuleId: string | null
+  onToggleRule: (ruleId: string) => void
+  onProposeChange: (rule: RuleCatalogEntry) => void
+}) {
+  const Icon = CATEGORY_ICON_MAP[category]
+  const color = CATEGORY_COLOR_MAP[category]
+  const categoryRules = getRulesForCategory(category)
+
+  const filtered = searchQuery
+    ? categoryRules.filter(
+        (r) =>
+          r.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : categoryRules
+
+  if (filtered.length === 0) return null
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Icon className={`h-5 w-5 ${color}`} />
+          {CATEGORY_LABELS[category]}
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">{CATEGORY_DESCRIPTIONS[category]}</p>
+      </CardHeader>
+      <CardContent>
+        {filtered.map((rule) => (
+          <RuleRow
+            key={rule.id}
+            rule={rule}
+            rules={rules}
+            isExpanded={expandedRuleId === rule.id}
+            onToggle={() => onToggleRule(rule.id)}
+            onProposeChange={onProposeChange}
+          />
+        ))}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -47,6 +186,9 @@ export function RulesPage() {
   const navigate = useNavigate()
 
   const rules = getCommunityRules(null, (community as any)?.rules)
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null)
 
   const { data: versions } = useQuery({
     queryKey: ['rule-versions', communityId],
@@ -62,7 +204,28 @@ export function RulesPage() {
     enabled: !!communityId,
   })
 
-  const pct = (n: number) => `${Math.round(n * 100)}%`
+  const handleToggleRule = (ruleId: string) => {
+    setExpandedRuleId((prev) => (prev === ruleId ? null : ruleId))
+  }
+
+  const handleProposeChange = (rule: RuleCatalogEntry) => {
+    navigate('/governance', {
+      state: {
+        openProposal: true,
+        template: 'cambio_regla',
+        ruleId: rule.id,
+      },
+    })
+  }
+
+  const totalRules = RULES_CATALOG.length
+  const matchingRules = searchQuery
+    ? RULES_CATALOG.filter(
+        (r) =>
+          r.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          r.description.toLowerCase().includes(searchQuery.toLowerCase())
+      ).length
+    : totalRules
 
   return (
     <div className="space-y-6">
@@ -70,142 +233,47 @@ export function RulesPage() {
         <div>
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl flex items-center gap-2">
             <BookOpen className="h-6 w-6 text-blue-600" />
-            Reglas de la Comunidad
+            Reglamento
           </h1>
           <p className="text-sm text-muted-foreground">
-            Configuracion vigente — visible para todos los miembros
+            {totalRules} reglas vigentes — haz clic en cualquiera para ver el detalle
           </p>
         </div>
         {isAdmin && (
           <Button variant="outline" size="sm" onClick={() => navigate('/settings')}>
-            <ExternalLink className="h-3.5 w-3.5 mr-1" />
-            Editar en Configuracion
+            Configuración avanzada
           </Button>
         )}
       </div>
 
-      {/* Governance */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Shield className="h-5 w-5 text-blue-600" />
-            Gobernanza
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RuleRow label="Quorum por defecto">{pct(rules.governance.default_quorum)}</RuleRow>
-          <RuleRow label="Mayoria por defecto">{pct(rules.governance.default_majority)}</RuleRow>
-          <RuleRow label="Delegacion habilitada">
-            <BoolBadge value={rules.governance.delegation_enabled} />
-          </RuleRow>
-          <RuleRow label="Roles con derecho a proponer">
-            <div className="flex gap-1">
-              {rules.governance.proposal_rights.map((r) => (
-                <Badge key={r} variant="outline" className="capitalize">{r}</Badge>
-              ))}
-            </div>
-          </RuleRow>
-          <RuleRow label="Horas de enfriamiento">{rules.governance.cool_down_hours}h</RuleRow>
-          <RuleRow label="Auto-ejecucion">
-            <BoolBadge value={rules.governance.auto_execution_enabled} />
-          </RuleRow>
-          <RuleRow label="Discusion obligatoria">
-            <BoolBadge value={rules.governance.mandatory_discussion_enabled} />
-          </RuleRow>
-          {rules.governance.mandatory_discussion_enabled && (
-            <RuleRow label="Horas de discusion por defecto">
-              {rules.governance.default_discussion_hours}h
-            </RuleRow>
-          )}
-          <RuleRow label="Periodo de gracia (apelaciones)">
-            {rules.governance.grace_period_hours > 0 ? `${rules.governance.grace_period_hours}h` : 'Deshabilitado'}
-          </RuleRow>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar regla..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+        {searchQuery && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {matchingRules} {matchingRules === 1 ? 'regla encontrada' : 'reglas encontradas'}
+          </p>
+        )}
+      </div>
 
-          <div className="mt-3 pt-3 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Quorum por Tipo de Propuesta</p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 text-sm">
-              {Object.entries(rules.governance.quorum_by_type).map(([type, val]) => (
-                <div key={type} className="rounded-md border px-2 py-1 text-center">
-                  <span className="capitalize text-muted-foreground text-xs">{type}</span>
-                  <p className="font-medium">{pct(val)}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-3 pt-3 border-t">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Mayoria por Tipo de Propuesta</p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 text-sm">
-              {Object.entries(rules.governance.majority_by_type).map(([type, val]) => (
-                <div key={type} className="rounded-md border px-2 py-1 text-center">
-                  <span className="capitalize text-muted-foreground text-xs">{type}</span>
-                  <p className="font-medium">{pct(val)}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Treasury */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Wallet className="h-5 w-5 text-emerald-600" />
-            Tesoreria
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RuleRow label="Modo">
-            <Badge variant="secondary">
-              {{ import: 'Importacion', connector: 'Conector', fintech_rail: 'Rail IFPE', hybrid: 'Hibrido' }[rules.treasury.mode]}
-            </Badge>
-          </RuleRow>
-          <RuleRow label="Moneda">{rules.treasury.currency}</RuleRow>
-          <RuleRow label="Limite de gasto del admin">
-            ${rules.treasury.admin_spending_limit.toLocaleString()} {rules.treasury.currency}
-          </RuleRow>
-          <RuleRow label="Votacion requerida arriba de">
-            ${rules.treasury.require_vote_above.toLocaleString()} {rules.treasury.currency}
-          </RuleRow>
-          <RuleRow label="Fondo de reserva">{rules.treasury.reserva_fund_percentage}%</RuleRow>
-          <RuleRow label="Estado financiero mensual automatico">
-            <BoolBadge value={rules.treasury.monthly_statement_auto} />
-          </RuleRow>
-        </CardContent>
-      </Card>
-
-      {/* Identity */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <UserCheck className="h-5 w-5 text-violet-600" />
-            Identidad
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RuleRow label="Pago condiciona voto">
-            <BoolBadge value={rules.identity.payment_to_vote_enabled} />
-          </RuleRow>
-          {rules.identity.payment_to_vote_enabled && (
-            <>
-              <RuleRow label="Periodo de gracia">{rules.identity.grace_period_months} meses</RuleRow>
-              <RuleRow label="Restaurar al pagar">
-                <BoolBadge value={rules.identity.auto_restore_on_payment} />
-              </RuleRow>
-              <RuleRow label="Restricciones para morosos">
-                <div className="flex gap-1 flex-wrap">
-                  {rules.identity.delinquent_restrictions.map((r) => (
-                    <Badge key={r} variant="outline" className="capitalize">{r}</Badge>
-                  ))}
-                </div>
-              </RuleRow>
-            </>
-          )}
-          <RuleRow label="Terminos consecutivos max">{rules.identity.admin_max_consecutive_terms}</RuleRow>
-          <RuleRow label="Duracion del termino">{rules.identity.admin_term_months} meses</RuleRow>
-        </CardContent>
-      </Card>
+      {/* Rule categories */}
+      {(['governance', 'treasury', 'identity'] as RuleCategory[]).map((cat) => (
+        <CategorySection
+          key={cat}
+          category={cat}
+          rules={rules}
+          searchQuery={searchQuery}
+          expandedRuleId={expandedRuleId}
+          onToggleRule={handleToggleRule}
+          onProposeChange={handleProposeChange}
+        />
+      ))}
 
       {/* Version History */}
       {versions && versions.length > 0 && (
@@ -221,7 +289,7 @@ export function RulesPage() {
               {versions.map((v) => (
                 <div key={v.id} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
                   <div>
-                    <span className="font-medium">Version {v.version_number}</span>
+                    <span className="font-medium">Versión {v.version_number}</span>
                     {v.change_reason && (
                       <span className="text-muted-foreground ml-2">— {v.change_reason}</span>
                     )}
