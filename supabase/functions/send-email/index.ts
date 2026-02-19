@@ -72,6 +72,23 @@ const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, u
       <a href="${d.app_url}/governance/assemblies/${d.assembly_id}">Ver Detalles</a>
     `,
   },
+  password_reset: {
+    subject: 'Restablecer tu contraseña - CIVITAS',
+    body: (d) => `
+      <h2>Solicitud de restablecimiento de contraseña</h2>
+      <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta asociada a <strong>${d.email}</strong>.</p>
+      <p>Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
+      <p style="text-align: center; margin: 24px 0;">
+        <a href="${d.reset_link}"
+           style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          Restablecer Contraseña
+        </a>
+      </p>
+      <p style="font-size: 13px; color: #666;">Este enlace expirará en 1 hora. Si no solicitaste este cambio, puedes ignorar este correo de forma segura.</p>
+      <p style="font-size: 13px; color: #666;">Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+      <p style="font-size: 12px; color: #999; word-break: break-all;">${d.reset_link}</p>
+    `,
+  },
 }
 
 function renderTemplate(type: string, data: Record<string, unknown>): { subject: string; html: string } | null {
