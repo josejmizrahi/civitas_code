@@ -15,7 +15,7 @@ export function StreakCounter({ streak, maxStreak, compact }: Props) {
     if (compact) return null
     return (
       <span className="text-xs text-muted-foreground">
-        Sin racha activa
+        Empieza tu racha hoy
       </span>
     )
   }

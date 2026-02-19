@@ -5,7 +5,7 @@ interface Props {
   compact?: boolean
 }
 
-/** Global XP progress bar — shows current level, XP progress to next level. */
+/** Progress bar — shows level and progress to next level. No jargon. */
 export function XpBar({ compact }: Props) {
   const { data: profile } = useMyGamification()
 
@@ -19,7 +19,7 @@ export function XpBar({ compact }: Props) {
     return (
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold" style={{ color: level.color }}>
-          {level.icon} Nv.{level.level}
+          {level.icon} {level.titleShort}
         </span>
         <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden min-w-[60px]">
           <div
@@ -28,7 +28,7 @@ export function XpBar({ compact }: Props) {
           />
         </div>
         <span className="text-[10px] text-muted-foreground font-mono">
-          {profile.xp}xp
+          {profile.xp} pts
         </span>
       </div>
     )
@@ -41,13 +41,12 @@ export function XpBar({ compact }: Props) {
           <span className="text-lg">{level.icon}</span>
           <div>
             <span className="text-sm font-bold" style={{ color: level.color }}>
-              Nivel {level.level}
+              {level.title}
             </span>
-            <span className="text-xs text-muted-foreground ml-1.5">{level.title}</span>
           </div>
         </div>
         <span className="text-xs font-mono text-muted-foreground">
-          {profile.xp} XP
+          {profile.xp} puntos
         </span>
       </div>
       <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
@@ -58,8 +57,8 @@ export function XpBar({ compact }: Props) {
       </div>
       {next && (
         <div className="flex justify-between text-[10px] text-muted-foreground">
-          <span>{progress.current} / {progress.next} XP</span>
-          <span>{next.icon} Nivel {next.level}: {next.title}</span>
+          <span>{progress.current} / {progress.next} para subir</span>
+          <span>Siguiente: {next.icon} {next.title}</span>
         </div>
       )}
     </div>

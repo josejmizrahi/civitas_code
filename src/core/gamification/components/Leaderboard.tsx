@@ -76,7 +76,7 @@ export function Leaderboard({ limit = 10, compact }: Props) {
                 </span>
               </div>
               <div className="text-[10px] text-muted-foreground">
-                Nv.{entry.level} · {entry.badge_count} insignias
+                Niv.{entry.level} · {entry.badge_count} logros
                 {entry.current_streak > 0 && ` · 🔥${entry.current_streak}`}
               </div>
             </div>
@@ -84,7 +84,7 @@ export function Leaderboard({ limit = 10, compact }: Props) {
               <span className="text-sm font-bold font-mono" style={{ color: level.color }}>
                 {entry.xp.toLocaleString()}
               </span>
-              <span className="text-[10px] text-muted-foreground ml-0.5">XP</span>
+              <span className="text-[10px] text-muted-foreground ml-0.5">pts</span>
             </div>
           </div>
         )

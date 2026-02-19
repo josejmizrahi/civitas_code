@@ -1,4 +1,4 @@
-// Gamification Types — XP, Levels, Badges, Streaks
+// Gamification Types — Behavioral Loops, Goals, Progress, Community Pulse
 
 export type GamificationAction =
   | 'vote'
@@ -57,7 +57,7 @@ export interface BadgeDefinition {
   description: string
   icon: string
   category: 'governance' | 'treasury' | 'community' | 'streak' | 'special'
-  condition: string // human-readable condition
+  condition: string
 }
 
 export interface LeaderboardEntry {
@@ -79,4 +79,47 @@ export interface XpAwardResult {
   new_badges: string[]
   streak: number
   streak_multiplier: number
+}
+
+// ─── Behavioral Loop Types ──────────────────────────────────────────────────
+
+/** A daily goal — part of the trigger → action → reward loop. */
+export interface DailyGoal {
+  id: string
+  title: string
+  description: string
+  icon: string
+  completed: boolean
+  action: {
+    label: string
+    href: string
+  }
+  points: number
+}
+
+/** Community health pulse — collective progress meter. */
+export interface CommunityPulse {
+  overall: number
+  payments: { pct: number; label: string }
+  participation: { pct: number; label: string }
+  activity: { pct: number; label: string }
+}
+
+/** Social nudge — peer activity for FOMO / belonging. */
+export interface SocialNudge {
+  type: 'vote' | 'payment' | 'proposal' | 'general'
+  message: string
+  icon: string
+  href?: string
+}
+
+/** Quick action — one-tap contextual action. */
+export interface QuickAction {
+  id: string
+  title: string
+  subtitle: string
+  icon: string
+  href: string
+  urgency: 'high' | 'medium' | 'low'
+  badge?: string
 }

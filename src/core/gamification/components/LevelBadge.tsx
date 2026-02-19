@@ -26,7 +26,7 @@ export function LevelBadge({ xp, size = 'md', showTitle }: Props) {
       }}
     >
       <span>{level.icon}</span>
-      <span>Nv.{level.level}</span>
+      <span>Niv.{level.level}</span>
       {showTitle && <span className="font-normal opacity-80">· {level.titleShort}</span>}
     </span>
   )

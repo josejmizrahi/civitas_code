@@ -27,7 +27,7 @@ export function GamificationSummary() {
             maxStreak={profile.max_streak}
           />
           <div className="text-right">
-            <div className="text-xs text-muted-foreground">Insignias</div>
+            <div className="text-xs text-muted-foreground">Logros</div>
             <div className="text-lg font-bold">{profile.badges.length}</div>
           </div>
         </div>

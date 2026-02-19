@@ -95,7 +95,7 @@ describe('Gamification Constants', () => {
     it('finds existing badge', () => {
       const badge = getBadgeById('first_vote')
       expect(badge).toBeDefined()
-      expect(badge?.name).toBe('Primer Voto')
+      expect(badge?.name).toBe('Mi Primera Vez')
     })
 
     it('returns undefined for unknown badge', () => {

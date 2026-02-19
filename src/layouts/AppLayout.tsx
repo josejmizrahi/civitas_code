@@ -251,15 +251,20 @@ export function AppLayout() {
           )}
         </nav>
 
-        {/* Gamification XP bar */}
+        {/* Level + Streak */}
         {gamProfile && communityId && (
           <div className="border-t px-3 py-2.5 space-y-1.5">
             <XpBar compact />
-            {gamProfile.current_streak > 0 && (
-              <div className="flex justify-center">
+            <div className="flex items-center justify-between text-xs">
+              {gamProfile.current_streak > 0 ? (
                 <StreakCounter streak={gamProfile.current_streak} compact />
-              </div>
-            )}
+              ) : (
+                <span className="text-muted-foreground">Empieza tu racha hoy</span>
+              )}
+              <span className="text-muted-foreground">
+                {gamProfile.badges.length} logros
+              </span>
+            </div>
           </div>
         )}
 

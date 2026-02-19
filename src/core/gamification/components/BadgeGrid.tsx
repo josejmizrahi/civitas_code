@@ -76,7 +76,7 @@ export function BadgeGrid({ earned, showAll, compact }: Props) {
                     )}
                     {!isEarned && (
                       <div className="mt-1 text-[9px] text-muted-foreground">
-                        🔒 Bloqueado
+                        🔒 Por desbloquear
                       </div>
                     )}
                   </div>
