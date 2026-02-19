@@ -4,6 +4,7 @@ import { useAuth } from './providers'
 import { AppLayout } from '@/layouts/AppLayout'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { LandingPage } from '@/pages/landing/LandingPage'
+import { WhitepaperPage } from '@/pages/whitepaper/WhitepaperPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
@@ -86,6 +87,7 @@ export function AppRouter() {
       <Routes>
         {/* Landing page — public */}
         <Route path="/" element={<LandingRedirect />} />
+        <Route path="/whitepaper" element={<WhitepaperPage />} />
 
         {/* Auth routes */}
         <Route element={<PublicRoute><AuthLayout /></PublicRoute>}>

@@ -1,5 +1,8 @@
 import { cn } from '@/shared/lib/utils'
 import { REACTION_CONFIG, type ReactionType, type ReactionSummary } from '../types'
+import { ThumbsUp, ThumbsDown, Lightbulb, HelpCircle } from 'lucide-react'
+import type { ComponentType } from 'react'
+import type { LucideProps } from 'lucide-react'
 
 interface Props {
   commentId: string
@@ -10,6 +13,13 @@ interface Props {
 }
 
 const REACTION_TYPES: ReactionType[] = ['agree', 'disagree', 'helpful', 'question']
+
+const REACTION_ICONS: Record<ReactionType, ComponentType<LucideProps>> = {
+  agree: ThumbsUp,
+  disagree: ThumbsDown,
+  helpful: Lightbulb,
+  question: HelpCircle,
+}
 
 export function CommentReactions({ commentId, summary, onAdd, onRemove, disabled }: Props) {
   const userReactions = summary?.user_reactions ?? []
@@ -29,6 +39,7 @@ export function CommentReactions({ commentId, summary, onAdd, onRemove, disabled
         const config = REACTION_CONFIG[reaction]
         const count = summary?.[reaction] ?? 0
         const isActive = userReactions.includes(reaction)
+        const Icon = REACTION_ICONS[reaction]
 
         return (
           <button
@@ -44,7 +55,7 @@ export function CommentReactions({ commentId, summary, onAdd, onRemove, disabled
               disabled && 'opacity-50 cursor-not-allowed'
             )}
           >
-            <span>{config.emoji}</span>
+            <Icon className="h-3 w-3" />
             {count > 0 && <span className="font-medium">{count}</span>}
           </button>
         )

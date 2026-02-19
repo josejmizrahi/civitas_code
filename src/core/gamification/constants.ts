@@ -2,16 +2,16 @@ import type { LevelDefinition, BadgeDefinition, GamificationAction } from './typ
 
 // ─── Friendly Action Labels (no jargon) ─────────────────────────────────────
 
-export const ACTION_LABELS: Record<GamificationAction, { verb: string; past: string; emoji: string }> = {
-  vote: { verb: 'Votar', past: 'Votaste', emoji: '🗳️' },
-  endorse: { verb: 'Apoyar', past: 'Apoyaste', emoji: '👍' },
-  propose: { verb: 'Proponer', past: 'Propusiste', emoji: '💡' },
-  pay_on_time: { verb: 'Pagar', past: 'Pagaste', emoji: '💰' },
-  attend_assembly: { verb: 'Asistir', past: 'Asististe', emoji: '🏛️' },
-  daily_login: { verb: 'Entrar', past: 'Entraste', emoji: '👋' },
-  comment: { verb: 'Opinar', past: 'Opinaste', emoji: '💬' },
-  sign_minutes: { verb: 'Firmar', past: 'Firmaste', emoji: '✍️' },
-  create_delegation: { verb: 'Delegar', past: 'Delegaste', emoji: '🤝' },
+export const ACTION_LABELS: Record<GamificationAction, { verb: string; past: string; icon: string }> = {
+  vote: { verb: 'Votar', past: 'Votaste', icon: 'vote' },
+  endorse: { verb: 'Apoyar', past: 'Apoyaste', icon: 'thumbs-up' },
+  propose: { verb: 'Proponer', past: 'Propusiste', icon: 'lightbulb' },
+  pay_on_time: { verb: 'Pagar', past: 'Pagaste', icon: 'wallet' },
+  attend_assembly: { verb: 'Asistir', past: 'Asististe', icon: 'landmark' },
+  daily_login: { verb: 'Entrar', past: 'Entraste', icon: 'log-in' },
+  comment: { verb: 'Opinar', past: 'Opinaste', icon: 'message-square' },
+  sign_minutes: { verb: 'Firmar', past: 'Firmaste', icon: 'pen-line' },
+  create_delegation: { verb: 'Delegar', past: 'Delegaste', icon: 'handshake' },
 }
 
 // ─── Points per Action ──────────────────────────────────────────────────────
@@ -45,13 +45,13 @@ export function getStreakMultiplier(streak: number): { multiplier: number; label
 // ─── Level System ───────────────────────────────────────────────────────────
 
 export const LEVELS: LevelDefinition[] = [
-  { level: 1, title: 'Vecino Nuevo', titleShort: 'Nuevo', xpRequired: 0, color: '#94a3b8', icon: '🏠' },
-  { level: 2, title: 'Vecino Activo', titleShort: 'Activo', xpRequired: 100, color: '#22c55e', icon: '🌱' },
-  { level: 3, title: 'Participante', titleShort: 'Participante', xpRequired: 300, color: '#3b82f6', icon: '⭐' },
-  { level: 4, title: 'Colaborador', titleShort: 'Colaborador', xpRequired: 600, color: '#8b5cf6', icon: '🤝' },
-  { level: 5, title: 'Líder Comunitario', titleShort: 'Líder', xpRequired: 1000, color: '#f59e0b', icon: '🏆' },
-  { level: 6, title: 'Pilar de la Comunidad', titleShort: 'Pilar', xpRequired: 1800, color: '#ef4444', icon: '🏛️' },
-  { level: 7, title: 'Guardián del Condominio', titleShort: 'Guardián', xpRequired: 3000, color: '#ec4899', icon: '👑' },
+  { level: 1, title: 'Vecino Nuevo', titleShort: 'Nuevo', xpRequired: 0, color: '#94a3b8', icon: 'home' },
+  { level: 2, title: 'Vecino Activo', titleShort: 'Activo', xpRequired: 100, color: '#22c55e', icon: 'sprout' },
+  { level: 3, title: 'Participante', titleShort: 'Participante', xpRequired: 300, color: '#3b82f6', icon: 'star' },
+  { level: 4, title: 'Colaborador', titleShort: 'Colaborador', xpRequired: 600, color: '#8b5cf6', icon: 'handshake' },
+  { level: 5, title: 'Lider Comunitario', titleShort: 'Lider', xpRequired: 1000, color: '#f59e0b', icon: 'trophy' },
+  { level: 6, title: 'Pilar de la Comunidad', titleShort: 'Pilar', xpRequired: 1800, color: '#ef4444', icon: 'landmark' },
+  { level: 7, title: 'Guardian del Condominio', titleShort: 'Guardian', xpRequired: 3000, color: '#ec4899', icon: 'crown' },
 ]
 
 export function getLevelForXp(xp: number): LevelDefinition {
@@ -79,29 +79,29 @@ export function getXpProgress(xp: number): { current: number; next: number; pct:
 
 export const BADGES: BadgeDefinition[] = [
   // Tu Voz
-  { id: 'first_vote', name: 'Mi Primera Vez', description: 'Votaste por primera vez', icon: '🗳️', category: 'governance', condition: 'vote >= 1' },
-  { id: 'voter_10', name: 'Voz Activa', description: 'Ya votaste 10 veces', icon: '📢', category: 'governance', condition: 'vote >= 10' },
-  { id: 'voter_50', name: 'Siempre Presente', description: '50 votos — nunca te lo pierdes', icon: '🏛️', category: 'governance', condition: 'vote >= 50' },
-  { id: 'first_proposal', name: 'Tengo una Idea', description: 'Hiciste tu primera propuesta', icon: '💡', category: 'governance', condition: 'propose >= 1' },
-  { id: 'proposer_10', name: 'Lleno de Ideas', description: '10 propuestas — siempre innovando', icon: '🚀', category: 'governance', condition: 'propose >= 10' },
-  { id: 'endorser_5', name: 'Buen Apoyo', description: 'Apoyaste 5 propuestas de otros', icon: '✅', category: 'governance', condition: 'endorse >= 5' },
-  { id: 'endorser_20', name: 'Respaldo Seguro', description: '20 apoyos — cuentan contigo', icon: '🛡️', category: 'governance', condition: 'endorse >= 20' },
+  { id: 'first_vote', name: 'Mi Primera Vez', description: 'Votaste por primera vez', icon: 'vote', category: 'governance', condition: 'vote >= 1' },
+  { id: 'voter_10', name: 'Voz Activa', description: 'Ya votaste 10 veces', icon: 'megaphone', category: 'governance', condition: 'vote >= 10' },
+  { id: 'voter_50', name: 'Siempre Presente', description: '50 votos', icon: 'landmark', category: 'governance', condition: 'vote >= 50' },
+  { id: 'first_proposal', name: 'Tengo una Idea', description: 'Hiciste tu primera propuesta', icon: 'lightbulb', category: 'governance', condition: 'propose >= 1' },
+  { id: 'proposer_10', name: 'Lleno de Ideas', description: '10 propuestas', icon: 'rocket', category: 'governance', condition: 'propose >= 10' },
+  { id: 'endorser_5', name: 'Buen Apoyo', description: 'Apoyaste 5 propuestas de otros', icon: 'check-circle', category: 'governance', condition: 'endorse >= 5' },
+  { id: 'endorser_20', name: 'Respaldo Seguro', description: '20 apoyos', icon: 'shield', category: 'governance', condition: 'endorse >= 20' },
   // Pagos
-  { id: 'first_payment', name: 'Al Corriente', description: 'Tu primer pago a tiempo', icon: '💰', category: 'treasury', condition: 'pay_on_time >= 1' },
-  { id: 'payer_6', name: 'Puntual', description: '6 meses pagando a tiempo', icon: '💎', category: 'treasury', condition: 'pay_on_time >= 6' },
-  { id: 'payer_12', name: 'Ejemplo a Seguir', description: 'Un año sin fallar un pago', icon: '🌟', category: 'treasury', condition: 'pay_on_time >= 12' },
+  { id: 'first_payment', name: 'Al Corriente', description: 'Tu primer pago a tiempo', icon: 'wallet', category: 'treasury', condition: 'pay_on_time >= 1' },
+  { id: 'payer_6', name: 'Puntual', description: '6 meses pagando a tiempo', icon: 'gem', category: 'treasury', condition: 'pay_on_time >= 6' },
+  { id: 'payer_12', name: 'Ejemplo a Seguir', description: 'Un anio sin fallar un pago', icon: 'award', category: 'treasury', condition: 'pay_on_time >= 12' },
   // Comunidad
-  { id: 'comentarista', name: 'Opinión Cuenta', description: 'Diste tu primera opinión', icon: '💬', category: 'community', condition: 'comment >= 1' },
-  { id: 'commenter_25', name: 'Conversador', description: '25 opiniones — te gusta participar', icon: '🗣️', category: 'community', condition: 'comment >= 25' },
-  { id: 'assembler_5', name: 'Siempre Ahí', description: 'Fuiste a 5 asambleas', icon: '🪑', category: 'community', condition: 'attend_assembly >= 5' },
-  { id: 'signer', name: 'De Palabra', description: 'Firmaste un acta de asamblea', icon: '✍️', category: 'community', condition: 'sign_minutes >= 1' },
+  { id: 'comentarista', name: 'Opinion Cuenta', description: 'Diste tu primera opinion', icon: 'message-square', category: 'community', condition: 'comment >= 1' },
+  { id: 'commenter_25', name: 'Conversador', description: '25 opiniones', icon: 'messages-square', category: 'community', condition: 'comment >= 25' },
+  { id: 'assembler_5', name: 'Siempre Ahi', description: 'Fuiste a 5 asambleas', icon: 'armchair', category: 'community', condition: 'attend_assembly >= 5' },
+  { id: 'signer', name: 'De Palabra', description: 'Firmaste un acta de asamblea', icon: 'pen-line', category: 'community', condition: 'sign_minutes >= 1' },
   // Constancia
-  { id: 'streak_7', name: 'Una Semana', description: '7 días seguidos participando', icon: '🔥', category: 'streak', condition: 'streak >= 7' },
-  { id: 'streak_30', name: 'Todo un Mes', description: '30 días sin faltar', icon: '⚡', category: 'streak', condition: 'streak >= 30' },
-  { id: 'streak_90', name: 'Inquebrantable', description: '90 días seguidos — eres leyenda', icon: '💪', category: 'streak', condition: 'streak >= 90' },
+  { id: 'streak_7', name: 'Una Semana', description: '7 dias seguidos participando', icon: 'flame', category: 'streak', condition: 'streak >= 7' },
+  { id: 'streak_30', name: 'Todo un Mes', description: '30 dias sin faltar', icon: 'zap', category: 'streak', condition: 'streak >= 30' },
+  { id: 'streak_90', name: 'Inquebrantable', description: '90 dias seguidos', icon: 'shield-check', category: 'streak', condition: 'streak >= 90' },
   // Especial
-  { id: 'early_adopter', name: 'Pionero', description: 'De los primeros en unirse', icon: '🌅', category: 'special', condition: 'special: early_adopter' },
-  { id: 'level_max', name: 'Leyenda', description: 'Llegaste al nivel máximo', icon: '👑', category: 'special', condition: 'level >= 7' },
+  { id: 'early_adopter', name: 'Pionero', description: 'De los primeros en unirse', icon: 'sunrise', category: 'special', condition: 'special: early_adopter' },
+  { id: 'level_max', name: 'Leyenda', description: 'Llegaste al nivel maximo', icon: 'crown', category: 'special', condition: 'level >= 7' },
 ]
 
 export function getBadgeById(id: string): BadgeDefinition | undefined {
@@ -109,11 +109,11 @@ export function getBadgeById(id: string): BadgeDefinition | undefined {
 }
 
 export const BADGE_CATEGORIES = [
-  { id: 'governance', label: 'Tu Voz', icon: '🗳️' },
-  { id: 'treasury', label: 'Pagos', icon: '💰' },
-  { id: 'community', label: 'Comunidad', icon: '🤝' },
-  { id: 'streak', label: 'Constancia', icon: '🔥' },
-  { id: 'special', label: 'Especial', icon: '⭐' },
+  { id: 'governance', label: 'Tu Voz', icon: 'vote' },
+  { id: 'treasury', label: 'Pagos', icon: 'wallet' },
+  { id: 'community', label: 'Comunidad', icon: 'users' },
+  { id: 'streak', label: 'Constancia', icon: 'flame' },
+  { id: 'special', label: 'Especial', icon: 'star' },
 ] as const
 
 // ─── Celebration Messages (variable rewards — not always the same) ──────────
@@ -145,10 +145,10 @@ export function getStreakWarning(streak: number, lastActivity: string | null): s
 
   if (hoursAgo < 20) return null
   if (hoursAgo < 36 && streak >= 3) {
-    return `¡No pierdas tu racha de ${streak} días! Haz algo hoy.`
+    return `No pierdas tu racha de ${streak} dias. Participa hoy.`
   }
   if (hoursAgo >= 36 && streak >= 3) {
-    return `⚠️ Tu racha de ${streak} días está en riesgo. ¡Actúa ahora!`
+    return `Tu racha de ${streak} dias esta en riesgo. Actua ahora.`
   }
   return null
 }

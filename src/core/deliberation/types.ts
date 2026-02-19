@@ -72,9 +72,9 @@ export const SENTIMENT_CONFIG: Record<Sentiment, { label: string; color: string;
   question: { label: 'Pregunta', color: 'text-blue-700', bgColor: 'bg-blue-100' },
 }
 
-export const REACTION_CONFIG: Record<ReactionType, { label: string; emoji: string }> = {
-  agree: { label: 'De acuerdo', emoji: '👍' },
-  disagree: { label: 'En desacuerdo', emoji: '👎' },
-  helpful: { label: 'Útil', emoji: '💡' },
-  question: { label: 'Pregunta', emoji: '❓' },
+export const REACTION_CONFIG: Record<ReactionType, { label: string; icon: string }> = {
+  agree: { label: 'De acuerdo', icon: 'thumbs-up' },
+  disagree: { label: 'En desacuerdo', icon: 'thumbs-down' },
+  helpful: { label: 'Util', icon: 'lightbulb' },
+  question: { label: 'Pregunta', icon: 'help-circle' },
 }

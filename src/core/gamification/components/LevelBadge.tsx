@@ -1,4 +1,5 @@
 import { getLevelForXp } from '../constants'
+import { DynamicIcon } from '@/shared/components/DynamicIcon'
 
 interface Props {
   xp: number
@@ -16,6 +17,8 @@ export function LevelBadge({ xp, size = 'md', showTitle }: Props) {
     lg: 'text-base px-3 py-1.5 gap-1.5',
   }
 
+  const iconSizes = { sm: 'h-3 w-3', md: 'h-3.5 w-3.5', lg: 'h-4 w-4' }
+
   return (
     <span
       className={`inline-flex items-center rounded-full font-bold transition-transform hover:scale-105 ${sizes[size]}`}
@@ -25,9 +28,9 @@ export function LevelBadge({ xp, size = 'md', showTitle }: Props) {
         border: `1.5px solid ${level.color}40`,
       }}
     >
-      <span>{level.icon}</span>
+      <DynamicIcon name={level.icon} className={iconSizes[size]} />
       <span>Niv.{level.level}</span>
-      {showTitle && <span className="font-normal opacity-80">· {level.titleShort}</span>}
+      {showTitle && <span className="font-normal opacity-80">{level.titleShort}</span>}
     </span>
   )
 }

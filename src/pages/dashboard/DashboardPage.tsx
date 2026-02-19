@@ -75,7 +75,7 @@ export function DashboardPage() {
       {/* ─── Friendly Header ─── */}
       <div>
         <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-          ¡Hola, {firstName}! 👋
+          Hola, {firstName}
         </h1>
         <p className="text-sm text-muted-foreground">
           {community?.name ?? 'Tu comunidad'}

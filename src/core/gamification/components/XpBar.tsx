@@ -1,11 +1,12 @@
 import { useMyGamification } from '../hooks/useGamification'
 import { getLevelForXp, getXpProgress, getNextLevel } from '../constants'
+import { DynamicIcon } from '@/shared/components/DynamicIcon'
 
 interface Props {
   compact?: boolean
 }
 
-/** Progress bar — shows level and progress to next level. No jargon. */
+/** Progress bar -- shows level and progress to next level. */
 export function XpBar({ compact }: Props) {
   const { data: profile } = useMyGamification()
 
@@ -18,8 +19,9 @@ export function XpBar({ compact }: Props) {
   if (compact) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm font-bold" style={{ color: level.color }}>
-          {level.icon} {level.titleShort}
+        <span className="flex items-center gap-1 text-sm font-bold" style={{ color: level.color }}>
+          <DynamicIcon name={level.icon} className="h-3.5 w-3.5" />
+          {level.titleShort}
         </span>
         <div className="h-1.5 flex-1 rounded-full bg-muted overflow-hidden min-w-[60px]">
           <div
@@ -38,7 +40,7 @@ export function XpBar({ compact }: Props) {
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <span className="text-lg">{level.icon}</span>
+          <DynamicIcon name={level.icon} className="h-5 w-5" style={{ color: level.color }} />
           <div>
             <span className="text-sm font-bold" style={{ color: level.color }}>
               {level.title}
@@ -58,7 +60,9 @@ export function XpBar({ compact }: Props) {
       {next && (
         <div className="flex justify-between text-[10px] text-muted-foreground">
           <span>{progress.current} / {progress.next} para subir</span>
-          <span>Siguiente: {next.icon} {next.title}</span>
+          <span className="flex items-center gap-0.5">
+            Siguiente: <DynamicIcon name={next.icon} className="h-3 w-3 inline" /> {next.title}
+          </span>
         </div>
       )}
     </div>

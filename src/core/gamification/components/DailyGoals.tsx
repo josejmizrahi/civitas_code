@@ -6,6 +6,8 @@ import { useCommunityContext } from '@/app/providers'
 import type { DailyGoal } from '../types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { getStreakWarning } from '../constants'
+import { DynamicIcon } from '@/shared/components/DynamicIcon'
+import { Target, Check, Flame, AlertTriangle, CheckCircle } from 'lucide-react'
 
 /**
  * Daily Goals — the core behavioral loop.
@@ -29,9 +31,9 @@ export function DailyGoals() {
   const checkedInToday = profile.last_activity_date === new Date().toISOString().split('T')[0]
   goals.push({
     id: 'checkin',
-    title: checkedInToday ? '¡Ya entraste hoy!' : 'Entra a tu comunidad',
-    description: checkedInToday ? 'Revisa qué hay de nuevo' : 'Revisa las novedades del día',
-    icon: '👋',
+    title: checkedInToday ? 'Ya entraste hoy' : 'Entra a tu comunidad',
+    description: checkedInToday ? 'Revisa las novedades' : 'Revisa las novedades del dia',
+    icon: 'log-in',
     completed: checkedInToday,
     action: { label: 'Ver novedades', href: '/dashboard' },
     points: 5,
@@ -43,7 +45,7 @@ export function DailyGoals() {
       id: 'vote',
       title: `${activeProposals.length} propuesta${activeProposals.length > 1 ? 's' : ''} esperan tu voto`,
       description: activeProposals[0].title,
-      icon: '🗳️',
+      icon: 'vote',
       completed: false,
       action: { label: 'Ir a votar', href: '/governance' },
       points: 20,
@@ -62,7 +64,7 @@ export function DailyGoals() {
         ? `Tienes ${overdue.length} pago${overdue.length > 1 ? 's' : ''} vencido${overdue.length > 1 ? 's' : ''}`
         : 'Revisa tu estado de cuenta',
       description: overdue.length > 0 ? 'Ponte al corriente para no perder tu voto' : 'Verifica que estés al día',
-      icon: overdue.length > 0 ? '⚠️' : '💰',
+      icon: overdue.length > 0 ? 'alert-triangle' : 'wallet',
       completed: false,
       action: { label: overdue.length > 0 ? 'Pagar ahora' : 'Ver pagos', href: '/treasury' },
       points: 50,
@@ -71,9 +73,9 @@ export function DailyGoals() {
     // All paid!
     goals.push({
       id: 'payment',
-      title: '¡Estás al corriente!',
-      description: 'Todos tus pagos están al día',
-      icon: '✅',
+      title: 'Estas al corriente',
+      description: 'Todos tus pagos estan al dia',
+      icon: 'check-circle',
       completed: true,
       action: { label: 'Ver historial', href: '/treasury' },
       points: 0,
@@ -92,7 +94,8 @@ export function DailyGoals() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
-            🎯 Tus metas de hoy
+            <Target className="h-4 w-4" />
+            Tus metas de hoy
           </CardTitle>
           <span className="text-sm font-bold text-muted-foreground">
             {completedCount}/{totalGoals}
@@ -117,7 +120,7 @@ export function DailyGoals() {
                 : 'border-border hover:border-primary/30 hover:bg-accent/50 hover:shadow-sm'
             }`}
           >
-            <span className="text-xl shrink-0">{goal.icon}</span>
+            <DynamicIcon name={goal.icon} className="h-5 w-5 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className={`text-sm font-medium ${goal.completed ? 'line-through text-muted-foreground' : ''}`}>
                 {goal.title}
@@ -125,9 +128,9 @@ export function DailyGoals() {
               <p className="text-xs text-muted-foreground truncate">{goal.description}</p>
             </div>
             {goal.completed ? (
-              <span className="text-green-500 text-lg">✓</span>
+              <Check className="h-5 w-5 text-green-500" />
             ) : (
-              <span className="text-xs text-primary font-medium shrink-0">{goal.action.label} →</span>
+              <span className="text-xs text-primary font-medium shrink-0">{goal.action.label}</span>
             )}
           </Link>
         ))}
@@ -135,14 +138,20 @@ export function DailyGoals() {
         {/* Streak warning — loss aversion */}
         {streakWarning && (
           <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 mt-2">
-            <p className="text-sm font-medium text-orange-800">🔥 {streakWarning}</p>
+            <p className="flex items-center gap-1.5 text-sm font-medium text-orange-800">
+              <Flame className="h-4 w-4 shrink-0" />
+              {streakWarning}
+            </p>
           </div>
         )}
 
         {/* All complete celebration */}
         {completedCount === totalGoals && totalGoals > 0 && (
           <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center mt-2 animate-slide-up-fade">
-            <p className="text-sm font-bold text-green-800">🎉 ¡Completaste todas tus metas de hoy!</p>
+            <p className="flex items-center justify-center gap-1.5 text-sm font-bold text-green-800">
+              <CheckCircle className="h-4 w-4 shrink-0" />
+              Completaste todas tus metas de hoy
+            </p>
             <p className="text-xs text-green-600 mt-1">Tu racha sigue creciendo</p>
           </div>
         )}
