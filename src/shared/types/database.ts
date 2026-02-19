@@ -1,7 +1,3 @@
-(node:5501) ExperimentalWarning: CommonJS module /Users/jj/.nvm/versions/node/v23.1.0/lib/node_modules/npm/node_modules/debug/src/node.js is loading ES Module /Users/jj/.nvm/versions/node/v23.1.0/lib/node_modules/npm/node_modules/supports-color/index.js using require().
-Support for loading ES Module in require() is an experimental feature and might change at any time
-(Use `node --trace-warnings ...` to show where the warning was created)
-npm warn exec The following package was not found and will be installed: supabase@2.76.10
 export type Json =
   | string
   | number

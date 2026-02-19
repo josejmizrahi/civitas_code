@@ -28,7 +28,7 @@ export async function getAssemblies(
 
   const { data, error } = await query
   if (error) throw error
-  return (data ?? []) as Assembly[]
+  return (data ?? []) as unknown as Assembly[]
 }
 
 export async function getAssembly(assemblyId: string): Promise<Assembly> {
@@ -40,7 +40,7 @@ export async function getAssembly(assemblyId: string): Promise<Assembly> {
 
   if (error) throw error
 
-  const assembly = data as Assembly
+  const assembly = data as unknown as Assembly
 
   // Join caller name
   if (assembly.called_by) {
@@ -257,7 +257,7 @@ export async function getConvocatorias(
     .order('call_number', { ascending: true })
 
   if (error) throw error
-  return (data ?? []) as Convocatoria[]
+  return (data ?? []) as unknown as Convocatoria[]
 }
 
 export async function recordDelivery(

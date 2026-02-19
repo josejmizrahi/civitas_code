@@ -16,7 +16,7 @@ export async function getProposals(
 
   const { data, error } = await query
   if (error) throw error
-  return (data ?? []) as Proposal[]
+  return (data ?? []) as unknown as Proposal[]
 }
 
 export async function getProposal(proposalId: string): Promise<Proposal> {
@@ -27,7 +27,7 @@ export async function getProposal(proposalId: string): Promise<Proposal> {
     .single()
 
   if (error) throw error
-  return data as Proposal
+  return data as unknown as Proposal
 }
 
 export async function createProposal(
@@ -1018,7 +1018,7 @@ export async function generateMinutes(
     .single()
 
   if (error) throw error
-  return data as Minutes
+  return data as unknown as Minutes
 }
 
 export async function getMinutes(proposalId: string): Promise<Minutes | null> {
@@ -1031,7 +1031,7 @@ export async function getMinutes(proposalId: string): Promise<Minutes | null> {
     .maybeSingle()
 
   if (error) throw error
-  return data as Minutes | null
+  return data as unknown as Minutes | null
 }
 
 /**
@@ -1049,7 +1049,7 @@ export async function approveMinutes(minutesId: string, userId: string): Promise
     .single()
 
   if (error) throw error
-  return data as Minutes
+  return data as unknown as Minutes
 }
 
 /**
@@ -1068,7 +1068,7 @@ export async function signMinutes(
     .single()
 
   if (fetchErr) throw fetchErr
-  const minutes = current as Minutes
+  const minutes = current as unknown as Minutes
 
   // Compute SHA-256 hash
   const signedAt = new Date().toISOString()
@@ -1088,5 +1088,5 @@ export async function signMinutes(
     .single()
 
   if (error) throw error
-  return data as Minutes
+  return data as unknown as Minutes
 }

@@ -194,7 +194,7 @@ export async function createMorosoNotice(
       outstanding_amount: outstandingAmount,
       assembly_id: opts?.assemblyId ?? null,
       deadline: opts?.deadline ?? null,
-      outstanding_obligations: opts?.obligations ?? [],
+      outstanding_obligations: (opts?.obligations ?? []) as unknown as any,
     })
     .select()
     .single()

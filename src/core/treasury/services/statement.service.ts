@@ -74,7 +74,7 @@ export async function getStatements(
 
   const { data, error } = await query
   if (error) throw error
-  return (data ?? []) as FinancialStatement[]
+  return (data ?? []) as unknown as FinancialStatement[]
 }
 
 /**
@@ -88,7 +88,7 @@ export async function getStatement(statementId: string): Promise<FinancialStatem
     .single()
 
   if (error) throw error
-  return data as FinancialStatement
+  return data as unknown as FinancialStatement
 }
 
 /**
