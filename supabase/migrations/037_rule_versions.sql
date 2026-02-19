@@ -31,25 +31,33 @@ CREATE INDEX IF NOT EXISTS idx_rule_versions_community ON rule_versions(communit
 ALTER TABLE rule_versions ENABLE ROW LEVEL SECURITY;
 
 -- All members can read rule history
-CREATE POLICY rule_versions_select ON rule_versions FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM members m
-      WHERE m.community_id = rule_versions.community_id
-      AND m.user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'rule_versions_select') THEN
+    CREATE POLICY rule_versions_select ON rule_versions FOR SELECT
+      USING (
+        EXISTS (
+          SELECT 1 FROM members m
+          WHERE m.community_id = rule_versions.community_id
+          AND m.user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- Only admins can create rule versions (through rule update service)
-CREATE POLICY rule_versions_insert ON rule_versions FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM members m
-      WHERE m.community_id = rule_versions.community_id
-      AND m.user_id = auth.uid()
-      AND m.role = 'admin'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'rule_versions_insert') THEN
+    CREATE POLICY rule_versions_insert ON rule_versions FOR INSERT
+      WITH CHECK (
+        EXISTS (
+          SELECT 1 FROM members m
+          WHERE m.community_id = rule_versions.community_id
+          AND m.user_id = auth.uid()
+          AND m.role = 'admin'
+        )
+      );
+  END IF;
+END $$;
 
 -- ---------------------------------------------------------------------------
 -- Helper function: get next version number

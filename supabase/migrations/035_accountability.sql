@@ -42,21 +42,29 @@ CREATE INDEX IF NOT EXISTS idx_impl_tasks_status ON implementation_tasks(communi
 
 ALTER TABLE implementation_tasks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Members can view tasks" ON implementation_tasks
-  FOR SELECT USING (
-    community_id IN (
-      SELECT community_id FROM members
-      WHERE user_id = auth.uid() AND status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can view tasks') THEN
+    CREATE POLICY "Members can view tasks" ON implementation_tasks
+      FOR SELECT USING (
+        community_id IN (
+          SELECT community_id FROM members
+          WHERE user_id = auth.uid() AND status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Admin can manage tasks" ON implementation_tasks
-  FOR ALL USING (
-    community_id IN (
-      SELECT community_id FROM members
-      WHERE user_id = auth.uid() AND status = 'active' AND role IN ('admin', 'comite_vigilancia')
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admin can manage tasks') THEN
+    CREATE POLICY "Admin can manage tasks" ON implementation_tasks
+      FOR ALL USING (
+        community_id IN (
+          SELECT community_id FROM members
+          WHERE user_id = auth.uid() AND status = 'active' AND role IN ('admin', 'comite_vigilancia')
+        )
+      );
+  END IF;
+END $$;
 
 -- ---------------------------------------------------------------------------
 -- 4. Decision Archive View (join proposals + vote count + task progress)

@@ -31,13 +31,13 @@ END;
 $fn$;
 
 -- Wrapper: notify pending executions for ALL communities
+DROP FUNCTION IF EXISTS notify_pending_executions();
 CREATE OR REPLACE FUNCTION notify_pending_executions()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $fn$
 DECLARE
-  v_community_id uuid;
   v_proposal RECORD;
 BEGIN
   FOR v_proposal IN
@@ -49,56 +49,48 @@ BEGIN
       AND p.grace_period_end <= now() + interval '24 hours'
       AND NOT p.appealed
   LOOP
-    INSERT INTO notifications (community_id, type, title, message, related_id, created_at)
-    VALUES (
+    PERFORM notify_community(
       v_proposal.community_id,
       'pre_execution',
       'Ejecucion proxima: ' || v_proposal.title,
       'La propuesta "' || v_proposal.title || '" sera ejecutada en menos de 24 horas.',
-      v_proposal.id,
-      now()
-    )
-    ON CONFLICT DO NOTHING;
+      jsonb_build_object('proposal_id', v_proposal.id)
+    );
   END LOOP;
 END;
 $fn$;
 
-DO $$
+DO $cron$
 BEGIN
-  -- Check if pg_cron extension exists
   IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron') THEN
 
-    -- Schedule auto-execution processing every hour
     PERFORM cron.schedule(
       'process-auto-executions',
       '0 * * * *',
-      $$SELECT process_auto_executions()$$
+      'SELECT process_auto_executions()'
     );
 
-    -- Schedule expired proposals processing every hour
     PERFORM cron.schedule(
       'process-expired-proposals',
       '5 * * * *',
-      $$SELECT process_expired_proposals()$$
+      'SELECT process_expired_proposals()'
     );
 
-    -- Schedule moroso status computation daily at 3 AM (iterates all communities)
     PERFORM cron.schedule(
       'compute-moroso-status',
       '0 3 * * *',
-      $$SELECT compute_moroso_status_all()$$
+      'SELECT compute_moroso_status_all()'
     );
 
-    -- Schedule pre-execution notifications daily at 9 AM
     PERFORM cron.schedule(
       'notify-pending-executions',
       '0 9 * * *',
-      $$SELECT notify_pending_executions()$$
+      'SELECT notify_pending_executions()'
     );
 
     RAISE NOTICE 'pg_cron jobs scheduled successfully';
 
   ELSE
-    RAISE NOTICE 'pg_cron extension not available — skipping job scheduling. Enable pg_cron in the Supabase dashboard to activate scheduled jobs.';
+    RAISE NOTICE 'pg_cron extension not available — skipping job scheduling.';
   END IF;
-END $$;
+END $cron$;

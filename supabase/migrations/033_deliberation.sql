@@ -58,67 +58,95 @@ ALTER TABLE discussion_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comment_reactions ENABLE ROW LEVEL SECURITY;
 
 -- Comments: members of the community can read all non-deleted comments
-CREATE POLICY "Members can view comments" ON discussion_comments
-  FOR SELECT USING (
-    community_id IN (
-      SELECT community_id FROM members
-      WHERE user_id = auth.uid() AND status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can view comments') THEN
+    CREATE POLICY "Members can view comments" ON discussion_comments
+      FOR SELECT USING (
+        community_id IN (
+          SELECT community_id FROM members
+          WHERE user_id = auth.uid() AND status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
 -- Comments: active members can create comments
-CREATE POLICY "Members can create comments" ON discussion_comments
-  FOR INSERT WITH CHECK (
-    community_id IN (
-      SELECT community_id FROM members
-      WHERE user_id = auth.uid() AND status = 'active'
-    )
-    AND author_id IN (
-      SELECT id FROM members WHERE user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can create comments') THEN
+    CREATE POLICY "Members can create comments" ON discussion_comments
+      FOR INSERT WITH CHECK (
+        community_id IN (
+          SELECT community_id FROM members
+          WHERE user_id = auth.uid() AND status = 'active'
+        )
+        AND author_id IN (
+          SELECT id FROM members WHERE user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- Comments: authors can update their own comments (edit)
-CREATE POLICY "Authors can update own comments" ON discussion_comments
-  FOR UPDATE USING (
-    author_id IN (
-      SELECT id FROM members WHERE user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Authors can update own comments') THEN
+    CREATE POLICY "Authors can update own comments" ON discussion_comments
+      FOR UPDATE USING (
+        author_id IN (
+          SELECT id FROM members WHERE user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- Comments: authors can soft-delete their own comments
-CREATE POLICY "Authors can delete own comments" ON discussion_comments
-  FOR DELETE USING (
-    author_id IN (
-      SELECT id FROM members WHERE user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Authors can delete own comments') THEN
+    CREATE POLICY "Authors can delete own comments" ON discussion_comments
+      FOR DELETE USING (
+        author_id IN (
+          SELECT id FROM members WHERE user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- Reactions: members can view reactions
-CREATE POLICY "Members can view reactions" ON comment_reactions
-  FOR SELECT USING (
-    comment_id IN (
-      SELECT dc.id FROM discussion_comments dc
-      JOIN members m ON m.community_id = dc.community_id
-      WHERE m.user_id = auth.uid() AND m.status = 'active'
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can view reactions') THEN
+    CREATE POLICY "Members can view reactions" ON comment_reactions
+      FOR SELECT USING (
+        comment_id IN (
+          SELECT dc.id FROM discussion_comments dc
+          JOIN members m ON m.community_id = dc.community_id
+          WHERE m.user_id = auth.uid() AND m.status = 'active'
+        )
+      );
+  END IF;
+END $$;
 
 -- Reactions: members can add reactions
-CREATE POLICY "Members can add reactions" ON comment_reactions
-  FOR INSERT WITH CHECK (
-    member_id IN (
-      SELECT id FROM members WHERE user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can add reactions') THEN
+    CREATE POLICY "Members can add reactions" ON comment_reactions
+      FOR INSERT WITH CHECK (
+        member_id IN (
+          SELECT id FROM members WHERE user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- Reactions: members can remove their own reactions
-CREATE POLICY "Members can remove own reactions" ON comment_reactions
-  FOR DELETE USING (
-    member_id IN (
-      SELECT id FROM members WHERE user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can remove own reactions') THEN
+    CREATE POLICY "Members can remove own reactions" ON comment_reactions
+      FOR DELETE USING (
+        member_id IN (
+          SELECT id FROM members WHERE user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
 -- ---------------------------------------------------------------------------
 -- 5. Sentiment summary view (materialized for performance)

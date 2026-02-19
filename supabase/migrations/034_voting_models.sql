@@ -14,8 +14,11 @@ ALTER TABLE proposals ADD COLUMN IF NOT EXISTS voting_model text NOT NULL DEFAUL
 ALTER TABLE proposals ADD COLUMN IF NOT EXISTS voting_options jsonb DEFAULT '[]'::jsonb;
 
 -- Constraint: valid voting models
-ALTER TABLE proposals ADD CONSTRAINT valid_voting_model
-  CHECK (voting_model IN ('simple', 'consensus', 'multiple_choice'));
+DO $$ BEGIN
+  ALTER TABLE proposals DROP CONSTRAINT IF EXISTS valid_voting_model;
+  ALTER TABLE proposals ADD CONSTRAINT valid_voting_model
+    CHECK (voting_model IN ('simple', 'consensus', 'multiple_choice'));
+END $$;
 
 -- ---------------------------------------------------------------------------
 -- 2. Expand vote values to support consensus and multiple choice

@@ -8,6 +8,55 @@
 -- 1. AUTH USERS (6 demo users)
 -- ============================================================================
 
+-- ============================================================================
+-- 0. CLEANUP: Remove existing demo data to allow re-seeding
+-- ============================================================================
+DO $cleanup$
+DECLARE
+  v_community_id uuid;
+BEGIN
+  SELECT id INTO v_community_id FROM communities WHERE slug = 'las-palmas';
+  IF v_community_id IS NOT NULL THEN
+    DELETE FROM audit_log WHERE community_id = v_community_id;
+    DELETE FROM notifications WHERE community_id = v_community_id;
+    DELETE FROM comment_reactions WHERE comment_id IN (SELECT id FROM discussion_comments WHERE community_id = v_community_id);
+    DELETE FROM discussion_comments WHERE community_id = v_community_id;
+    DELETE FROM contract_installments WHERE community_id = v_community_id;
+    DELETE FROM ratings WHERE community_id = v_community_id;
+    DELETE FROM contracts WHERE community_id = v_community_id;
+    DELETE FROM votes WHERE proposal_id IN (SELECT id FROM proposals WHERE community_id = v_community_id);
+    DELETE FROM implementation_tasks WHERE community_id = v_community_id;
+    DELETE FROM budgets WHERE community_id = v_community_id;
+    DELETE FROM proposals WHERE community_id = v_community_id;
+    DELETE FROM payment_plan_installments WHERE plan_id IN (SELECT id FROM payment_plans WHERE community_id = v_community_id);
+    DELETE FROM payment_plans WHERE community_id = v_community_id;
+    DELETE FROM payment_obligations WHERE community_id = v_community_id;
+    DELETE FROM transactions WHERE community_id = v_community_id;
+    DELETE FROM recurring_schedules WHERE community_id = v_community_id;
+    DELETE FROM categories WHERE community_id = v_community_id;
+    DELETE FROM entity_contacts WHERE entity_id IN (SELECT id FROM entities WHERE community_id = v_community_id);
+    DELETE FROM entities WHERE community_id = v_community_id;
+    DELETE FROM delegations WHERE community_id = v_community_id;
+    DELETE FROM vigilancia_reports WHERE community_id = v_community_id;
+    DELETE FROM admin_terms WHERE community_id = v_community_id;
+    DELETE FROM census_snapshots WHERE community_id = v_community_id;
+    DELETE FROM convocatorias WHERE community_id = v_community_id;
+    DELETE FROM assemblies WHERE community_id = v_community_id;
+    DELETE FROM documents WHERE community_id = v_community_id;
+    DELETE FROM minutes WHERE community_id = v_community_id;
+    DELETE FROM maintenance_requests WHERE unit_id IN (SELECT id FROM units WHERE community_id = v_community_id);
+    DELETE FROM units WHERE community_id = v_community_id;
+    DELETE FROM common_areas WHERE community_id = v_community_id;
+    DELETE FROM roles WHERE community_id = v_community_id;
+    DELETE FROM invitations WHERE community_id = v_community_id;
+    DELETE FROM financial_statements WHERE community_id = v_community_id;
+    DELETE FROM members WHERE community_id = v_community_id;
+    DELETE FROM communities WHERE id = v_community_id;
+  END IF;
+END $cleanup$;
+
+DELETE FROM auth.users WHERE email IN ('carlos@laspalmas.mx','maria@laspalmas.mx','roberto@laspalmas.mx','ana@laspalmas.mx','pedro@laspalmas.mx','laura@laspalmas.mx');
+
 INSERT INTO auth.users (
   instance_id, id, aud, role, email, encrypted_password,
   email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
@@ -140,9 +189,7 @@ INSERT INTO communities (id, name, slug, type, config, rules) VALUES (
       "delinquent_restrictions": ["vote", "propose"]
     }
   }'::jsonb
-) ON CONFLICT (id) DO UPDATE SET
-  rules = EXCLUDED.rules,
-  config = EXCLUDED.config;
+);
 
 -- ============================================================================
 -- 3. MEMBERS (6 members with different roles)

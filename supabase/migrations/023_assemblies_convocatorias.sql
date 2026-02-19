@@ -46,69 +46,93 @@ CREATE TABLE IF NOT EXISTS convocatorias (
 );
 
 -- 3. Indexes
-CREATE INDEX idx_assemblies_community ON assemblies(community_id);
-CREATE INDEX idx_assemblies_status ON assemblies(community_id, status);
-CREATE INDEX idx_assemblies_scheduled ON assemblies(scheduled_date);
-CREATE INDEX idx_convocatorias_assembly ON convocatorias(assembly_id);
-CREATE INDEX idx_convocatorias_community ON convocatorias(community_id);
+CREATE INDEX IF NOT EXISTS idx_assemblies_community ON assemblies(community_id);
+CREATE INDEX IF NOT EXISTS idx_assemblies_status ON assemblies(community_id, status);
+CREATE INDEX IF NOT EXISTS idx_assemblies_scheduled ON assemblies(scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_convocatorias_assembly ON convocatorias(assembly_id);
+CREATE INDEX IF NOT EXISTS idx_convocatorias_community ON convocatorias(community_id);
 
 -- 4. RLS policies for assemblies
 ALTER TABLE assemblies ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Members can view their community assemblies"
-  ON assemblies FOR SELECT
-  USING (
-    community_id IN (
-      SELECT community_id FROM members WHERE user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can view their community assemblies') THEN
+    CREATE POLICY "Members can view their community assemblies"
+      ON assemblies FOR SELECT
+      USING (
+        community_id IN (
+          SELECT community_id FROM members WHERE user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Admins can insert assemblies"
-  ON assemblies FOR INSERT
-  WITH CHECK (
-    community_id IN (
-      SELECT community_id FROM members
-      WHERE user_id = auth.uid() AND role IN ('admin', 'tesorero')
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can insert assemblies') THEN
+    CREATE POLICY "Admins can insert assemblies"
+      ON assemblies FOR INSERT
+      WITH CHECK (
+        community_id IN (
+          SELECT community_id FROM members
+          WHERE user_id = auth.uid() AND role IN ('admin', 'tesorero')
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Admins can update assemblies"
-  ON assemblies FOR UPDATE
-  USING (
-    community_id IN (
-      SELECT community_id FROM members
-      WHERE user_id = auth.uid() AND role IN ('admin', 'tesorero')
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can update assemblies') THEN
+    CREATE POLICY "Admins can update assemblies"
+      ON assemblies FOR UPDATE
+      USING (
+        community_id IN (
+          SELECT community_id FROM members
+          WHERE user_id = auth.uid() AND role IN ('admin', 'tesorero')
+        )
+      );
+  END IF;
+END $$;
 
 -- 5. RLS policies for convocatorias
 ALTER TABLE convocatorias ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Members can view their community convocatorias"
-  ON convocatorias FOR SELECT
-  USING (
-    community_id IN (
-      SELECT community_id FROM members WHERE user_id = auth.uid()
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Members can view their community convocatorias') THEN
+    CREATE POLICY "Members can view their community convocatorias"
+      ON convocatorias FOR SELECT
+      USING (
+        community_id IN (
+          SELECT community_id FROM members WHERE user_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Admins can insert convocatorias"
-  ON convocatorias FOR INSERT
-  WITH CHECK (
-    community_id IN (
-      SELECT community_id FROM members
-      WHERE user_id = auth.uid() AND role IN ('admin', 'tesorero')
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can insert convocatorias') THEN
+    CREATE POLICY "Admins can insert convocatorias"
+      ON convocatorias FOR INSERT
+      WITH CHECK (
+        community_id IN (
+          SELECT community_id FROM members
+          WHERE user_id = auth.uid() AND role IN ('admin', 'tesorero')
+        )
+      );
+  END IF;
+END $$;
 
-CREATE POLICY "Admins can update convocatorias"
-  ON convocatorias FOR UPDATE
-  USING (
-    community_id IN (
-      SELECT community_id FROM members
-      WHERE user_id = auth.uid() AND role IN ('admin', 'tesorero')
-    )
-  );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Admins can update convocatorias') THEN
+    CREATE POLICY "Admins can update convocatorias"
+      ON convocatorias FOR UPDATE
+      USING (
+        community_id IN (
+          SELECT community_id FROM members
+          WHERE user_id = auth.uid() AND role IN ('admin', 'tesorero')
+        )
+      );
+  END IF;
+END $$;
 
 -- 6. Add assembly_id to proposals and minutes for linking
 ALTER TABLE proposals ADD COLUMN IF NOT EXISTS assembly_id uuid REFERENCES assemblies(id);
