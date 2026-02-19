@@ -55,7 +55,7 @@ BEGIN
   END IF;
 END $cleanup$;
 
-DELETE FROM auth.users WHERE email IN ('carlos@laspalmas.mx','maria@laspalmas.mx','roberto@laspalmas.mx','ana@laspalmas.mx','pedro@laspalmas.mx','laura@laspalmas.mx');
+DELETE FROM auth.users WHERE email IN ('carlos@laspalmas.mx','maria@laspalmas.mx','roberto@laspalmas.mx','ana@laspalmas.mx','pedro@laspalmas.mx','laura@laspalmas.mx','vecino@laspalmas.mx');
 
 INSERT INTO auth.users (
   instance_id, id, aud, role, email, encrypted_password,
@@ -136,6 +136,18 @@ INSERT INTO auth.users (
     '{"sub":"a0000000-0000-0000-0000-000000000006","email":"laura@laspalmas.mx","full_name":"Laura Torres","email_verified":true,"phone_verified":false}'::jsonb,
     now() - interval '3 months', now(), '', '',
     '', '', '', '', '', 0, '', false, false
+  ),
+  (
+    '00000000-0000-0000-0000-000000000000',
+    'a0000000-0000-0000-0000-000000000007',
+    'authenticated', 'authenticated',
+    'vecino@laspalmas.mx',
+    crypt('password123', gen_salt('bf', 10)),
+    now(), now(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"sub":"a0000000-0000-0000-0000-000000000007","email":"vecino@laspalmas.mx","full_name":"Diego Ramírez","email_verified":true,"phone_verified":false}'::jsonb,
+    now() - interval '4 months', now(), '', '',
+    '', '', '', '', '', 0, '', false, false
   )
 ON CONFLICT (id) DO NOTHING;
 
@@ -148,7 +160,8 @@ INSERT INTO auth.identities (
   (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000003', '{"sub":"a0000000-0000-0000-0000-000000000003","email":"roberto@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000003', now(), now(), now()),
   (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000004', '{"sub":"a0000000-0000-0000-0000-000000000004","email":"ana@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000004', now(), now(), now()),
   (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000005', '{"sub":"a0000000-0000-0000-0000-000000000005","email":"pedro@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000005', now(), now(), now()),
-  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000006', '{"sub":"a0000000-0000-0000-0000-000000000006","email":"laura@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000006', now(), now(), now())
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000006', '{"sub":"a0000000-0000-0000-0000-000000000006","email":"laura@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000006', now(), now(), now()),
+  (gen_random_uuid(), 'a0000000-0000-0000-0000-000000000007', '{"sub":"a0000000-0000-0000-0000-000000000007","email":"vecino@laspalmas.mx","email_verified":true,"phone_verified":false}'::jsonb, 'email', 'a0000000-0000-0000-0000-000000000007', now(), now(), now())
 ON CONFLICT (provider_id, provider) DO NOTHING;
 
 -- ============================================================================
@@ -173,15 +186,15 @@ INSERT INTO communities (id, name, slug, type, config, rules) VALUES (
       "default_quorum": 0.5,
       "default_majority": 0.5,
       "delegation_enabled": true,
-      "proposal_rights": ["admin", "tesorero", "miembro"],
+      "proposal_rights": ["admin", "comite_vigilancia", "tesorero", "miembro"],
       "cool_down_hours": 48,
       "auto_execution_enabled": true,
       "auto_execution_threshold": 50000,
       "mandatory_discussion_enabled": true,
       "default_discussion_hours": 72,
       "grace_period_hours": 48,
-      "quorum_by_type": {"ordinary": 0.5, "extraordinary": 0.66, "budget": 0.5, "amendment": 0.66},
-      "majority_by_type": {"ordinary": 0.5, "extraordinary": 0.66, "budget": 0.5, "amendment": 0.66}
+      "quorum_by_type": {"ordinary": 0.5, "extraordinary": 0.66, "budget": 0.5, "election": 0.5, "amendment": 0.66},
+      "majority_by_type": {"ordinary": 0.5, "extraordinary": 0.66, "budget": 0.5, "election": 0.5, "amendment": 0.66}
     },
     "treasury": {
       "mode": "import",
@@ -252,6 +265,14 @@ INSERT INTO members (id, community_id, user_id, role, status, financial_standing
     'observador', 'active', 'good_standing', 1.0000,
     '{"unit": "B-302", "phone": "+52 55 6789 0123"}'::jsonb,
     now() - interval '3 months'
+  ),
+  (
+    'b0000000-0000-0000-0000-000000000007',
+    '00000000-0000-0000-0000-000000000001',
+    'a0000000-0000-0000-0000-000000000007',
+    'miembro', 'active', 'good_standing', 1.0000,
+    '{"unit": "C-101", "phone": "+52 55 7890 1234"}'::jsonb,
+    now() - interval '4 months'
   )
 ON CONFLICT (community_id, user_id) DO NOTHING;
 
@@ -334,6 +355,10 @@ INSERT INTO payment_obligations (id, community_id, member_id, amount, due_date, 
   ('e0000000-0000-0000-0000-000000000013', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000003', 3500.00, '2026-02-01', 'pending', 'Cuota mantenimiento - Febrero 2026'),
   ('e0000000-0000-0000-0000-000000000014', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000004', 3500.00, '2026-02-01', 'paid', 'Cuota mantenimiento - Febrero 2026'),
   ('e0000000-0000-0000-0000-000000000015', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000005', 3500.00, '2026-02-01', 'overdue', 'Cuota mantenimiento - Febrero 2026'),
+
+  -- Diego (miembro) - paid January, pending February
+  ('e0000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000007', 3500.00, '2026-01-01', 'paid', 'Cuota mantenimiento - Enero 2026'),
+  ('e0000000-0000-0000-0000-000000000016', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000007', 3500.00, '2026-02-01', 'pending', 'Cuota mantenimiento - Febrero 2026'),
 
   -- Pedro has 3 months of overdue debt (Nov, Dec, Jan, Feb)
   ('e0000000-0000-0000-0000-000000000020', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000005', 3500.00, '2025-11-01', 'overdue', 'Cuota mantenimiento - Noviembre 2025'),
@@ -930,4 +955,39 @@ INSERT INTO payment_plan_installments (id, plan_id, installment_number, amount, 
   ('1e000000-0000-0000-0000-000000000001', '1d000000-0000-0000-0000-000000000001', 1, 2333.33, '2026-03-01', 'pending'),
   ('1e000000-0000-0000-0000-000000000002', '1d000000-0000-0000-0000-000000000001', 2, 2333.33, '2026-04-01', 'pending'),
   ('1e000000-0000-0000-0000-000000000003', '1d000000-0000-0000-0000-000000000001', 3, 2333.34, '2026-05-01', 'pending')
+ON CONFLICT DO NOTHING;
+
+-- ============================================================================
+-- 32. GAMIFICATION (XP, levels, badges, streaks for each member)
+-- ============================================================================
+
+INSERT INTO member_gamification (id, community_id, member_id, xp, level, current_streak, max_streak, last_activity_date, badges) VALUES
+  -- Carlos (admin) - Level 5, very active
+  ('1f000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001',
+   1850, 5, 12, 30, CURRENT_DATE,
+   '[{"id":"first_vote","earnedAt":"2025-09-01"},{"id":"first_proposal","earnedAt":"2025-09-05"},{"id":"pagador_puntual","earnedAt":"2025-10-01"},{"id":"streak_7","earnedAt":"2025-11-15"},{"id":"streak_30","earnedAt":"2025-12-15"},{"id":"voter_10","earnedAt":"2026-01-10"},{"id":"proposer_5","earnedAt":"2026-01-20"},{"id":"comentarista","earnedAt":"2025-10-10"}]'::jsonb),
+  -- María (tesorero) - Level 4
+  ('1f000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000002',
+   1200, 4, 8, 20, CURRENT_DATE - interval '1 day',
+   '[{"id":"first_vote","earnedAt":"2025-09-02"},{"id":"pagador_puntual","earnedAt":"2025-10-01"},{"id":"streak_7","earnedAt":"2025-11-20"},{"id":"voter_10","earnedAt":"2026-01-15"},{"id":"comentarista","earnedAt":"2025-11-01"}]'::jsonb),
+  -- Roberto (comité vigilancia) - Level 3
+  ('1f000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000003',
+   700, 3, 3, 10, CURRENT_DATE - interval '2 days',
+   '[{"id":"first_vote","earnedAt":"2025-10-01"},{"id":"pagador_puntual","earnedAt":"2025-11-01"},{"id":"comentarista","earnedAt":"2025-12-05"}]'::jsonb),
+  -- Ana (miembro activa) - Level 3
+  ('1f000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000004',
+   650, 3, 5, 14, CURRENT_DATE - interval '1 day',
+   '[{"id":"first_vote","earnedAt":"2025-10-15"},{"id":"pagador_puntual","earnedAt":"2025-11-01"},{"id":"first_proposal","earnedAt":"2025-12-01"},{"id":"streak_7","earnedAt":"2026-01-05"}]'::jsonb),
+  -- Pedro (miembro moroso) - Level 1, inactive
+  ('1f000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000005',
+   80, 1, 0, 2, CURRENT_DATE - interval '30 days',
+   '[{"id":"first_vote","earnedAt":"2025-11-01"}]'::jsonb),
+  -- Laura (observador) - Level 2
+  ('1f000000-0000-0000-0000-000000000006', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000006',
+   250, 2, 2, 5, CURRENT_DATE - interval '3 days',
+   '[{"id":"first_vote","earnedAt":"2025-12-01"},{"id":"comentarista","earnedAt":"2026-01-10"}]'::jsonb),
+  -- Diego (miembro regular) - Level 2, moderately active
+  ('1f000000-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000007',
+   320, 2, 4, 7, CURRENT_DATE,
+   '[{"id":"first_vote","earnedAt":"2025-11-15"},{"id":"pagador_puntual","earnedAt":"2025-12-01"},{"id":"comentarista","earnedAt":"2026-01-20"}]'::jsonb)
 ON CONFLICT DO NOTHING;

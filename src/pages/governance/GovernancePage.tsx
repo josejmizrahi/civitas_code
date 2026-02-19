@@ -11,7 +11,7 @@ import { processExpiredProposals, processAutoExecutions } from '@/core/governanc
 import { useProposals } from '@/core/governance/hooks/useProposals'
 import { exportToExcel } from '@/shared/services/export.service'
 import { formatDate } from '@/shared/lib/utils'
-import { Plus, Download } from 'lucide-react'
+import { Plus, Download, CheckCircle2 } from 'lucide-react'
 
 export function GovernancePage() {
   const location = useLocation()
@@ -20,17 +20,20 @@ export function GovernancePage() {
   const [showCreate, setShowCreate] = useState(false)
   const [showCreateAssembly, setShowCreateAssembly] = useState(false)
   const [initialTemplateId, setInitialTemplateId] = useState<string | undefined>()
+  const [initialRuleId, setInitialRuleId] = useState<string | undefined>()
+  const [successBanner, setSuccessBanner] = useState<{ message: string; detail?: string } | null>(null)
   const processedRpcRef = useRef(false)
   const { canCreateProposals, isAdmin } = usePermissions()
   const { data: allProposals } = useProposals()
 
-  // Consume location.state from Settings "Cambiar Regla via Propuesta"
+  // Consume location.state from Settings "Cambiar Regla via Propuesta" or Reglamento "Proponer cambio"
   useEffect(() => {
-    const state = location.state as { openProposal?: boolean; template?: string } | null
+    const state = location.state as { openProposal?: boolean; template?: string; ruleId?: string } | null
     if (state?.openProposal && state?.template) {
       queueMicrotask(() => {
         setShowCreate(true)
         setInitialTemplateId(state.template)
+        if (state.ruleId) setInitialRuleId(state.ruleId)
       })
       navigate(location.pathname, { replace: true, state: {} })
     }
@@ -42,6 +45,19 @@ export function GovernancePage() {
     processExpiredProposals().catch(() => {})
     processAutoExecutions().catch(() => {})
   }, [])
+
+  const handleProposalCreated = (info: { endorsementsRequired: number }) => {
+    setTab('draft')
+    if (info.endorsementsRequired > 0) {
+      setSuccessBanner({
+        message: 'Propuesta creada como borrador',
+        detail: `Necesita ${info.endorsementsRequired} avales de otros miembros para avanzar a discusión/votación.`,
+      })
+    } else {
+      setSuccessBanner({ message: 'Propuesta creada exitosamente' })
+    }
+    setTimeout(() => setSuccessBanner(null), 8000)
+  }
 
   const isAssemblyTab = tab === 'assemblies'
 
@@ -87,6 +103,18 @@ export function GovernancePage() {
         </div>
       </div>
 
+      {successBanner && (
+        <div className="flex items-start gap-2 rounded-md bg-green-50 border border-green-200 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="font-medium text-green-800">{successBanner.message}</p>
+            {successBanner.detail && (
+              <p className="text-sm text-green-700 mt-1">{successBanner.detail}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="flex w-full overflow-x-auto scrollbar-hide flex-nowrap sm:flex-wrap gap-1">
           <TabsTrigger value="active">Activas</TabsTrigger>
@@ -116,7 +144,7 @@ export function GovernancePage() {
         </TabsContent>
       </Tabs>
 
-      <CreateProposalDialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) setInitialTemplateId(undefined) }} initialTemplateId={initialTemplateId} />
+      <CreateProposalDialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) { setInitialTemplateId(undefined); setInitialRuleId(undefined) } }} initialTemplateId={initialTemplateId} initialRuleId={initialRuleId} onCreated={handleProposalCreated} />
       <CreateAssemblyDialog open={showCreateAssembly} onOpenChange={setShowCreateAssembly} />
     </div>
   )

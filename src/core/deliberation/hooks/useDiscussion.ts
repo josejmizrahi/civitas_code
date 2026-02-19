@@ -13,6 +13,7 @@ import {
   buildCommentTree,
 } from '../services/deliberation.service'
 import type { Sentiment, ReactionType, ReactionSummary } from '../types'
+import { awardXp } from '@/core/gamification/services/gamification.service'
 
 /**
  * Fetch all comments for a proposal, threaded.
@@ -95,6 +96,10 @@ export function useCreateComment() {
       queryClient.invalidateQueries({ queryKey: ['discussion-comments', variables.proposal_id] })
       queryClient.invalidateQueries({ queryKey: ['discussion-comments-flat', variables.proposal_id] })
       queryClient.invalidateQueries({ queryKey: ['sentiment-summary', variables.proposal_id] })
+      // Award XP for commenting
+      if (communityId) {
+        awardXp(variables.author_id, communityId, 'comment', { proposal_id: variables.proposal_id }).catch(() => {})
+      }
     },
   })
 }

@@ -22,6 +22,7 @@ import {
   X,
   User,
   Shield,
+  BookOpen,
   Ellipsis,
 } from 'lucide-react'
 import { Avatar } from '@/shared/components/ui/avatar'
@@ -29,11 +30,15 @@ import { Button } from '@/shared/components/ui/button'
 import { NotificationBell } from '@/shared/components/NotificationBell'
 import { cn } from '@/shared/lib/utils'
 import { PrivacyGate } from '@/core/privacy/components/PrivacyGate'
+import { XpBar } from '@/core/gamification/components/XpBar'
+import { StreakCounter } from '@/core/gamification/components/StreakCounter'
+import { useMyGamification } from '@/core/gamification/hooks/useGamification'
 
 const coreNavigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
   { name: 'Tesoreria', href: '/treasury', icon: Wallet, minRole: 'observador' as Role },
   { name: 'Gobernanza', href: '/governance', icon: Vote, minRole: 'observador' as Role },
+  { name: 'Reglamento', href: '/rules', icon: BookOpen, minRole: 'observador' as Role },
   { name: 'Miembros', href: '/members', icon: Users, minRole: 'observador' as Role },
   { name: 'Partes Relacionadas', href: '/entities', icon: Building2, minRole: 'observador' as Role },
   { name: 'Documentos', href: '/documents', icon: FileText, minRole: 'observador' as Role },
@@ -94,6 +99,7 @@ export function AppLayout() {
   }
 
   const userRole = (currentMember?.role ?? 'observador') as Role
+  const { data: gamProfile } = useMyGamification()
 
   // Build navigation: core items filtered by role + vertical items
   const navigation = [
@@ -283,6 +289,23 @@ export function AppLayout() {
             </>
           )}
         </nav>
+
+        {/* Level + Streak */}
+        {gamProfile && communityId && (
+          <div className="border-t px-3 py-2.5 space-y-1.5">
+            <XpBar compact />
+            <div className="flex items-center justify-between text-xs">
+              {gamProfile.current_streak > 0 ? (
+                <StreakCounter streak={gamProfile.current_streak} compact />
+              ) : (
+                <span className="text-muted-foreground">Empieza tu racha hoy</span>
+              )}
+              <span className="text-muted-foreground">
+                {gamProfile.badges.length} logros
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* User section */}
         <div className="border-t p-3">

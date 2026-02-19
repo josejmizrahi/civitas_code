@@ -20,6 +20,11 @@ import {
   UserMinus, UserCheck, AlertCircle, CheckCircle, Clock,
 } from 'lucide-react'
 import type { Role } from '@/shared/types'
+import { LevelBadge } from '@/core/gamification/components/LevelBadge'
+import { BadgeGrid } from '@/core/gamification/components/BadgeGrid'
+import { StreakCounter } from '@/core/gamification/components/StreakCounter'
+import { getXpProgress, getLevelForXp, getNextLevel } from '@/core/gamification/constants'
+import { getProfile } from '@/core/gamification/services/gamification.service'
 
 const roleLabels: Record<string, string> = {
   platform_admin: 'Admin Plataforma',
@@ -101,6 +106,11 @@ export function MemberDetailPage() {
     queryKey: ['audit-log', communityId, memberQuery.data?.user_id],
     queryFn: () => getAuditLog(communityId!, { userId: memberQuery.data!.user_id!, limit: 30 }),
     enabled: !!communityId && !!memberQuery.data?.user_id,
+  })
+  const gamQuery = useQuery({
+    queryKey: ['gamification', communityId, memberId],
+    queryFn: () => getProfile(memberId!, communityId!),
+    enabled: !!communityId && !!memberId,
   })
 
   const member = memberQuery.data
@@ -234,6 +244,57 @@ export function MemberDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Gamification Profile */}
+      {gamQuery.data && (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <LevelBadge xp={gamQuery.data.xp} size="lg" showTitle />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold font-mono">{gamQuery.data.xp.toLocaleString()} XP</span>
+                    <StreakCounter streak={gamQuery.data.current_streak} compact />
+                  </div>
+                  {(() => {
+                    const progress = getXpProgress(gamQuery.data.xp)
+                    const next = getNextLevel(getLevelForXp(gamQuery.data.xp).level)
+                    return next ? (
+                      <div className="mt-1 flex items-center gap-2">
+                        <div className="h-1.5 w-32 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-amber-400 transition-all duration-700"
+                            style={{ width: `${progress.pct}%` }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">
+                          {progress.current}/{progress.next} para Nv.{next.level}
+                        </span>
+                      </div>
+                    ) : null
+                  })()}
+                </div>
+              </div>
+              <div className="flex items-center gap-4 text-center">
+                <div>
+                  <div className="text-lg font-bold">{gamQuery.data.badges.length}</div>
+                  <div className="text-[10px] text-muted-foreground">Insignias</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold">{gamQuery.data.max_streak}</div>
+                  <div className="text-[10px] text-muted-foreground">Mejor racha</div>
+                </div>
+              </div>
+            </div>
+            {gamQuery.data.badges.length > 0 && (
+              <div className="mt-3 pt-3 border-t">
+                <BadgeGrid earned={gamQuery.data.badges} compact />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Row */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">

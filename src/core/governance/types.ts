@@ -44,9 +44,13 @@ export interface Proposal {
   execution_status: ExecutionStatus | null
   executed_at: string | null
   cool_down_until: string | null
+  // Endorsement system
+  endorsements_required: number
+  endorsements_met: boolean
   // Joined / computed
   creator_name?: string
   vote_summary?: VoteSummary
+  endorsement_count?: number
 }
 
 export interface Vote {
@@ -71,6 +75,15 @@ export interface VoteSummary {
   quorum_met: boolean
   majority_met: boolean
   participation_pct: number
+}
+
+export interface Endorsement {
+  id: string
+  proposal_id: string
+  member_id: string
+  community_id: string
+  endorsed_at: string
+  member_name?: string
 }
 
 export interface Delegation {

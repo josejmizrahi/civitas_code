@@ -90,6 +90,7 @@ function DialogHeader({
         'flex flex-col gap-1.5 text-center sm:text-left',
         className
       )}
+      onClick={(e) => e.stopPropagation()}
       {...props}
     />
   )

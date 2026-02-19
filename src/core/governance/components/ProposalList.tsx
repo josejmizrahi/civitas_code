@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { Badge } from '@/shared/components/ui/badge'
 import { formatDate } from '@/shared/lib/utils'
 import { Link } from 'react-router-dom'
+import { EndorsementBar } from './EndorsementBar'
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Borrador',
@@ -64,6 +65,11 @@ export function ProposalList({ statusFilter }: Props) {
             </CardHeader>
             <CardContent>
               <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">{p.description}</p>
+              {p.status === 'draft' && p.endorsements_required > 0 && (
+                <div className="mb-2" onClick={(e) => e.preventDefault()}>
+                  <EndorsementBar proposal={p} />
+                </div>
+              )}
               <div className="flex gap-4 text-xs text-muted-foreground">
                 <span>Creada: {formatDate(p.created_at)}</span>
                 {p.voting_start && <span>Votación: {formatDate(p.voting_start)}</span>}

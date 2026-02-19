@@ -586,6 +586,23 @@ export function SettingsPage() {
                   </p>
                 </div>
 
+                {/* Endorsements */}
+                <div className="space-y-2">
+                  <Label htmlFor="min_endorsements">Avales requeridos para propuestas</Label>
+                  <Input
+                    id="min_endorsements"
+                    type="number"
+                    min={0}
+                    max={50}
+                    value={rules.governance.min_endorsements ?? 3}
+                    onChange={(e) => updateGovernance('min_endorsements', Number(e.target.value))}
+                    className="max-w-[200px]"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Cantidad de avales que necesita una propuesta antes de notificar a todos. 0 = sin avales (notificación inmediata).
+                  </p>
+                </div>
+
                 {/* Auto-execution */}
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
