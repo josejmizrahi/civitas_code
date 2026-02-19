@@ -42,9 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
+
+      // Redirect to reset-password page when a PASSWORD_RECOVERY event is received
+      // and user is not already on that page
+      if (event === 'PASSWORD_RECOVERY' && !window.location.pathname.includes('/reset-password')) {
+        window.location.href = '/reset-password'
+      }
     })
 
     return () => subscription.unsubscribe()
