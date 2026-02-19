@@ -16,7 +16,7 @@ export function PrivacyNoticeModal({ open, onAccept, onClose, communityName }: P
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto w-[95vw] sm:w-auto" onClose={onClose}>
+      <DialogContent className="sm:max-w-2xl" onClose={onClose}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <ScrollText className="h-5 w-5" />

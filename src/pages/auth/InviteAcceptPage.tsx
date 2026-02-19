@@ -59,7 +59,7 @@ export function InviteAcceptPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
           <p className="mt-2 text-muted-foreground">Verificando invitación...</p>
@@ -71,7 +71,7 @@ export function InviteAcceptPage() {
   // Invalid or expired invitation
   if (!invitation || invitation.status !== 'pending') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
           <XCircle className="mx-auto h-12 w-12 text-destructive" />
           <h1 className="mt-4 text-xl font-semibold">Invitación no válida</h1>
@@ -89,7 +89,7 @@ export function InviteAcceptPage() {
   // Not logged in - redirect to register with token preserved
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
           <Building2 className="mx-auto h-12 w-12 text-primary" />
           <h1 className="mt-4 text-xl font-semibold">Has sido invitado</h1>
@@ -117,7 +117,7 @@ export function InviteAcceptPage() {
   // Accepted successfully
   if (accepted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
           <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
           <h1 className="mt-4 text-xl font-semibold">¡Bienvenido!</h1>
@@ -131,7 +131,7 @@ export function InviteAcceptPage() {
 
   // Logged in - show accept button
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex min-h-dvh items-center justify-center bg-background">
       <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
         <Building2 className="mx-auto h-12 w-12 text-primary" />
         <h1 className="mt-4 text-xl font-semibold">Invitación pendiente</h1>

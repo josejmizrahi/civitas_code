@@ -121,7 +121,7 @@ export function TreasuryPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="no-print flex w-full overflow-x-auto overflow-y-hidden flex-nowrap sm:flex-wrap gap-1 min-w-0">
+        <TabsList className="no-print flex w-full overflow-x-auto overflow-y-hidden scrollbar-hide flex-nowrap sm:flex-wrap gap-1 min-w-0 h-auto py-1">
           <TabsTrigger value="dashboard" className="shrink-0 gap-1 whitespace-nowrap">
             <BarChart3 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Dashboard</span>

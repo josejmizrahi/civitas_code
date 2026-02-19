@@ -3,7 +3,7 @@ import { buttonVariants } from '@/shared/components/ui/button'
 
 export function NotFoundPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 text-center">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-4 text-center">
       <div className="space-y-2">
         <h1 className="text-6xl font-bold tracking-tight text-foreground">404</h1>
         <h2 className="text-xl font-semibold text-foreground">
