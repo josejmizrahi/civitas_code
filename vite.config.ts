@@ -11,6 +11,17 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // Expose Supabase env vars (from Vercel integration) to the client bundle.
+  // Vite only auto-exposes VITE_-prefixed vars, so we inject the Vercel-provided
+  // NEXT_PUBLIC_ / bare vars at build time via define.
+  define: {
+    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(
+      process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ''
+    ),
+    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(
+      process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || ''
+    ),
+  },
   test: {
     globals: true,
     environment: 'jsdom',
