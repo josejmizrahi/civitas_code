@@ -7,8 +7,6 @@ import {
   getInstallments,
   markInstallmentPaid,
   cancelPaymentPlan,
-  type PaymentPlan,
-  type PlanInstallment,
 } from '../services/payment-plan.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
@@ -20,7 +18,6 @@ import {
   CheckCircle2,
   Clock,
   AlertTriangle,
-  XCircle,
   DollarSign,
   Ban,
 } from 'lucide-react'
@@ -46,7 +43,7 @@ const installmentStatusIcon: Record<string, typeof CheckCircle2> = {
 }
 
 export function PaymentPlanDetail({ planId, onClose }: Props) {
-  const { communityId } = useCommunityContext()
+  const { communityId: _communityId } = useCommunityContext()
   const { isAdmin } = usePermissions()
   const queryClient = useQueryClient()
 

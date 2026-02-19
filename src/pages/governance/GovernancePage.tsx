@@ -28,8 +28,10 @@ export function GovernancePage() {
   useEffect(() => {
     const state = location.state as { openProposal?: boolean; template?: string } | null
     if (state?.openProposal && state?.template) {
-      setShowCreate(true)
-      setInitialTemplateId(state.template)
+      queueMicrotask(() => {
+        setShowCreate(true)
+        setInitialTemplateId(state.template)
+      })
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.state, location.pathname, navigate])

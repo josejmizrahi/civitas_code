@@ -25,7 +25,7 @@ export function InviteAcceptPage() {
     getInvitationByToken(token)
       .then((inv) => {
         setInvitation(inv)
-        if (inv.community_id) {
+        if (inv?.community_id) {
           getCommunity(inv.community_id)
             .then((c) => setCommunityName(c.name))
             .catch(() => setCommunityName(null))

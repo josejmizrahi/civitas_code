@@ -24,7 +24,7 @@ export function MentionAutocomplete({ members, onSelect, query, visible, positio
   ).slice(0, 8)
 
   useEffect(() => {
-    setSelectedIndex(0)
+    queueMicrotask(() => setSelectedIndex(0))
   }, [query])
 
   useEffect(() => {
@@ -96,13 +96,13 @@ export function useMentionDetection(text: string, cursorPosition: number) {
     const atIndex = beforeCursor.lastIndexOf('@')
 
     if (atIndex === -1) {
-      setShowAutocomplete(false)
+      queueMicrotask(() => setShowAutocomplete(false))
       return
     }
 
     // The @ must be at the start or preceded by whitespace
     if (atIndex > 0 && !/\s/.test(beforeCursor[atIndex - 1])) {
-      setShowAutocomplete(false)
+      queueMicrotask(() => setShowAutocomplete(false))
       return
     }
 
@@ -110,12 +110,14 @@ export function useMentionDetection(text: string, cursorPosition: number) {
 
     // If there's a space after the query start, the mention is "closed"
     if (query.includes(' ') && query.length > 20) {
-      setShowAutocomplete(false)
+      queueMicrotask(() => setShowAutocomplete(false))
       return
     }
 
-    setMentionQuery(query)
-    setShowAutocomplete(true)
+    queueMicrotask(() => {
+      setMentionQuery(query)
+      setShowAutocomplete(true)
+    })
   }, [text, cursorPosition])
 
   return { mentionQuery, showAutocomplete, setShowAutocomplete }

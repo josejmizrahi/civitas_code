@@ -22,7 +22,7 @@ export function ProposePaymentPlan({ memberId, totalDebt, onClose }: Props) {
   const [installments, setInstallments] = useState('6')
   const [frequency, setFrequency] = useState('monthly')
   const [startDate, setStartDate] = useState(
-    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   )
   const [notes, setNotes] = useState('')
 

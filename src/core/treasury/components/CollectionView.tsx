@@ -1,6 +1,6 @@
 import { useCommunityContext } from '@/app/providers'
 import { useCollectionStats } from '../hooks/usePaymentStatus'
-import { getCollectionConfig, generatePaymentReference } from '../services/treasury.service'
+import { getCollectionConfig } from '../services/treasury.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { formatCurrency } from '@/shared/lib/utils'

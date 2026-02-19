@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { formatCurrency } from '@/shared/lib/utils'
-import { ArrowRight, TrendingUp, TrendingDown, Equal } from 'lucide-react'
+import { ArrowRight, TrendingUp, TrendingDown } from 'lucide-react'
 
 interface Props {
   type: 'income' | 'expense'

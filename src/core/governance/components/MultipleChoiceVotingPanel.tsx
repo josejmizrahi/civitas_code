@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { cn } from '@/shared/lib/utils'
 import { CheckCircle2 } from 'lucide-react'
@@ -16,7 +15,7 @@ interface Props {
 }
 
 export function MultipleChoiceVotingPanel({
-  proposalId,
+  proposalId: _proposalId,
   memberId,
   options,
   existingVotes,
@@ -42,7 +41,7 @@ export function MultipleChoiceVotingPanel({
   }
 
   // Sort options by votes for display
-  const sortedOptions = [...options].sort((a, b) => {
+  const _sortedOptions = [...options].sort((a, b) => {
     const aVotes = voteCounts[`option_${options.indexOf(a) + 1}`] ?? 0
     const bVotes = voteCounts[`option_${options.indexOf(b) + 1}`] ?? 0
     return bVotes - aVotes

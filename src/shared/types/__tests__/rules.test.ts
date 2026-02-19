@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { DEFAULT_RULES } from '../rules'
-import type { CommunityRules, TreasuryRules, GovernanceRules, IdentityRules } from '../rules'
+import type { CommunityRules } from '../rules'
 
 describe('DEFAULT_RULES', () => {
   it('has all three sections', () => {

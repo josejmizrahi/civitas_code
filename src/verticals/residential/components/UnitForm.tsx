@@ -30,22 +30,24 @@ export function UnitForm({ open, onOpenChange, unit }: Props) {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (unit) {
-      setUnitNumber(unit.unit_number)
-      setFloor(unit.floor != null ? String(unit.floor) : '')
-      setTower(unit.tower ?? '')
-      setAreaM2(unit.area_m2 != null ? String(unit.area_m2) : '')
-      setIndivisoPct(unit.indiviso_pct != null ? String(unit.indiviso_pct) : '')
-      setMemberId(unit.member_id ?? '')
-    } else {
-      setUnitNumber('')
-      setFloor('')
-      setTower('')
-      setAreaM2('')
-      setIndivisoPct('')
-      setMemberId('')
-    }
-    setError('')
+    queueMicrotask(() => {
+      if (unit) {
+        setUnitNumber(unit.unit_number)
+        setFloor(unit.floor != null ? String(unit.floor) : '')
+        setTower(unit.tower ?? '')
+        setAreaM2(unit.area_m2 != null ? String(unit.area_m2) : '')
+        setIndivisoPct(unit.indiviso_pct != null ? String(unit.indiviso_pct) : '')
+        setMemberId(unit.member_id ?? '')
+      } else {
+        setUnitNumber('')
+        setFloor('')
+        setTower('')
+        setAreaM2('')
+        setIndivisoPct('')
+        setMemberId('')
+      }
+      setError('')
+    })
   }, [unit, open])
 
   const activeMembers = (members ?? []).filter((m) => m.status === 'active')

@@ -399,7 +399,7 @@ function ReportCard({ report }: { report: VigilanciaReport }) {
 // ---------------------------------------------------------------------------
 
 export function VigilanciaPanel() {
-  const { currentMember } = useCommunityContext()
+  const { currentMember: _currentMember } = useCommunityContext()
   const { isAdmin, role } = usePermissions()
   const { data: reports, isLoading } = useVigilanciaReports()
   const [showForm, setShowForm] = useState(false)

@@ -23,9 +23,9 @@ export function DashboardPage() {
   const { community } = useCommunityContext()
   const { data: members, isLoading: membersLoading, error: membersError } = useMembers()
   const { data: stats, isLoading: statsLoading, error: statsError } = useDashboard()
-  const { data: proposals, isLoading: proposalsLoading } = useProposals('active')
+  const { data: proposals, isLoading: _proposalsLoading } = useProposals('active')
   const { data: sources } = useDataSources()
-  const { data: obligations, isLoading: obligationsLoading } = usePaymentObligations()
+  const { data: obligations, isLoading: _obligationsLoading } = usePaymentObligations()
   const { rules, financialStanding, treasuryMode, isPaymentToVoteEnabled } = useRulesEngine()
 
   const lastSync = sources

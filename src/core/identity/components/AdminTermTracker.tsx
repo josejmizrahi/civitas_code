@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useCommunityContext } from '@/app/providers'
 import { useAdminTerms, useStartTerm, useEndTerm } from '../hooks/useTerms'
 import { useMembers } from '../hooks/useMembers'
@@ -23,11 +23,13 @@ const roleLabels: Record<string, string> = {
 }
 
 function TermProgressBar({ term, termMonths }: { term: AdminTerm; termMonths: number }) {
-  const start = new Date(term.term_start).getTime()
-  const expectedEnd = start + termMonths * 30 * 24 * 60 * 60 * 1000
-  const now = Date.now()
-  const progress = Math.min(((now - start) / (expectedEnd - start)) * 100, 100)
-  const isNearEnd = progress >= 80
+  const { progress, isNearEnd } = useMemo(() => {
+    const start = new Date(term.term_start).getTime()
+    const expectedEnd = start + termMonths * 30 * 24 * 60 * 60 * 1000
+    const now = Date.now() // eslint-disable-line react-hooks/purity
+    const p = Math.min(((now - start) / (expectedEnd - start)) * 100, 100)
+    return { progress: p, isNearEnd: p >= 80 }
+  }, [term.term_start, termMonths])
 
   return (
     <div className="space-y-1">
@@ -54,7 +56,7 @@ function TermProgressBar({ term, termMonths }: { term: AdminTerm; termMonths: nu
 }
 
 export function AdminTermTracker() {
-  const { communityId, community } = useCommunityContext()
+  const { communityId: _communityId, community } = useCommunityContext()
   const { isAdmin } = usePermissions()
   const { data: terms, isLoading } = useAdminTerms()
   const { data: members } = useMembers()

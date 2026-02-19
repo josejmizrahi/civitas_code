@@ -81,7 +81,7 @@ export function useApproveMinutes() {
   return useMutation({
     mutationFn: ({ minutesId, userId }: { minutesId: string; userId: string }) =>
       approveMinutes(minutesId, userId),
-    onSuccess: (_data, variables) => {
+    onSuccess: (_data, _variables) => {
       queryClient.invalidateQueries({ queryKey: ['minutes'] })
     },
   })

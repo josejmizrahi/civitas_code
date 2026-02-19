@@ -3,15 +3,12 @@ import { useDashboard } from '../hooks/useDashboard'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCollectionStats } from '../hooks/usePaymentStatus'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
 import { Select } from '@/shared/components/ui/select'
 import { Progress } from '@/shared/components/ui/progress'
 import { formatCurrency } from '@/shared/lib/utils'
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -25,7 +22,6 @@ import {
 import {
   TrendingUp,
   TrendingDown,
-  PieChart as PieIcon,
   BarChart3,
   AlertTriangle,
 } from 'lucide-react'
@@ -42,7 +38,7 @@ export function FinancialAnalytics() {
     if (!stats || !transactions) return null
 
     const monthCount = parseInt(period)
-    const now = new Date()
+    const _now = new Date()
 
     // Monthly trends (limited to period)
     const monthlyTrends = (stats.monthlyData || []).slice(-monthCount)

@@ -150,20 +150,22 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   // Auto-select if user has exactly one community and none is selected
   useEffect(() => {
     if (userCommunities.length === 1 && !communityId) {
-      handleSetCommunityId(userCommunities[0].id)
+      queueMicrotask(() => handleSetCommunityId(userCommunities[0].id))
     }
   }, [userCommunities, communityId])
 
   // Fetch community and current member when communityId or user changes
   useEffect(() => {
     if (!communityId || !user) {
-      setCommunity(null)
-      setCurrentMember(null)
+      queueMicrotask(() => {
+        setCommunity(null)
+        setCurrentMember(null)
+      })
       return
     }
 
     let cancelled = false
-    setCommunityLoading(true)
+    queueMicrotask(() => setCommunityLoading(true))
 
     Promise.all([
       getCommunity(communityId),

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -41,13 +41,14 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
     { order: 1, topic: '', description: '' },
   ])
 
-  const noticeWarning = (() => {
+  const noticeWarning = useMemo(() => {
     if (!scheduledDate) return false
     const diff = Math.ceil(
+      // eslint-disable-next-line react-hooks/purity
       (new Date(scheduledDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     )
     return diff < minNoticeDays
-  })()
+  }, [scheduledDate, minNoticeDays])
 
   function addAgendaItem() {
     setAgenda((prev) => [

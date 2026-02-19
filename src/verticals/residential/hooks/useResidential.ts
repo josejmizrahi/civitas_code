@@ -12,7 +12,6 @@ import {
   updateMaintenanceStatus,
   assignMaintenanceRequest,
 } from '../services/residential.service'
-import type { Unit, CommonArea } from '../types'
 import type { MaintenanceStatus } from '@/shared/types'
 
 // ---------------------------------------------------------------------------

@@ -103,7 +103,7 @@ function CountdownTimer({ endDate, label }: { endDate: string; label?: string })
 
 export function ProposalDetail({ proposalId }: Props) {
   const { user } = useAuth()
-  const { communityId } = useCommunityContext()
+  const { communityId: _communityId } = useCommunityContext()
   const { isAdmin } = usePermissions()
   const { rules } = useRulesEngine()
   const { data: proposal, isLoading, refetch: refetchProposal } = useProposal(proposalId)
@@ -172,7 +172,7 @@ export function ProposalDetail({ proposalId }: Props) {
   }
 
   const canStartDiscussion = proposal.status === 'draft' && isAdmin
-  const canActivate = (proposal.status === 'draft' || proposal.status === 'discussion') && isAdmin
+  const _canActivate = (proposal.status === 'draft' || proposal.status === 'discussion') && isAdmin
   const canClose = proposal.status === 'active'
   const isVotingOpen = proposal.status === 'active' &&
     (!proposal.voting_end || new Date(proposal.voting_end) > new Date())

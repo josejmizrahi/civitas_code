@@ -8,7 +8,7 @@ import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { FinancialReviewPanel } from '@/core/governance/components/FinancialReviewPanel'
 
 export function VigilanciaPage() {
-  const { communityId } = useCommunityContext()
+  const { communityId: _communityId } = useCommunityContext()
   const { isAdmin, role } = usePermissions()
   const [activeTab, setActiveTab] = useState('reportes')
   const isComite = role === 'comite_vigilancia' || isAdmin

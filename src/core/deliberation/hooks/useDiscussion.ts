@@ -12,7 +12,7 @@ import {
   computeReactionSummaries,
   buildCommentTree,
 } from '../services/deliberation.service'
-import type { Sentiment, ReactionType, DiscussionComment, ReactionSummary } from '../types'
+import type { Sentiment, ReactionType, ReactionSummary } from '../types'
 
 /**
  * Fetch all comments for a proposal, threaded.
