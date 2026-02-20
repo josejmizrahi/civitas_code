@@ -18,13 +18,18 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const [inviteError, setInviteError] = useState('')
+
   useEffect(() => {
     if (user && inviteToken) {
       acceptInvitation(inviteToken, user.id)
         .then(() => navigate('/dashboard'))
-        .catch(() => navigate('/dashboard'))
+        .catch((err) => {
+          setInviteError(err instanceof Error ? err.message : 'No se pudo aceptar la invitación')
+          navigate('/dashboard')
+        })
     }
-  }, [user, inviteToken])
+  }, [user, inviteToken, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,6 +55,11 @@ export function LoginPage() {
           {inviteToken && (
             <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
               Inicia sesión para aceptar tu invitación
+            </div>
+          )}
+          {inviteError && (
+            <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800">
+              No se pudo aceptar la invitación: {inviteError}
             </div>
           )}
           {error && (

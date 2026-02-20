@@ -3,6 +3,7 @@ import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/shared/lib/supabase'
 import { getCommunity, getCurrentMember, getUserCommunities } from '@/core/identity/services/identity.service'
 import type { Community, Member } from '@/core/identity/types'
+import { useToast } from '@/shared/components/ui/toast'
 
 // ============================================
 // Auth Context
@@ -30,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const { info: toastInfo } = useToast()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -43,13 +45,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const hadUser = !!user
       setSession(session)
       setUser(session?.user ?? null)
 
-      // Redirect to reset-password page when a PASSWORD_RECOVERY event is received
-      // and user is not already on that page
       if (event === 'PASSWORD_RECOVERY' && !window.location.pathname.includes('/reset-password')) {
+        // Full-page redirect is intentional here: this event fires on initial
+        // load from the email link, before the SPA router is ready.
         window.location.href = '/reset-password'
+      }
+
+      if (event === 'SIGNED_OUT' && hadUser) {
+        toastInfo('Tu sesión ha finalizado')
       }
     })
 
@@ -118,6 +125,7 @@ export function useCommunityContext() {
 
 export function CommunityProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
+  const { error: toastError } = useToast()
   const [communityId, setCommunityIdState] = useState<string | null>(() => {
     return localStorage.getItem('civitas_community_id')
   })
@@ -145,8 +153,12 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
         setCommunityError(null)
         setUserCommunities(data)
       })
-      .catch((err) => { setCommunityError(err?.message || 'Error al cargar comunidades') })
-  }, [user])
+      .catch((err) => {
+        const msg = err?.message || 'Error al cargar comunidades'
+        setCommunityError(msg)
+        toastError(msg)
+      })
+  }, [user, toastError])
 
   // Fetch user communities list on login
   useEffect(() => {
@@ -186,7 +198,9 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
       })
       .catch((err) => {
         if (!cancelled) {
-          setCommunityError(err?.message || 'Error al cargar comunidad')
+          const msg = err?.message || 'Error al cargar comunidad'
+          setCommunityError(msg)
+          toastError(msg)
           setCommunity(null)
           setCurrentMember(null)
           handleSetCommunityId(null)
