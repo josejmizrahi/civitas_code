@@ -25,12 +25,15 @@ import {
   Shield,
   BookOpen,
   Ellipsis,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { Avatar } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
 import { NotificationBell } from '@/shared/components/NotificationBell'
 import { cn } from '@/shared/lib/utils'
 import { PrivacyGate } from '@/core/privacy/components/PrivacyGate'
+import { useTheme } from '@/shared/hooks/useTheme'
 import { XpBar } from '@/core/gamification/components/XpBar'
 import { StreakCounter } from '@/core/gamification/components/StreakCounter'
 import { useMyGamification } from '@/core/gamification/hooks/useGamification'
@@ -101,6 +104,7 @@ export function AppLayout() {
 
   const userRole = (currentMember?.role ?? 'observador') as Role
   const { data: gamProfile } = useMyGamification()
+  const { resolvedTheme, setTheme } = useTheme()
 
   // Build navigation: core items filtered by role + vertical items
   const navigation = [
@@ -335,6 +339,15 @@ export function AppLayout() {
             <div className="hidden md:block">
               <NotificationBell />
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+              title={resolvedTheme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+              className="shrink-0"
+            >
+              {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
             <Button variant="ghost" size="icon" onClick={handleSignOut} title="Cerrar sesion" className="shrink-0">
               <LogOut className="h-4 w-4" />
             </Button>
