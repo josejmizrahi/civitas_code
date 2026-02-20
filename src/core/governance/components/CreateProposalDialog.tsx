@@ -234,6 +234,21 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
     if (!resolvedMajority || resolvedMajority <= 0 || resolvedMajority > 1) {
       setError('Error en mayoría. Contacta al administrador.'); return
     }
+    if (votingEnd) {
+      const endDate = new Date(votingEnd)
+      if (endDate <= new Date()) {
+        setError('La fecha de fin de votación debe ser en el futuro'); return
+      }
+    }
+    if (votingStart && votingEnd && new Date(votingStart) >= new Date(votingEnd)) {
+      setError('La fecha de inicio debe ser anterior a la fecha de fin'); return
+    }
+    if (votingModel === 'multiple_choice') {
+      const validOptions = multipleChoiceOptions.filter((opt) => opt.trim())
+      if (validOptions.length < 2) {
+        setError('Debes agregar al menos 2 opciones para votación de opción múltiple'); return
+      }
+    }
 
     try {
       // Resolve beneficiary name from selected entity or manual input
@@ -277,7 +292,6 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
       // Reset form
       handleBack()
     } catch (err: unknown) {
-      console.error('Error creating proposal:', err)
       const message =
         err instanceof Error
           ? err.message
