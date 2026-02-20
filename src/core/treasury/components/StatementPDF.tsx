@@ -131,7 +131,7 @@ export function StatementPDF({ statement, communityName, onClose }: Props) {
 
             {/* Footer */}
             <div className="text-center pt-4 border-t text-xs text-muted-foreground">
-              <p>Generado el {formatDate(statement.generated_at)} — CIVITAS</p>
+              <p>Generado el {formatDate(statement.generated_at)} — Ryve</p>
               <p className="mt-1">Art. 43 LPCI CDMX — Estado financiero para asamblea de condominos</p>
             </div>
           </CardContent>

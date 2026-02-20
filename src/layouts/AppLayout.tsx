@@ -131,7 +131,7 @@ export function AppLayout() {
     } catch {
       // Network error — still clear local state
     }
-    localStorage.removeItem('civitas_community_id')
+    localStorage.removeItem('ryve_community_id')
     queryClient.clear()
     navigate('/login')
   }
@@ -160,7 +160,7 @@ export function AppLayout() {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="truncate text-sm font-semibold">{community?.name || 'Civitas'}</span>
+          <span className="truncate text-sm font-semibold">{community?.name || 'Ryve'}</span>
         </div>
         <div className="flex items-center gap-1">
           <NotificationBell />
@@ -198,7 +198,7 @@ export function AppLayout() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-sidebar-primary">
-                  {community?.name || 'Civitas'}
+                  {community?.name || 'Ryve'}
                 </p>
                 {currentMember?.role && (
                   <p className="truncate text-xs text-muted-foreground capitalize">

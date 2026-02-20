@@ -127,7 +127,7 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const { error: toastError } = useToast()
   const [communityId, setCommunityIdState] = useState<string | null>(() => {
-    return localStorage.getItem('civitas_community_id')
+    return localStorage.getItem('ryve_community_id')
   })
   const [community, setCommunity] = useState<Community | null>(null)
   const [currentMember, setCurrentMember] = useState<Member | null>(null)
@@ -138,9 +138,9 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   const handleSetCommunityId = (id: string | null) => {
     setCommunityIdState(id)
     if (id) {
-      localStorage.setItem('civitas_community_id', id)
+      localStorage.setItem('ryve_community_id', id)
     } else {
-      localStorage.removeItem('civitas_community_id')
+      localStorage.removeItem('ryve_community_id')
       setCommunity(null)
       setCurrentMember(null)
     }

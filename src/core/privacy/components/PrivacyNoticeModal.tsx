@@ -11,8 +11,8 @@ interface PrivacyNoticeModalProps {
 
 export function PrivacyNoticeModal({ open, onAccept, onClose, communityName }: PrivacyNoticeModalProps) {
   const responsibleParty = communityName
-    ? `Civitas Platform / ${communityName}`
-    : 'Civitas Platform'
+    ? `Ryve Platform / ${communityName}`
+    : 'Ryve Platform'
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>

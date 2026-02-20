@@ -41,7 +41,7 @@ export function TestWrapper({ children, queryClient = defaultQueryClient, initia
 export function createMockUser(overrides?: Partial<User>): User {
   return {
     id: 'user-1',
-    email: 'test@civitas.test',
+    email: 'test@ryve.test',
     app_metadata: {},
     user_metadata: { full_name: 'Test User' },
     aud: 'authenticated',
@@ -78,7 +78,7 @@ export function createMockMember(overrides?: Partial<Member>): Member {
     community_id: 'community-1',
     role: 'miembro',
     status: 'active',
-    email: 'test@civitas.test',
+    email: 'test@ryve.test',
     full_name: 'Test User',
     financial_standing: 'good_standing',
     created_at: '2025-01-01T00:00:00Z',

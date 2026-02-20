@@ -48,7 +48,7 @@ export function LoginPage() {
     <Card>
       <CardHeader>
         <CardTitle>Iniciar Sesión</CardTitle>
-        <CardDescription>Ingresa a tu cuenta de Civitas</CardDescription>
+        <CardDescription>Ingresa a tu cuenta de Ryve</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">

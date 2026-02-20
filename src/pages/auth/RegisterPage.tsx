@@ -70,7 +70,7 @@ export function RegisterPage() {
     <Card>
       <CardHeader>
         <CardTitle>Crear Cuenta</CardTitle>
-        <CardDescription>Regístrate en Civitas</CardDescription>
+        <CardDescription>Regístrate en Ryve</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
