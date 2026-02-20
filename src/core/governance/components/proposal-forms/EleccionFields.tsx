@@ -3,14 +3,14 @@ import type { TemplateFieldsProps } from './types'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
-import { Select } from '@/shared/components/ui/select'
+import { SearchableSelect } from './SearchableSelect'
 import { Plus, Trash2 } from 'lucide-react'
 
 const CARGOS = [
   { value: 'admin', label: 'Administrador' },
   { value: 'comite_vigilancia', label: 'Comité de vigilancia' },
   { value: 'tesorero', label: 'Tesorero' },
-] as const
+]
 
 export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsProps) {
   const [cargo, setCargo] = useState(
@@ -63,16 +63,13 @@ export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsPr
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Cargo a elegir</Label>
-        <Select value={cargo} onChange={(e) => setCargo(e.target.value)}>
-          {CARGOS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <SearchableSelect
+        label="Cargo a elegir"
+        value={cargo}
+        onChange={setCargo}
+        options={CARGOS}
+        placeholder="Buscar cargo..."
+      />
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label>Candidatos</Label>

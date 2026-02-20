@@ -5,12 +5,12 @@ import { supabase } from '@/shared/lib/supabase'
 import type { TemplateFieldsProps } from './types'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
-import { Select } from '@/shared/components/ui/select'
+import { SearchableSelect } from './SearchableSelect'
 
 const APLICA_A_OPTIONS = [
   { value: 'ordinaria', label: 'Cuota ordinaria' },
   { value: 'extraordinaria', label: 'Cuota extraordinaria' },
-] as const
+]
 
 export function CuotaFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
   const { communityId } = useCommunityContext()
@@ -108,19 +108,13 @@ export function CuotaFields({ rules, onFieldsChange, initialData }: TemplateFiel
           onChange={(e) => setFechaVigor(e.target.value)}
         />
       </div>
-      <div className="space-y-2">
-        <Label>Aplica a</Label>
-        <Select
-          value={aplicaA}
-          onChange={(e) => setAplicaA(e.target.value as 'ordinaria' | 'extraordinaria')}
-        >
-          {APLICA_A_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <SearchableSelect
+        label="Aplica a"
+        value={aplicaA}
+        onChange={(v) => setAplicaA(v as 'ordinaria' | 'extraordinaria')}
+        options={APLICA_A_OPTIONS}
+        placeholder="Buscar tipo de cuota..."
+      />
       {impacto != null && (
         <div className="rounded-lg border bg-muted/30 p-3">
           <p className="text-sm font-medium text-muted-foreground">Impacto estimado</p>

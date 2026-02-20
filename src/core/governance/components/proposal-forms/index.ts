@@ -2,6 +2,8 @@ export { TemplateForm, type TemplateFormProps, type ProposalTemplateId } from '.
 export type { TemplateFormData, TemplateFieldsProps } from './types'
 export { EntityPicker, type EntityPickerValue } from './EntityPicker'
 export { RulePicker } from './RulePicker'
+export { SearchableSelect, type SearchableSelectOption } from './SearchableSelect'
+export { CategoryPicker, type CategoryPickerValue } from './CategoryPicker'
 export { GastoFields } from './GastoFields'
 export { CambioReglaFields } from './CambioReglaFields'
 export { CuotaFields } from './CuotaFields'

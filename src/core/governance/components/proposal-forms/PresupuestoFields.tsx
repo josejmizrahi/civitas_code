@@ -3,26 +3,28 @@ import { useQuery } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
 import { getCategories } from '@/core/treasury/services/treasury.service'
 import type { TemplateFieldsProps } from './types'
+import { CategoryPicker, type CategoryPickerValue } from './CategoryPicker'
+import { SearchableSelect } from './SearchableSelect'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
-import { Select } from '@/shared/components/ui/select'
 
 const PERIODO_OPTIONS = [
   { value: 'mensual', label: 'Mensual' },
   { value: 'trimestral', label: 'Trimestral' },
   { value: 'anual', label: 'Anual' },
-] as const
+]
 
 const FONDO_OPTIONS = [
   { value: 'mantenimiento', label: 'Fondo de mantenimiento' },
   { value: 'reserva', label: 'Fondo de reserva' },
-] as const
+]
 
 export function PresupuestoFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
   const { communityId } = useCommunityContext()
-  const [categoryId, setCategoryId] = useState(
-    (initialData?.financialInstruction?.category_id as string) ?? ''
-  )
+  const [category, setCategory] = useState<CategoryPickerValue>(() => {
+    const id = (initialData?.financialInstruction?.category_id as string) ?? ''
+    return { categoryId: id || null, categoryName: '' }
+  })
   const [monto, setMonto] = useState(
     String((initialData?.financialInstruction?.amount ?? '') || '')
   )
@@ -39,8 +41,10 @@ export function PresupuestoFields({ rules, onFieldsChange, initialData }: Templa
     enabled: !!communityId,
   })
 
+  const categoryId = category.categoryId ?? ''
+  const categoryName = category.categoryName || (categories?.find((c) => c.id === categoryId)?.name ?? '')
+
   useEffect(() => {
-    const categoryName = categories?.find((c) => c.id === categoryId)?.name ?? ''
     const title =
       categoryName && monto
         ? `Presupuesto ${periodo}: ${categoryName} - ${rules.treasury.currency} ${monto}`
@@ -71,24 +75,16 @@ export function PresupuestoFields({ rules, onFieldsChange, initialData }: Templa
         fondo,
       },
     })
-  }, [categoryId, monto, periodo, fondo, categories, rules.treasury.currency, onFieldsChange, initialData])
+  }, [categoryId, categoryName, monto, periodo, fondo, categories, rules.treasury.currency, onFieldsChange, initialData])
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label>Categoría</Label>
-        <Select
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
-        >
-          <option value="">Seleccionar categoría</option>
-          {categories?.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <CategoryPicker
+        value={category}
+        onChange={setCategory}
+        label="Categoría"
+        placeholder="Buscar categoría..."
+      />
       <div className="space-y-2">
         <Label>Monto solicitado ({rules.treasury.currency})</Label>
         <Input
@@ -100,29 +96,20 @@ export function PresupuestoFields({ rules, onFieldsChange, initialData }: Templa
           placeholder="0.00"
         />
       </div>
-      <div className="space-y-2">
-        <Label>Periodo</Label>
-        <Select value={periodo} onChange={(e) => setPeriodo(e.target.value)}>
-          {PERIODO_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label>Fondo</Label>
-        <Select
-          value={fondo}
-          onChange={(e) => setFondo(e.target.value as 'mantenimiento' | 'reserva')}
-        >
-          {FONDO_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <SearchableSelect
+        label="Periodo"
+        value={periodo}
+        onChange={setPeriodo}
+        options={PERIODO_OPTIONS}
+        placeholder="Buscar periodo..."
+      />
+      <SearchableSelect
+        label="Fondo"
+        value={fondo}
+        onChange={(v) => setFondo(v as 'mantenimiento' | 'reserva')}
+        options={FONDO_OPTIONS}
+        placeholder="Buscar fondo..."
+      />
     </div>
   )
 }

@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react'
 import type { TemplateFieldsProps } from './types'
+import { EntityPicker, type EntityPickerValue } from './EntityPicker'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { AlertTriangle } from 'lucide-react'
 
 export function EmergenciaFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
+  const [beneficiario, setBeneficiario] = useState<EntityPickerValue>({
+    entityId: null,
+    recipientName: (initialData?.financialInstruction?.recipient_name as string) ?? '',
+  })
   const [monto, setMonto] = useState(
     String((initialData?.financialInstruction?.amount ?? '') || '')
   )
@@ -22,6 +27,7 @@ export function EmergenciaFields({ rules, onFieldsChange, initialData }: Templat
       : initialData?.title ?? ''
     const description = [
       'Propuesta de gasto por emergencia.',
+      beneficiario.recipientName && `Beneficiario: ${beneficiario.recipientName}`,
       monto && `Monto estimado: ${rules.treasury.currency} ${monto}`,
       evidencia && `Evidencia (fotos/URLs):\n${evidencia}`,
       justificacion && `Justificación de la emergencia:\n${justificacion}`,
@@ -30,7 +36,12 @@ export function EmergenciaFields({ rules, onFieldsChange, initialData }: Templat
       .join('\n\n')
     const financialInstruction =
       monto !== '' && Number(monto) >= 0
-        ? { type: 'disbursement' as const, amount: Number(monto), description: justificacion || undefined }
+        ? {
+            type: 'disbursement' as const,
+            amount: Number(monto),
+            recipient_name: beneficiario.recipientName || undefined,
+            description: justificacion || undefined,
+          }
         : undefined
     onFieldsChange({
       title: title || undefined,
@@ -42,7 +53,7 @@ export function EmergenciaFields({ rules, onFieldsChange, initialData }: Templat
         justificacion: justificacion || undefined,
       },
     })
-  }, [monto, evidencia, justificacion, rules.treasury.currency, onFieldsChange, initialData])
+  }, [beneficiario, monto, evidencia, justificacion, rules.treasury.currency, onFieldsChange, initialData])
 
   return (
     <div className="space-y-4">
@@ -52,6 +63,12 @@ export function EmergenciaFields({ rules, onFieldsChange, initialData }: Templat
           Esta propuesta es para un gasto de urgencia. Incluya evidencia y justificación.
         </p>
       </div>
+      <EntityPicker
+        value={beneficiario}
+        onChange={setBeneficiario}
+        label="Beneficiario / Proveedor"
+        placeholder="Buscar proveedor o beneficiario..."
+      />
       <div className="space-y-2">
         <Label>Monto estimado ({rules.treasury.currency})</Label>
         <Input

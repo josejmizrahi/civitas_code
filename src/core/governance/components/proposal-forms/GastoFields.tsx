@@ -4,12 +4,12 @@ import { EntityPicker, type EntityPickerValue } from './EntityPicker'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
-import { Select } from '@/shared/components/ui/select'
+import { SearchableSelect } from './SearchableSelect'
 
 const FONDO_OPTIONS = [
   { value: 'mantenimiento', label: 'Fondo de mantenimiento' },
   { value: 'reserva', label: 'Fondo de reserva' },
-] as const
+]
 
 export function GastoFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
   const [entity, setEntity] = useState<EntityPickerValue>({
@@ -97,19 +97,13 @@ export function GastoFields({ rules, onFieldsChange, initialData }: TemplateFiel
           rows={2}
         />
       </div>
-      <div className="space-y-2">
-        <Label>Fondo</Label>
-        <Select
-          value={fondo}
-          onChange={(e) => setFondo(e.target.value as 'mantenimiento' | 'reserva')}
-        >
-          {FONDO_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <SearchableSelect
+        label="Fondo"
+        value={fondo}
+        onChange={(v) => setFondo(v as 'mantenimiento' | 'reserva')}
+        options={FONDO_OPTIONS}
+        placeholder="Buscar fondo..."
+      />
     </div>
   )
 }
