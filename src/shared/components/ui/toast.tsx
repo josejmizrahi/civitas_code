@@ -81,22 +81,29 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
   if (toasts.length === 0) return null
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm">
+    <div
+      className="fixed z-[100] flex flex-col gap-2 max-w-[calc(100vw-2rem)] sm:max-w-sm bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] left-4 right-4 sm:left-auto sm:right-4 lg:bottom-4"
+      role="region"
+      aria-label="Notificaciones"
+      aria-live="polite"
+    >
       {toasts.map((t) => {
         const Icon = ICON_MAP[t.variant]
         return (
           <div
             key={t.id}
+            role="status"
             className={cn(
-              'flex items-center gap-3 rounded-lg border px-4 py-3 shadow-lg animate-in slide-in-from-right-full',
+              'flex items-center gap-3 rounded-lg border px-4 py-3 shadow-lg animate-in slide-in-from-bottom-4 sm:slide-in-from-right-full',
               STYLE_MAP[t.variant]
             )}
           >
-            <Icon className="h-5 w-5 shrink-0" />
+            <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
             <p className="flex-1 text-sm font-medium">{t.message}</p>
             <button
               onClick={() => onRemove(t.id)}
-              className="shrink-0 rounded-sm opacity-70 hover:opacity-100"
+              className="shrink-0 rounded-sm p-1 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-70 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Cerrar notificacion"
             >
               <X className="h-4 w-4" />
             </button>
