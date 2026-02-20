@@ -92,9 +92,9 @@ export function exportToPDF(elementId: string, options: ExportOptions): void {
 /**
  * Export structured data to Excel.
  */
-export function exportToExcel(
+export async function exportToExcel(
   data: Record<string, unknown>[],
   options: ExportOptions & { sheetName?: string }
-): void {
-  downloadAsExcel(data, options.filename, options.sheetName || 'Datos')
+): Promise<void> {
+  await downloadAsExcel(data, options.filename, options.sheetName || 'Datos')
 }

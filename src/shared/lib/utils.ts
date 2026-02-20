@@ -1,6 +1,5 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
-import * as XLSX from 'xlsx'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -60,8 +59,9 @@ export function downloadAsCSV(data: Record<string, unknown>[], filename: string)
   URL.revokeObjectURL(url)
 }
 
-export function downloadAsExcel(data: Record<string, unknown>[], filename: string, sheetName = 'Datos'): void {
+export async function downloadAsExcel(data: Record<string, unknown>[], filename: string, sheetName = 'Datos'): Promise<void> {
   if (data.length === 0) return
+  const XLSX = await import('xlsx')
   const worksheet = XLSX.utils.json_to_sheet(data)
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
