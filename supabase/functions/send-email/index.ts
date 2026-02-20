@@ -85,6 +85,37 @@ const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, u
       <p style="font-size: 12px; color: #999; word-break: break-all;">${d.reset_link}</p>
     `,
   },
+  voting_opened: {
+    subject: 'Votación abierta: {title}',
+    body: (d) => `
+      <h2>Se abrió la votación</h2>
+      <p>La propuesta <strong>${d.title}</strong> está en periodo de votación.</p>
+      ${d.voting_end ? `<p>La votación cierra el ${d.voting_end}.</p>` : ''}
+      <p style="text-align: center; margin: 24px 0;">
+        <a href="${d.app_url}/governance/${d.proposal_id}"
+           style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          Ir a votar
+        </a>
+      </p>
+    `,
+  },
+  voting_closing_soon: {
+    subject: 'La votación para "{title}" cierra en 24h',
+    body: (d) => `
+      <h2>Últimas horas para votar</h2>
+      <p>La votación para <strong>${d.title}</strong> cierra en 24 horas.</p>
+      <p><a href="${d.app_url}/governance/${d.proposal_id}">Ir a votar</a></p>
+    `,
+  },
+  payment_reminder: {
+    subject: 'Recordatorio: pago próximo - {concept}',
+    body: (d) => `
+      <h2>Pago próximo</h2>
+      <p>Tu obligación <strong>${d.concept}</strong> por $${d.amount} ${d.currency || 'MXN'} vence en ${d.days} día(s).</p>
+      <p>Fecha de vencimiento: ${d.due_date}</p>
+      <a href="${d.app_url}/treasury">Ver Mis Pagos</a>
+    `,
+  },
   invitation: {
     subject: 'Te han invitado a {community_name} en CIVITAS',
     body: (d) => `

@@ -10,8 +10,6 @@ import {
   getConvocatorias,
 } from '../services/assembly.service'
 import type { AgendaItem, AssemblyStatus, AttendanceRecord } from '../types'
-import { awardXp } from '@/core/gamification/services/gamification.service'
-
 export function useAssemblies(status?: string) {
   const { communityId } = useCommunityContext()
 
@@ -94,13 +92,6 @@ export function useRecordAttendance() {
       queryClient.invalidateQueries({
         queryKey: ['assembly', variables.assemblyId],
       })
-      // Award XP for attending (each present member)
-      if (communityId) {
-        const present = variables.records.filter((r) => r.present)
-        for (const r of present) {
-          awardXp(r.member_id, communityId, 'attend_assembly').catch(() => {})
-        }
-      }
     },
   })
 }

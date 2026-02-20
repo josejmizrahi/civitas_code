@@ -11,7 +11,7 @@ import type { AttendanceRecord } from '../types'
 interface Props {
   assemblyId: string
   initialAttendance: AttendanceRecord[]
-  memberList: Array<{ id: string; name: string; indiviso_pct: number }>
+  memberList: Array<{ id: string; name: string; indiviso_pct?: number }>
   disabled?: boolean
 }
 
@@ -33,7 +33,7 @@ export function AttendanceManager({
       member_id: m.id,
       member_name: m.name,
       present: false,
-      indiviso_pct: m.indiviso_pct,
+      indiviso_pct: m.indiviso_pct ?? 1,
     }))
   })
 
@@ -73,8 +73,8 @@ export function AttendanceManager({
   const totalCount = attendance.length
   const presentIndiviso = attendance
     .filter((r) => r.present)
-    .reduce((sum, r) => sum + r.indiviso_pct, 0)
-  const totalIndiviso = attendance.reduce((sum, r) => sum + r.indiviso_pct, 0)
+    .reduce((sum, r) => sum + (r.indiviso_pct ?? 1), 0)
+  const totalIndiviso = attendance.reduce((sum, r) => sum + (r.indiviso_pct ?? 1), 0)
   const quorumPct = totalIndiviso > 0 ? presentIndiviso / totalIndiviso : 0
 
   const handleSave = async () => {
@@ -152,7 +152,7 @@ export function AttendanceManager({
                 </span>
               </div>
               <span className="text-xs text-muted-foreground shrink-0">
-                {record.indiviso_pct.toFixed(2)}% indiviso
+                {(record.indiviso_pct ?? 1).toFixed(2)}% peso
               </span>
             </button>
           ))}

@@ -13,8 +13,6 @@ import {
 } from '../services/governance.service'
 import type { FinancialInstruction } from '@/shared/types/rules'
 import type { VotingModel } from '@/shared/types'
-import { awardXp } from '@/core/gamification/services/gamification.service'
-
 export function useProposals(status?: string) {
   const { communityId } = useCommunityContext()
 
@@ -34,7 +32,7 @@ export function useProposal(proposalId: string | undefined) {
 }
 
 export function useCreateProposal() {
-  const { communityId, currentMember } = useCommunityContext()
+  const { communityId } = useCommunityContext()
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
@@ -60,10 +58,6 @@ export function useCreateProposal() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals', communityId] })
-      // Award XP for creating a proposal
-      if (currentMember?.id && communityId) {
-        awardXp(currentMember.id, communityId, 'propose').catch(() => {})
-      }
     },
   })
 }

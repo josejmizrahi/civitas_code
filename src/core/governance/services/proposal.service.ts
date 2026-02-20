@@ -170,6 +170,14 @@ export async function openVotingFromDiscussion(proposalId: string, communityId: 
   try {
     const { notifyCommunity } = await import('@/shared/services/notification.service')
     await notifyCommunity(communityId, 'proposal_opened', `Votación abierta: ${proposal.title}`, votingEnd ? `La votación cierra el ${new Date(votingEnd).toLocaleDateString('es-MX')}` : 'Votación sin fecha límite', { proposal_id: proposalId })
+    const { sendEmailToMembers } = await import('@/shared/services/email.service')
+    const appUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    sendEmailToMembers(communityId, 'voting_opened', {
+      title: proposal.title,
+      app_url: appUrl,
+      proposal_id: proposalId,
+      voting_end: votingEnd ? new Date(votingEnd).toLocaleDateString('es-MX') : null,
+    })
   } catch { /* best-effort */ }
 
   return data as unknown as Proposal

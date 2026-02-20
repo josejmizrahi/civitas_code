@@ -10,7 +10,6 @@ import {
   getCollectionStats,
 } from '../services/treasury.service'
 import { refreshFinancialStandings } from '@/shared/services/rules.service'
-import { awardXp } from '@/core/gamification/services/gamification.service'
 import type { PaymentObligation } from '../types'
 
 const obligationKeys = {
@@ -113,7 +112,7 @@ export function useMarkObligationAsPaid() {
         notes,
         created_by: user!.id,
       }),
-    onSuccess: async (_data, variables) => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: obligationKeys.all })
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
@@ -122,10 +121,6 @@ export function useMarkObligationAsPaid() {
           await refreshFinancialStandings(communityId)
           queryClient.invalidateQueries({ queryKey: ['members'] })
         } catch { /* best-effort */ }
-        // Award XP for paying on time
-        if (variables.obligation.member_id) {
-          awardXp(variables.obligation.member_id, communityId, 'pay_on_time').catch(() => {})
-        }
       }
     },
   })

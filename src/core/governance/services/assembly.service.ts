@@ -184,14 +184,14 @@ export async function recordAttendance(
   assemblyId: string,
   attendanceRecords: AttendanceRecord[]
 ): Promise<void> {
-  // Calculate quorum percentage
+  // Calculate quorum percentage (indiviso_pct defaults to 1.0 for non-residential / one-member-one-vote)
   const totalIndiviso = attendanceRecords.reduce(
-    (sum, r) => sum + r.indiviso_pct,
+    (sum, r) => sum + (r.indiviso_pct ?? 1),
     0
   )
   const presentIndiviso = attendanceRecords
     .filter((r) => r.present)
-    .reduce((sum, r) => sum + r.indiviso_pct, 0)
+    .reduce((sum, r) => sum + (r.indiviso_pct ?? 1), 0)
 
   const quorumPct =
     totalIndiviso > 0 ? (presentIndiviso / totalIndiviso) * 100 : 0
@@ -316,10 +316,10 @@ export function calculateAssemblyQuorum(
   morosoMemberIds: string[] = []
 ): { quorumMet: boolean; currentPct: number; requiredPct: number; morosExcluded: number } {
   const eligibleAttendance = attendance.filter(r => !morosoMemberIds.includes(r.member_id))
-  const totalIndiviso = eligibleAttendance.reduce((sum, r) => sum + r.indiviso_pct, 0)
+  const totalIndiviso = eligibleAttendance.reduce((sum, r) => sum + (r.indiviso_pct ?? 1), 0)
   const presentIndiviso = eligibleAttendance
     .filter((r) => r.present)
-    .reduce((sum, r) => sum + r.indiviso_pct, 0)
+    .reduce((sum, r) => sum + (r.indiviso_pct ?? 1), 0)
 
   const currentPct = totalIndiviso > 0 ? presentIndiviso / totalIndiviso : 0
 

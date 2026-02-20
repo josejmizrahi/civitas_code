@@ -4,10 +4,19 @@ import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { useCommunityContext } from '@/app/providers'
 import { DynamicIcon } from '@/shared/components/DynamicIcon'
 import { ChevronRight } from 'lucide-react'
-import type { QuickAction } from '../types'
+
+interface QuickAction {
+  id: string
+  title: string
+  subtitle: string
+  icon: string
+  href: string
+  urgency: 'high' | 'medium' | 'low'
+  badge?: string
+}
 
 /**
- * Quick Actions -- reduce friction to 1 tap.
+ * Quick Actions — reduce friction to 1 tap.
  * Shows the most important thing the member should do right now.
  */
 export function QuickActions() {
@@ -17,7 +26,6 @@ export function QuickActions() {
 
   const actions: QuickAction[] = []
 
-  // Overdue payments -- highest urgency
   const overduePayments = obligations?.filter((o) => o.status === 'overdue') ?? []
   if (overduePayments.length > 0) {
     actions.push({
@@ -30,14 +38,13 @@ export function QuickActions() {
     })
   }
 
-  // Active proposals to vote on
   if (proposals && proposals.length > 0) {
     actions.push({
       id: 'vote',
       title: 'Vota ahora',
       subtitle: proposals.length === 1
         ? proposals[0].title
-        : `${proposals.length} propuestas esperan tu opinion`,
+        : `${proposals.length} propuestas esperan tu opinión`,
       icon: 'vote',
       href: '/governance',
       urgency: 'medium',
@@ -45,7 +52,6 @@ export function QuickActions() {
     })
   }
 
-  // Pending payments (not overdue yet)
   const pendingPayments = obligations?.filter((o) => o.status === 'pending') ?? []
   if (pendingPayments.length > 0 && overduePayments.length === 0) {
     actions.push({

@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAssembly, useConvocatorias, useUpdateAssemblyStatus } from '@/core/governance/hooks/useAssemblies'
+import { useMembers } from '@/core/identity/hooks/useMembers'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -47,6 +48,7 @@ export function AssemblyDetailPage() {
 
   const { data: assembly, isLoading } = useAssembly(assemblyId)
   const { data: convocatorias } = useConvocatorias(assemblyId)
+  const { data: members } = useMembers()
   const updateStatus = useUpdateAssemblyStatus()
 
   const rules = community
@@ -77,11 +79,11 @@ export function AssemblyDetailPage() {
     }
   }
 
-  // Dummy member list for attendance — in real app this comes from members table
-  const memberList = (assembly.attendance || []).map((r) => ({
-    id: r.member_id,
-    name: r.member_name,
-    indiviso_pct: r.indiviso_pct,
+  // Member list for attendance: full community members with voting weight (default 1.0 for non-residential)
+  const memberList = (members ?? []).map((m) => ({
+    id: m.id,
+    name: m.full_name || m.email || 'Miembro',
+    indiviso_pct: (m as { voting_weight?: number }).voting_weight ?? 1,
   }))
 
   return (

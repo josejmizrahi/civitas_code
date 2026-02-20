@@ -145,7 +145,8 @@ export interface AttendanceRecord {
   member_id: string
   member_name: string
   present: boolean
-  indiviso_pct: number
+  /** Voting weight for quorum (e.g. indiviso % in residential). Default 1.0 for one-member-one-vote. */
+  indiviso_pct?: number
   checked_in_at?: string
 }
 

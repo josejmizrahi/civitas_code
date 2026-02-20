@@ -10,8 +10,6 @@ import {
   signMinutes,
   executeProposal,
 } from '../services/governance.service'
-import { awardXp } from '@/core/gamification/services/gamification.service'
-
 export function useVotes(proposalId: string | undefined) {
   return useQuery({
     queryKey: ['votes', proposalId],
@@ -57,8 +55,6 @@ export function useCastVoteWithDelegations() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['votes', variables.proposalId] })
       queryClient.invalidateQueries({ queryKey: ['vote-summary', variables.proposalId] })
-      // Award XP for voting
-      awardXp(variables.memberId, communityId!, 'vote', { proposal_id: variables.proposalId }).catch(() => {})
     },
   })
 }
@@ -92,15 +88,12 @@ export function useApproveMinutes() {
 
 export function useSignMinutes() {
   const queryClient = useQueryClient()
-  const { communityId } = useCommunityContext()
 
   return useMutation({
     mutationFn: ({ minutesId, memberId, memberName }: { minutesId: string; memberId: string; memberName: string }) =>
       signMinutes(minutesId, memberId, memberName),
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['minutes'] })
-      // Award XP for signing minutes
-      awardXp(variables.memberId, communityId!, 'sign_minutes').catch(() => {})
     },
   })
 }

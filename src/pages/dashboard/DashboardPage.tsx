@@ -19,12 +19,8 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
-import { DailyGoals } from '@/core/gamification/components/DailyGoals'
-import { CommunityPulse } from '@/core/gamification/components/CommunityPulse'
-import { QuickActions } from '@/core/gamification/components/QuickActions'
-import { SocialNudge } from '@/core/gamification/components/SocialNudge'
-import { Leaderboard } from '@/core/gamification/components/Leaderboard'
-import { GamificationSummary } from '@/core/gamification/components/GamificationSummary'
+import { QuickActions } from '@/pages/dashboard/components/QuickActions'
+import { FirstStepsChecklist } from '@/pages/dashboard/components/FirstStepsChecklist'
 
 export function DashboardPage() {
   const { community, currentMember } = useCommunityContext()
@@ -82,33 +78,21 @@ export function DashboardPage() {
         </p>
       </div>
 
-      {/* ─── Quick Actions: What should I do NOW? (Trigger) ─── */}
+      {/* ─── Primeros pasos (solo admin, se oculta cuando está completo) ─── */}
+      {isAdmin && <FirstStepsChecklist />}
+
+      {/* ─── Quick Actions ─── */}
       <QuickActions />
 
-      {/* ─── Social Nudges: What are others doing? (FOMO) ─── */}
-      <SocialNudge />
-
-      {/* ─── Main Content: Goals + Pulse (Behavioral Loops) ─── */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {/* Daily Goals = Trigger → Action → Reward → Progress → Return */}
-        <DailyGoals />
-
-        {/* Community Pulse = Collective Progress → Belonging */}
-        <CommunityPulse />
-      </div>
-
-      {/* ─── Gamification: Progress + Leaderboard (Status + Competition) ─── */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <GamificationSummary />
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Vecinos más activos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Leaderboard limit={5} compact />
-          </CardContent>
-        </Card>
-      </div>
+      {/* ─── Actividad Reciente ─── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Actividad Reciente</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AuditLog compact />
+        </CardContent>
+      </Card>
 
       {/* ─── Alerts (only if relevant) ─── */}
       {(overdueObligations.length > 0 || (proposals && proposals.length > 0)) && (
@@ -359,15 +343,6 @@ export function DashboardPage() {
         </>
       )}
 
-      {/* Audit log */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Actividad Reciente</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AuditLog compact />
-        </CardContent>
-      </Card>
     </div>
   )
 }
