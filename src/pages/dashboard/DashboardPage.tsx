@@ -16,7 +16,7 @@ import { formatCurrency, formatDateTime } from '@/shared/lib/utils'
 import { hasPermission, type Role } from '@/shared/types'
 import {
   Users, Wallet, Vote, Upload, TrendingUp, TrendingDown,
-  AlertTriangle, AlertCircle, Shield, UserCheck, BarChart3,
+  AlertTriangle, Shield, UserCheck, BarChart3,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/shared/components/ui/button'
