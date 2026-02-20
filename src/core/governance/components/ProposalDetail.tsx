@@ -194,7 +194,7 @@ export function ProposalDetail({ proposalId }: Props) {
       { proposalId, discussionHours: parseInt(discussionHours) },
       {
         onSuccess: () => { toast.success('Periodo de discusión iniciado'); refetchProposal() },
-        onError: (err: any) => toast.error(err?.message || 'Error al iniciar discusión'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al iniciar discusión'),
       }
     )
   }
@@ -205,7 +205,7 @@ export function ProposalDetail({ proposalId }: Props) {
         { proposalId, votingEnd: votingEndInput || null },
         {
           onSuccess: () => { toast.success('Votación abierta'); refetchProposal() },
-          onError: (err: any) => toast.error(err?.message || 'Error al abrir votación'),
+          onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al abrir votación'),
         }
       )
     } else {
@@ -235,7 +235,7 @@ export function ProposalDetail({ proposalId }: Props) {
           setOutcomeText('')
           refetchProposal()
         },
-        onError: (err: any) => toast.error(err?.message || 'Error al declarar resultado'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al declarar resultado'),
       }
     )
   }
@@ -246,7 +246,7 @@ export function ProposalDetail({ proposalId }: Props) {
       { proposalId, userId: user.id },
       {
         onSuccess: () => { toast.success('Propuesta apelada — ejecución pausada'); refetchProposal() },
-        onError: (err: any) => toast.error(err?.message || 'Error al apelar'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al apelar'),
       }
     )
   }
@@ -501,7 +501,7 @@ export function ProposalDetail({ proposalId }: Props) {
             { proposalId, memberId: currentMember.id, value, blockReason },
             {
               onSuccess: () => toast.success('Voto registrado'),
-              onError: (err: any) => toast.error(err?.message || 'Error al registrar voto'),
+              onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al registrar voto'),
             }
           )
         }
@@ -616,7 +616,7 @@ export function ProposalDetail({ proposalId }: Props) {
                       { proposalId, userId: user.id },
                       {
                         onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
-                        onError: (err: any) => toast.error(err?.message || 'Error al ejecutar'),
+                        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                       }
                     )}
                     disabled={executeMut.isPending}
@@ -639,7 +639,7 @@ export function ProposalDetail({ proposalId }: Props) {
                       { proposalId, userId: user.id },
                       {
                         onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
-                        onError: (err: any) => toast.error(err?.message || 'Error al ejecutar'),
+                        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                       }
                     )}
                     disabled={executeMut.isPending}
@@ -656,7 +656,7 @@ export function ProposalDetail({ proposalId }: Props) {
                     { proposalId, userId: user.id },
                     {
                       onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
-                      onError: (err: any) => toast.error(err?.message || 'Error al ejecutar'),
+                      onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                     }
                   )}
                   disabled={executeMut.isPending}

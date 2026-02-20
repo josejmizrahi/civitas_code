@@ -126,8 +126,8 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
       toast.success('Asamblea creada exitosamente. Se genero la convocatoria automaticamente.')
       resetForm()
       onOpenChange(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Error al crear asamblea')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al crear asamblea')
     }
   }
 

@@ -343,7 +343,7 @@ export async function getCollectionStats(communityId: string): Promise<{
 /**
  * Get community collection config from rules.
  */
-export function getCollectionConfig(rules: any): CollectionConfig {
+export function getCollectionConfig(rules: { treasury?: Record<string, unknown> }): CollectionConfig {
   const treasury = rules?.treasury
   return {
     clabe: treasury?.clabe ?? null,

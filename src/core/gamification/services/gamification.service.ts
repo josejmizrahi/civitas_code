@@ -1,5 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
-import type { GamificationProfile, GamificationAction, XpAwardResult, LeaderboardEntry, EarnedBadge } from '../types'
+import type { GamificationProfile, GamificationAction, GamificationEvent, XpAwardResult, LeaderboardEntry, EarnedBadge } from '../types'
 import { XP_VALUES, getLevelForXp, getStreakMultiplier, BADGES } from '../constants'
 
 const gam = () => (supabase as any).from('member_gamification')
@@ -270,7 +270,7 @@ export async function getRecentEvents(
   memberId: string,
   communityId: string,
   limit = 20
-): Promise<any[]> {
+): Promise<GamificationEvent[]> {
   const { data, error } = await events()
     .select('*')
     .eq('member_id', memberId)
