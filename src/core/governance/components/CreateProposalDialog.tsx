@@ -2,18 +2,14 @@ import { useState, useEffect, useRef } from 'react'
 import { useCreateProposal } from '../hooks/useProposals'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { PROPOSAL_TEMPLATES, type ProposalTemplate } from '../services/proposal-templates'
-import { useEntities, useCreateEntity } from '@/core/entities/hooks/useEntities'
-import type { Entity } from '@/core/entities/types'
-import {
-  RULES_CATALOG,
-  getRuleCatalogEntry,
-  CATEGORY_LABELS,
-} from '@/shared/config/rules-catalog'
+import { TemplateForm } from './proposal-forms'
+import type { TemplateFormData } from './proposal-forms'
+import type { ProposalTemplateId } from './proposal-forms'
+import { getRuleCatalogEntry } from '@/shared/config/rules-catalog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
-import { Textarea } from '@/shared/components/ui/textarea'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
@@ -29,10 +25,6 @@ import {
   FileText,
   MessageSquare,
   Info,
-  Plus,
-  Search,
-  BookOpen,
-  Scale,
 } from 'lucide-react'
 import type { FinancialInstruction } from '@/shared/types/rules'
 import type { ProposalType, VotingModel } from '@/shared/types'
@@ -60,15 +52,14 @@ interface Props {
 export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, initialRuleId, onCreated }: Props) {
   const createProposal = useCreateProposal()
   const { rules, canPropose } = useRulesEngine()
-  const { data: entities } = useEntities({ status: 'active' })
-  const createEntityMut = useCreateEntity()
 
   // Template selection step
   const [selectedTemplate, setSelectedTemplate] = useState<ProposalTemplate | null>(null)
 
-  // Form fields
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+  // Form data from template-specific form (title, description, financialInstruction, metadata)
+  const [templateFormData, setTemplateFormData] = useState<Partial<TemplateFormData>>({})
+
+  // Common form fields
   const [type, setType] = useState<string>('ordinary')
   const [votingStart, setVotingStart] = useState('')
   const [votingEnd, setVotingEnd] = useState('')
@@ -92,29 +83,6 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
   const [votingModel, setVotingModel] = useState<VotingModel>('simple')
   const [multipleChoiceOptions, setMultipleChoiceOptions] = useState<string[]>(['', ''])
 
-  // Financial instruction fields
-  const [hasFinancialInstruction, setHasFinancialInstruction] = useState(false)
-  const [instrType, setInstrType] = useState<FinancialInstruction['type']>('disbursement')
-  const [instrAmount, setInstrAmount] = useState('')
-  const [instrRecipient, setInstrRecipient] = useState('')
-  const [instrDescription, setInstrDescription] = useState('')
-
-  // Entity selector (for beneficiario)
-  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null)
-  const [entitySearch, setEntitySearch] = useState('')
-  const [showEntityDropdown, setShowEntityDropdown] = useState(false)
-  const [showNewEntityForm, setShowNewEntityForm] = useState(false)
-  const [newEntityName, setNewEntityName] = useState('')
-  const [newEntityType, setNewEntityType] = useState<string>('proveedor')
-  const [newEntityPhone, setNewEntityPhone] = useState('')
-  const entityDropdownRef = useRef<HTMLDivElement>(null)
-
-  // Rule picker (for cambio_regla template)
-  const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null)
-  const [ruleSearch, setRuleSearch] = useState('')
-  const [showRulePicker, setShowRulePicker] = useState(false)
-  const rulePickerRef = useRef<HTMLDivElement>(null)
-
   const appliedInitialRef = useRef(false)
   // When opened with initialTemplateId (e.g. from Settings or Reglamento), preselect template once
   useEffect(() => {
@@ -128,88 +96,44 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
         appliedInitialRef.current = true
         queueMicrotask(() => {
           setSelectedTemplate(template)
-          setTitle(template.defaultTitle)
           setType(template.type)
-          setHasFinancialInstruction(template.hasFinancialInstruction)
-          if (template.defaultInstructionType) setInstrType(template.defaultInstructionType)
           if (template.suggestedDiscussionHours) {
             setDiscussionHours(String(template.suggestedDiscussionHours))
             setIncludeDiscussion(true)
           }
-          // Pre-select rule if coming from Reglamento
-          if (initialRuleId) {
+          const initial: Partial<TemplateFormData> = { title: template.defaultTitle }
+          if (initialRuleId && template.id === 'cambio_regla') {
             const ruleEntry = getRuleCatalogEntry(initialRuleId)
             if (ruleEntry) {
-              setSelectedRuleId(initialRuleId)
-              setTitle(`Cambio de regla: ${ruleEntry.label}`)
-              setDescription(
-                `Propongo cambiar la regla "${ruleEntry.label}".\n\nValor actual: ${ruleEntry.format(rules)}\nNuevo valor propuesto: [completar]\n\nJustificación: [explicar por qué es necesario el cambio]`
-              )
+              initial.title = `Cambio de regla: ${ruleEntry.label}`
+              initial.description = `Propongo cambiar la regla "${ruleEntry.label}".\n\nValor actual: ${ruleEntry.format(rules)}\nNuevo valor propuesto: [completar]\n\nJustificación: [explicar por qué es necesario el cambio]`
+              initial.metadata = { ruleId: initialRuleId }
             }
           }
+          setTemplateFormData(initial)
         })
       }
     }
   }, [open, initialTemplateId, initialRuleId, rules])
 
-  // Close entity dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (entityDropdownRef.current && !entityDropdownRef.current.contains(e.target as Node)) {
-        setShowEntityDropdown(false)
-      }
-    }
-    if (showEntityDropdown) document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [showEntityDropdown])
-
-  // Close rule picker on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (rulePickerRef.current && !rulePickerRef.current.contains(e.target as Node)) {
-        setShowRulePicker(false)
-      }
-    }
-    if (showRulePicker) document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [showRulePicker])
-
   const handleSelectTemplate = (template: ProposalTemplate) => {
     setSelectedTemplate(template)
-    setTitle(template.defaultTitle)
     setType(template.type)
-    setHasFinancialInstruction(template.hasFinancialInstruction)
-    if (template.defaultInstructionType) {
-      setInstrType(template.defaultInstructionType)
-    }
     if (template.suggestedDiscussionHours) {
       setDiscussionHours(String(template.suggestedDiscussionHours))
       setIncludeDiscussion(true)
     }
+    setTemplateFormData({ title: template.defaultTitle })
   }
 
   const handleBack = () => {
     setSelectedTemplate(null)
-    setTitle('')
-    setDescription('')
+    setTemplateFormData({})
     setType('ordinary')
-    setHasFinancialInstruction(false)
-    setInstrAmount('')
-    setInstrRecipient('')
-    setInstrDescription('')
     setIncludeDiscussion(rules.governance.mandatory_discussion_enabled)
     setDiscussionHours(String(rules.governance.default_discussion_hours))
     setVotingModel('simple')
     setMultipleChoiceOptions(['', ''])
-    setSelectedEntityId(null)
-    setEntitySearch('')
-    setShowNewEntityForm(false)
-    setNewEntityName('')
-    setNewEntityType('proveedor')
-    setNewEntityPhone('')
-    setSelectedRuleId(null)
-    setRuleSearch('')
-    setShowRulePicker(false)
     setError('')
   }
 
@@ -221,6 +145,9 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
       setError(canPropose.reason || 'No tienes permiso para crear propuestas')
       return
     }
+
+    const title = templateFormData.title ?? ''
+    const description = templateFormData.description ?? ''
 
     // Client-side validation
     if (!title.trim()) { setError('El título es obligatorio'); return }
@@ -249,20 +176,14 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
     }
 
     try {
-      // Resolve beneficiary name from selected entity or manual input
-      const recipientName = selectedEntityId
-        ? entities?.find((e) => e.id === selectedEntityId)?.name ?? instrRecipient
-        : instrRecipient
-
-      const financialInstruction: FinancialInstruction | undefined = hasFinancialInstruction
-        ? {
-            type: instrType,
-            amount: instrAmount ? parseFloat(instrAmount) : undefined,
-            recipient_name: recipientName || undefined,
-            description: instrDescription || undefined,
-            config_key: selectedRuleId || undefined,
-          }
-        : undefined
+      let financialInstruction: FinancialInstruction | undefined = templateFormData.financialInstruction
+      if (selectedTemplate?.id === 'cambio_regla' && templateFormData.metadata?.ruleId) {
+        financialInstruction = {
+          ...financialInstruction,
+          type: 'config_change',
+          config_key: String(templateFormData.metadata.ruleId),
+        }
+      }
 
       // Build voting options for multiple choice
       const votingOptions = votingModel === 'multiple_choice'
@@ -365,131 +286,14 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                 </div>
               )}
 
-              {/* Rule Picker — shown for cambio_regla template */}
-              {selectedTemplate.id === 'cambio_regla' && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1.5">
-                    <BookOpen className="h-4 w-4" />
-                    Regla a modificar
-                  </Label>
-                  <div className="relative" ref={rulePickerRef}>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        value={selectedRuleId ? (getRuleCatalogEntry(selectedRuleId)?.label ?? ruleSearch) : ruleSearch}
-                        onChange={(e) => {
-                          setRuleSearch(e.target.value)
-                          setSelectedRuleId(null)
-                          setShowRulePicker(true)
-                        }}
-                        onFocus={() => setShowRulePicker(true)}
-                        placeholder="Buscar regla que quieres cambiar..."
-                        className="pl-9"
-                      />
-                    </div>
-                    {showRulePicker && (
-                      <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-64 overflow-y-auto">
-                        {(['governance', 'treasury', 'identity'] as const).map((cat) => {
-                          const catRules = RULES_CATALOG.filter(
-                            (r) =>
-                              r.category === cat &&
-                              (!ruleSearch ||
-                                r.label.toLowerCase().includes(ruleSearch.toLowerCase()) ||
-                                r.description.toLowerCase().includes(ruleSearch.toLowerCase()))
-                          )
-                          if (catRules.length === 0) return null
-                          return (
-                            <div key={cat}>
-                              <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted/50 sticky top-0">
-                                {CATEGORY_LABELS[cat]}
-                              </div>
-                              {catRules.map((rule) => (
-                                <button
-                                  key={rule.id}
-                                  type="button"
-                                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left hover:bg-accent transition-colors"
-                                  onClick={() => {
-                                    setSelectedRuleId(rule.id)
-                                    setRuleSearch('')
-                                    setShowRulePicker(false)
-                                    // Pre-fill title and description
-                                    setTitle(`Cambio de regla: ${rule.label}`)
-                                    if (!description || description.startsWith('Propongo cambiar la regla')) {
-                                      setDescription(
-                                        `Propongo cambiar la regla "${rule.label}".\n\nValor actual: ${rule.format(rules)}\nNuevo valor propuesto: [completar]\n\nJustificación: [explicar por qué es necesario el cambio]`
-                                      )
-                                    }
-                                  }}
-                                >
-                                  <div className="flex-1 min-w-0">
-                                    <span className="font-medium">{rule.label}</span>
-                                    <p className="text-xs text-muted-foreground truncate">{rule.description}</p>
-                                  </div>
-                                  <Badge variant="secondary" className="text-[10px] shrink-0 font-mono">
-                                    {rule.format(rules)}
-                                  </Badge>
-                                </button>
-                              ))}
-                            </div>
-                          )
-                        })}
-                        {RULES_CATALOG.filter(
-                          (r) =>
-                            !ruleSearch ||
-                            r.label.toLowerCase().includes(ruleSearch.toLowerCase()) ||
-                            r.description.toLowerCase().includes(ruleSearch.toLowerCase())
-                        ).length === 0 && (
-                          <div className="px-3 py-4 text-sm text-muted-foreground text-center">
-                            No se encontraron reglas
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {selectedRuleId && (() => {
-                    const rule = getRuleCatalogEntry(selectedRuleId)
-                    if (!rule) return null
-                    return (
-                      <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{rule.label}</span>
-                          <Badge variant="secondary" className="text-[10px]">
-                            {CATEGORY_LABELS[rule.category]}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{rule.description}</p>
-                        <div className="flex items-center gap-2 pt-1">
-                          <span className="text-xs text-muted-foreground">Valor actual:</span>
-                          <Badge variant="outline" className="font-mono text-xs">
-                            {rule.format(rules)}
-                          </Badge>
-                        </div>
-                        {rule.legalRef && (
-                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 pt-1">
-                            <Scale className="h-3 w-3" />
-                            {rule.legalRef}
-                          </p>
-                        )}
-                      </div>
-                    )
-                  })()}
-                </div>
-              )}
+              {/* Template-specific form (title, description, financial fields, etc.) */}
+              <TemplateForm
+                templateId={(selectedTemplate.id as ProposalTemplateId) || 'general'}
+                rules={rules}
+                onFieldsChange={(fields) => setTemplateFormData((prev) => ({ ...prev, ...fields }))}
+                initialData={templateFormData}
+              />
 
-              <div className="space-y-2">
-                <Label>Título</Label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Título de la propuesta" />
-              </div>
-              <div className="space-y-2">
-                <Label>Descripción</Label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                  placeholder={selectedTemplate.descriptionPlaceholder}
-                  rows={4}
-                />
-              </div>
               <div className="space-y-2">
                 <Label>Tipo</Label>
                 <Select value={type} onChange={(e) => setType(e.target.value)}>
@@ -649,186 +453,11 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                 </div>
               )}
 
-              {/* Financial Instruction Section */}
-              <Card className="border-dashed">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <Banknote className="h-4 w-4" />
-                    Instrucción Financiera
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={hasFinancialInstruction}
-                      onChange={(e) => setHasFinancialInstruction(e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300"
-                    />
-                    <span className="text-sm">Esta propuesta incluye una acción financiera</span>
-                  </label>
-
-                  {hasFinancialInstruction && (
-                    <div className="space-y-3 pl-7">
-                      <div className="space-y-2">
-                        <Label>Tipo de instrucción</Label>
-                        <Select value={instrType} onChange={(e) => setInstrType(e.target.value as FinancialInstruction['type'])}>
-                          <option value="disbursement">Desembolso / Pago a proveedor</option>
-                          <option value="budget_allocation">Asignación de presupuesto</option>
-                          <option value="quota_change">Cambio de cuota</option>
-                          <option value="config_change">Cambio de configuración</option>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Monto ({rules.treasury.currency})</Label>
-                        <Input type="number" min="0" step="0.01" value={instrAmount} onChange={(e) => setInstrAmount(e.target.value)} placeholder="0.00" />
-                      </div>
-                      {instrType === 'disbursement' && (
-                        <div className="space-y-2">
-                          <Label>Beneficiario</Label>
-                          {!showNewEntityForm ? (
-                            <div className="relative" ref={entityDropdownRef}>
-                              <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                  value={selectedEntityId ? entities?.find((e) => e.id === selectedEntityId)?.name ?? entitySearch : entitySearch}
-                                  onChange={(e) => {
-                                    setEntitySearch(e.target.value)
-                                    setSelectedEntityId(null)
-                                    setInstrRecipient(e.target.value)
-                                    setShowEntityDropdown(true)
-                                  }}
-                                  onFocus={() => setShowEntityDropdown(true)}
-                                  placeholder="Buscar proveedor o beneficiario..."
-                                  className="pl-9"
-                                />
-                              </div>
-                              {showEntityDropdown && (
-                                <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-48 overflow-y-auto">
-                                  {entities
-                                    ?.filter((e) =>
-                                      !entitySearch ||
-                                      e.name.toLowerCase().includes(entitySearch.toLowerCase()) ||
-                                      (e.contact_person && e.contact_person.toLowerCase().includes(entitySearch.toLowerCase()))
-                                    )
-                                    .slice(0, 8)
-                                    .map((entity) => (
-                                      <button
-                                        key={entity.id}
-                                        type="button"
-                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left hover:bg-accent transition-colors"
-                                        onClick={() => {
-                                          setSelectedEntityId(entity.id)
-                                          setInstrRecipient(entity.name)
-                                          setEntitySearch('')
-                                          setShowEntityDropdown(false)
-                                        }}
-                                      >
-                                        <span className="font-medium">{entity.name}</span>
-                                        <Badge variant="secondary" className="text-[10px] ml-auto">
-                                          {entity.type === 'proveedor' ? 'Proveedor' : entity.type === 'contratista' ? 'Contratista' : entity.type}
-                                        </Badge>
-                                      </button>
-                                    ))}
-                                  <button
-                                    type="button"
-                                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left text-primary hover:bg-accent transition-colors border-t"
-                                    onClick={() => {
-                                      setShowEntityDropdown(false)
-                                      setShowNewEntityForm(true)
-                                      setNewEntityName(entitySearch)
-                                    }}
-                                  >
-                                    <Plus className="h-4 w-4" />
-                                    <span>Crear nuevo proveedor{entitySearch ? `: "${entitySearch}"` : ''}</span>
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            /* Inline new entity creation */
-                            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm font-medium">Nuevo proveedor</span>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setShowNewEntityForm(false)}
-                                  className="h-6 text-xs"
-                                >
-                                  Cancelar
-                                </Button>
-                              </div>
-                              <div className="space-y-2">
-                                <Input
-                                  value={newEntityName}
-                                  onChange={(e) => setNewEntityName(e.target.value)}
-                                  placeholder="Nombre del proveedor"
-                                />
-                              </div>
-                              <div className="grid grid-cols-2 gap-2">
-                                <Select value={newEntityType} onChange={(e) => setNewEntityType(e.target.value)}>
-                                  <option value="proveedor">Proveedor</option>
-                                  <option value="contratista">Contratista</option>
-                                  <option value="socio_comercial">Socio Comercial</option>
-                                  <option value="otro">Otro</option>
-                                </Select>
-                                <Input
-                                  value={newEntityPhone}
-                                  onChange={(e) => setNewEntityPhone(e.target.value)}
-                                  placeholder="Teléfono (opcional)"
-                                />
-                              </div>
-                              <Button
-                                type="button"
-                                size="sm"
-                                disabled={!newEntityName.trim() || createEntityMut.isPending}
-                                onClick={async () => {
-                                  try {
-                                    const created = await createEntityMut.mutateAsync({
-                                      name: newEntityName.trim(),
-                                      type: newEntityType as Entity['type'],
-                                      status: 'active',
-                                      rfc: null,
-                                      email: null,
-                                      phone: newEntityPhone || null,
-                                      address: null,
-                                      clabe: null,
-                                      bank_name: null,
-                                      contact_person: null,
-                                      notes: null,
-                                      created_by: null,
-                                    })
-                                    setSelectedEntityId(created.id)
-                                    setInstrRecipient(created.name)
-                                    setShowNewEntityForm(false)
-                                    setNewEntityName('')
-                                    setNewEntityPhone('')
-                                  } catch {
-                                    setError('Error al crear el proveedor')
-                                  }
-                                }}
-                              >
-                                {createEntityMut.isPending ? 'Creando...' : 'Crear y seleccionar'}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      <div className="space-y-2">
-                        <Label>Concepto</Label>
-                        <Input value={instrDescription} onChange={(e) => setInstrDescription(e.target.value)} placeholder="Descripción del movimiento financiero" />
-                      </div>
-                      {rules.governance.auto_execution_enabled && (
-                        <p className="text-xs text-blue-600 bg-blue-50 rounded p-2">
-                          Auto-ejecución activa: si la propuesta se aprueba, la instrucción financiera se ejecutará automáticamente tras {rules.governance.cool_down_hours}h de enfriamiento.
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              {selectedTemplate.hasFinancialInstruction && rules.governance.auto_execution_enabled && (
+                <p className="text-xs text-blue-600 bg-blue-50 rounded p-2">
+                  Auto-ejecución activa: si la propuesta se aprueba, la instrucción financiera se ejecutará automáticamente tras {rules.governance.cool_down_hours}h de enfriamiento.
+                </p>
+              )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleBack}>Atrás</Button>
