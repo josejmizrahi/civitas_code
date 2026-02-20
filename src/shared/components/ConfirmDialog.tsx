@@ -65,8 +65,8 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           <DialogHeader>
             <div className="flex items-start gap-3">
               {isDestructive && (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50">
+                  <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                 </div>
               )}
               <div className="flex-1">

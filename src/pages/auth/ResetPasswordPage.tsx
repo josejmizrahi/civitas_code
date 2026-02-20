@@ -7,6 +7,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
 import { Eye, EyeOff, CheckCircle, XCircle, ShieldCheck } from 'lucide-react'
+import { AlertBanner } from '@/shared/components/AlertBanner'
 
 interface PasswordRequirement {
   label: string
@@ -174,7 +175,7 @@ export function ResetPasswordPage() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+            <AlertBanner variant="error">{error}</AlertBanner>
           )}
 
           {/* New Password */}
@@ -228,11 +229,11 @@ export function ResetPasswordPage() {
                   return (
                     <li key={req.label} className="flex items-center gap-2 text-xs">
                       {met ? (
-                        <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                        <CheckCircle className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
                       ) : (
                         <XCircle className="h-3.5 w-3.5 text-muted-foreground" />
                       )}
-                      <span className={met ? 'text-green-700' : 'text-muted-foreground'}>
+                      <span className={met ? 'text-green-700 dark:text-green-300' : 'text-muted-foreground'}>
                         {req.label}
                       </span>
                     </li>
@@ -265,8 +266,8 @@ export function ResetPasswordPage() {
               </button>
             </div>
             {confirmPassword.length > 0 && (
-              <p className={`text-xs ${passwordsMatch ? 'text-green-600' : 'text-destructive'}`}>
-                {passwordsMatch ? 'Las contraseñas coinciden' : 'Las contraseñas no coinciden'}
+              <p className={`text-xs ${passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
+                {passwordsMatch ? 'Las contrasenas coinciden' : 'Las contrasenas no coinciden'}
               </p>
             )}
           </div>

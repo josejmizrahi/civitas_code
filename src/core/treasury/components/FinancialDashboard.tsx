@@ -32,7 +32,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{formatCurrency(stats.totalIncome)}</div>
+            <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(stats.totalIncome)}</div>
           </CardContent>
         </Card>
 
@@ -42,7 +42,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
             <TrendingDown className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-red-600">{formatCurrency(stats.totalExpenses)}</div>
+            <div className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400">{formatCurrency(stats.totalExpenses)}</div>
           </CardContent>
         </Card>
 
@@ -52,7 +52,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
             <Wallet className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-xl sm:text-2xl font-bold ${stats.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div className={`text-xl sm:text-2xl font-bold ${stats.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
               {formatCurrency(stats.balance)}
             </div>
           </CardContent>
@@ -66,7 +66,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-xl sm:text-2xl font-bold text-yellow-600">
+                <div className="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                   {formatCurrency(collStats.pendingAmount + collStats.overdueAmount)}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -101,7 +101,9 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
             <CardTitle>Ingresos vs Egresos</CardTitle>
           </CardHeader>
           <CardContent>
-            <IncomeVsExpenseChart data={stats.monthlyData} />
+            <div className="aspect-[16/9] sm:aspect-[2/1]">
+              <IncomeVsExpenseChart data={stats.monthlyData} />
+            </div>
           </CardContent>
         </Card>
       )}
@@ -116,7 +118,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
               {stats.byCategory.map((cat) => (
                 <div key={cat.name} className="flex items-center justify-between">
                   <span className="text-sm">{cat.name}</span>
-                  <span className={`text-sm font-medium ${cat.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`text-sm font-medium ${cat.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {formatCurrency(cat.amount)}
                   </span>
                 </div>

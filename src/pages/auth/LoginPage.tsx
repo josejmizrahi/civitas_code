@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
+import { AlertBanner } from '@/shared/components/AlertBanner'
 
 export function LoginPage() {
   const { signIn, user } = useAuth()
@@ -53,17 +54,13 @@ export function LoginPage() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {inviteToken && (
-            <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
-              Inicia sesión para aceptar tu invitación
-            </div>
+            <AlertBanner variant="info">Inicia sesion para aceptar tu invitacion</AlertBanner>
           )}
           {inviteError && (
-            <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800">
-              No se pudo aceptar la invitación: {inviteError}
-            </div>
+            <AlertBanner variant="warning">No se pudo aceptar la invitacion: {inviteError}</AlertBanner>
           )}
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+            <AlertBanner variant="error">{error}</AlertBanner>
           )}
           <div className="space-y-2">
             <Label htmlFor="email">Correo electrónico</Label>

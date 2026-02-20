@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/utils'
 import { Plus, Trash2, FileText, CheckCircle, ArrowLeft, AlertTriangle, User, Building2, ClipboardCheck } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 import type { Contract, ContractInstallment } from '../types'
 import type { ContractType } from '@/shared/types'
 
@@ -64,8 +65,15 @@ function InstallmentView({ contract }: { contract: Contract }) {
   const { canManageTreasury } = usePermissions()
   const toast = useToast()
 
-  const handleMarkPaid = (inst: ContractInstallment) => {
-    if (confirm(`Registrar pago de parcialidad #${inst.installment_number} por ${formatCurrency(inst.amount)}?`)) {
+  const confirmDialog = useConfirm()
+
+  const handleMarkPaid = async (inst: ContractInstallment) => {
+    const confirmed = await confirmDialog({
+      title: 'Registrar pago',
+      description: `Confirmar el pago de parcialidad #${inst.installment_number} por ${formatCurrency(inst.amount)}.`,
+      confirmLabel: 'Registrar pago',
+    })
+    if (confirmed) {
       markPaid.mutate({ installment: inst }, {
         onSuccess: () => toast.success('Pago registrado'),
         onError: () => toast.error('Error al registrar pago'),
@@ -135,7 +143,8 @@ export function ContractList() {
   const updateContract = useUpdateContract()
   const deleteContract = useDeleteContract()
   const toast = useToast()
-
+  const confirmDialog = useConfirm()
+  
   const [showCreate, setShowCreate] = useState(false)
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
 
@@ -178,8 +187,14 @@ export function ContractList() {
     }
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('Eliminar este contrato y sus parcialidades?')) {
+  const handleDelete = async (id: string) => {
+    const confirmed = await confirmDialog({
+      title: 'Eliminar contrato',
+      description: 'Esta accion eliminara el contrato y todas sus parcialidades. No se puede deshacer.',
+      confirmLabel: 'Eliminar',
+      variant: 'destructive',
+    })
+    if (confirmed) {
       deleteContract.mutate(id, {
         onSuccess: () => toast.success('Contrato eliminado'),
         onError: () => toast.error('Error al eliminar contrato'),

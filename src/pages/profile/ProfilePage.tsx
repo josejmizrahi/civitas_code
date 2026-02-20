@@ -185,16 +185,10 @@ export function ProfilePage() {
             </div>
           </div>
           {nameError && (
-            <div className="mt-4 rounded-md bg-destructive/10 p-3 flex items-center gap-2 text-sm text-destructive">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{nameError}</span>
-            </div>
+            <AlertBanner variant="error" className="mt-4">{nameError}</AlertBanner>
           )}
           {nameSuccess && (
-            <div className="mt-4 rounded-md bg-green-50 border border-green-200 p-3 flex items-center gap-2 text-sm text-green-800">
-              <CheckCircle className="h-4 w-4 shrink-0" />
-              <span>Nombre actualizado exitosamente</span>
-            </div>
+            <AlertBanner variant="success" className="mt-4">Nombre actualizado exitosamente</AlertBanner>
           )}
           <div className="mt-4">
             <Button onClick={handleSaveName} disabled={nameSaving}>
@@ -238,16 +232,10 @@ export function ProfilePage() {
             </div>
           </div>
           {passwordError && (
-            <div className="mt-4 rounded-md bg-destructive/10 p-3 flex items-center gap-2 text-sm text-destructive">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{passwordError}</span>
-            </div>
+            <AlertBanner variant="error" className="mt-4">{passwordError}</AlertBanner>
           )}
           {passwordSuccess && (
-            <div className="mt-4 rounded-md bg-green-50 border border-green-200 p-3 flex items-center gap-2 text-sm text-green-800">
-              <CheckCircle className="h-4 w-4 shrink-0" />
-              <span>Contraseña actualizada exitosamente</span>
-            </div>
+            <AlertBanner variant="success" className="mt-4">Contrasena actualizada exitosamente</AlertBanner>
           )}
           <div className="mt-4">
             <Button onClick={handleChangePassword} disabled={passwordSaving}>
@@ -333,7 +321,7 @@ export function ProfilePage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <Label className="text-muted-foreground">Rol en la comunidad actual</Label>
                 <div>

@@ -13,6 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { Label } from '@/shared/components/ui/label'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote, Bell, BellOff, Loader2, ArrowLeft } from 'lucide-react'
+import { PageHeader } from '@/shared/components/PageHeader'
+import { AlertBanner } from '@/shared/components/AlertBanner'
 import { useNavigate } from 'react-router-dom'
 import { InviteMemberDialog } from '@/core/identity/components/InviteMemberDialog'
 import { formatDate } from '@/shared/lib/utils'
@@ -168,24 +170,14 @@ export function SettingsPage() {
         <Button variant="ghost" onClick={() => navigate('/dashboard')} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> Volver al panel
         </Button>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Configuración de la Comunidad</h1>
-            <p className="text-sm text-muted-foreground">Solo los administradores pueden acceder a esta sección.</p>
-          </div>
-        </div>
+        <PageHeader title="Configuracion de la Comunidad" description="Solo los administradores pueden acceder a esta seccion." />
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Configuración de la Comunidad</h1>
-          <p className="text-sm text-muted-foreground">Nombre, reglas, categorías e invitaciones de {community?.name || 'tu comunidad'}</p>
-        </div>
-      </div>
+      <PageHeader title="Configuracion de la Comunidad" description={`Nombre, reglas, categorias e invitaciones de ${community?.name || 'tu comunidad'}`} />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="gap-1">
@@ -491,9 +483,7 @@ export function SettingsPage() {
           <div className="space-y-6">
             {/* Success banner */}
             {rulesSaved && (
-              <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
-                Reglas guardadas exitosamente.
-              </div>
+              <AlertBanner variant="success">Reglas guardadas exitosamente.</AlertBanner>
             )}
 
             {/* Governance Rules */}
@@ -718,7 +708,7 @@ export function SettingsPage() {
               </CardHeader>
               <CardContent className="space-y-5">
                 {/* Payment to vote — KEY FEATURE */}
-                <div className="rounded-md border border-violet-200 bg-violet-50/50 p-4 space-y-3">
+                <div className="rounded-md border border-violet-200 dark:border-violet-800/50 bg-violet-50/50 dark:bg-violet-950/20 p-4 space-y-3">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -736,7 +726,7 @@ export function SettingsPage() {
                 </div>
 
                 {rules.identity.payment_to_vote_enabled && (
-                  <div className="ml-4 space-y-5 border-l-2 border-violet-200 pl-4">
+                  <div className="ml-4 space-y-5 border-l-2 border-violet-200 dark:border-violet-800/50 pl-4">
                     {/* Grace period */}
                     <div className="space-y-2">
                       <Label htmlFor="grace_period_months">Periodo de gracia (meses)</Label>

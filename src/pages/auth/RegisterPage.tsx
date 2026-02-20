@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
+import { AlertBanner } from '@/shared/components/AlertBanner'
 import { ConsentCheckbox } from '@/core/privacy/components/ConsentCheckbox'
 import { PrivacyNoticeModal } from '@/core/privacy/components/PrivacyNoticeModal'
 
@@ -75,7 +76,7 @@ export function RegisterPage() {
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+            <AlertBanner variant="error">{error}</AlertBanner>
           )}
           <div className="space-y-2">
             <Label htmlFor="fullName">Nombre completo</Label>

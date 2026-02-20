@@ -17,6 +17,7 @@ import { Select } from '@/shared/components/ui/select'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Card, CardContent } from '@/shared/components/ui/card'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
 import { Plus, Play, Pause, Trash2, RefreshCw, CalendarClock } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
@@ -98,8 +99,16 @@ export function RecurringScheduleList() {
     })
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('Eliminar este cobro/pago recurrente?')) {
+  const confirmDialog = useConfirm()
+
+  const handleDelete = async (id: string) => {
+    const confirmed = await confirmDialog({
+      title: 'Eliminar cobro/pago recurrente',
+      description: 'Esta accion no se puede deshacer. Se eliminara permanentemente este registro recurrente.',
+      confirmLabel: 'Eliminar',
+      variant: 'destructive',
+    })
+    if (confirmed) {
       deleteSchedule.mutate(id, {
         onSuccess: () => toast.success('Recurrente eliminado'),
         onError: () => toast.error('Error al eliminar recurrente'),

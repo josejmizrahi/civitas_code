@@ -13,6 +13,7 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Plus, Trash2, Star, Building2, Phone, Mail, Search } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 import { ENTITY_TYPE_LABELS, ENTITY_STATUS_LABELS } from '../types'
 import type { EntityType, EntityStatus } from '@/shared/types'
 
@@ -72,8 +73,16 @@ export function EntityList() {
     }
   }
 
-  const handleDelete = (id: string, name: string) => {
-    if (confirm(`Eliminar "${name}"? Esta acción no se puede deshacer.`)) {
+  const confirmDialog = useConfirm()
+
+  const handleDelete = async (id: string, name: string) => {
+    const confirmed = await confirmDialog({
+      title: 'Eliminar entidad',
+      description: `Se eliminara "${name}" permanentemente. Esta accion no se puede deshacer.`,
+      confirmLabel: 'Eliminar',
+      variant: 'destructive',
+    })
+    if (confirmed) {
       deleteEntity.mutate(id, {
         onSuccess: () => toast.success('Entidad eliminada'),
         onError: () => toast.error('Error al eliminar entidad'),

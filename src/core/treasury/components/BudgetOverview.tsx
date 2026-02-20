@@ -16,6 +16,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { formatCurrency } from '@/shared/lib/utils'
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 import type { Budget } from '../types'
 import type { FundType } from '@/shared/types/rules'
 
@@ -102,8 +103,16 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
     }
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('Estas seguro de eliminar este presupuesto?')) {
+  const confirmDialog = useConfirm()
+
+  const handleDelete = async (id: string) => {
+    const confirmed = await confirmDialog({
+      title: 'Eliminar presupuesto',
+      description: 'Esta accion no se puede deshacer. Se eliminara permanentemente este presupuesto.',
+      confirmLabel: 'Eliminar',
+      variant: 'destructive',
+    })
+    if (confirmed) {
       deleteBudget.mutate(id, {
         onSuccess: () => toast.success('Presupuesto eliminado'),
         onError: () => toast.error('Error al eliminar presupuesto'),

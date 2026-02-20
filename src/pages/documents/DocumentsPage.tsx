@@ -22,6 +22,7 @@ import {
 } from '@/shared/components/ui/dialog'
 import { DocumentRetentionPanel } from '@/core/governance/components/DocumentRetentionPanel'
 import { FileText, Plus, Trash2, Upload, Search, File, X, AlertCircle } from 'lucide-react'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 import { formatDate } from '@/shared/lib/utils'
 import { useDocuments, useCreateDocument, useDeleteDocument } from '@/core/documents/hooks/useDocuments'
 import { useToast } from '@/shared/components/ui/toast'
@@ -142,8 +143,16 @@ export function DocumentsPage() {
     }
   }
 
-  const handleDelete = (docId: string, docTitle: string) => {
-    if (confirm(`¿Eliminar "${docTitle}"? Esta acción no se puede deshacer.`)) {
+  const confirmDialog = useConfirm()
+
+  const handleDelete = async (docId: string, docTitle: string) => {
+    const confirmed = await confirmDialog({
+      title: 'Eliminar documento',
+      description: `Se eliminara "${docTitle}" permanentemente. Esta accion no se puede deshacer.`,
+      confirmLabel: 'Eliminar',
+      variant: 'destructive',
+    })
+    if (confirmed) {
       deleteDoc.mutate(docId, {
         onSuccess: () => toast.success('Documento eliminado'),
         onError: () => toast.error('Error al eliminar documento'),
