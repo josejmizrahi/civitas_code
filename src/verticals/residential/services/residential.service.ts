@@ -46,7 +46,7 @@ export async function createUnit(
     member_id?: string | null
   },
 ): Promise<Unit> {
-  const { data, error } = await (supabase.from('units') as any)
+  const { data, error } = await supabase.from('units')
     .insert({
       community_id: communityId,
       ...unit,
@@ -69,7 +69,7 @@ export async function updateUnit(
     member_id?: string | null
   },
 ): Promise<Unit> {
-  const { data, error } = await (supabase.from('units') as any)
+  const { data, error } = await supabase.from('units')
     .update(updates)
     .eq('id', unitId)
     .select()
@@ -80,7 +80,7 @@ export async function updateUnit(
 }
 
 export async function deleteUnit(unitId: string): Promise<void> {
-  const { error } = await (supabase.from('units') as any)
+  const { error } = await supabase.from('units')
     .delete()
     .eq('id', unitId)
 
@@ -91,7 +91,7 @@ export async function assignMemberToUnit(
   unitId: string,
   memberId: string,
 ): Promise<Unit> {
-  const { data, error } = await (supabase.from('units') as any)
+  const { data, error } = await supabase.from('units')
     .update({ member_id: memberId })
     .eq('id', unitId)
     .select()
@@ -102,7 +102,7 @@ export async function assignMemberToUnit(
 }
 
 export async function unassignMember(unitId: string): Promise<Unit> {
-  const { data, error } = await (supabase.from('units') as any)
+  const { data, error } = await supabase.from('units')
     .update({ member_id: null })
     .eq('id', unitId)
     .select()
@@ -131,7 +131,7 @@ export async function createCommonArea(
   communityId: string,
   area: { name: string; rules?: string | null; reservation_enabled?: boolean },
 ): Promise<CommonArea> {
-  const { data, error } = await (supabase.from('common_areas') as any)
+  const { data, error } = await supabase.from('common_areas')
     .insert({
       community_id: communityId,
       ...area,
@@ -147,7 +147,7 @@ export async function updateCommonArea(
   areaId: string,
   updates: { name?: string; rules?: string | null; reservation_enabled?: boolean },
 ): Promise<CommonArea> {
-  const { data, error } = await (supabase.from('common_areas') as any)
+  const { data, error } = await supabase.from('common_areas')
     .update(updates)
     .eq('id', areaId)
     .select()
@@ -158,7 +158,7 @@ export async function updateCommonArea(
 }
 
 export async function deleteCommonArea(areaId: string): Promise<void> {
-  const { error } = await (supabase.from('common_areas') as any)
+  const { error } = await supabase.from('common_areas')
     .delete()
     .eq('id', areaId)
 
@@ -189,7 +189,7 @@ export async function createMaintenanceRequest(
     created_by: string
   }
 ): Promise<MaintenanceRequest> {
-  const { data, error } = await (supabase.from('maintenance_requests') as any)
+  const { data, error } = await supabase.from('maintenance_requests')
     .insert({
       community_id: communityId,
       status: 'open',
@@ -206,7 +206,7 @@ export async function updateMaintenanceStatus(
   requestId: string,
   status: MaintenanceStatus,
 ): Promise<MaintenanceRequest> {
-  const { data, error } = await (supabase.from('maintenance_requests') as any)
+  const { data, error } = await supabase.from('maintenance_requests')
     .update({ status })
     .eq('id', requestId)
     .select()
@@ -220,7 +220,7 @@ export async function assignMaintenanceRequest(
   requestId: string,
   memberId: string | null,
 ): Promise<MaintenanceRequest> {
-  const { data, error } = await (supabase.from('maintenance_requests') as any)
+  const { data, error } = await supabase.from('maintenance_requests')
     .update({ assigned_to: memberId })
     .eq('id', requestId)
     .select()

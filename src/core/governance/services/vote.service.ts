@@ -40,7 +40,7 @@ export async function castVote(vote: {
     weight, cast_at: new Date().toISOString(), block_reason: vote.block_reason || null,
   }
 
-  const { data, error } = await (supabase.from('votes') as any)
+  const { data, error } = await supabase.from('votes')
     .upsert(upsertData, { onConflict: 'proposal_id,member_id' })
     .select().single()
   if (error) throw error
@@ -83,7 +83,7 @@ export async function castVoteWithDelegations(
 
   for (const delegation of eligible) {
     const weight = weightMap.get(delegation.from_member_id) ?? 1
-    const { data: delegatedVote, error: voteErr } = await (supabase.from('votes') as any)
+    const { data: delegatedVote, error: voteErr } = await supabase.from('votes')
       .insert({ proposal_id: proposalId, member_id: delegation.from_member_id, value, weight, delegated_from: memberId, cast_at: new Date().toISOString() })
       .select().single()
     if (!voteErr && delegatedVote) results.push(delegatedVote as Vote)

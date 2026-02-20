@@ -42,8 +42,8 @@ export interface VigilanciaReport {
 // ---------------------------------------------------------------------------
 
 export async function getAdminTerms(communityId: string): Promise<AdminTerm[]> {
-  const { data, error } = await (supabase
-    .from('admin_terms' as any) as any)
+  const { data, error } = await supabase
+    .from('admin_terms')
     .select('*')
     .eq('community_id', communityId)
     .order('term_start', { ascending: false })
@@ -56,8 +56,8 @@ export async function getCurrentTerm(
   communityId: string,
   memberId: string,
 ): Promise<AdminTerm | null> {
-  const { data, error } = await (supabase
-    .from('admin_terms' as any) as any)
+  const { data, error } = await supabase
+    .from('admin_terms')
     .select('*')
     .eq('community_id', communityId)
     .eq('member_id', memberId)
@@ -77,8 +77,8 @@ export async function startTerm(
   assemblyId?: string,
 ): Promise<AdminTerm> {
   // Get last consecutive term number for this member
-  const { data: lastTerm } = await (supabase
-    .from('admin_terms' as any) as any)
+  const { data: lastTerm } = await supabase
+    .from('admin_terms')
     .select('term_number')
     .eq('community_id', communityId)
     .eq('member_id', memberId)
@@ -91,8 +91,8 @@ export async function startTerm(
   const termNumber = lastTerm ? (lastTerm as any).term_number + 1 : 1
 
   // End any currently active term for this role in the community
-  const { error: endError } = await (supabase
-    .from('admin_terms' as any) as any)
+  const { error: endError } = await supabase
+    .from('admin_terms')
     .update({ status: 'completed', term_end: new Date().toISOString() })
     .eq('community_id', communityId)
     .eq('role', role)
@@ -100,8 +100,8 @@ export async function startTerm(
 
   if (endError) throw endError
 
-  const { data, error } = await (supabase
-    .from('admin_terms' as any) as any)
+  const { data, error } = await supabase
+    .from('admin_terms')
     .insert({
       community_id: communityId,
       member_id: memberId,
@@ -117,8 +117,8 @@ export async function startTerm(
 }
 
 export async function endTerm(termId: string): Promise<void> {
-  const { error } = await (supabase
-    .from('admin_terms' as any) as any)
+  const { error } = await supabase
+    .from('admin_terms')
     .update({
       status: 'completed',
       term_end: new Date().toISOString(),
@@ -133,8 +133,8 @@ export async function canBeReElected(
   memberId: string,
 ): Promise<boolean> {
   // Get rules for max consecutive terms
-  const { data: community } = await (supabase
-    .from('communities') as any)
+  const { data: community } = await supabase
+    .from('communities')
     .select('rules')
     .eq('id', communityId)
     .single()
@@ -142,8 +142,8 @@ export async function canBeReElected(
   const maxTerms = (community as any)?.rules?.identity?.admin_max_consecutive_terms ?? 2
 
   // Count consecutive completed/active terms
-  const { data: terms } = await (supabase
-    .from('admin_terms' as any) as any)
+  const { data: terms } = await supabase
+    .from('admin_terms')
     .select('term_number, status')
     .eq('community_id', communityId)
     .eq('member_id', memberId)

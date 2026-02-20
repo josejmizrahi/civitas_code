@@ -66,7 +66,7 @@ export async function verifyTransaction(
 ): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { error } = await (supabase.from('transactions') as any)
+  const { error } = await supabase.from('transactions')
     .update({
       verification_status: status,
       verified_by: user?.id ?? null,

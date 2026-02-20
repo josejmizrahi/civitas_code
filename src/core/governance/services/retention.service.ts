@@ -23,7 +23,7 @@ export async function registerDocument(
   const expiresAt = new Date(now)
   expiresAt.setFullYear(expiresAt.getFullYear() + retentionYears)
 
-  const { error } = await (supabase.from('document_retention') as any)
+  const { error } = await supabase.from('document_retention')
     .insert({
       community_id: communityId,
       document_type: data.document_type,
@@ -94,7 +94,7 @@ export async function getExpiringDocuments(
  * Archive a document retention record.
  */
 export async function archiveDocument(retentionId: string): Promise<void> {
-  const { error } = await (supabase.from('document_retention') as any)
+  const { error } = await supabase.from('document_retention')
     .update({
       archived: true,
       archived_at: new Date().toISOString(),

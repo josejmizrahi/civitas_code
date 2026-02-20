@@ -5,7 +5,7 @@ import type { Endorsement } from '../types'
 import { getProposal } from './proposal.service'
 
 export async function getEndorsements(proposalId: string): Promise<Endorsement[]> {
-  const { data, error } = await (supabase as any).from('proposal_endorsements')
+  const { data, error } = await supabase.from('proposal_endorsements')
     .select('*').eq('proposal_id', proposalId).order('endorsed_at', { ascending: true })
   if (error) throw error
   return (data ?? []) as unknown as Endorsement[]
@@ -18,7 +18,7 @@ export async function addEndorsement(
   if (proposal.status !== 'draft') throw new AppError('Solo se pueden avalar propuestas en borrador', 'VALIDATION')
   if (proposal.created_by === memberId) throw new AppError('No puedes avalar tu propia propuesta', 'VALIDATION')
 
-  const { error } = await (supabase as any).from('proposal_endorsements')
+  const { error } = await supabase.from('proposal_endorsements')
     .insert({ proposal_id: proposalId, member_id: memberId, community_id: communityId })
   if (error) {
     if (error.code === '23505') throw new AppError('Ya avalaste esta propuesta', 'CONFLICT')
@@ -29,7 +29,7 @@ export async function addEndorsement(
   const thresholdMet = proposal.endorsements_required > 0 && endorsements.length >= proposal.endorsements_required
 
   if (thresholdMet && !proposal.endorsements_met) {
-    await (supabase.from('proposals') as any).update({ endorsements_met: true }).eq('id', proposalId)
+    await supabase.from('proposals').update({ endorsements_met: true }).eq('id', proposalId)
 
     sendEmailToMembers(communityId, 'proposal_new', {
       title: proposal.title, description: proposal.description, proposal_type: proposal.type,
@@ -46,7 +46,7 @@ export async function addEndorsement(
 }
 
 export async function removeEndorsement(proposalId: string, memberId: string): Promise<void> {
-  const { error } = await (supabase as any).from('proposal_endorsements')
+  const { error } = await supabase.from('proposal_endorsements')
     .delete().eq('proposal_id', proposalId).eq('member_id', memberId)
   if (error) throw error
 
@@ -54,6 +54,6 @@ export async function removeEndorsement(proposalId: string, memberId: string): P
   const endorsements = await getEndorsements(proposalId)
   const stillMet = proposal.endorsements_required === 0 || endorsements.length >= proposal.endorsements_required
   if (!stillMet && proposal.endorsements_met) {
-    await (supabase.from('proposals') as any).update({ endorsements_met: false }).eq('id', proposalId)
+    await supabase.from('proposals').update({ endorsements_met: false }).eq('id', proposalId)
   }
 }

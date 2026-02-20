@@ -138,8 +138,8 @@ export async function getMemberDebtSummary(
 export async function notifyMorosos(
   communityId: string,
 ): Promise<void> {
-  const { error } = await (supabase
-    .from('members') as any)
+  const { error } = await supabase
+    .from('members')
     .update({ moroso_notified_at: new Date().toISOString() })
     .eq('community_id', communityId)
     .eq('financial_standing', 'moroso')

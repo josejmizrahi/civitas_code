@@ -1376,6 +1376,115 @@ export type Database = {
           },
         ]
       }
+      gamification_events: {
+        Row: {
+          id: string
+          community_id: string
+          member_id: string
+          event_type: string
+          points: number
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          community_id: string
+          member_id: string
+          event_type: string
+          points?: number
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          community_id?: string
+          member_id?: string
+          event_type?: string
+          points?: number
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gamification_events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ifpe_webhook_events: {
+        Row: {
+          id: string
+          community_id: string
+          event_type: string
+          clabe_destino: string | null
+          clabe_origen: string | null
+          monto: number | null
+          referencia_numerica: string | null
+          concepto: string | null
+          nombre_ordenante: string | null
+          rfc_ordenante: string | null
+          fecha_operacion: string | null
+          clave_rastreo: string | null
+          raw_payload: Json
+          reconciliation_status: string
+          matched_obligation_id: string | null
+          matched_transaction_id: string | null
+          processed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          community_id: string
+          event_type: string
+          clabe_destino?: string | null
+          clabe_origen?: string | null
+          monto?: number | null
+          referencia_numerica?: string | null
+          concepto?: string | null
+          nombre_ordenante?: string | null
+          rfc_ordenante?: string | null
+          fecha_operacion?: string | null
+          clave_rastreo?: string | null
+          raw_payload?: Json
+          reconciliation_status?: string
+          matched_obligation_id?: string | null
+          matched_transaction_id?: string | null
+          processed_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          community_id?: string
+          event_type?: string
+          clabe_destino?: string | null
+          clabe_origen?: string | null
+          monto?: number | null
+          referencia_numerica?: string | null
+          concepto?: string | null
+          nombre_ordenante?: string | null
+          rfc_ordenante?: string | null
+          fecha_operacion?: string | null
+          clave_rastreo?: string | null
+          raw_payload?: Json
+          reconciliation_status?: string
+          matched_obligation_id?: string | null
+          matched_transaction_id?: string | null
+          processed_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ifpe_webhook_events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       implementation_tasks: {
         Row: {
           community_id: string
@@ -1678,6 +1787,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_gamification: {
+        Row: {
+          id: string
+          community_id: string
+          member_id: string
+          total_xp: number
+          level: number
+          badges: Json
+          streak_days: number
+          last_active_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          community_id: string
+          member_id: string
+          total_xp?: number
+          level?: number
+          badges?: Json
+          streak_days?: number
+          last_active_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          community_id?: string
+          member_id?: string
+          total_xp?: number
+          level?: number
+          badges?: Json
+          streak_days?: number
+          last_active_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_gamification_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
@@ -2313,6 +2469,45 @@ export type Database = {
           },
         ]
       }
+      proposal_endorsements: {
+        Row: {
+          id: string
+          proposal_id: string
+          member_id: string
+          community_id: string
+          endorsed_at: string
+        }
+        Insert: {
+          id?: string
+          proposal_id: string
+          member_id: string
+          community_id: string
+          endorsed_at?: string
+        }
+        Update: {
+          id?: string
+          proposal_id?: string
+          member_id?: string
+          community_id?: string
+          endorsed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_endorsements_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_endorsements_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "decision_archive"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           created_at: string
@@ -2630,6 +2825,7 @@ export type Database = {
           fund_type: string
           id: string
           import_job_id: string | null
+          origin: string
           source_id: string | null
           type: string
           verification_status: string
@@ -2649,6 +2845,7 @@ export type Database = {
           fund_type?: string
           id?: string
           import_job_id?: string | null
+          origin?: string
           source_id?: string | null
           type: string
           verification_status?: string
@@ -2668,6 +2865,7 @@ export type Database = {
           fund_type?: string
           id?: string
           import_job_id?: string | null
+          origin?: string
           source_id?: string | null
           type?: string
           verification_status?: string

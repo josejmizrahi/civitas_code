@@ -118,7 +118,7 @@ export async function proposePaymentPlan(
 
   const installmentAmount = Math.ceil((plan.total_debt / plan.number_of_installments) * 100) / 100
 
-  const { data, error } = await (supabase.from('payment_plans') as any)
+  const { data, error } = await supabase.from('payment_plans')
     .insert({
       community_id: communityId,
       member_id: plan.member_id,
@@ -152,7 +152,7 @@ export async function approvePaymentPlan(
   }
 
   // Update plan status
-  const { data, error } = await (supabase.from('payment_plans') as any)
+  const { data, error } = await supabase.from('payment_plans')
     .update({
       status: 'active',
       approved_by: approvedBy,
@@ -173,7 +173,7 @@ export async function approvePaymentPlan(
     plan.total_debt
   )
 
-  const { error: instError } = await (supabase.from('payment_plan_installments') as any)
+  const { error: instError } = await supabase.from('payment_plan_installments')
     .insert(
       installments.map((inst, idx) => ({
         plan_id: planId,
@@ -196,7 +196,7 @@ export async function cancelPaymentPlan(
   planId: string,
   reason: string
 ): Promise<PaymentPlan> {
-  const { data, error } = await (supabase.from('payment_plans') as any)
+  const { data, error } = await supabase.from('payment_plans')
     .update({
       status: 'cancelled',
       cancelled_at: new Date().toISOString(),
@@ -228,7 +228,7 @@ export async function markInstallmentPaid(
 
   const expectedAmount = (existing as { amount: number }).amount
 
-  const { data, error } = await (supabase.from('payment_plan_installments') as any)
+  const { data, error } = await supabase.from('payment_plan_installments')
     .update({
       status: paidAmount >= expectedAmount ? 'paid' : 'partial',
       paid_at: new Date().toISOString(),
@@ -246,7 +246,7 @@ export async function markInstallmentPaid(
   const allPaid = allInstallments.every((i) => i.status === 'paid')
 
   if (allPaid) {
-    const { error: planErr } = await (supabase.from('payment_plans') as any)
+    const { error: planErr } = await supabase.from('payment_plans')
       .update({ status: 'completed' })
       .eq('id', installment.plan_id)
     if (planErr) throw planErr

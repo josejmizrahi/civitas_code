@@ -87,7 +87,7 @@ export async function grantProxy(
     throw new Error('Este condómino ya tiene una representación activa para esta asamblea')
   }
 
-  const { data: proxy, error } = await (supabase.from('assembly_proxies') as any)
+  const { data: proxy, error } = await supabase.from('assembly_proxies')
     .insert({
       community_id: communityId,
       assembly_id: data.assembly_id,
@@ -106,7 +106,7 @@ export async function grantProxy(
  * Revoke a proxy by setting is_active = false and revoked_at timestamp.
  */
 export async function revokeProxy(proxyId: string): Promise<void> {
-  const { error } = await (supabase.from('assembly_proxies') as any)
+  const { error } = await supabase.from('assembly_proxies')
     .update({
       is_active: false,
       revoked_at: new Date().toISOString(),

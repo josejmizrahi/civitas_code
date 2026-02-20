@@ -16,7 +16,7 @@ export async function createDataSource(
   communityId: string,
   source: { name: string; type: string; created_by: string }
 ): Promise<DataSource> {
-  const { data, error } = await (supabase.from('data_sources') as any)
+  const { data, error } = await supabase.from('data_sources')
     .insert({ community_id: communityId, ...source, config: {}, status: 'active' })
     .select()
     .single()
@@ -44,7 +44,7 @@ export async function createImportJob(
   communityId: string,
   job: { source_id: string; rows_total: number }
 ): Promise<ImportJob> {
-  const { data, error } = await (supabase.from('import_jobs') as any)
+  const { data, error } = await supabase.from('import_jobs')
     .insert({
       community_id: communityId,
       ...job,
@@ -64,7 +64,7 @@ export async function updateImportJob(
   jobId: string,
   updates: Partial<ImportJob>
 ): Promise<void> {
-  const { error } = await (supabase.from('import_jobs') as any)
+  const { error } = await supabase.from('import_jobs')
     .update(updates)
     .eq('id', jobId)
 
@@ -88,13 +88,13 @@ export async function saveColumnMappings(
   mappings: { external_column: string; internal_field: string }[]
 ): Promise<void> {
   // Delete existing mappings for this source
-  await (supabase.from('column_mappings') as any)
+  await supabase.from('column_mappings')
     .delete()
     .eq('community_id', communityId)
     .eq('source_id', sourceId)
 
   if (mappings.length > 0) {
-    const { error } = await (supabase.from('column_mappings') as any)
+    const { error } = await supabase.from('column_mappings')
       .insert(
         mappings.map((m) => ({
           community_id: communityId,
@@ -127,13 +127,13 @@ export async function saveCategoryMapping(
   mapping: { external_name: string; internal_category_id: string; auto_matched: boolean }
 ): Promise<void> {
   // Upsert based on external_name + source_id
-  await (supabase.from('category_mappings') as any)
+  await supabase.from('category_mappings')
     .delete()
     .eq('community_id', communityId)
     .eq('source_id', sourceId)
     .eq('external_name', mapping.external_name)
 
-  const { error } = await (supabase.from('category_mappings') as any)
+  const { error } = await supabase.from('category_mappings')
     .insert({
       community_id: communityId,
       source_id: sourceId,
@@ -177,7 +177,7 @@ export async function importTransactions(
       }
     }
 
-    const { error } = await (supabase.from('transactions') as any)
+    const { error } = await supabase.from('transactions')
       .insert({
         community_id: communityId,
         ...tx,
@@ -196,20 +196,20 @@ export async function importTransactions(
 }
 
 export async function updateDataSourceSync(sourceId: string): Promise<void> {
-  await (supabase.from('data_sources') as any)
+  await supabase.from('data_sources')
     .update({ last_sync_at: new Date().toISOString() })
     .eq('id', sourceId)
 }
 
 export async function rollbackImportJob(jobId: string): Promise<void> {
   // Delete all transactions that were created by this import job
-  const { error: txError } = await (supabase.from('transactions') as any)
+  const { error: txError } = await supabase.from('transactions')
     .delete()
     .eq('import_job_id', jobId)
   if (txError) throw txError
 
   // Mark the job as rolled back
-  const { error: jobError } = await (supabase.from('import_jobs') as any)
+  const { error: jobError } = await supabase.from('import_jobs')
     .update({ status: 'rolled_back' })
     .eq('id', jobId)
   if (jobError) throw jobError

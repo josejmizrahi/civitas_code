@@ -37,7 +37,7 @@ export function DeliveryTracker({ notificationType, relatedId }: Props) {
   const { data: records, isLoading } = useQuery({
     queryKey: ['delivery-tracker', communityId, notificationType, relatedId],
     queryFn: async () => {
-      let query = (supabase.from('notifications') as any)
+      let query = supabase.from('notifications')
         .select('id, delivery_status, delivery_channel, delivered_at, created_at, member_id')
         .eq('community_id', communityId!)
         .order('created_at', { ascending: false })

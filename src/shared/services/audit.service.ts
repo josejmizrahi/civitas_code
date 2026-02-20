@@ -22,7 +22,7 @@ export async function logAuditAction(
   details?: Record<string, unknown>
 ): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
-  const { error } = await (supabase.from('audit_log') as any).insert({
+  const { error } = await supabase.from('audit_log').insert({
     community_id: communityId,
     user_id: user?.id ?? null,
     action,
