@@ -3,6 +3,7 @@ import { useTasks, useCreateTask, useUpdateTask } from '../hooks/useImplementati
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Progress } from '@/shared/components/ui/progress'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Select } from '@/shared/components/ui/select'
@@ -93,15 +94,7 @@ export function ImplementationTracker({ proposalId }: Props) {
               <span>Progreso general</span>
               <span>{overallProgress}%</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className={cn(
-                  'h-full rounded-full transition-all duration-500',
-                  overallProgress === 100 ? 'bg-green-500' : 'bg-primary'
-                )}
-                style={{ width: `${overallProgress}%` }}
-              />
-            </div>
+            <Progress value={overallProgress} indicatorClassName={overallProgress === 100 ? 'bg-green-500' : 'bg-primary'} />
           </div>
         )}
 
