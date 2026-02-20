@@ -211,7 +211,7 @@ export async function createMorosoNotice(
       .eq('id', memberId)
       .single()
   ).then(({ data: profile }) => {
-    const email = (profile as any)?.email
+    const email = (profile as { email?: string } | null)?.email
     if (email) {
       sendEmail(email, 'moroso_notice', {
         overdue_count: opts?.obligations?.length ?? 1,

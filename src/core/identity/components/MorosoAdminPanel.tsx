@@ -13,6 +13,9 @@ import { AlertTriangle, RefreshCw, Bell, Ban, UserX, UsersRound } from 'lucide-r
 import { useMemberDebt } from '../hooks/useMoroso'
 import type { Member } from '../types'
 
+/** Member with moroso timestamps from member_profiles / view */
+type MorosoMember = Member & { moroso_since?: string; moroso_notified_at?: string }
+
 // ---------------------------------------------------------------------------
 // Restriction labels
 // ---------------------------------------------------------------------------
@@ -33,7 +36,7 @@ const restrictionIcons: Record<string, typeof Ban> = {
 // Single row sub-component (fetches debt per member)
 // ---------------------------------------------------------------------------
 
-function MorosoRow({ member }: { member: Member }) {
+function MorosoRow({ member }: { member: MorosoMember }) {
   const { data: debt, isLoading } = useMemberDebt(member.id)
 
   return (
@@ -51,11 +54,11 @@ function MorosoRow({ member }: { member: Member }) {
         {isLoading ? '...' : formatCurrency(debt?.total_debt ?? 0)}
       </TableCell>
       <TableCell className="hidden sm:table-cell">
-        {formatDate((member as any).moroso_since)}
+        {formatDate(member.moroso_since ?? '')}
       </TableCell>
       <TableCell className="hidden lg:table-cell">
-        {(member as any).moroso_notified_at
-          ? formatDate((member as any).moroso_notified_at)
+        {member.moroso_notified_at
+          ? formatDate(member.moroso_notified_at)
           : <span className="text-muted-foreground text-xs">Sin notificar</span>}
       </TableCell>
       <TableCell>

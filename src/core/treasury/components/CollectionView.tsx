@@ -1,18 +1,15 @@
 import { useCommunityContext } from '@/app/providers'
-import { useCollectionStats } from '../hooks/usePaymentStatus'
 import { getCollectionConfig } from '../services/treasury.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
-import { formatCurrency } from '@/shared/lib/utils'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import {
-  Banknote,
   AlertTriangle,
   CheckCircle2,
   Building2,
   CreditCard,
-  ArrowUpCircle,
   Copy,
+  Receipt,
 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { useState } from 'react'
@@ -133,9 +130,8 @@ function ClabeDisplay({ config }: { config: { clabe: string | null; bank_name: s
   )
 }
 
-export function CollectionView() {
+export function CollectionView({ onGoToObligations }: { onGoToObligations?: () => void }) {
   const { community } = useCommunityContext()
-  const { data: stats, isLoading } = useCollectionStats()
   const { canManageTreasury } = usePermissions()
 
   const rules = community?.rules as { treasury?: TreasuryRules } | null
@@ -146,60 +142,22 @@ export function CollectionView() {
     <div className="space-y-6">
       <TreasuryModeBanner mode={treasuryMode} />
 
-      {/* Collection Stats */}
-      {!isLoading && stats && (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Por Cobrar</CardTitle>
-              <Banknote className="h-4 w-4 text-yellow-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.pendingAmount + stats.overdueAmount)}</div>
-              <p className="text-xs text-muted-foreground">{stats.pendingCount + stats.overdueCount} obligaciones</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Vencido</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{formatCurrency(stats.overdueAmount)}</div>
-              <p className="text-xs text-muted-foreground">{stats.overdueCount} obligaciones vencidas</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Cobrado</CardTitle>
-              <ArrowUpCircle className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{formatCurrency(stats.collectedAmount)}</div>
-              <p className="text-xs text-muted-foreground">{stats.paidCount} pagos recibidos</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Tasa de Cobro</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {(stats.collectionRate * 100).toFixed(0)}%
-              </div>
-              <div className="mt-1 h-2 rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-blue-500 transition-all"
-                  style={{ width: `${stats.collectionRate * 100}%` }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* Resumen de cobranza está en Dashboard; detalle en Obligaciones */}
+      {canManageTreasury && onGoToObligations && (
+        <Card className="border-dashed">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-2">
+              <Receipt className="h-4 w-4 shrink-0" />
+              El resumen de cobranza (por cobrar, vencido, cobrado) está en el <strong>Dashboard</strong>.
+              Para crear obligaciones y registrar pagos, usa la pestaña <strong>Obligaciones</strong>.
+              {onGoToObligations && (
+                <Button variant="link" className="h-auto p-0 text-primary" onClick={onGoToObligations}>
+                  Ir a Obligaciones →
+                </Button>
+              )}
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* CLABE / Account info */}

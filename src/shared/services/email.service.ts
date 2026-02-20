@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { logger } from '@/shared/lib/logger'
 
 /**
  * Fire-and-forget email via the send-email Edge Function.
@@ -13,9 +14,9 @@ export async function sendEmail(
     const { error } = await supabase.functions.invoke('send-email', {
       body: { to, type, data },
     })
-    if (error) console.warn(`[email] Failed to send "${type}" to ${to}:`, error.message)
+    if (error) logger.warn(`[email] Failed to send "${type}" to ${to}:`, error.message)
   } catch (err) {
-    console.warn(`[email] Failed to send "${type}" to ${to}:`, err)
+    logger.warn(`[email] Failed to send "${type}" to ${to}:`, err)
   }
 }
 
@@ -66,6 +67,6 @@ export async function sendEmailToMembers(
       }
     }
   } catch (err) {
-    console.warn(`[email] Failed to send "${type}" to community ${communityId}:`, err)
+    logger.warn(`[email] Failed to send "${type}" to community ${communityId}:`, err)
   }
 }

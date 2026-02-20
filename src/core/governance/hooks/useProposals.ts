@@ -56,7 +56,7 @@ export function useCreateProposal() {
       createProposal(communityId!, {
         ...proposal,
         created_by: user!.id,
-        financial_instruction: proposal.financial_instruction as any,
+        financial_instruction: proposal.financial_instruction as Record<string, unknown> | undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proposals', communityId] })

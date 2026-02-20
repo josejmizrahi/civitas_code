@@ -113,6 +113,9 @@ export function RecurringScheduleList() {
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Cobros o pagos que se repiten en el tiempo (ej. cuota mensual, aportación periódica).
+      </p>
       {/* Summary */}
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>

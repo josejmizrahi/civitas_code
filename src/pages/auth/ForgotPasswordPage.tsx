@@ -11,13 +11,11 @@ import { Mail, ArrowLeft } from 'lucide-react'
 export function ForgotPasswordPage() {
   const { resetPassword } = useAuth()
   const [email, setEmail] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
     setLoading(true)
 
     try {
@@ -32,7 +30,7 @@ export function ForgotPasswordPage() {
       }
 
       setSent(true)
-    } catch (err: unknown) {
+    } catch {
       // Even on error, show success to prevent email enumeration
       setSent(true)
     } finally {
@@ -92,9 +90,6 @@ export function ForgotPasswordPage() {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-          )}
           <div className="space-y-2">
             <Label htmlFor="email">Correo electrónico</Label>
             <Input

@@ -41,9 +41,16 @@ export default defineConfig(({ mode }) => {
       include: ['src/**/*.{test,spec}.{ts,tsx}'],
       css: false,
       env: {
+        NODE_ENV: 'development',
         VITE_SUPABASE_URL: 'http://localhost:54321',
         VITE_SUPABASE_ANON_KEY: 'test-anon-key',
         VITE_VAPID_PUBLIC_KEY: '',
+      },
+      coverage: {
+        provider: 'v8',
+        include: ['src/**/*.{ts,tsx}'],
+        exclude: ['src/test/**', 'src/**/*.test.{ts,tsx}', 'src/**/*.d.ts'],
+        reporter: ['text', 'text-summary', 'lcov'],
       },
     },
   }

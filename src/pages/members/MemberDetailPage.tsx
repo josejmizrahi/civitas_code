@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
@@ -15,6 +15,7 @@ import { Select } from '@/shared/components/ui/select'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/utils'
+import { useToast } from '@/shared/components/ui/toast'
 import {
   ArrowLeft, Wallet, Vote, Activity, Shield,
   UserMinus, UserCheck, AlertCircle, CheckCircle, Clock,
@@ -95,6 +96,7 @@ export function MemberDetailPage() {
   const reactivate = useReactivateMember()
   const [editingRole, setEditingRole] = useState(false)
 
+  const { error: toastError, success: toastSuccess } = useToast()
   const memberQuery = useMember(memberId)
   const obligationsQuery = usePaymentObligations(memberId)
   const votesQuery = useQuery({
@@ -112,6 +114,18 @@ export function MemberDetailPage() {
     queryFn: () => getProfile(memberId!, communityId!),
     enabled: !!communityId && !!memberId,
   })
+
+  // Mostrar toast si fallan gamificación o auditoría (datos secundarios)
+  useEffect(() => {
+    if (gamQuery.isError && gamQuery.error) {
+      toastError(gamQuery.error instanceof Error ? gamQuery.error.message : 'Error al cargar gamificación')
+    }
+  }, [gamQuery.isError, gamQuery.error, toastError])
+  useEffect(() => {
+    if (auditQuery.isError && auditQuery.error) {
+      toastError(auditQuery.error instanceof Error ? auditQuery.error.message : 'Error al cargar historial')
+    }
+  }, [auditQuery.isError, auditQuery.error, toastError])
 
   const member = memberQuery.data
   const loading = memberQuery.isLoading
@@ -141,17 +155,32 @@ export function MemberDetailPage() {
   const overdueCount = obligations.filter(o => o.status === 'overdue' || (o.status === 'pending' && new Date(o.due_date) < new Date())).length
 
   const handleRoleChange = async (newRole: string) => {
-    await updateRole.mutateAsync({ memberId: member.id, role: newRole as Role })
-    setEditingRole(false)
+    try {
+      await updateRole.mutateAsync({ memberId: member.id, role: newRole as Role })
+      toastSuccess('Rol actualizado correctamente')
+      setEditingRole(false)
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Error al cambiar el rol')
+    }
   }
 
   const handleDeactivate = async () => {
     if (!confirm(`¿Desactivar a ${member.full_name || member.email}?`)) return
-    await deactivate.mutateAsync(member.id)
+    try {
+      await deactivate.mutateAsync(member.id)
+      toastSuccess('Miembro desactivado')
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Error al desactivar miembro')
+    }
   }
 
   const handleReactivate = async () => {
-    await reactivate.mutateAsync(member.id)
+    try {
+      await reactivate.mutateAsync(member.id)
+      toastSuccess('Miembro reactivado')
+    } catch (err) {
+      toastError(err instanceof Error ? err.message : 'Error al reactivar miembro')
+    }
   }
 
   return (

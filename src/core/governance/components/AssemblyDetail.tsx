@@ -89,8 +89,8 @@ export function AssemblyDetail({ assemblyId }: Props) {
         status: newStatus,
       })
       toast.success(`Estado actualizado: ${STATUS_LABELS[newStatus] || newStatus}`)
-    } catch (err: any) {
-      toast.error(err.message || 'Error al actualizar estado')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al actualizar estado')
     }
   }
 

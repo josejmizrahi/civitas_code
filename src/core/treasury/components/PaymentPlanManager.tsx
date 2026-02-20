@@ -103,7 +103,7 @@ function PlanRow({ plan, isAdmin }: { plan: PaymentPlan; isAdmin: boolean }) {
       { planId: plan.id, approvedBy: user.id },
       {
         onSuccess: () => toast.success('Plan aprobado — parcialidades generadas'),
-        onError: (err: any) => toast.error(err?.message || 'Error al aprobar'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al aprobar'),
       }
     )
   }
@@ -117,7 +117,7 @@ function PlanRow({ plan, isAdmin }: { plan: PaymentPlan; isAdmin: boolean }) {
           toast.success('Plan cancelado')
           setShowCancelForm(false)
         },
-        onError: (err: any) => toast.error(err?.message || 'Error al cancelar'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al cancelar'),
       }
     )
   }

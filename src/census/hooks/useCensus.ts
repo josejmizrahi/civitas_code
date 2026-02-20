@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
-import { getCensusSnapshots, takeCensusSnapshot, getLatestCensus, getPlatformCensus } from '../services/census.service'
+import { getCensusSnapshots, takeCensusSnapshot, getLatestCensus, getPlatformCensus, getGrowthMetrics } from '../services/census.service'
 
 export function useCensusSnapshots() {
   const { communityId } = useCommunityContext()
@@ -29,6 +29,15 @@ export function useTakeCensusSnapshot() {
       queryClient.invalidateQueries({ queryKey: ['census', communityId] })
       queryClient.invalidateQueries({ queryKey: ['census', 'latest', communityId] })
     },
+  })
+}
+
+export function useGrowthMetrics() {
+  const { communityId } = useCommunityContext()
+  return useQuery({
+    queryKey: ['census', 'growth', communityId],
+    queryFn: () => getGrowthMetrics(communityId!),
+    enabled: !!communityId,
   })
 }
 

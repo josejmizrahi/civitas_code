@@ -47,10 +47,19 @@ export function CreateObligationDialog({ open, onOpenChange }: Props) {
       setError('Selecciona un miembro o marca "Para todos los miembros activos"')
       return
     }
+    const parsedAmount = parseFloat(amount)
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+      setError('El monto debe ser mayor a cero')
+      return
+    }
+    if (parsedAmount > 100_000_000) {
+      setError('El monto excede el límite permitido')
+      return
+    }
 
     try {
       const obligation = {
-        amount: parseFloat(amount),
+        amount: parsedAmount,
         due_date: dueDate,
         concept,
       }

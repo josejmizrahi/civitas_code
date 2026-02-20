@@ -40,12 +40,6 @@ export function MultipleChoiceVotingPanel({
     onVote(optionValue)
   }
 
-  // Sort options by votes for display
-  const _sortedOptions = [...options].sort((a, b) => {
-    const aVotes = voteCounts[`option_${options.indexOf(a) + 1}`] ?? 0
-    const bVotes = voteCounts[`option_${options.indexOf(b) + 1}`] ?? 0
-    return bVotes - aVotes
-  })
 
   return (
     <Card>

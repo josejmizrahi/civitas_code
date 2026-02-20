@@ -1,5 +1,5 @@
 import { useToast } from '@/shared/components/ui/toast'
-import { getBadgeById, getLevelForXp, getCelebrationMessage, ACTION_LABELS } from '../constants'
+import { getBadgeById, getLevelForXp, getCelebrationMessage } from '../constants'
 import type { XpAwardResult, GamificationAction } from '../types'
 
 /**

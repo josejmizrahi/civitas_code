@@ -35,7 +35,7 @@ export function EndorsementBar({ proposal }: Props) {
         { proposalId: proposal.id, memberId: currentMember.id },
         {
           onSuccess: () => toast.success('Aval retirado'),
-          onError: (err: any) => toast.error(err.message || 'Error al retirar aval'),
+          onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al retirar aval'),
         }
       )
     } else {
@@ -49,7 +49,7 @@ export function EndorsementBar({ proposal }: Props) {
               toast.success('Aval registrado')
             }
           },
-          onError: (err: any) => toast.error(err.message || 'Error al avalar'),
+          onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al avalar'),
         }
       )
     }

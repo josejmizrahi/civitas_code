@@ -175,7 +175,7 @@ export function ProposalDetail({ proposalId }: Props) {
 
   const endorsementsOk = proposal.endorsements_required === 0 || proposal.endorsements_met
   const canStartDiscussion = proposal.status === 'draft' && isAdmin && endorsementsOk
-  const _canActivate = (proposal.status === 'draft' || proposal.status === 'discussion') && isAdmin
+  
   const canClose = proposal.status === 'active'
   const isVotingOpen = proposal.status === 'active' &&
     (!proposal.voting_end || new Date(proposal.voting_end) > new Date())
@@ -194,7 +194,7 @@ export function ProposalDetail({ proposalId }: Props) {
       { proposalId, discussionHours: parseInt(discussionHours) },
       {
         onSuccess: () => { toast.success('Periodo de discusión iniciado'); refetchProposal() },
-        onError: (err: any) => toast.error(err?.message || 'Error al iniciar discusión'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al iniciar discusión'),
       }
     )
   }
@@ -205,7 +205,7 @@ export function ProposalDetail({ proposalId }: Props) {
         { proposalId, votingEnd: votingEndInput || null },
         {
           onSuccess: () => { toast.success('Votación abierta'); refetchProposal() },
-          onError: (err: any) => toast.error(err?.message || 'Error al abrir votación'),
+          onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al abrir votación'),
         }
       )
     } else {
@@ -235,7 +235,7 @@ export function ProposalDetail({ proposalId }: Props) {
           setOutcomeText('')
           refetchProposal()
         },
-        onError: (err: any) => toast.error(err?.message || 'Error al declarar resultado'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al declarar resultado'),
       }
     )
   }
@@ -246,7 +246,7 @@ export function ProposalDetail({ proposalId }: Props) {
       { proposalId, userId: user.id },
       {
         onSuccess: () => { toast.success('Propuesta apelada — ejecución pausada'); refetchProposal() },
-        onError: (err: any) => toast.error(err?.message || 'Error al apelar'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al apelar'),
       }
     )
   }
@@ -276,7 +276,7 @@ export function ProposalDetail({ proposalId }: Props) {
               {proposal.appealed && (
                 <Badge variant="destructive" className="text-xs">Apelada</Badge>
               )}
-              <Badge variant={(STATUS_VARIANTS[proposal.status] || 'default') as any}>
+              <Badge variant={(STATUS_VARIANTS[proposal.status] || 'default') as 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'}>
                 {STATUS_LABELS[proposal.status] || proposal.status}
               </Badge>
             </div>
@@ -285,7 +285,7 @@ export function ProposalDetail({ proposalId }: Props) {
         <CardContent className="space-y-4">
           <p className="whitespace-pre-wrap text-sm">{proposal.description}</p>
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-            {(proposal as any).creator_name && <span>Por: <span className="font-medium text-foreground">{(proposal as any).creator_name}</span></span>}
+            {proposal.creator_name && <span>Por: <span className="font-medium text-foreground">{proposal.creator_name}</span></span>}
             <span>Creada: {formatDate(proposal.created_at)}</span>
             {proposal.discussion_start && <span>Discusión: {formatDate(proposal.discussion_start)}</span>}
             {proposal.voting_start && <span>Inicio votación: {formatDate(proposal.voting_start)}</span>}
@@ -501,7 +501,7 @@ export function ProposalDetail({ proposalId }: Props) {
             { proposalId, memberId: currentMember.id, value, blockReason },
             {
               onSuccess: () => toast.success('Voto registrado'),
-              onError: (err: any) => toast.error(err?.message || 'Error al registrar voto'),
+              onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al registrar voto'),
             }
           )
         }
@@ -565,7 +565,7 @@ export function ProposalDetail({ proposalId }: Props) {
           <CardContent className="space-y-4">
             <div className="rounded-md bg-muted p-3 text-sm space-y-1">
               {(() => {
-                const fi = proposal.financial_instruction as any
+                const fi = proposal.financial_instruction
                 const typeLabels: Record<string, string> = {
                   disbursement: 'Desembolso',
                   budget_allocation: 'Asignación Presupuestal',
@@ -616,7 +616,7 @@ export function ProposalDetail({ proposalId }: Props) {
                       { proposalId, userId: user.id },
                       {
                         onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
-                        onError: (err: any) => toast.error(err?.message || 'Error al ejecutar'),
+                        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                       }
                     )}
                     disabled={executeMut.isPending}
@@ -639,7 +639,7 @@ export function ProposalDetail({ proposalId }: Props) {
                       { proposalId, userId: user.id },
                       {
                         onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
-                        onError: (err: any) => toast.error(err?.message || 'Error al ejecutar'),
+                        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                       }
                     )}
                     disabled={executeMut.isPending}
@@ -656,7 +656,7 @@ export function ProposalDetail({ proposalId }: Props) {
                     { proposalId, userId: user.id },
                     {
                       onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
-                      onError: (err: any) => toast.error(err?.message || 'Error al ejecutar'),
+                      onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                     }
                   )}
                   disabled={executeMut.isPending}

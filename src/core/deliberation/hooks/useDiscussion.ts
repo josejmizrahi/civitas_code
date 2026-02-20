@@ -5,6 +5,7 @@ import {
   createComment,
   updateComment,
   softDeleteComment,
+  moderateComment,
   getReactions,
   addReaction,
   removeReaction,
@@ -129,6 +130,23 @@ export function useDeleteComment(proposalId: string) {
 
   return useMutation({
     mutationFn: (commentId: string) => softDeleteComment(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['discussion-comments', proposalId] })
+      queryClient.invalidateQueries({ queryKey: ['discussion-comments-flat', proposalId] })
+      queryClient.invalidateQueries({ queryKey: ['sentiment-summary', proposalId] })
+    },
+  })
+}
+
+/**
+ * Moderate a comment (admin/comité de vigilancia only).
+ */
+export function useModerateComment(proposalId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ commentId, moderatorId, reason }: { commentId: string; moderatorId: string; reason: string }) =>
+      moderateComment(commentId, moderatorId, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['discussion-comments', proposalId] })
       queryClient.invalidateQueries({ queryKey: ['discussion-comments-flat', proposalId] })

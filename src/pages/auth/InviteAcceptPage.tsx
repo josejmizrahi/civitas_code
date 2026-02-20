@@ -50,8 +50,8 @@ export function InviteAcceptPage() {
       setAccepted(true)
       // Redirect to dashboard after 2 seconds
       setTimeout(() => navigate('/dashboard'), 2000)
-    } catch (err: any) {
-      setError(err.message || 'Error al aceptar la invitación')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al aceptar la invitación')
     } finally {
       setAccepting(false)
     }

@@ -343,13 +343,13 @@ export async function getCollectionStats(communityId: string): Promise<{
 /**
  * Get community collection config from rules.
  */
-export function getCollectionConfig(rules: any): CollectionConfig {
-  const treasury = rules?.treasury
+export function getCollectionConfig(rules: Record<string, unknown> | null): CollectionConfig {
+  const treasury = (rules?.treasury ?? {}) as Record<string, unknown>
   return {
-    clabe: treasury?.clabe ?? null,
-    bank_name: treasury?.bank_name ?? null,
-    beneficiary_name: treasury?.beneficiary_name ?? null,
-    payment_reference_prefix: treasury?.payment_reference_prefix ?? null,
+    clabe: (treasury?.clabe as string) ?? null,
+    bank_name: (treasury?.bank_name as string) ?? null,
+    beneficiary_name: (treasury?.beneficiary_name as string) ?? null,
+    payment_reference_prefix: (treasury?.payment_reference_prefix as string) ?? null,
   }
 }
 

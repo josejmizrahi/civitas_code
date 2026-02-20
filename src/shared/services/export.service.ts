@@ -5,6 +5,7 @@
  */
 
 import { downloadAsExcel } from '@/shared/lib/utils'
+import { logger } from '@/shared/lib/logger'
 
 export interface ExportOptions {
   filename: string
@@ -19,13 +20,13 @@ export interface ExportOptions {
 export function exportToPDF(elementId: string, options: ExportOptions): void {
   const element = document.getElementById(elementId)
   if (!element) {
-    console.warn(`Export target element #${elementId} not found`)
+    logger.warn(`Export target element #${elementId} not found`)
     return
   }
 
   const win = window.open('', '_blank')
   if (!win) {
-    console.warn('Could not open print window — popup may be blocked')
+    logger.warn('Could not open print window — popup may be blocked')
     return
   }
 
@@ -92,9 +93,9 @@ export function exportToPDF(elementId: string, options: ExportOptions): void {
 /**
  * Export structured data to Excel.
  */
-export function exportToExcel(
+export async function exportToExcel(
   data: Record<string, unknown>[],
   options: ExportOptions & { sheetName?: string }
-): void {
-  downloadAsExcel(data, options.filename, options.sheetName || 'Datos')
+): Promise<void> {
+  await downloadAsExcel(data, options.filename, options.sheetName || 'Datos')
 }

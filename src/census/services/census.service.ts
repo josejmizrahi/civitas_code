@@ -60,8 +60,31 @@ export async function getLatestCensus(communityId: string): Promise<CensusSnapsh
     .order('snapshot_date', { ascending: false })
     .limit(1)
     .maybeSingle()
-  if (error) return null
+  if (error) throw error
   return data as CensusSnapshot | null
+}
+
+export async function getGrowthMetrics(communityId: string): Promise<{
+  memberGrowth: number
+  incomeGrowth: number
+  participationTrend: number
+}> {
+  const snapshots = await getCensusSnapshots(communityId)
+  if (snapshots.length < 2) {
+    return { memberGrowth: 0, incomeGrowth: 0, participationTrend: 0 }
+  }
+
+  const latest = snapshots[0]
+  const previous = snapshots[1]
+
+  const calcGrowth = (current: number, prev: number) =>
+    prev === 0 ? 0 : Math.round(((current - prev) / prev) * 100)
+
+  return {
+    memberGrowth: calcGrowth(latest.active_members, previous.active_members),
+    incomeGrowth: calcGrowth(latest.total_income, previous.total_income),
+    participationTrend: calcGrowth(latest.active_proposals, previous.active_proposals),
+  }
 }
 
 export async function getPlatformCensus(): Promise<PlatformCensus> {

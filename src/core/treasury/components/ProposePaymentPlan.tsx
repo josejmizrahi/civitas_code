@@ -36,6 +36,20 @@ export function ProposePaymentPlan({ memberId, totalDebt, onClose }: Props) {
   }
 
   const handleSubmit = () => {
+    if (numInstallments < 2 || numInstallments > 36) {
+      toast.error('El número de parcialidades debe ser entre 2 y 36')
+      return
+    }
+    if (totalDebt <= 0) {
+      toast.error('La deuda total debe ser mayor a cero')
+      return
+    }
+    const today = new Date().toISOString().split('T')[0]
+    if (startDate < today) {
+      toast.error('La fecha de inicio no puede ser en el pasado')
+      return
+    }
+
     proposePlan.mutate(
       {
         member_id: memberId,
@@ -51,7 +65,7 @@ export function ProposePaymentPlan({ memberId, totalDebt, onClose }: Props) {
           toast.success('Plan de pago propuesto exitosamente')
           onClose()
         },
-        onError: (err: any) => toast.error(err?.message || 'Error al proponer plan'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al proponer plan'),
       }
     )
   }

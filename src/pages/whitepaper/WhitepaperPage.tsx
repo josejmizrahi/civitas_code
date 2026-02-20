@@ -9,13 +9,18 @@ const TOC = [
   { id: 'abstract', label: 'Resumen Ejecutivo' },
   { id: 'problem', label: '1. El Problema' },
   { id: 'thesis', label: '2. Tesis Fundacional' },
-  { id: 'primitives', label: '3. Primitivas del Sistema' },
+  { id: 'primitives', label: '3. Las Cinco Primitivas' },
   { id: 'closed-loop', label: '4. Ciclo Cerrado' },
-  { id: 'social-contract', label: '5. Contrato Social Configurable' },
-  { id: 'architecture', label: '6. Arquitectura Tecnica' },
-  { id: 'progressive', label: '7. Activacion Progresiva' },
-  { id: 'market', label: '8. Mercado Objetivo' },
-  { id: 'vision', label: '9. Vision a Futuro' },
+  { id: 'fintech', label: '5. Alianza Fintech (IFPE)' },
+  { id: 'social-contract', label: '6. Contrato Social Configurable' },
+  { id: 'architecture', label: '7. Arquitectura Tecnica' },
+  { id: 'progressive', label: '8. Activacion Progresiva' },
+  { id: 'market', label: '9. Mercado Objetivo' },
+  { id: 'revenue', label: '10. Modelo de Ingresos' },
+  { id: 'deployment', label: '11. Estrategia de Despliegue' },
+  { id: 'competitive', label: 'Competencia' },
+  { id: 'risks', label: 'Riesgos y Seguridad' },
+  { id: 'vision', label: '12. Conclusión' },
 ]
 
 // ---------------------------------------------------------------------------
@@ -77,8 +82,8 @@ export function WhitepaperPage() {
                 Civitas: Infraestructura para comunidades autogobernadas
               </h1>
               <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
-                Un sistema de primitivas integradas — Identidad, Tesoreria, Gobernanza —
-                que transforma la administracion colectiva en autodeterminacion digital.
+                Cinco primitivas integradas — Identidad, Tesoreria, Gobernanza, Censo y Federacion —
+                que se activan de forma progresiva y transforman la administracion colectiva en autodeterminacion digital.
               </p>
               <div className="mt-6 flex flex-wrap gap-4 text-sm text-muted-foreground">
                 <span>Febrero 2026</span>
@@ -106,11 +111,8 @@ export function WhitepaperPage() {
               <h2 className="mb-4 text-2xl font-bold tracking-tight">Resumen Ejecutivo</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Civitas es un sistema operativo para comunidades autogobernadas. A diferencia de las herramientas
-                  de administracion fragmentadas que existen hoy, Civitas integra tres primitivas fundamentales
-                  — <strong className="text-foreground">Identidad</strong>, <strong className="text-foreground">Tesoreria</strong> y <strong className="text-foreground">Gobernanza</strong> — en un ciclo cerrado donde
-                  cada decision tiene consecuencias financieras, cada pago afecta los derechos y cada derecho
-                  habilita decisiones.
+                  Civitas es una plataforma modular para comunidades autogobernadas. Integra cinco primitivas
+                  — <strong className="text-foreground">Identidad</strong>, <strong className="text-foreground">Tesoreria</strong>, <strong className="text-foreground">Gobernanza</strong>, <strong className="text-foreground">Censo</strong> y <strong className="text-foreground">Federacion</strong> — que se activan de forma progresiva. En el nucleo, Identidad, Tesoreria y Gobernanza forman un ciclo cerrado: cada decision tiene consecuencias financieras, cada pago afecta los derechos y cada derecho habilita decisiones.
                 </p>
                 <p>
                   El sistema esta disenado para cualquier organizacion colectiva que necesite gobernarse, cobrar
@@ -198,10 +200,10 @@ export function WhitepaperPage() {
 
             {/* ─── Primitives ─── */}
             <section id="primitives" className="mb-14 scroll-mt-20">
-              <h2 className="mb-4 text-2xl font-bold tracking-tight">3. Primitivas del Sistema</h2>
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">3. Las Cinco Primitivas</h2>
               <p className="mb-6 text-muted-foreground leading-relaxed">
-                Civitas se construye sobre tres primitivas composables. Cada una puede funcionar de forma
-                independiente, pero su verdadero poder emerge cuando operan juntas.
+                Civitas se construye sobre cinco primitivas composables que se activan de forma progresiva.
+                Las tres centrales — Identidad, Tesoreria y Gobernanza — forman una maquina integrada; Censo y Federacion amplian el sistema a escala y entre comunidades.
               </p>
 
               <div className="space-y-6">
@@ -278,6 +280,49 @@ export function WhitepaperPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Census */}
+                <div className="rounded-xl border p-5 sm:p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center justify-center rounded-lg bg-amber-50 p-2 text-amber-600">
+                      <BarChart3 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Censo</h3>
+                      <p className="text-xs text-muted-foreground">Census Primitive</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                    <p>
+                      Rastrea tamano de la comunidad, actividad economica y huella geografica. Con el rail
+                      fintech, el Censo reporta actividad economica verificada — dinero real que fluye por la
+                      comunidad, no estimaciones. Es clave para federacion y para demostrar escala ante
+                      instituciones externas.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Federation */}
+                <div className="rounded-xl border p-5 sm:p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center justify-center rounded-lg bg-sky-50 p-2 text-sky-600">
+                      <Globe className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Federacion</h3>
+                      <p className="text-xs text-muted-foreground">Federation Primitive</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                    <p>
+                      Permite que comunidades se reconozcan entre si, coordinen decisiones conjuntas y
+                      compartan recursos. Con el rail fintech, tesorerias federadas pueden ejecutar compras
+                      conjuntas: cientos de condominios que cambian de proveedor energetico, ONGs que
+                      coordinan campanas, o cooperativas que negocian precios al mayoreo — y el pago
+                      colectivo se desembolsa desde una cuenta federada.
+                    </p>
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -324,9 +369,34 @@ export function WhitepaperPage() {
               </div>
             </section>
 
+            {/* ─── Fintech Partnership ─── */}
+            <section id="fintech" className="mb-14 scroll-mt-20">
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">5. Alianza Fintech (IFPE)</h2>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p>
+                  Civitas es una plataforma de gobernanza, no una institucion financiera. La infraestructura
+                  de pagos la provee un socio IFPE (Institucion de Fondos de Pago Electronico) bajo la Ley
+                  Fintech en Mexico. El IFPE genera la CLABE de cada comunidad; los pagos SPEI se reconcilian
+                  automaticamente; los desembolsos aprobados por gobernanza se ejecutan por API. Sin
+                  discrecion del administrador: la decision es la ejecucion.
+                </p>
+                <p>
+                  <strong className="text-foreground">Modos de Tesoreria (progresivos):</strong> Import (CSV/Excel) en MVP; Conector (sincronizacion con ERP); Rail Fintech (SPEI nativo via IFPE) en Fase 2+; Hibrido (import + rail) en transicion. El dashboard distingue transacciones verificadas por el rail de las reportadas manualmente.
+                </p>
+              </div>
+              <div className="mt-6 rounded-lg border bg-muted/30 p-4 text-sm">
+                <p className="font-medium text-foreground mb-1">Por que no construir la capa financiera?</p>
+                <p className="text-muted-foreground">
+                  Obtener una licencia IFPE exige capital significativo y aprobacion CNBV. La alianza permite
+                  salir al mercado de inmediato; si la escala lo justifica (miles de comunidades), una licencia
+                  propia puede evaluarse como opcion estrategica.
+                </p>
+              </div>
+            </section>
+
             {/* ─── Social Contract ─── */}
             <section id="social-contract" className="mb-14 scroll-mt-20">
-              <h2 className="mb-4 text-2xl font-bold tracking-tight">5. Contrato Social Configurable</h2>
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">6. Contrato Social Configurable</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
                   Cada comunidad es diferente. Un condominio en la Ciudad de Mexico tiene reglas distintas a una
@@ -364,7 +434,7 @@ export function WhitepaperPage() {
 
             {/* ─── Architecture ─── */}
             <section id="architecture" className="mb-14 scroll-mt-20">
-              <h2 className="mb-4 text-2xl font-bold tracking-tight">6. Arquitectura Tecnica</h2>
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">7. Arquitectura Tecnica</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
                   Civitas se construye sobre una arquitectura multi-tenant con aislamiento real a nivel de
@@ -403,7 +473,7 @@ export function WhitepaperPage() {
 
             {/* ─── Progressive ─── */}
             <section id="progressive" className="mb-14 scroll-mt-20">
-              <h2 className="mb-4 text-2xl font-bold tracking-tight">7. Activacion Progresiva</h2>
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">8. Activacion Progresiva</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
                   Civitas no requiere una transformacion digital completa desde el dia uno. El sistema esta
@@ -432,7 +502,7 @@ export function WhitepaperPage() {
 
             {/* ─── Market ─── */}
             <section id="market" className="mb-14 scroll-mt-20">
-              <h2 className="mb-4 text-2xl font-bold tracking-tight">8. Mercado Objetivo</h2>
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">9. Mercado Objetivo</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
                   Civitas se dirige a cualquier organizacion colectiva que necesite gobernarse, cobrar y
@@ -450,21 +520,22 @@ export function WhitepaperPage() {
                     </tr>
                   </thead>
                   <tbody className="text-muted-foreground">
-                    <tr className="border-b"><td className="py-3 pr-4">Condominios</td><td className="py-3 pr-4 font-medium text-foreground">930,000+</td><td className="py-3">Solo en Mexico. Verticales con mayor urgencia de digitalizacion.</td></tr>
-                    <tr className="border-b"><td className="py-3 pr-4">Cooperativas</td><td className="py-3 pr-4 font-medium text-foreground">60,000+</td><td className="py-3">Agricolas, de ahorro, de vivienda. En toda Latinoamerica.</td></tr>
-                    <tr className="border-b"><td className="py-3 pr-4">Comunidades religiosas</td><td className="py-3 pr-4 font-medium text-foreground">50,000+</td><td className="py-3">Parroquias y templos que necesitan transparencia financiera.</td></tr>
-                    <tr className="border-b"><td className="py-3 pr-4">Asociaciones industriales</td><td className="py-3 pr-4 font-medium text-foreground">15,000+</td><td className="py-3">Camaras, clusters y gremios con gobernanza colectiva.</td></tr>
+                    <tr className="border-b"><td className="py-3 pr-4">Condominios</td><td className="py-3 pr-4 font-medium text-foreground">930,000+</td><td className="py-3">Solo en Mexico. Cero visibilidad, fraude administrativo, sin rendicion de cuentas.</td></tr>
+                    <tr className="border-b"><td className="py-3 pr-4">Cooperativas</td><td className="py-3 pr-4 font-medium text-foreground">60,000+</td><td className="py-3">Manufactura, agro, servicios. Asignacion de costos opaca.</td></tr>
+                    <tr className="border-b"><td className="py-3 pr-4">ONGs y fundaciones</td><td className="py-3 pr-4 font-medium text-foreground">50,000+</td><td className="py-3">Donantes no pueden verificar gastos; juntas controlan todo.</td></tr>
+                    <tr className="border-b"><td className="py-3 pr-4">Comunidades religiosas</td><td className="py-3 pr-4 font-medium text-foreground">28,000+</td><td className="py-3">Sin contabilidad verificable, modelo basado solo en confianza.</td></tr>
+                    <tr className="border-b"><td className="py-3 pr-4">Clubes y sindicatos</td><td className="py-3 pr-4 font-medium text-foreground">25,000+ / 15,000+</td><td className="py-3">Juntas deciden; miembros pagan sin visibilidad.</td></tr>
                     <tr><td className="py-3 pr-4">Network States</td><td className="py-3 pr-4 font-medium text-foreground">Emergente</td><td className="py-3">Comunidades digitales que buscan gobernanza soberana.</td></tr>
                   </tbody>
                 </table>
               </div>
               <div className="mt-6 space-y-3 sm:hidden">
                 {[
-                  { seg: 'Condominios', vol: '930,000+', note: 'Solo en Mexico. Mayor urgencia de digitalizacion.' },
-                  { seg: 'Cooperativas', vol: '60,000+', note: 'Agricolas, de ahorro, de vivienda. En toda Latinoamerica.' },
-                  { seg: 'Comunidades religiosas', vol: '50,000+', note: 'Parroquias y templos con necesidad de transparencia.' },
-                  { seg: 'Asociaciones industriales', vol: '15,000+', note: 'Camaras, clusters y gremios.' },
-                  { seg: 'Network States', vol: 'Emergente', note: 'Comunidades digitales con gobernanza soberana.' },
+                  { seg: 'Condominios', vol: '930,000+', note: 'Solo en Mexico. Cero visibilidad, mayor urgencia.' },
+                  { seg: 'Cooperativas', vol: '60,000+', note: 'Manufactura, agro, servicios.' },
+                  { seg: 'ONGs / religiosas', vol: '50K / 28K+', note: 'Donantes y feligreses sin visibilidad.' },
+                  { seg: 'Clubes / sindicatos', vol: '25K / 15K+', note: 'Juntas deciden; miembros pagan.' },
+                  { seg: 'Network States', vol: 'Emergente', note: 'Gobernanza soberana digital.' },
                 ].map((r) => (
                   <div key={r.seg} className="rounded-lg border p-3">
                     <div className="flex items-center justify-between">
@@ -477,29 +548,124 @@ export function WhitepaperPage() {
               </div>
             </section>
 
-            {/* ─── Vision ─── */}
+            {/* ─── Revenue ─── */}
+            <section id="revenue" className="mb-14 scroll-mt-20">
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">10. Modelo de Ingresos</h2>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p>
+                  El sistema de primitivas integradas genera tres fuentes de ingreso que se complementan:
+                </p>
+                <ul className="ml-4 list-disc space-y-2">
+                  <li><strong className="text-foreground">Suscripcion SaaS</strong> — Las comunidades pagan por la plataforma (Identidad + Gobernanza). Ingreso recurrente predecible.</li>
+                  <li><strong className="text-foreground">Comision por transaccion</strong> — Un porcentaje sobre pagos procesados por el rail fintech (compartido con el IFPE). Ej.: 0,5% sobre flujo mensual por comunidad puede superar la suscripcion.</li>
+                  <li><strong className="text-foreground">Productos financieros</strong> — Futuro: cuentas de ahorro comunitarias, seguros colectivos, poder de compra agregado. El socio IFPE lo habilita sin que Civitas requiera licencia propia.</li>
+                </ul>
+                <p>
+                  Efecto compuesto: miles de comunidades x flujo mensual = volumen procesado recurrente y en crecimiento con la red.
+                </p>
+              </div>
+            </section>
+
+            {/* ─── Deployment ─── */}
+            <section id="deployment" className="mb-14 scroll-mt-20">
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">11. Estrategia de Despliegue</h2>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p>
+                  La adopcion sigue el dolor, no la ideologia. No vendemos &quot;network states&quot;; vendemos visibilidad sobre el dinero y decisiones que se ejecutan solas.
+                </p>
+              </div>
+              <div className="mt-6 space-y-3">
+                {[
+                  { phase: '1', title: 'Validar', members: '1 edificio, 200 miembros', desc: 'Identidad + Tesoreria (import) + Gobernanza. Sin rail fintech. Validar que transparencia y gobernanza digital tienen product-market fit.' },
+                  { phase: '2', title: 'Integrar', members: '10 edificios, 2,000 miembros', desc: 'Activar IFPE. Pagos nativos. Reconciliacion automatica. Pago condiciona voto. Gobernanza ejecutable.' },
+                  { phase: '3', title: 'Escalar', members: '100 comunidades, 50,000 miembros', desc: 'Expandir a ONGs, cooperativas, clubes, sindicatos, religiosas. Mismo motor, parametros por vertical. Productos financieros iniciales.' },
+                  { phase: '4', title: 'Federar', members: '1,000 comunidades, 500,000 miembros', desc: 'Comunidades federadas. Compras colectivas. Tesorerias federadas ejecutan decisiones conjuntas. Censo con escala verificable.' },
+                  { phase: '5', title: 'Network State', members: '10,000+ comunidades, 5M+ miembros', desc: 'Infraestructura institucional completa. Verificacion on-chain cross-border. El contrato social como marco constitucional.' },
+                ].map((s) => (
+                  <div key={s.phase} className="flex items-start gap-4 rounded-lg border p-4">
+                    <span className="text-2xl font-bold text-muted-foreground/30">{s.phase}</span>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-semibold">{s.title}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">{s.members}</p>
+                      <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ─── Competitive Landscape ─── */}
+            <section id="competitive" className="mb-14 scroll-mt-20">
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">Competencia</h2>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p>
+                  Las soluciones existentes cubren fragmentos del problema. Ninguna integra identidad, tesoreria y gobernanza en una sola maquina que funcione en todos los verticales:
+                </p>
+              </div>
+              <div className="mt-6 overflow-x-auto rounded-lg border">
+                <table className="w-full min-w-[640px] text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="px-3 py-2.5 text-left font-semibold">Capacidad</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Software admin</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Herramientas DAO</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Civic tech</th>
+                      <th className="px-3 py-2.5 text-left font-semibold">Civitas v3</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-muted-foreground">
+                    <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Identidad</td><td className="px-3 py-2">Gestionada por admin</td><td className="px-3 py-2">Wallet</td><td className="px-3 py-2">Registro electoral</td><td className="px-3 py-2">Estado dinamico + standing</td></tr>
+                    <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Tesoreria</td><td className="px-3 py-2">Solo admin</td><td className="px-3 py-2">On-chain</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Todos los miembros (tiempo real, verificable)</td></tr>
+                    <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Gobernanza</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Peso por token</td><td className="px-3 py-2">Solo votar</td><td className="px-3 py-2">Configurable + ejecutable</td></tr>
+                    <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Cobro de pagos</td><td className="px-3 py-2">Banco aparte</td><td className="px-3 py-2">Transferencias token</td><td className="px-3 py-2">—</td><td className="px-3 py-2">SPEI nativo (integrado)</td></tr>
+                    <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Ejecucion de decisiones</td><td className="px-3 py-2">Manual (admin)</td><td className="px-3 py-2">Smart contract</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Auto-desembolso via IFPE</td></tr>
+                    <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Pago condiciona derechos</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Por token</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Configurable por comunidad</td></tr>
+                    <tr><td className="px-3 py-2 font-medium text-foreground">Multi-vertical</td><td className="px-3 py-2">Un vertical</td><td className="px-3 py-2">Solo crypto</td><td className="px-3 py-2">Solo gobierno</td><td className="px-3 py-2">Cualquier comunidad organizada</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Civitas es el unico sistema donde las decisiones tienen consecuencias financieras automaticas en cualquier tipo de comunidad.
+              </p>
+            </section>
+
+            {/* ─── Risks & Security ─── */}
+            <section id="risks" className="mb-14 scroll-mt-20">
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">Riesgos y Seguridad</h2>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p><strong className="text-foreground">Riesgos clave y mitigaciones:</strong> fallo del socio IFPE → segregacion de fondos, migracion a otro IFPE, modo import como respaldo. Abuso de auto-ejecucion → periodos de enfriamiento configurables, umbrales, opcion de override manual. Cambios regulatorios → arquitectura de capa financiera intercambiable.</p>
+                <p><strong className="text-foreground">Seguridad:</strong> RLS por comunidad en base de datos; votos inmutables y auditoria completa; comunicaciones con IFPE por TLS y verificacion de webhooks; periodos de enfriamiento entre voto y desembolso. Civitas no almacena credenciales bancarias; el IFPE cumple reporteo regulatorio.</p>
+              </div>
+            </section>
+
+            {/* ─── Conclusion ─── */}
             <section id="vision" className="mb-14 scroll-mt-20">
-              <h2 className="mb-4 text-2xl font-bold tracking-tight">9. Vision a Futuro</h2>
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">12. Conclusión</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
                   Civitas no es solo una herramienta de administracion. Es infraestructura para que cualquier
                   grupo humano pueda gobernarse a si mismo de forma transparente, democratica y eficiente.
                 </p>
                 <p>
-                  Empezamos con condominios en Mexico porque necesitan una solucion urgente. Pero el mismo
-                  sistema que gobierna un edificio de 50 departamentos puede gobernar una cooperativa de 500
-                  socios o una comunidad digital de 5,000 miembros.
+                  En v3 conectamos todo: un socio fintech aporta el rail financiero, la gobernanza ejecutable
+                  cierra la brecha entre decision y accion, y el motor de reglas configurable permite que cada
+                  comunidad defina como interactuan las piezas. Cualquier comunidad — condominio, ONG,
+                  cooperativa, club, sindicato — puede decir: &quot;Votamos contratar a esta empresa y el dinero se
+                  transfirio automaticamente. Todos lo vemos. Nadie tuvo que confiar en la junta.&quot;
                 </p>
                 <p>
-                  A largo plazo, Civitas construye la infraestructura para una red federada de comunidades
-                  autogobernadas. Cada comunidad opera de forma soberana con sus propias reglas, pero puede
-                  conectarse a una red mas amplia para compartir metricas agregadas, comparar su salud
-                  organizacional y aprender de otras comunidades.
+                  Eso es imposible con las herramientas actuales. En Civitas es rutinario. Las cinco primitivas
+                  son universales. El motor es configurable. Los verticales son plugins. El rail financiero mueve
+                  dinero real. El motor de reglas hace cumplir de verdad.
                 </p>
                 <p className="text-foreground font-medium">
-                  Cada comunidad que se gobierna mejor es un paso hacia un mundo con mas confianza,
-                  mas participacion y mas justicia.
+                  Civitas no es un network state. Civitas es infraestructura que hace posibles los network states.
                 </p>
+                <div className="mt-6 pt-4 border-t text-xs text-muted-foreground">
+                  <p className="font-medium text-foreground mb-1">Referencias</p>
+                  <p>[1] Srinivasan, B. (2022). The Network State: How to Start a New Country.</p>
+                  <p>[2] Ley para Regular las Instituciones de Tecnologia Financiera (2018). DOF Mexico.</p>
+                </div>
               </div>
             </section>
 

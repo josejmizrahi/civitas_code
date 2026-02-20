@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { logger } from '@/shared/lib/logger'
 
 export interface Notification {
   id: string
@@ -62,7 +63,7 @@ export async function notifyCommunity(
     p_body: body ?? null,
     p_metadata: metadata ?? {},
   })
-  if (error) { console.warn('notify_community failed:', error.message); return 0 }
+  if (error) { logger.warn('notify_community failed:', error.message); return 0 }
   return (data as number) ?? 0
 }
 
@@ -82,5 +83,5 @@ export async function notifyMember(
     p_body: body ?? null,
     p_metadata: metadata ?? {},
   })
-  if (error) console.warn('notify_member failed:', error.message)
+  if (error) logger.warn('notify_member failed:', error.message)
 }

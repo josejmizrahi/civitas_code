@@ -36,10 +36,25 @@ export function ExpenseForm({ open, onOpenChange }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    const parsedAmount = parseFloat(amount)
+    if (!parsedAmount || parsedAmount <= 0) {
+      setError('El monto debe ser mayor a cero')
+      return
+    }
+    if (parsedAmount > 100_000_000) {
+      setError('El monto excede el límite permitido')
+      return
+    }
+    if (type === 'expense' && filteredCategories.length > 0 && !categoryId) {
+      setError('Selecciona una categoría para el egreso')
+      return
+    }
+
     try {
       await createTx.mutateAsync({
         type,
-        amount: parseFloat(amount),
+        amount: parsedAmount,
         category_id: categoryId || undefined,
         description,
         date,

@@ -1,5 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
-import type { GamificationProfile, GamificationAction, XpAwardResult, LeaderboardEntry, EarnedBadge } from '../types'
+import type { GamificationProfile, GamificationAction, GamificationEvent, XpAwardResult, LeaderboardEntry, EarnedBadge } from '../types'
 import { XP_VALUES, getLevelForXp, getStreakMultiplier, BADGES } from '../constants'
 
 const gam = () => (supabase as any).from('member_gamification')
@@ -76,8 +76,6 @@ export async function awardXp(
   // Streak calculation
   const today = new Date().toISOString().split('T')[0]
   let newStreak = profile.current_streak
-  let streakBroken = false
-
   if (profile.last_activity_date) {
     const lastDate = new Date(profile.last_activity_date)
     const todayDate = new Date(today)
@@ -86,11 +84,8 @@ export async function awardXp(
     if (diffDays === 0) {
       // Same day, streak unchanged
     } else if (diffDays === 1) {
-      // Consecutive day
       newStreak += 1
     } else {
-      // Streak broken
-      streakBroken = true
       newStreak = 1
     }
   } else {
@@ -174,7 +169,8 @@ async function getActionCounts(
     .eq('member_id', memberId)
     .eq('community_id', communityId)
 
-  if (error || !data) return {}
+  if (error) throw error
+  if (!data) return {}
 
   const counts: Record<string, number> = {}
   for (const row of data as { action: string }[]) {
@@ -270,7 +266,7 @@ export async function getRecentEvents(
   memberId: string,
   communityId: string,
   limit = 20
-): Promise<any[]> {
+): Promise<GamificationEvent[]> {
   const { data, error } = await events()
     .select('*')
     .eq('member_id', memberId)

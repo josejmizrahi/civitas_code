@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
 import { useAuth } from '@/app/providers'
-import { getDocuments, createDocument, deleteDocument } from '../services/documents.service'
+import { getDocuments, createDocument, updateDocument, deleteDocument } from '../services/documents.service'
 
 export function useDocuments() {
   const { communityId } = useCommunityContext()
@@ -21,6 +21,16 @@ export function useCreateDocument() {
       if (!user || !communityId) throw new Error('Not authenticated')
       return createDocument(communityId, { ...doc, uploaded_by: user.id })
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['documents', communityId] }),
+  })
+}
+
+export function useUpdateDocument() {
+  const { communityId } = useCommunityContext()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ documentId, updates }: { documentId: string; updates: { title?: string; category?: string } }) =>
+      updateDocument(documentId, updates),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['documents', communityId] }),
   })
 }

@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { logger } from '@/shared/lib/logger'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || ''
 
@@ -18,7 +19,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   try {
     return await navigator.serviceWorker.register('/sw.js')
   } catch {
-    console.warn('Service worker registration failed')
+    logger.warn('Service worker registration failed')
     return null
   }
 }
@@ -31,7 +32,7 @@ export async function requestPushPermission(): Promise<boolean> {
 
 export async function subscribeToPush(memberId: string): Promise<boolean> {
   if (!VAPID_PUBLIC_KEY) {
-    console.warn('VAPID public key not configured')
+    logger.warn('VAPID public key not configured')
     return false
   }
 
@@ -64,7 +65,7 @@ export async function subscribeToPush(memberId: string): Promise<boolean> {
 
     return true
   } catch {
-    console.warn('Push subscription failed')
+    logger.warn('Push subscription failed')
     return false
   }
 }

@@ -25,7 +25,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:grid-cols-5">
-        <Card>
+        <Card className="rounded-xl border-border/80 shadow-sm transition-shadow hover:shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ingresos</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
@@ -35,7 +35,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-xl border-border/80 shadow-sm transition-shadow hover:shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Egresos</CardTitle>
             <TrendingDown className="h-4 w-4 text-red-500" />
@@ -45,7 +45,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-xl border-border/80 shadow-sm transition-shadow hover:shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Balance</CardTitle>
             <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -59,7 +59,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
 
         {collStats && (
           <>
-            <Card>
+            <Card className="rounded-xl border-border/80 shadow-sm transition-shadow hover:shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Por Cobrar</CardTitle>
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
@@ -80,7 +80,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="rounded-xl border-border/80 shadow-sm transition-shadow hover:shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Tasa Cobro</CardTitle>
                 <ArrowUpCircle className="h-4 w-4 text-blue-500" />
@@ -100,7 +100,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
       </div>
 
       {stats.monthlyData.length > 0 && (
-        <Card>
+        <Card className="rounded-xl border-border/80 shadow-sm">
           <CardHeader>
             <CardTitle>Ingresos vs Egresos</CardTitle>
           </CardHeader>
@@ -111,7 +111,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
       )}
 
       {stats.byCategory.length > 0 && (
-        <Card>
+        <Card className="rounded-xl border-border/80 shadow-sm">
           <CardHeader>
             <CardTitle>Por Categoria</CardTitle>
           </CardHeader>

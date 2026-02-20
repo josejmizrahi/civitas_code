@@ -40,7 +40,7 @@ const skipIfNoKey = SUPABASE_ANON_KEY ? describe : describe.skip
 
 skipIfNoKey('RLS Penetration Tests', () => {
   let memberClient: SupabaseClient
-  let _adminClient: SupabaseClient
+  let adminClient: SupabaseClient
   let otherClient: SupabaseClient
   let anonClient: SupabaseClient
 
@@ -49,7 +49,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
 
     try {
       memberClient = await createAuthenticatedClient(MEMBER_EMAIL, MEMBER_PASSWORD)
-      _adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
+      adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
       otherClient = await createAuthenticatedClient(OTHER_COMMUNITY_MEMBER_EMAIL, OTHER_COMMUNITY_MEMBER_PASSWORD)
     } catch (e) {
       console.warn('Skipping RLS tests — test accounts not available:', (e as Error).message)
@@ -162,12 +162,12 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data: txs } = await memberClient.from('transactions').select('id').limit(1)
       if (!txs?.length) return
 
-      const { error } = await memberClient.from('transactions').delete().eq('id', txs[0].id)
-      // Should either error or silently delete nothing
+      const { error, count } = await memberClient.from('transactions').delete({ count: 'exact' }).eq('id', txs[0].id)
       if (!error) {
-        const { data: check } = await memberClient.from('transactions').select('id').eq('id', txs[0].id)
-        // Transaction should still exist if RLS blocked the delete
-        expect(check?.length).toBeGreaterThanOrEqual(0)
+        // RLS should prevent deletion — the row should still exist
+        expect(count ?? 0).toBe(0)
+      } else {
+        expect(error).toBeTruthy()
       }
     })
 
@@ -177,13 +177,16 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data: communities } = await memberClient.from('communities').select('id').limit(1)
       if (!communities?.length) return
 
-      const { error: _error } = await (memberClient.from('communities') as any)
-        .update({ rules: { test: true } })
+      const { error, count } = await (memberClient.from('communities') as any)
+        .update({ rules: { test: true } }, { count: 'exact' })
         .eq('id', communities[0].id)
 
-      // Should fail for non-admin
-      // (RLS may silently match 0 rows instead of erroring)
-      expect(true).toBe(true)
+      // RLS should either reject with an error or silently match 0 rows
+      if (!error) {
+        expect(count ?? 0).toBe(0)
+      } else {
+        expect(error).toBeTruthy()
+      }
     })
 
     it('regular member should not insert vigilancia_reports', async () => {
@@ -218,6 +221,18 @@ skipIfNoKey('RLS Penetration Tests', () => {
         rules: {},
       })
       expect(error).toBeTruthy()
+    })
+  })
+
+  // =========================================================================
+  // Admin privilege verification
+  // =========================================================================
+  describe('Admin privileges', () => {
+    it('admin client should be able to read communities', async () => {
+      if (!adminClient) return
+
+      const { data } = await adminClient.from('communities').select('id')
+      expect(data).toBeDefined()
     })
   })
 

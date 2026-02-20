@@ -14,6 +14,7 @@ import { markDuplicates } from '@/ingestion/services/reconciliation.service'
 import { importTransactions, updateImportJob, updateDataSourceSync, createImportJob } from '@/ingestion/services/ingestion.service'
 import { getCategories } from '@/core/treasury/services/treasury.service'
 import { useCommunityContext } from '@/app/providers'
+import { logger } from '@/shared/lib/logger'
 import { useCategoryMappings } from '@/ingestion/hooks/useMappingRules'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import type { ParsedFile, NormalizedTransaction } from '@/ingestion/types'
@@ -142,7 +143,7 @@ export function IngestionPage() {
       queryClient.invalidateQueries({ queryKey: ['import-jobs'] })
       queryClient.invalidateQueries({ queryKey: ['data-sources'] })
     } catch (err) {
-      console.error('Import error:', err)
+      logger.error('Import error:', err)
     } finally {
       setImporting(false)
     }

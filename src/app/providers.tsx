@@ -1,8 +1,9 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
-import { supabase, supabaseMissing } from '@/shared/lib/supabase'
+import { supabase } from '@/shared/lib/supabase'
 import { getCommunity, getCurrentMember, getUserCommunities } from '@/core/identity/services/identity.service'
 import type { Community, Member } from '@/core/identity/types'
+import { useToast } from '@/shared/components/ui/toast'
 
 // ============================================
 // Auth Context
@@ -29,34 +30,41 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(!supabaseMissing)
+  const [loading, setLoading] = useState(true)
+  const { info: toastInfo } = useToast()
+  const sessionRef = useRef<Session | null>(null)
 
   useEffect(() => {
-    if (supabaseMissing) return
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      sessionRef.current = s
+      setSession(s)
+      setUser(s?.user ?? null)
       setLoading(false)
     }).catch(() => {
+      sessionRef.current = null
       setSession(null)
       setUser(null)
       setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      const hadSession = !!sessionRef.current
+      sessionRef.current = newSession
+      setSession(newSession)
+      setUser(newSession?.user ?? null)
 
-      // Redirect to reset-password page when a PASSWORD_RECOVERY event is received
-      // and user is not already on that page
       if (event === 'PASSWORD_RECOVERY' && !window.location.pathname.includes('/reset-password')) {
         window.location.href = '/reset-password'
+        return
+      }
+
+      if (event === 'SIGNED_OUT' && hadSession) {
+        toastInfo('Tu sesión ha finalizado. Vuelve a iniciar sesión si quieres continuar.')
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [toastInfo])
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -120,6 +128,7 @@ export function useCommunityContext() {
 
 export function CommunityProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
+  const { error: toastError } = useToast()
   const [communityId, setCommunityIdState] = useState<string | null>(() => {
     return localStorage.getItem('civitas_community_id')
   })
@@ -147,8 +156,12 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
         setCommunityError(null)
         setUserCommunities(data)
       })
-      .catch((err) => { setCommunityError(err?.message || 'Error al cargar comunidades') })
-  }, [user])
+      .catch((err) => {
+        const msg = err?.message || 'Error al cargar comunidades'
+        setCommunityError(msg)
+        toastError(msg)
+      })
+  }, [user, toastError])
 
   // Fetch user communities list on login
   useEffect(() => {
@@ -188,7 +201,9 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
       })
       .catch((err) => {
         if (!cancelled) {
-          setCommunityError(err?.message || 'Error al cargar comunidad')
+          const msg = err?.message || 'Error al cargar comunidad'
+          setCommunityError(msg)
+          toastError(msg)
           setCommunity(null)
           setCurrentMember(null)
           handleSetCommunityId(null)

@@ -55,6 +55,19 @@ export async function createDocument(
   return data as Document
 }
 
+export async function updateDocument(
+  documentId: string,
+  updates: { title?: string; category?: string }
+): Promise<Document> {
+  const { data, error } = await (supabase.from('documents') as any)
+    .update(updates)
+    .eq('id', documentId)
+    .select()
+    .single()
+  if (error) throw error
+  return data as Document
+}
+
 export async function deleteDocument(documentId: string): Promise<void> {
   const { error } = await (supabase.from('documents') as any)
     .delete()

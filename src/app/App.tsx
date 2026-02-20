@@ -4,6 +4,7 @@ import { AppRouter } from './routes'
 import { ToastProvider } from '@/shared/components/ui/toast'
 import { ConfirmProvider } from '@/shared/components/ConfirmDialog'
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary'
+import { ThemeContext, useThemeState } from '@/shared/hooks/useTheme'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,19 +20,23 @@ const queryClient = new QueryClient({
 })
 
 export default function App() {
+  const themeState = useThemeState()
+
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <ConfirmProvider>
-            <AuthProvider>
-              <CommunityProvider>
-                <AppRouter />
-              </CommunityProvider>
-            </AuthProvider>
-          </ConfirmProvider>
-        </ToastProvider>
-      </QueryClientProvider>
+      <ThemeContext.Provider value={themeState}>
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            <ConfirmProvider>
+              <AuthProvider>
+                <CommunityProvider>
+                  <AppRouter />
+                </CommunityProvider>
+              </AuthProvider>
+            </ConfirmProvider>
+          </ToastProvider>
+        </QueryClientProvider>
+      </ThemeContext.Provider>
     </ErrorBoundary>
   )
 }

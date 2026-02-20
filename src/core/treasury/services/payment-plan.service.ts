@@ -108,6 +108,14 @@ export async function proposePaymentPlan(
     proposed_by: string
   }
 ): Promise<PaymentPlan> {
+  if (plan.total_debt <= 0) throw new Error('La deuda total debe ser mayor a cero')
+  if (plan.number_of_installments < 2 || plan.number_of_installments > 36) {
+    throw new Error('El número de parcialidades debe ser entre 2 y 36')
+  }
+  if (!['weekly', 'biweekly', 'monthly'].includes(plan.frequency)) {
+    throw new Error('Frecuencia no válida')
+  }
+
   const installmentAmount = Math.ceil((plan.total_debt / plan.number_of_installments) * 100) / 100
 
   const { data, error } = await (supabase.from('payment_plans') as any)
