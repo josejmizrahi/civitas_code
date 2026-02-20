@@ -86,6 +86,24 @@ function RoleGuard({ requiredRole, children }: { requiredRole: string; children:
   return <>{children}</>
 }
 
+/** Catch-all that must never show 404 for root path (some deployments match "*" before "/"). */
+function UnauthenticatedCatchAll() {
+  const { pathname } = useLocation()
+  if (pathname === '/' || pathname === '') {
+    return <LandingRedirect />
+  }
+  return <LazyPage><NotFoundPage /></LazyPage>
+}
+
+/** Protected 404: if user hit "/", send to dashboard instead of 404. */
+function ProtectedCatchAll() {
+  const { pathname } = useLocation()
+  if (pathname === '/' || pathname === '') {
+    return <Navigate to="/dashboard" replace />
+  }
+  return <LazyPage><NotFoundPage /></LazyPage>
+}
+
 export function AppRouter() {
   return (
     <BrowserRouter>
@@ -136,13 +154,13 @@ export function AppRouter() {
           <Route path="/settings/audit" element={<RoleGuard requiredRole="admin"><LazyPage><AuditLogPage /></LazyPage></RoleGuard>} />
           <Route path="/governance/assemblies" element={<Navigate to="/governance" replace />} />
 
-          {/* Authenticated 404 — keeps sidebar visible */}
-          <Route path="*" element={<LazyPage><NotFoundPage /></LazyPage>} />
+          {/* Authenticated 404 — never show 404 for "/" (redirect to dashboard) */}
+          <Route path="*" element={<ProtectedCatchAll />} />
         </Route>
 
-        {/* Unauthenticated 404 — same layout as login/register (AuthLayout uses Outlet) */}
+        {/* Unauthenticated catch-all — ensure "/" never shows 404 (SPA / base path edge cases) */}
         <Route path="*" element={<AuthLayout />}>
-          <Route index element={<LazyPage><NotFoundPage /></LazyPage>} />
+          <Route index element={<UnauthenticatedCatchAll />} />
         </Route>
       </Routes>
     </BrowserRouter>
