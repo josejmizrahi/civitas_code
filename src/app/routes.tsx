@@ -5,17 +5,17 @@ import { AppLayout } from '@/layouts/AppLayout'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { LandingPage } from '@/pages/landing/LandingPage'
 import { WhitepaperPage } from '@/pages/whitepaper/WhitepaperPage'
-import { LoginPage } from '@/pages/auth/LoginPage'
-import { RegisterPage } from '@/pages/auth/RegisterPage'
-import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
-import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
-import { InviteAcceptPage } from '@/pages/auth/InviteAcceptPage'
 import { useCommunityContext } from './providers'
 import { hasPermission, type Role } from '@/shared/types'
 import type { ReactNode } from 'react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 
 // Lazy-loaded pages (heavy, code-split into separate chunks)
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage').then(m => ({ default: m.LoginPage })))
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage').then(m => ({ default: m.RegisterPage })))
+const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })))
+const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })))
+const InviteAcceptPage = lazy(() => import('@/pages/auth/InviteAcceptPage').then(m => ({ default: m.InviteAcceptPage })))
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const MembersPage = lazy(() => import('@/pages/members/MembersPage').then(m => ({ default: m.MembersPage })))
 const MemberDetailPage = lazy(() => import('@/pages/members/MemberDetailPage').then(m => ({ default: m.MemberDetailPage })))
@@ -91,18 +91,18 @@ export function AppRouter() {
 
         {/* Auth routes */}
         <Route element={<PublicRoute><AuthLayout /></PublicRoute>}>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/login" element={<LazyPage><LoginPage /></LazyPage>} />
+          <Route path="/register" element={<LazyPage><RegisterPage /></LazyPage>} />
+          <Route path="/forgot-password" element={<LazyPage><ForgotPasswordPage /></LazyPage>} />
         </Route>
 
         {/* Reset password (needs auth session from email link) */}
         <Route element={<AuthLayout />}>
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/reset-password" element={<LazyPage><ResetPasswordPage /></LazyPage>} />
         </Route>
 
         {/* Invitation acceptance (standalone, no layout) */}
-        <Route path="/invite/:token" element={<InviteAcceptPage />} />
+        <Route path="/invite/:token" element={<LazyPage><InviteAcceptPage /></LazyPage>} />
 
         {/* Onboarding wizard (standalone, no AppLayout) */}
         <Route path="/onboarding" element={<ProtectedRoute><LazyPage><OnboardingWizard /></LazyPage></ProtectedRoute>} />
@@ -128,9 +128,13 @@ export function AppRouter() {
           <Route path="/profile" element={<LazyPage><ProfilePage /></LazyPage>} />
           <Route path="/settings" element={<RoleGuard requiredRole="admin"><LazyPage><SettingsPage /></LazyPage></RoleGuard>} />
           <Route path="/settings/audit" element={<RoleGuard requiredRole="admin"><LazyPage><AuditLogPage /></LazyPage></RoleGuard>} />
+          <Route path="/governance/assemblies" element={<Navigate to="/governance" replace />} />
+
+          {/* Authenticated 404 — keeps sidebar visible */}
+          <Route path="*" element={<LazyPage><NotFoundPage /></LazyPage>} />
         </Route>
 
-        {/* Catch all — 404 */}
+        {/* Unauthenticated 404 */}
         <Route path="*" element={<LazyPage><NotFoundPage /></LazyPage>} />
       </Routes>
     </BrowserRouter>
