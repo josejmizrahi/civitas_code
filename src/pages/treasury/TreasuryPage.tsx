@@ -131,37 +131,50 @@ export function TreasuryPage() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportPDF}
-              title="Exporta la vista actual a PDF"
-              className="gap-1.5"
-            >
-              <Download className="h-4 w-4" />
-              PDF
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportExcel}
-              disabled={!transactions?.length}
-              title="Exporta el listado de transacciones a Excel"
-              className="gap-1.5"
-            >
-              <Download className="h-4 w-4" />
-              Excel
-            </Button>
-            {canImportData && (
-              <Button variant="outline" size="sm" onClick={() => navigate('/ingestion')} className="gap-1.5">
-                <FileSpreadsheet className="h-4 w-4" />
-                Importar
+            {/* Secondary actions hidden on small screens */}
+            <div className="hidden sm:flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportPDF}
+                title="Exporta la vista actual a PDF"
+                className="gap-1.5"
+              >
+                <Download className="h-4 w-4" />
+                PDF
               </Button>
-            )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportExcel}
+                disabled={!transactions?.length}
+                title="Exporta el listado de transacciones a Excel"
+                className="gap-1.5"
+              >
+                <Download className="h-4 w-4" />
+                Excel
+              </Button>
+              {canImportData && (
+                <Button variant="outline" size="sm" onClick={() => navigate('/ingestion')} className="gap-1.5">
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Importar
+                </Button>
+              )}
+            </div>
+            {/* Mobile-only compact actions */}
+            <div className="flex sm:hidden items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleExportPDF} title="PDF">
+                <Download className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={!transactions?.length} title="Excel">
+                <FileSpreadsheet className="h-4 w-4" />
+              </Button>
+            </div>
             {canManageTreasury && (
               <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
                 <Plus className="h-4 w-4" />
-                Captura manual
+                <span className="hidden sm:inline">Captura manual</span>
+                <span className="sm:hidden">Capturar</span>
               </Button>
             )}
           </div>
@@ -183,9 +196,9 @@ export function TreasuryPage() {
         )}
       </header>
 
-      {/* Navegación principal: 4 secciones */}
-      <nav className="no-print" aria-label="Secciones de tesorería">
-        <div className="flex flex-wrap gap-1 rounded-xl bg-muted/60 p-1.5">
+      {/* Navegacion principal: 4 secciones */}
+      <nav className="no-print" aria-label="Secciones de tesoreria">
+        <div className="flex gap-1 rounded-xl bg-muted/60 p-1.5 overflow-x-auto scrollbar-hide">
           {MAIN_SECTIONS.map((section) => {
             const Icon = section.icon
             const isActive = mainSection === section.id
@@ -195,7 +208,7 @@ export function TreasuryPage() {
                 type="button"
                 onClick={() => setMainSection(section.id)}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
+                  'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors whitespace-nowrap shrink-0',
                   isActive
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
@@ -203,7 +216,7 @@ export function TreasuryPage() {
                 title={section.description}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">{section.label}</span>
+                {section.label}
               </button>
             )
           })}
@@ -221,7 +234,7 @@ export function TreasuryPage() {
         <section className="space-y-4 animate-in fade-in duration-200" aria-label="Cobro">
           <Tabs value={cobroTab} onValueChange={(v) => setCobroTab(v)}>
             {canManageTreasury && (
-              <TabsList className="mb-4 h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
+              <TabsList className="mb-4">
                 <TabsTrigger value="obligations" className="gap-1.5 text-xs sm:text-sm">
                   <Receipt className="h-3.5 w-3.5" />
                   Obligaciones
@@ -248,7 +261,7 @@ export function TreasuryPage() {
       {mainSection === 'programacion' && (
         <section className="space-y-4 animate-in fade-in duration-200" aria-label="Programación">
           <Tabs value={programacionTab} onValueChange={(v) => setProgramacionTab(v)}>
-            <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
+            <TabsList>
               <TabsTrigger value="recurring" className="gap-1.5 text-xs sm:text-sm">
                 <RefreshCw className="h-3.5 w-3.5" />
                 Recurrentes
@@ -274,7 +287,7 @@ export function TreasuryPage() {
       {mainSection === 'datos' && (
         <section className="space-y-4 animate-in fade-in duration-200" aria-label="Datos e informes">
           <Tabs value={datosTab} onValueChange={(v) => setDatosTab(v)}>
-            <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
+            <TabsList>
               <TabsTrigger value="transactions" className="gap-1.5 text-xs sm:text-sm">
                 <ArrowRightLeft className="h-3.5 w-3.5" />
                 Transacciones

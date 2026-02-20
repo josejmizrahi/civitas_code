@@ -5,9 +5,10 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
-
+import { PageHeader } from '@/shared/components/PageHeader'
+import { AlertBanner } from '@/shared/components/AlertBanner'
 import { supabase } from '@/shared/lib/supabase'
-import { User, Lock, Building2, Shield, CheckCircle, AlertCircle, ScrollText } from 'lucide-react'
+import { User, Lock, Building2, Shield, ScrollText } from 'lucide-react'
 import { formatDate } from '@/shared/lib/utils'
 import type { Member } from '@/core/identity/types'
 import { ARCORightsPanel } from '@/core/privacy/components/ARCORightsPanel'
@@ -148,12 +149,7 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Mi Perfil</h1>
-          <p className="text-sm text-muted-foreground">Gestiona tu cuenta y preferencias</p>
-        </div>
-      </div>
+      <PageHeader title="Mi Perfil" description="Gestiona tu cuenta y preferencias" />
 
       {/* Personal Info Section */}
       <Card>

@@ -1,10 +1,12 @@
 import { useProposals } from '../hooks/useProposals'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { EmptyState } from '@/shared/components/EmptyState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { formatDate } from '@/shared/lib/utils'
 import { Link } from 'react-router-dom'
 import { EndorsementBar } from './EndorsementBar'
+import { Vote } from 'lucide-react'
 
 const STATUS_LABELS: Record<string, string> = {
   draft: 'Borrador',
@@ -44,7 +46,13 @@ export function ProposalList({ statusFilter }: Props) {
   if (isLoading) return <LoadingSpinner message="Cargando propuestas..." className="py-8" />
 
   if (!proposals || proposals.length === 0) {
-    return <p className="text-muted-foreground">No hay propuestas.</p>
+    return (
+      <EmptyState
+        icon={Vote}
+        title="Sin propuestas"
+        description="Crea la primera propuesta para iniciar el proceso de gobernanza de tu comunidad."
+      />
+    )
   }
 
   return (
@@ -70,9 +78,9 @@ export function ProposalList({ statusFilter }: Props) {
                   <EndorsementBar proposal={p} />
                 </div>
               )}
-              <div className="flex gap-4 text-xs text-muted-foreground">
+              <div className="flex flex-col gap-1 text-xs text-muted-foreground sm:flex-row sm:gap-4">
                 <span>Creada: {formatDate(p.created_at)}</span>
-                {p.voting_start && <span>Votación: {formatDate(p.voting_start)}</span>}
+                {p.voting_start && <span>Votacion: {formatDate(p.voting_start)}</span>}
                 {p.voting_end && <span>Cierre: {formatDate(p.voting_end)}</span>}
               </div>
             </CardContent>

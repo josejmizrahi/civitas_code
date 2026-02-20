@@ -1,4 +1,5 @@
 import { MemberDirectory } from '@/core/identity/components/MemberDirectory'
+import { PageHeader } from '@/shared/components/PageHeader'
 import { Button } from '@/shared/components/ui/button'
 import { Download } from 'lucide-react'
 import { useMembers } from '@/core/identity/hooks/useMembers'
@@ -30,16 +31,12 @@ export function MembersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Miembros</h1>
-          <p className="text-sm text-muted-foreground">Directorio de miembros de la comunidad</p>
-        </div>
+      <PageHeader title="Miembros" description="Directorio de miembros de la comunidad">
         <Button variant="outline" size="sm" onClick={handleExport} disabled={!members?.length}>
           <Download className="mr-1 h-4 w-4" />
           Exportar
         </Button>
-      </div>
+      </PageHeader>
       <MemberDirectory />
     </div>
   )

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTransactions, useUpdateTransaction, useDeleteTransaction } from '../hooks/useTransactions'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { getCategories } from '../services/treasury.service'
@@ -15,22 +15,11 @@ import { formatCurrency, formatDate, downloadAsCSV, downloadAsExcel } from '@/sh
 import { Pencil, Trash2, Check, X, Download, ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
+import { useIsMobile } from '@/shared/hooks/useIsMobile'
 import { verifyTransaction } from '../services/receipt.service'
 import type { Transaction } from '../types'
 import type { FundType } from '@/shared/types/rules'
-
-const MD_BREAKPOINT = 768
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < MD_BREAKPOINT)
-  useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MD_BREAKPOINT - 1}px)`)
-    const update = () => setIsMobile(mql.matches)
-    update()
-    mql.addEventListener('change', update)
-    return () => mql.removeEventListener('change', update)
-  }, [])
-  return isMobile
-}
 
 export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
   const [type, setType] = useState<string>('')
@@ -46,6 +35,7 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
   const deleteTx = useDeleteTransaction()
   const toast = useToast()
   const queryClient = useQueryClient()
+  const confirm = useConfirm()
 
   const verifyMut = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'verified' | 'disputed' }) =>
@@ -100,11 +90,18 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
     }
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('¿Estás seguro de eliminar esta transacción?')) {
+  const handleDelete = async (id: string) => {
+    const confirmed = await confirm({
+      title: 'Eliminar transaccion',
+      description: 'Esta accion no se puede deshacer. Se eliminara permanentemente esta transaccion del registro.',
+      confirmLabel: 'Eliminar',
+      cancelLabel: 'Cancelar',
+      variant: 'destructive',
+    })
+    if (confirmed) {
       deleteTx.mutate(id, {
-        onSuccess: () => toast.success('Transacción eliminada'),
-        onError: () => toast.error('Error al eliminar transacción'),
+        onSuccess: () => toast.success('Transaccion eliminada'),
+        onError: () => toast.error('Error al eliminar transaccion'),
       })
     }
   }

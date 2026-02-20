@@ -91,7 +91,7 @@ export function FirstStepsChecklist() {
   if (allDone) return null
 
   return (
-    <Card className="border-primary/30 bg-primary/5">
+    <Card className="border-primary/20 bg-primary/5 dark:bg-primary/5">
       <CardHeader>
         <CardTitle className="text-base">Primeros pasos</CardTitle>
       </CardHeader>

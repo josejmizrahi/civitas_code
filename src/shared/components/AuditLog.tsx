@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuditLog } from '@/shared/hooks/useAuditLog'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { EmptyState } from '@/shared/components/EmptyState'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
@@ -50,7 +51,7 @@ export function AuditLog({ entityType, compact }: Props) {
   const display = entries?.slice(0, limit) ?? []
 
   if (isLoading) return <LoadingSpinner message="Cargando actividad..." className="py-6" />
-  if (display.length === 0) return <div className="text-muted-foreground text-sm">Sin actividad reciente.</div>
+  if (display.length === 0) return <EmptyState icon={Activity} title="Sin actividad reciente" description="Las acciones en la comunidad aparecerán aquí" compact />
 
   const content = (
     <div className="space-y-3">

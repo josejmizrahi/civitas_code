@@ -1,4 +1,5 @@
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { AlertBanner } from '@/shared/components/AlertBanner'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { useDashboard } from '@/core/treasury/hooks/useDashboard'
 import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
@@ -60,10 +61,9 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       {queryError && (
-        <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3 flex items-center gap-2 text-sm text-destructive">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>Error al cargar algunos datos. Intenta recargar la página.</span>
-        </div>
+        <AlertBanner variant="error">
+          Error al cargar algunos datos. Intenta recargar la pagina.
+        </AlertBanner>
       )}
 
       <MorosoStatusBanner />
@@ -99,14 +99,14 @@ export function DashboardPage() {
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
           {overdueObligations.length > 0 && (
             <Link to="/treasury" className="block">
-              <Card className="border-red-200 bg-red-50/50 hover:bg-red-50 transition-colors cursor-pointer">
+              <Card className="border-red-200 dark:border-red-800/50 bg-red-50/50 dark:bg-red-950/20 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer">
                 <CardContent className="flex items-center gap-4 pt-6">
-                  <AlertTriangle className="h-8 w-8 text-red-500 shrink-0" />
+                  <AlertTriangle className="h-8 w-8 text-red-500 dark:text-red-400 shrink-0" />
                   <div>
-                    <p className="font-semibold text-red-800">
+                    <p className="font-semibold text-red-800 dark:text-red-200">
                       {overdueObligations.length} pago{overdueObligations.length !== 1 ? 's' : ''} vencido{overdueObligations.length !== 1 ? 's' : ''}
                     </p>
-                    <p className="text-sm text-red-600">
+                    <p className="text-sm text-red-600 dark:text-red-300">
                       Total: {formatCurrency(overdueObligations.reduce((sum, o) => sum + Number(o.amount), 0))}
                     </p>
                   </div>
@@ -117,19 +117,19 @@ export function DashboardPage() {
 
           {proposals && proposals.length > 0 && (
             <Link to="/governance" className="block">
-              <Card className="border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition-colors cursor-pointer">
+              <Card className="border-blue-200 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-950/20 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors cursor-pointer">
                 <CardContent className="flex items-center gap-4 pt-6">
-                  <Vote className="h-8 w-8 text-blue-500 shrink-0" />
+                  <Vote className="h-8 w-8 text-blue-500 dark:text-blue-400 shrink-0" />
                   <div>
-                    <p className="font-semibold text-blue-800">
-                      {proposals.length} propuesta{proposals.length !== 1 ? 's' : ''} en votación
+                    <p className="font-semibold text-blue-800 dark:text-blue-200">
+                      {proposals.length} propuesta{proposals.length !== 1 ? 's' : ''} en votacion
                     </p>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {proposals.slice(0, 3).map((p) => (
                         <Badge key={p.id} variant="default" className="text-xs">{p.title}</Badge>
                       ))}
                       {proposals.length > 3 && (
-                        <Badge variant="default" className="text-xs">+{proposals.length - 3} más</Badge>
+                        <Badge variant="default" className="text-xs">+{proposals.length - 3} mas</Badge>
                       )}
                     </div>
                   </div>
@@ -143,7 +143,7 @@ export function DashboardPage() {
       {/* ─── Admin-only section: Financial overview ─── */}
       {isAdmin && (
         <>
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Miembros</CardTitle>
@@ -201,7 +201,9 @@ export function DashboardPage() {
                 <CardTitle className="text-base">Ingresos vs Egresos</CardTitle>
               </CardHeader>
               <CardContent>
-                <IncomeVsExpenseChart data={stats?.monthlyData ?? []} />
+                <div className="aspect-[16/9] sm:aspect-[2/1]">
+                  <IncomeVsExpenseChart data={stats?.monthlyData ?? []} />
+                </div>
               </CardContent>
             </Card>
 

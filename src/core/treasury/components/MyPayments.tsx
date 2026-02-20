@@ -61,33 +61,42 @@ export function MyPayments() {
   return (
     <div className="space-y-6">
       {/* Summary */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground">Total Pendiente</div>
-            <div className={`text-xl sm:text-2xl font-bold ${totalPending > 0 ? 'text-red-600' : 'text-green-600'}`}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Pendiente</CardTitle>
+            <AlertTriangle className={`h-4 w-4 ${totalPending > 0 ? 'text-red-500' : 'text-green-500'}`} />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-xl sm:text-2xl font-bold ${totalPending > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
               {formatCurrency(totalPending)}
             </div>
             <p className="text-xs text-muted-foreground">{pendingObs.length} pagos pendientes</p>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground">Total Pagado</div>
-            <div className="text-xl sm:text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Pagado</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">{formatCurrency(totalPaid)}</div>
             <p className="text-xs text-muted-foreground">{paidObs.length} pagos realizados</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground">Estatus Financiero</div>
+        <Card className="col-span-2 sm:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Estatus</CardTitle>
+            <Clock className={`h-4 w-4 ${pendingObs.some(o => o.status === 'overdue') ? 'text-red-500' : pendingObs.length > 0 ? 'text-yellow-500' : 'text-green-500'}`} />
+          </CardHeader>
+          <CardContent>
             <div className="text-xl sm:text-2xl font-bold">
               {pendingObs.some(o => o.status === 'overdue') ? (
-                <span className="text-red-600">Moroso</span>
+                <span className="text-red-600 dark:text-red-400">Moroso</span>
               ) : pendingObs.length > 0 ? (
-                <span className="text-yellow-600">Pendiente</span>
+                <span className="text-yellow-600 dark:text-yellow-400">Pendiente</span>
               ) : (
-                <span className="text-green-600">Al corriente</span>
+                <span className="text-green-600 dark:text-green-400">Al corriente</span>
               )}
             </div>
           </CardContent>
@@ -134,7 +143,7 @@ export function MyPayments() {
                   Contacta al tesorero de tu comunidad para conocer la forma de pago aceptada.
                   Una vez realizado el pago, el tesorero lo registrara en el sistema.
                 </p>
-                <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
+                <div className="rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/50 p-3 text-sm text-blue-800 dark:text-blue-200">
                   Proximamente se habilitara el pago directo via SPEI con reconciliacion automatica.
                 </div>
               </div>

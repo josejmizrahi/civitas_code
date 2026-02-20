@@ -96,7 +96,7 @@ function CountdownTimer({ endDate, label }: { endDate: string; label?: string })
   }, [endDate])
 
   return (
-    <div className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${expired ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
+    <div className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${expired ? 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300' : 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300'}`}>
       {expired ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
       {expired ? `${label || 'Tiempo'} expirado` : `${label || 'Tiempo restante'}: ${timeLeft}`}
     </div>
@@ -327,7 +327,7 @@ export function ProposalDetail({ proposalId }: Props) {
             <div className="space-y-2">
               <CountdownTimer endDate={proposal.grace_period_end} label="Periodo de apelación" />
               {proposal.appealed && (
-                <div className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+                <div className="flex items-center gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-sm font-medium text-amber-700 dark:text-amber-300">
                   <Shield className="h-4 w-4" />
                   <span>Esta propuesta fue apelada — la ejecución automática está pausada</span>
                 </div>
@@ -409,7 +409,7 @@ export function ProposalDetail({ proposalId }: Props) {
                 variant="outline"
                 onClick={handleAppeal}
                 disabled={appealMut.isPending}
-                className="border-amber-300 text-amber-700 hover:bg-amber-50"
+                className="border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/30"
               >
                 <Shield className="mr-2 h-4 w-4" />
                 {appealMut.isPending ? 'Apelando...' : 'Apelar Propuesta'}
@@ -596,13 +596,13 @@ export function ProposalDetail({ proposalId }: Props) {
                 </span>
               </div>
             ) : proposal.appealed ? (
-              <div className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+              <div className="flex items-center gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-sm font-medium text-amber-700 dark:text-amber-300">
                 <Shield className="h-4 w-4" />
                 <span>Ejecución pausada por apelación</span>
               </div>
             ) : proposal.execution_status === 'cool_down' && proposal.cool_down_until ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+                <div className="flex items-center gap-2 rounded-md bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-sm font-medium text-amber-700 dark:text-amber-300">
                   <Timer className="h-4 w-4" />
                   {new Date(proposal.cool_down_until) > new Date() ? (
                     <span>Periodo de enfriamiento — se auto-ejecutará el {formatDateTime(proposal.cool_down_until)}</span>
