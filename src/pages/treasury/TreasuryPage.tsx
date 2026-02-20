@@ -121,42 +121,42 @@ export function TreasuryPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="no-print flex w-full overflow-x-auto overflow-y-hidden scrollbar-hide flex-nowrap sm:flex-wrap gap-1 min-w-0 h-auto py-1">
+        <TabsList className="no-print gap-1 min-w-0 h-auto py-1">
           <TabsTrigger value="dashboard" className="shrink-0 gap-1 whitespace-nowrap">
             <BarChart3 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Dashboard</span>
+            <span className="hidden md:inline">Dashboard</span>
           </TabsTrigger>
           <TabsTrigger value="collection" className="shrink-0 gap-1 whitespace-nowrap">
             <Banknote className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Cobranza</span>
+            <span className="hidden md:inline">Cobranza</span>
           </TabsTrigger>
           <TabsTrigger value="recurring" className="shrink-0 gap-1 whitespace-nowrap">
             <RefreshCw className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Recurrentes</span>
+            <span className="hidden md:inline">Recurrentes</span>
           </TabsTrigger>
           <TabsTrigger value="contracts" className="shrink-0 gap-1 whitespace-nowrap">
             <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Contratos</span>
+            <span className="hidden md:inline">Contratos</span>
           </TabsTrigger>
           <TabsTrigger value="obligations" className="shrink-0 gap-1 whitespace-nowrap">
             <Receipt className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Obligaciones</span>
+            <span className="hidden md:inline">Obligaciones</span>
           </TabsTrigger>
           <TabsTrigger value="my-payments" className="shrink-0 gap-1 whitespace-nowrap">
             <User className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Mis Pagos</span>
+            <span className="hidden md:inline">Mis Pagos</span>
           </TabsTrigger>
           <TabsTrigger value="transactions" className="shrink-0 gap-1 whitespace-nowrap">
             <CreditCard className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Transacciones</span>
+            <span className="hidden md:inline">Transacciones</span>
           </TabsTrigger>
           <TabsTrigger value="budgets" className="shrink-0 gap-1 whitespace-nowrap">
             <PiggyBank className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Presupuestos</span>
+            <span className="hidden md:inline">Presupuestos</span>
           </TabsTrigger>
           <TabsTrigger value="statements" className="shrink-0 gap-1 whitespace-nowrap">
             <ClipboardList className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Estados Financieros</span>
+            <span className="hidden md:inline">Estados Financieros</span>
           </TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">

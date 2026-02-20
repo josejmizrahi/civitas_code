@@ -188,7 +188,7 @@ export function SettingsPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex w-full flex-nowrap overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible gap-1">
+        <TabsList className="gap-1">
           <TabsTrigger value="general" className="shrink-0 whitespace-nowrap">General</TabsTrigger>
           <TabsTrigger value="categories" className="shrink-0 whitespace-nowrap">Categorías</TabsTrigger>
           <TabsTrigger value="invitations" className="shrink-0 whitespace-nowrap">Invitaciones</TabsTrigger>

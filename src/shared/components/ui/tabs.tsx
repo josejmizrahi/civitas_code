@@ -27,7 +27,7 @@ function TabsList({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
       role="tablist"
       className={cn(
         'flex h-auto items-center rounded-lg bg-muted p-1 text-muted-foreground',
-        'w-full overflow-x-auto scrollbar-hide flex-nowrap sm:flex-wrap gap-0.5',
+        'w-full overflow-x-auto scrollbar-hide flex-nowrap md:flex-wrap gap-0.5',
         'max-w-full',
         className
       )}

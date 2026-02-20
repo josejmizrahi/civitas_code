@@ -144,9 +144,9 @@ export function AppLayout() {
   const isBottomNavActive = (href: string) => location.pathname.startsWith(href)
 
   return (
-    <div className="flex h-dvh flex-col overflow-x-hidden md:flex-row">
+    <div className="flex h-dvh flex-col overflow-x-hidden lg:flex-row">
       {/* ============ MOBILE TOP BAR ============ */}
-      <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur-sm px-4 md:hidden">
+      <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur-sm px-4 lg:hidden">
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <Button
             variant="ghost"
@@ -170,7 +170,7 @@ export function AppLayout() {
       {/* ============ MOBILE SIDEBAR OVERLAY ============ */}
       {mobileSidebarOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 md:hidden"
+          className="fixed inset-0 z-50 bg-black/50 lg:hidden"
           onClick={closeMobileSidebar}
           aria-hidden="true"
         />
@@ -179,7 +179,7 @@ export function AppLayout() {
       {/* ============ SIDEBAR ============ */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r bg-sidebar-background transition-transform duration-300 ease-in-out md:static md:w-64 md:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r bg-sidebar-background transition-transform duration-300 ease-in-out lg:static lg:w-64 lg:translate-x-0',
           mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -208,7 +208,7 @@ export function AppLayout() {
             <Button
               variant="ghost"
               size="icon"
-              className="mr-2 shrink-0 md:hidden"
+              className="mr-2 shrink-0 lg:hidden"
               onClick={closeMobileSidebar}
               aria-label="Cerrar menu"
             >
@@ -332,7 +332,7 @@ export function AppLayout() {
                 </p>
               </div>
             </NavLink>
-            <div className="hidden md:block">
+            <div className="hidden lg:block">
               <NotificationBell />
             </div>
             <Button variant="ghost" size="icon" onClick={handleSignOut} title="Cerrar sesion" className="shrink-0">
@@ -343,12 +343,12 @@ export function AppLayout() {
       </aside>
 
       {/* ============ MAIN CONTENT ============ */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden pt-14 pb-[4.5rem] md:pt-0 md:pb-0 min-w-0">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pt-14 pb-[4.5rem] lg:pt-0 lg:pb-0 min-w-0">
         <PrivacyGate communityName={community?.name}>
           {!communityId ? (
             <NoCommunityView />
           ) : (
-            <div className="mx-auto max-w-7xl w-full p-4 md:p-6 overflow-hidden">
+            <div className="mx-auto max-w-7xl w-full p-4 lg:p-6 overflow-x-hidden">
               <Outlet />
             </div>
           )}
@@ -356,7 +356,7 @@ export function AppLayout() {
       </main>
 
       {/* ============ MOBILE BOTTOM NAVIGATION ============ */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur-sm pb-safe md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur-sm pb-safe lg:hidden">
         <div className="flex items-stretch justify-around">
           {BOTTOM_NAV_ITEMS.map((item) => {
             const active = isBottomNavActive(item.href)

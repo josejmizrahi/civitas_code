@@ -481,7 +481,7 @@ export function CensusPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex w-full overflow-x-auto scrollbar-hide flex-nowrap sm:flex-wrap gap-1">
+        <TabsList className="gap-1">
           <TabsTrigger value="community">
             <Building2 className="mr-2 h-4 w-4" />
             Mi Comunidad

@@ -29,7 +29,7 @@ export function ResidentialPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex w-full overflow-x-auto scrollbar-hide flex-nowrap sm:flex-wrap gap-1">
+        <TabsList className="gap-1">
           <TabsTrigger value="units">Unidades</TabsTrigger>
           <TabsTrigger value="maintenance">Mantenimiento</TabsTrigger>
           <TabsTrigger value="common-areas">Áreas Comunes</TabsTrigger>
