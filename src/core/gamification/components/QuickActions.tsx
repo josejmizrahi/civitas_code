@@ -61,8 +61,8 @@ export function QuickActions() {
   if (actions.length === 0) return null
 
   const urgencyStyles = {
-    high: 'border-red-200 bg-red-50 hover:bg-red-100 text-red-900',
-    medium: 'border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-900',
+    high: 'border-destructive/30 bg-destructive/5 hover:bg-destructive/10 text-foreground',
+    medium: 'border-chart-1/30 bg-chart-1/5 hover:bg-chart-1/10 text-foreground',
     low: 'border-muted bg-card hover:bg-accent',
   }
 

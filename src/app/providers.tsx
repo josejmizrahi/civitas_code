@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase, supabaseMissing } from '@/shared/lib/supabase'
 import { getCommunity, getCurrentMember, getUserCommunities } from '@/core/identity/services/identity.service'
@@ -89,8 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
   }
 
+  const authValue = useMemo<AuthContextType>(() => ({
+    user, session, loading, signIn, signUp, signOut, resetPassword, updatePassword,
+  }), [user, session, loading])
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut, resetPassword, updatePassword }}>
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   )
@@ -129,7 +133,7 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   const [communityLoading, setCommunityLoading] = useState(false)
   const [communityError, setCommunityError] = useState<string | null>(null)
 
-  const handleSetCommunityId = (id: string | null) => {
+  const handleSetCommunityId = useCallback((id: string | null) => {
     setCommunityIdState(id)
     if (id) {
       localStorage.setItem('civitas_community_id', id)
@@ -138,7 +142,7 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
       setCommunity(null)
       setCurrentMember(null)
     }
-  }
+  }, [])
 
   const refreshCommunities = useCallback(() => {
     if (!user) return
@@ -201,19 +205,28 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
     return () => { cancelled = true }
   }, [communityId, user])
 
+  const contextValue = useMemo<CommunityContextType>(() => ({
+    communityId,
+    community,
+    currentMember,
+    userCommunities,
+    communityLoading,
+    communityError,
+    setCommunityId: handleSetCommunityId,
+    refreshCommunities,
+  }), [
+    communityId,
+    community,
+    currentMember,
+    userCommunities,
+    communityLoading,
+    communityError,
+    handleSetCommunityId,
+    refreshCommunities,
+  ])
+
   return (
-    <CommunityContext.Provider
-      value={{
-        communityId,
-        community,
-        currentMember,
-        userCommunities,
-        communityLoading,
-        communityError,
-        setCommunityId: handleSetCommunityId,
-        refreshCommunities,
-      }}
-    >
+    <CommunityContext.Provider value={contextValue}>
       {children}
     </CommunityContext.Provider>
   )

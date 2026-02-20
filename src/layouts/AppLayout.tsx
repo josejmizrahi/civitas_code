@@ -364,17 +364,19 @@ export function AppLayout() {
               <NavLink
                 key={item.href}
                 to={item.href}
-                className="flex flex-1 flex-col items-center gap-0.5 py-2 px-1"
+                className="flex flex-1 flex-col items-center justify-center gap-0.5 py-2.5 px-1 min-h-[48px]"
+                aria-current={active ? 'page' : undefined}
               >
                 <item.icon
                   className={cn(
                     'h-5 w-5 transition-colors',
                     active ? 'text-primary' : 'text-muted-foreground'
                   )}
+                  aria-hidden="true"
                 />
                 <span
                   className={cn(
-                    'text-[10px] leading-tight transition-colors',
+                    'text-[11px] leading-tight transition-colors',
                     active ? 'font-semibold text-primary' : 'text-muted-foreground'
                   )}
                 >
@@ -385,10 +387,11 @@ export function AppLayout() {
           })}
           <button
             onClick={() => setMobileSidebarOpen(true)}
-            className="flex flex-1 flex-col items-center gap-0.5 py-2 px-1"
+            className="flex flex-1 flex-col items-center justify-center gap-0.5 py-2.5 px-1 min-h-[48px]"
+            aria-label="Abrir menu completo"
           >
-            <Ellipsis className="h-5 w-5 text-muted-foreground" />
-            <span className="text-[10px] leading-tight text-muted-foreground">Mas</span>
+            <Ellipsis className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            <span className="text-[11px] leading-tight text-muted-foreground">Mas</span>
           </button>
         </div>
       </nav>
