@@ -1,7 +1,17 @@
 import { supabase } from '@/shared/lib/supabase'
 import { logger } from '@/shared/lib/logger'
+import { sendEmail } from '@/shared/services/email.service'
 import type { Role } from '@/shared/types'
 import type { Member, Invitation, Community } from '../types'
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Administrador',
+  tesorero: 'Tesorero',
+  miembro: 'Miembro',
+  observador: 'Observador',
+  comite_vigilancia: 'Comité de Vigilancia',
+  platform_admin: 'Admin de Plataforma',
+}
 
 // ---------------------------------------------------------------------------
 // Members
@@ -109,7 +119,36 @@ export async function createInvitation(
     .single()
 
   if (error) throw error
-  return data as Invitation
+
+  const invitation = data as Invitation
+  const inviteLink = `${window.location.origin}/invite/${invitation.token}`
+
+  let communityName = ''
+  let inviterName = ''
+  try {
+    const { data: community } = await supabase
+      .from('communities')
+      .select('name')
+      .eq('id', communityId)
+      .single()
+    communityName = community?.name || ''
+
+    const { data: { user } } = await supabase.auth.getUser()
+    inviterName = user?.user_metadata?.full_name || ''
+  } catch {
+    // Non-critical — send the email even without enrichment
+  }
+
+  sendEmail(email, 'invitation', {
+    invite_link: inviteLink,
+    community_name: communityName,
+    role,
+    role_label: ROLE_LABELS[role] || role,
+    inviter_name: inviterName,
+    app_url: window.location.origin,
+  })
+
+  return invitation
 }
 
 export async function getInvitations(

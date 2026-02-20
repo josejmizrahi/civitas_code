@@ -85,6 +85,23 @@ const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, u
       <p style="font-size: 12px; color: #999; word-break: break-all;">${d.reset_link}</p>
     `,
   },
+  invitation: {
+    subject: 'Te han invitado a {community_name} en CIVITAS',
+    body: (d) => `
+      <h2>Invitación a ${d.community_name || 'una comunidad'}</h2>
+      <p>Has sido invitado/a a unirte a <strong>${d.community_name}</strong> con el rol de <strong>${d.role_label || d.role || 'miembro'}</strong>.</p>
+      <p>${d.inviter_name ? `<strong>${d.inviter_name}</strong> te envió esta invitación.` : ''}</p>
+      <p style="text-align: center; margin: 24px 0;">
+        <a href="${d.invite_link}"
+           style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          Aceptar Invitación
+        </a>
+      </p>
+      <p style="font-size: 13px; color: #666;">Si no esperabas esta invitación, puedes ignorar este correo.</p>
+      <p style="font-size: 13px; color: #666;">Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
+      <p style="font-size: 12px; color: #999; word-break: break-all;">${d.invite_link}</p>
+    `,
+  },
 }
 
 function escapeHtml(str: string): string {

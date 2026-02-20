@@ -5,7 +5,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { Button } from '@/shared/components/ui/button'
-import { CheckCircle, Copy } from 'lucide-react'
+import { Copy, Mail } from 'lucide-react'
 import type { Role } from '@/shared/types'
 
 interface InviteMemberDialogProps {
@@ -64,15 +64,15 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
         {createdToken ? (
           <>
             <DialogHeader>
-              <DialogTitle>Invitación creada</DialogTitle>
+              <DialogTitle>Invitación enviada</DialogTitle>
               <DialogDescription>
-                La invitación ha sido creada exitosamente. Comparte el enlace con el miembro.
+                Se envió un correo de invitación a <strong>{email}</strong>. También puedes compartir el enlace directamente.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex items-center gap-2 rounded-md bg-green-50 p-4 text-green-800 dark:bg-green-950 dark:text-green-200">
-                <CheckCircle className="h-5 w-5" />
-                <span className="font-medium">Invitación creada</span>
+                <Mail className="h-5 w-5" />
+                <span className="font-medium">Correo de invitación enviado</span>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="invite-link">Enlace de invitación</Label>

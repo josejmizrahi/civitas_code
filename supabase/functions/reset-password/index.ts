@@ -75,21 +75,21 @@ serve(async (req) => {
 
     const resetLink = data?.properties?.action_link
     if (resetLink) {
-      try {
-        await supabaseAdmin.functions.invoke('send-email', {
-          body: {
-            to: normalizedEmail,
-            type: 'password_reset',
-            data: {
-              reset_link: resetLink,
-              app_url: SITE_URL,
-              email: normalizedEmail,
-              community_name: 'CIVITAS',
-            },
+      const { error: emailError } = await supabaseAdmin.functions.invoke('send-email', {
+        body: {
+          to: normalizedEmail,
+          type: 'password_reset',
+          data: {
+            reset_link: resetLink,
+            app_url: SITE_URL,
+            email: normalizedEmail,
+            community_name: 'CIVITAS',
           },
-        })
-      } catch (emailErr) {
-        console.error('[reset-password] Failed to send branded email:', emailErr)
+        },
+      })
+
+      if (emailError) {
+        console.error('[reset-password] Failed to send branded email:', emailError)
         // generateLink does NOT send an email by itself — if send-email fails,
         // we must fall back to resetPasswordForEmail which sends its own email.
         try {
@@ -101,7 +101,6 @@ serve(async (req) => {
         }
       }
     } else {
-      // No action_link means generateLink didn't produce a link — use the standard method
       await supabaseAdmin.auth.resetPasswordForEmail(normalizedEmail, {
         redirectTo: `${SITE_URL}/reset-password`,
       })
