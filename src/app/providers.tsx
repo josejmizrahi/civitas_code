@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/shared/lib/supabase'
+import { supabase, supabaseMissing } from '@/shared/lib/supabase'
 import { getCommunity, getCurrentMember, getUserCommunities } from '@/core/identity/services/identity.service'
 import type { Community, Member } from '@/core/identity/types'
 
@@ -29,9 +29,11 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!supabaseMissing)
 
   useEffect(() => {
+    if (supabaseMissing) return
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)

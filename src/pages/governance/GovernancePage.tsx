@@ -116,7 +116,7 @@ export function GovernancePage() {
       )}
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex w-full overflow-x-auto scrollbar-hide flex-nowrap sm:flex-wrap gap-1">
+        <TabsList className="gap-1">
           <TabsTrigger value="active">Activas</TabsTrigger>
           <TabsTrigger value="discussion">En Discusión</TabsTrigger>
           <TabsTrigger value="draft">Borradores</TabsTrigger>

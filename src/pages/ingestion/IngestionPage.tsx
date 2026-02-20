@@ -170,7 +170,7 @@ export function IngestionPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="flex w-full overflow-x-auto scrollbar-hide flex-nowrap sm:flex-wrap gap-1">
+        <TabsList className="gap-1">
           <TabsTrigger value="sources">Fuentes de Datos</TabsTrigger>
           <TabsTrigger value="wizard" disabled={!selectedSourceId}>
             Asistente de Importación

@@ -38,7 +38,7 @@ export function VigilanciaPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex w-full overflow-x-auto scrollbar-hide flex-nowrap sm:flex-wrap gap-1">
+        <TabsList className="gap-1">
           <TabsTrigger value="reportes" className="flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" />
             Reportes
