@@ -101,7 +101,7 @@ export async function createAssembly(
   }
 
   // Create assembly
-  const { data: assembly, error } = await (supabase.from('assemblies') as any)
+  const { data: assembly, error } = await supabase.from('assemblies')
     .insert({
       community_id: communityId,
       type: data.type,
@@ -169,7 +169,7 @@ export async function updateAssemblyStatus(
     updateData.third_call_at = callAt || new Date().toISOString()
   }
 
-  const { error } = await (supabase.from('assemblies') as any)
+  const { error } = await supabase.from('assemblies')
     .update(updateData)
     .eq('id', assemblyId)
 
@@ -196,7 +196,7 @@ export async function recordAttendance(
   const quorumPct =
     totalIndiviso > 0 ? (presentIndiviso / totalIndiviso) * 100 : 0
 
-  const { error } = await (supabase.from('assemblies') as any)
+  const { error } = await supabase.from('assemblies')
     .update({
       attendance: attendanceRecords,
       quorum_pct: quorumPct,
@@ -224,9 +224,8 @@ export async function createConvocatoria(
     minimum_notice_days: number
   }
 ): Promise<Convocatoria> {
-  const { data: convocatoria, error } = await (
-    supabase.from('convocatorias') as any
-  )
+  const { data: convocatoria, error } = await supabase
+    .from('convocatorias')
     .insert({
       community_id: communityId,
       assembly_id: data.assembly_id,
@@ -296,7 +295,7 @@ export async function recordDelivery(
     delivered_at: new Date().toISOString(),
   }
 
-  const { error } = await (supabase.from('convocatorias') as any)
+  const { error } = await supabase.from('convocatorias')
     .update({
       delivery_log: [...existingLog, newRecord],
     })

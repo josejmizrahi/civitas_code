@@ -47,7 +47,7 @@ export async function createDocument(
   communityId: string,
   doc: { title: string; file_url: string; category: string; uploaded_by: string }
 ): Promise<Document> {
-  const { data, error } = await (supabase.from('documents') as any)
+  const { data, error } = await supabase.from('documents')
     .insert({ community_id: communityId, ...doc })
     .select()
     .single()
@@ -59,7 +59,7 @@ export async function updateDocument(
   documentId: string,
   updates: { title?: string; category?: string }
 ): Promise<Document> {
-  const { data, error } = await (supabase.from('documents') as any)
+  const { data, error } = await supabase.from('documents')
     .update(updates)
     .eq('id', documentId)
     .select()
@@ -69,7 +69,7 @@ export async function updateDocument(
 }
 
 export async function deleteDocument(documentId: string): Promise<void> {
-  const { error } = await (supabase.from('documents') as any)
+  const { error } = await supabase.from('documents')
     .delete()
     .eq('id', documentId)
   if (error) throw error

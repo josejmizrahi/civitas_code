@@ -15,7 +15,7 @@ import { Plus, Pencil, Check, X, Trash2 } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
 
 async function createCategory(communityId: string, name: string, type: CategoryType): Promise<Category> {
-  const { data, error } = await (supabase.from('categories') as any)
+  const { data, error } = await supabase.from('categories')
     .insert({ community_id: communityId, name, type })
     .select()
     .single()
@@ -24,7 +24,7 @@ async function createCategory(communityId: string, name: string, type: CategoryT
 }
 
 async function updateCategory(categoryId: string, name: string): Promise<Category> {
-  const { data, error } = await (supabase.from('categories') as any)
+  const { data, error } = await supabase.from('categories')
     .update({ name })
     .eq('id', categoryId)
     .select()
@@ -34,7 +34,7 @@ async function updateCategory(categoryId: string, name: string): Promise<Categor
 }
 
 async function deleteCategory(categoryId: string): Promise<void> {
-  const { error } = await (supabase.from('categories') as any)
+  const { error } = await supabase.from('categories')
     .delete()
     .eq('id', categoryId)
   if (error) throw error

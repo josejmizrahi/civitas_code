@@ -37,7 +37,7 @@ export function useCreateMaintenanceRequest() {
       description: string
       priority: string
     }) => {
-      const { data, error } = await (supabase.from('maintenance_requests') as any)
+      const { data, error } = await supabase.from('maintenance_requests')
         .insert({
           community_id: communityId,
           ...request,

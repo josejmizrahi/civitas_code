@@ -9,7 +9,7 @@ export async function grantConsent(
   consentType: string,
   version: string = PRIVACY_NOTICE_VERSION
 ) {
-  const { error } = await (supabase.from('privacy_consents') as any).upsert(
+  const { error } = await supabase.from('privacy_consents').upsert(
     {
       user_id: userId,
       version,
@@ -26,7 +26,7 @@ export async function grantConsent(
 }
 
 export async function revokeConsent(userId: string, consentType: string) {
-  const { error } = await (supabase.from('privacy_consents') as any)
+  const { error } = await supabase.from('privacy_consents')
     .update({
       granted: false,
       revoked_at: new Date().toISOString(),
@@ -79,7 +79,7 @@ export async function createARCORequest(
   type: string,
   description: string
 ) {
-  const { data, error } = await (supabase.from('arco_requests') as any).insert({
+  const { data, error } = await supabase.from('arco_requests').insert({
     user_id: userId,
     type,
     description,
@@ -122,7 +122,7 @@ export async function respondToARCO(
   response: string,
   status: 'completed' | 'denied'
 ) {
-  const { error } = await (supabase.from('arco_requests') as any)
+  const { error } = await supabase.from('arco_requests')
     .update({
       response,
       status,
@@ -171,7 +171,7 @@ export async function anonymizeUser(userId: string): Promise<{ tablesAffected: n
   const anonId = `ANON-${userId.substring(0, 8)}`
 
   // 1. Anonymize member records
-  const { error: memberErr } = await (supabase.from('members') as any)
+  const { error: memberErr } = await supabase.from('members')
     .update({
       custom_attributes: { anonymized: true, anonymized_at: new Date().toISOString() },
     })
@@ -179,7 +179,7 @@ export async function anonymizeUser(userId: string): Promise<{ tablesAffected: n
   if (!memberErr) tablesAffected++
 
   // 2. Revoke all privacy consents
-  const { error: consentErr } = await (supabase.from('privacy_consents') as any)
+  const { error: consentErr } = await supabase.from('privacy_consents')
     .update({
       granted: false,
       revoked_at: new Date().toISOString(),
@@ -189,7 +189,7 @@ export async function anonymizeUser(userId: string): Promise<{ tablesAffected: n
   if (!consentErr) tablesAffected++
 
   // 3. Anonymize audit log entries
-  const { error: auditErr } = await (supabase.from('audit_log') as any)
+  const { error: auditErr } = await supabase.from('audit_log')
     .update({
       details: { anonymized: true },
     })
@@ -201,7 +201,7 @@ export async function anonymizeUser(userId: string): Promise<{ tablesAffected: n
   // link goes to an anonymized member record
 
   // 5. Mark ARCO request as completed
-  const { error: arcoErr } = await (supabase.from('arco_requests') as any)
+  const { error: arcoErr } = await supabase.from('arco_requests')
     .update({
       status: 'completed',
       response: `Datos del usuario anonimizados exitosamente. ID anonimizado: ${anonId}`,

@@ -136,7 +136,7 @@ export async function startDiscussion(proposalId: string, communityId: string, d
   const now = new Date()
   const discussionEnd = new Date(now.getTime() + discussionHours * 60 * 60 * 1000)
 
-  const { data, error } = await (supabase.from('proposals') as any)
+  const { data, error } = await supabase.from('proposals')
     .update({ status: 'discussion', discussion_start: now.toISOString(), discussion_end: discussionEnd.toISOString(), discussion_min_hours: discussionHours })
     .eq('id', proposalId).select().single()
   if (error) throw error
@@ -164,7 +164,7 @@ export async function openVotingFromDiscussion(proposalId: string, communityId: 
   const updateData: Record<string, unknown> = { status: 'active', voting_start: new Date().toISOString() }
   if (votingEnd) updateData.voting_end = votingEnd
 
-  const { data, error } = await (supabase.from('proposals') as any).update(updateData).eq('id', proposalId).select().single()
+  const { data, error } = await supabase.from('proposals').update(updateData).eq('id', proposalId).select().single()
   if (error) throw error
 
   try {
@@ -179,7 +179,7 @@ export async function declareOutcome(proposalId: string, outcome: string, declar
   const proposal = await getProposal(proposalId)
   if (!['closed', 'approved', 'rejected', 'executed'].includes(proposal.status)) throw new Error('Solo se puede declarar resultado de propuestas cerradas')
 
-  const { data, error } = await (supabase.from('proposals') as any)
+  const { data, error } = await supabase.from('proposals')
     .update({ outcome_declared: outcome, outcome_declared_by: declaredByUserId, outcome_declared_at: new Date().toISOString() })
     .eq('id', proposalId).select().single()
   if (error) throw error
@@ -193,11 +193,11 @@ export async function appealProposal(proposalId: string, communityId: string, ap
     if (Date.now() > new Date(proposal.grace_period_end).getTime()) throw new Error('El periodo de apelación ha expirado')
   }
 
-  const { data, error } = await (supabase.from('proposals') as any).update({ appealed: true }).eq('id', proposalId).select().single()
+  const { data, error } = await supabase.from('proposals').update({ appealed: true }).eq('id', proposalId).select().single()
   if (error) throw error
 
   try {
-    await (supabase.from('audit_log') as any).insert({ community_id: communityId, user_id: appealedByUserId, action: 'appeal_proposal', entity_type: 'proposal', entity_id: proposalId, details: { appealed_at: new Date().toISOString() } })
+    await supabase.from('audit_log').insert({ community_id: communityId, user_id: appealedByUserId, action: 'appeal_proposal', entity_type: 'proposal', entity_id: proposalId, details: { appealed_at: new Date().toISOString() } })
   } catch { /* audit best-effort */ }
 
   try {
@@ -209,7 +209,7 @@ export async function appealProposal(proposalId: string, communityId: string, ap
 }
 
 export async function updateProposalStatus(proposalId: string, status: string, extra?: Record<string, unknown>): Promise<void> {
-  const { error } = await (supabase.from('proposals') as any).update({ status, ...extra }).eq('id', proposalId)
+  const { error } = await supabase.from('proposals').update({ status, ...extra }).eq('id', proposalId)
   if (error) throw error
 }
 
@@ -251,7 +251,7 @@ export async function closeProposal(proposalId: string, communityId: string, clo
     }
   }
 
-  const { data, error } = await (supabase.from('proposals') as any).update(updateData).eq('id', proposalId).select().single()
+  const { data, error } = await supabase.from('proposals').update(updateData).eq('id', proposalId).select().single()
   if (error) throw error
 
   try {
@@ -297,7 +297,7 @@ export async function executeProposal(proposalId: string, communityId: string, e
   try {
     switch (instructionType) {
       case 'disbursement': {
-        const { error: txErr } = await (supabase.from('transactions') as any).insert({
+        const { error: txErr } = await supabase.from('transactions').insert({
           community_id: communityId, type: 'expense', amount: Number(instruction.amount) || 0,
           description: `[Gobernanza] ${instruction.description || proposal.title}`,
           date: new Date().toISOString().split('T')[0], category_id: (instruction.category_id as string) || null,
@@ -312,12 +312,12 @@ export async function executeProposal(proposalId: string, communityId: string, e
         const amount = Number(instruction.amount) || 0
         if (!categoryId) throw new Error('budget_allocation requiere category_id')
 
-        const { data: existing } = await (supabase.from('budgets') as any).select('id').eq('community_id', communityId).eq('category_id', categoryId).eq('period', period).maybeSingle()
+        const { data: existing } = await supabase.from('budgets').select('id').eq('community_id', communityId).eq('category_id', categoryId).eq('period', period).maybeSingle()
         if (existing) {
-          const { error: budgetErr } = await (supabase.from('budgets') as any).update({ amount, approved_by_proposal_id: proposalId }).eq('id', existing.id)
+          const { error: budgetErr } = await supabase.from('budgets').update({ amount, approved_by_proposal_id: proposalId }).eq('id', existing.id)
           if (budgetErr) throw budgetErr
         } else {
-          const { error: budgetErr } = await (supabase.from('budgets') as any).insert({ community_id: communityId, category_id: categoryId, period, amount, approved_by_proposal_id: proposalId })
+          const { error: budgetErr } = await supabase.from('budgets').insert({ community_id: communityId, category_id: categoryId, period, amount, approved_by_proposal_id: proposalId })
           if (budgetErr) throw budgetErr
         }
         break
@@ -331,7 +331,7 @@ export async function executeProposal(proposalId: string, communityId: string, e
         if (activeMembers && activeMembers.length > 0) {
           type ActiveMemberRow = { id: string; [k: string]: unknown }
           const obligations = (activeMembers as ActiveMemberRow[]).map((m) => ({ community_id: communityId, member_id: m.id, amount: newAmount, due_date: effectiveDate, concept, status: 'pending' }))
-          const { error: obErr } = await (supabase.from('payment_obligations') as any).insert(obligations)
+          const { error: obErr } = await supabase.from('payment_obligations').insert(obligations)
           if (obErr) throw obErr
         }
         break
@@ -361,13 +361,13 @@ export async function executeProposal(proposalId: string, communityId: string, e
       default: throw new Error(`Tipo de instrucción no soportado: ${instructionType}`)
     }
 
-    const { data, error } = await (supabase.from('proposals') as any)
+    const { data, error } = await supabase.from('proposals')
       .update({ status: 'executed', execution_status: 'executed', executed_at: new Date().toISOString() })
       .eq('id', proposalId).select().single()
     if (error) throw error
     return data as unknown as Proposal
   } catch (execError) {
-    await (supabase.from('proposals') as any).update({ execution_status: 'failed' }).eq('id', proposalId)
+    await supabase.from('proposals').update({ execution_status: 'failed' }).eq('id', proposalId)
     throw execError
   }
 }

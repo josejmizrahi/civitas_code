@@ -26,7 +26,7 @@ export async function updateCommunityRules(
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  await (supabase.from('rule_versions') as any).insert({
+  await supabase.from('rule_versions').insert({
     community_id: communityId,
     version_number: nextVersion ?? 1,
     rules: rules as any,
@@ -35,7 +35,7 @@ export async function updateCommunityRules(
     proposal_id: proposalId ?? null,
   })
 
-  const { error } = await (supabase.from('communities') as any)
+  const { error } = await supabase.from('communities')
     .update({ rules: rules as any })
     .eq('id', communityId)
   if (error) throw error

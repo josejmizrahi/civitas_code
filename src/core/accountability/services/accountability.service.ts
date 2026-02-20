@@ -54,7 +54,7 @@ export async function createTask(task: {
   responsible_member_id?: string
   due_date?: string
 }): Promise<ImplementationTask> {
-  const { data, error } = await (supabase.from('implementation_tasks') as any)
+  const { data, error } = await supabase.from('implementation_tasks')
     .insert({
       ...task,
       status: 'pending',
@@ -90,7 +90,7 @@ export async function updateTask(
     updateData.progress_pct = 100
   }
 
-  const { data, error } = await (supabase.from('implementation_tasks') as any)
+  const { data, error } = await supabase.from('implementation_tasks')
     .update(updateData)
     .eq('id', taskId)
     .select()

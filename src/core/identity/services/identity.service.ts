@@ -76,8 +76,8 @@ export async function updateMemberRole(
   memberId: string,
   role: Role,
 ): Promise<Member> {
-  const { data, error } = await (supabase
-    .from('members') as any)
+  const { data, error } = await supabase
+    .from('members')
     .update({ role })
     .eq('id', memberId)
     .select()
@@ -97,8 +97,8 @@ export async function createInvitation(
   role: Role,
   userId: string,
 ): Promise<Invitation> {
-  const { data, error } = await (supabase
-    .from('invitations') as any)
+  const { data, error } = await supabase
+    .from('invitations')
     .insert({
       community_id: communityId,
       email,
@@ -158,8 +158,8 @@ export async function createCommunity(
   if (error) {
     // Fallback: if RPC not available yet, try the old way
     logger.warn('create_community_with_admin RPC not available, falling back:', error.message)
-    const { data: community, error: communityError } = await (supabase
-      .from('communities') as any)
+    const { data: community, error: communityError } = await supabase
+      .from('communities')
       .insert({
         name: data.name,
         slug,
@@ -209,8 +209,8 @@ export async function joinCommunity(
   userId: string,
   role: Role,
 ): Promise<Member> {
-  const { data, error } = await (supabase
-    .from('members') as any)
+  const { data, error } = await supabase
+    .from('members')
     .insert({
       community_id: communityId,
       user_id: userId,
@@ -269,8 +269,8 @@ export async function getCurrentMember(
 // ---------------------------------------------------------------------------
 
 export async function deactivateMember(memberId: string): Promise<Member> {
-  const { data, error } = await (supabase
-    .from('members') as any)
+  const { data, error } = await supabase
+    .from('members')
     .update({ status: 'inactive' })
     .eq('id', memberId)
     .select()
@@ -281,8 +281,8 @@ export async function deactivateMember(memberId: string): Promise<Member> {
 }
 
 export async function reactivateMember(memberId: string): Promise<Member> {
-  const { data, error } = await (supabase
-    .from('members') as any)
+  const { data, error } = await supabase
+    .from('members')
     .update({ status: 'active' })
     .eq('id', memberId)
     .select()
@@ -316,8 +316,8 @@ export async function acceptInvitation(token: string, userId: string): Promise<v
 }
 
 export async function cancelInvitation(invitationId: string): Promise<void> {
-  const { error } = await (supabase
-    .from('invitations') as any)
+  const { error } = await supabase
+    .from('invitations')
     .update({ status: 'cancelled' })
     .eq('id', invitationId)
 
@@ -328,8 +328,8 @@ export async function updateCommunity(
   communityId: string,
   updates: { name?: string; description?: string; config?: Record<string, unknown> },
 ): Promise<Community> {
-  const { data, error } = await (supabase
-    .from('communities') as any)
+  const { data, error } = await supabase
+    .from('communities')
     .update(updates)
     .eq('id', communityId)
     .select()

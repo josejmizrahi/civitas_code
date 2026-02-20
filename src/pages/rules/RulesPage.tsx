@@ -193,7 +193,7 @@ export function RulesPage() {
   const { data: versions } = useQuery({
     queryKey: ['rule-versions', communityId],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('rule_versions') as any)
+      const { data, error } = await supabase.from('rule_versions')
         .select('id, version_number, change_reason, created_at')
         .eq('community_id', communityId!)
         .order('version_number', { ascending: false })

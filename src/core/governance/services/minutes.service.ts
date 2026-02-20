@@ -49,7 +49,7 @@ export async function generateMinutes(
   const hashArray = Array.from(new Uint8Array(hashBuffer))
   const integrityHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 
-  const { data, error } = await (supabase.from('minutes') as any)
+  const { data, error } = await supabase.from('minutes')
     .insert({ community_id: communityId, proposal_id: proposalId, content, generated_at: now.toISOString(), approved: false, signatures: [], integrity_hash: integrityHash })
     .select().single()
   if (error) throw error
@@ -64,7 +64,7 @@ export async function getMinutes(proposalId: string): Promise<Minutes | null> {
 }
 
 export async function approveMinutes(minutesId: string, userId: string): Promise<Minutes> {
-  const { data, error } = await (supabase.from('minutes') as any)
+  const { data, error } = await supabase.from('minutes')
     .update({ approved: true, approved_at: new Date().toISOString(), approved_by: userId })
     .eq('id', minutesId).select().single()
   if (error) throw error
@@ -83,7 +83,7 @@ export async function signMinutes(minutesId: string, memberId: string, memberNam
 
   const signatures = [...(minutes.signatures || []), { member_id: memberId, member_name: memberName, signed_at: signedAt, hash }]
 
-  const { data, error } = await (supabase.from('minutes') as any)
+  const { data, error } = await supabase.from('minutes')
     .update({ signatures }).eq('id', minutesId).select().single()
   if (error) throw error
   return data as unknown as Minutes

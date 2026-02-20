@@ -23,7 +23,7 @@ export async function getWebhookEvents(
   communityId: string,
   status?: string
 ): Promise<IfpeWebhookEvent[]> {
-  let query = (supabase as any).from('ifpe_webhook_events')
+  let query = supabase.from('ifpe_webhook_events')
     .select('*')
     .eq('community_id', communityId)
     .order('created_at', { ascending: false })
@@ -40,7 +40,7 @@ export async function manualReconcile(
   obligationId: string,
   communityId: string
 ): Promise<void> {
-  const { data: event, error: eventErr } = await (supabase as any).from('ifpe_webhook_events')
+  const { data: event, error: eventErr } = await supabase.from('ifpe_webhook_events')
     .select('*')
     .eq('id', eventId)
     .single()
@@ -48,7 +48,7 @@ export async function manualReconcile(
 
   const evt = event as IfpeWebhookEvent
 
-  const { data: tx, error: txErr } = await (supabase.from('transactions') as any)
+  const { data: tx, error: txErr } = await supabase.from('transactions')
     .insert({
       community_id: communityId,
       type: 'income',
@@ -62,12 +62,12 @@ export async function manualReconcile(
     .single()
   if (txErr) throw txErr
 
-  const { error: obErr } = await (supabase.from('payment_obligations') as any)
+  const { error: obErr } = await supabase.from('payment_obligations')
     .update({ status: 'paid', payment_transaction_id: tx.id })
     .eq('id', obligationId)
   if (obErr) throw obErr
 
-  const { error: evtErr } = await (supabase as any).from('ifpe_webhook_events')
+  const { error: evtErr } = await supabase.from('ifpe_webhook_events')
     .update({
       reconciliation_status: 'manual',
       matched_obligation_id: obligationId,
@@ -79,7 +79,7 @@ export async function manualReconcile(
 }
 
 export async function ignoreEvent(eventId: string): Promise<void> {
-  const { error } = await (supabase as any).from('ifpe_webhook_events')
+  const { error } = await supabase.from('ifpe_webhook_events')
     .update({
       reconciliation_status: 'ignored',
       processed_at: new Date().toISOString(),
@@ -96,7 +96,7 @@ export async function getReconciliationStats(communityId: string): Promise<{
   totalAmount: number
   matchedAmount: number
 }> {
-  const { data, error } = await (supabase as any).from('ifpe_webhook_events')
+  const { data, error } = await supabase.from('ifpe_webhook_events')
     .select('reconciliation_status, monto')
     .eq('community_id', communityId)
     .eq('event_type', 'spei_received')

@@ -95,7 +95,7 @@ export async function getStatement(statementId: string): Promise<FinancialStatem
  * Approve a financial statement (admin action — Art. 43 LPCI CDMX).
  */
 export async function approveStatement(statementId: string, approvedBy: string): Promise<void> {
-  const { error } = await (supabase.from('financial_statements') as any)
+  const { error } = await supabase.from('financial_statements')
     .update({
       approved: true,
       approved_at: new Date().toISOString(),

@@ -142,7 +142,8 @@ export async function createTransaction(
     origin?: string
   }
 ): Promise<Transaction> {
-  const { data, error } = await (supabase.from('transactions') as any)
+  const { data, error } = await supabase
+    .from('transactions')
     .insert({
       community_id: communityId,
       origin: transaction.origin ?? 'manual',
@@ -156,7 +157,8 @@ export async function createTransaction(
 }
 
 export async function updateTransaction(transactionId: string, updates: Partial<Pick<Transaction, 'type' | 'amount' | 'category_id' | 'description' | 'date'>>): Promise<Transaction> {
-  const { data, error } = await (supabase.from('transactions') as any)
+  const { data, error } = await supabase
+    .from('transactions')
     .update(updates)
     .eq('id', transactionId)
     .select('*, categories(name)')
@@ -166,14 +168,16 @@ export async function updateTransaction(transactionId: string, updates: Partial<
 }
 
 export async function deleteTransaction(transactionId: string): Promise<void> {
-  const { error } = await (supabase.from('transactions') as any)
+  const { error } = await supabase
+    .from('transactions')
     .delete()
     .eq('id', transactionId)
   if (error) throw error
 }
 
 export async function createBudget(communityId: string, budget: { category_id: string; period: string; amount: number }): Promise<Budget> {
-  const { data, error } = await (supabase.from('budgets') as any)
+  const { data, error } = await supabase
+    .from('budgets')
     .insert({ community_id: communityId, ...budget })
     .select('*, categories(name)')
     .single()
@@ -182,7 +186,8 @@ export async function createBudget(communityId: string, budget: { category_id: s
 }
 
 export async function updateBudget(budgetId: string, updates: { amount?: number; period?: string }): Promise<Budget> {
-  const { data, error } = await (supabase.from('budgets') as any)
+  const { data, error } = await supabase
+    .from('budgets')
     .update(updates)
     .eq('id', budgetId)
     .select('*, categories(name)')
@@ -192,14 +197,16 @@ export async function updateBudget(budgetId: string, updates: { amount?: number;
 }
 
 export async function deleteBudget(budgetId: string): Promise<void> {
-  const { error } = await (supabase.from('budgets') as any)
+  const { error } = await supabase
+    .from('budgets')
     .delete()
     .eq('id', budgetId)
   if (error) throw error
 }
 
 export async function createPaymentObligation(communityId: string, obligation: { member_id: string; amount: number; due_date: string; concept: string }): Promise<PaymentObligation> {
-  const { data, error } = await (supabase.from('payment_obligations') as any)
+  const { data, error } = await supabase
+    .from('payment_obligations')
     .insert({ community_id: communityId, ...obligation })
     .select()
     .single()
@@ -209,7 +216,8 @@ export async function createPaymentObligation(communityId: string, obligation: {
 
 export async function createBulkObligations(communityId: string, memberIds: string[], obligation: { amount: number; due_date: string; concept: string }): Promise<PaymentObligation[]> {
   const records = memberIds.map(id => ({ community_id: communityId, member_id: id, ...obligation }))
-  const { data, error } = await (supabase.from('payment_obligations') as any)
+  const { data, error } = await supabase
+    .from('payment_obligations')
     .insert(records)
     .select()
   if (error) throw error
@@ -222,7 +230,8 @@ export async function createBulkObligations(communityId: string, memberIds: stri
 export async function refreshOverdueObligations(communityId: string): Promise<number> {
   const today = new Date().toISOString().split('T')[0]
 
-  const { data, error } = await (supabase.from('payment_obligations') as any)
+  const { data, error } = await supabase
+    .from('payment_obligations')
     .update({ status: 'overdue' })
     .eq('community_id', communityId)
     .eq('status', 'pending')
@@ -236,7 +245,8 @@ export async function refreshOverdueObligations(communityId: string): Promise<nu
 export async function updateObligationStatus(obligationId: string, status: string, paymentTransactionId?: string): Promise<PaymentObligation> {
   const updateData: Record<string, unknown> = { status }
   if (paymentTransactionId) updateData.payment_transaction_id = paymentTransactionId
-  const { data, error } = await (supabase.from('payment_obligations') as any)
+  const { data, error } = await supabase
+    .from('payment_obligations')
     .update(updateData)
     .eq('id', obligationId)
     .select()
@@ -272,13 +282,15 @@ export async function markObligationAsPaid(
     origin: 'system' as const,
   }
 
-  const { data: tx, error: txError } = await (supabase.from('transactions') as any)
+  const { data: tx, error: txError } = await supabase
+    .from('transactions')
     .insert(txData)
     .select()
     .single()
   if (txError) throw txError
 
-  const { data: updatedOb, error: obError } = await (supabase.from('payment_obligations') as any)
+  const { data: updatedOb, error: obError } = await supabase
+    .from('payment_obligations')
     .update({ status: 'paid', payment_transaction_id: tx.id })
     .eq('id', obligation.id)
     .select()
@@ -304,7 +316,8 @@ export async function getCollectionStats(communityId: string): Promise<{
   collectedAmount: number
   collectionRate: number
 }> {
-  const { data, error } = await (supabase.from('payment_obligations') as any)
+  const { data, error } = await supabase
+    .from('payment_obligations')
     .select('status, amount')
     .eq('community_id', communityId)
 

@@ -46,7 +46,7 @@ export async function sendEmailToMembers(
     if (!profiles?.length) {
       // Fallback: try auth.users via profiles view
       const { data: fallbackProfiles } = await supabase
-        .from('member_profiles' as any)
+        .from('member_profiles')
         .select('email')
         .eq('community_id', communityId)
         .eq('status', 'active')

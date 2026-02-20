@@ -53,7 +53,7 @@ export async function createComment(comment: {
   parent_comment_id?: string
   mentions?: Array<{ member_id: string; member_name: string }>
 }): Promise<DiscussionComment> {
-  const { data, error } = await (supabase.from('discussion_comments') as any)
+  const { data, error } = await supabase.from('discussion_comments')
     .insert({
       community_id: comment.community_id,
       proposal_id: comment.proposal_id,
@@ -106,7 +106,7 @@ export async function updateComment(
     updateData.sentiment = sentiment
   }
 
-  const { data, error } = await (supabase.from('discussion_comments') as any)
+  const { data, error } = await supabase.from('discussion_comments')
     .update(updateData)
     .eq('id', commentId)
     .select()
@@ -120,7 +120,7 @@ export async function updateComment(
  * Soft-delete a comment (sets deleted_at, keeps record for thread integrity).
  */
 export async function softDeleteComment(commentId: string): Promise<void> {
-  const { error } = await (supabase.from('discussion_comments') as any)
+  const { error } = await supabase.from('discussion_comments')
     .update({
       deleted_at: new Date().toISOString(),
       content: '[Comentario eliminado]',
@@ -139,7 +139,7 @@ export async function moderateComment(
   moderatorId: string,
   reason: string
 ): Promise<void> {
-  const { error } = await (supabase.from('discussion_comments') as any)
+  const { error } = await supabase.from('discussion_comments')
     .update({
       deleted_at: new Date().toISOString(),
       content: `[Comentario eliminado por moderación: ${reason}]`,
@@ -207,7 +207,7 @@ export async function addReaction(
   memberId: string,
   reaction: ReactionType
 ): Promise<CommentReaction> {
-  const { data, error } = await (supabase.from('comment_reactions') as any)
+  const { data, error } = await supabase.from('comment_reactions')
     .insert({
       comment_id: commentId,
       member_id: memberId,
@@ -228,7 +228,7 @@ export async function removeReaction(
   memberId: string,
   reaction: ReactionType
 ): Promise<void> {
-  const { error } = await (supabase.from('comment_reactions') as any)
+  const { error } = await supabase.from('comment_reactions')
     .delete()
     .eq('comment_id', commentId)
     .eq('member_id', memberId)

@@ -2,8 +2,8 @@ import { supabase } from '@/shared/lib/supabase'
 import type { GamificationProfile, GamificationAction, GamificationEvent, XpAwardResult, LeaderboardEntry, EarnedBadge } from '../types'
 import { XP_VALUES, getLevelForXp, getStreakMultiplier, BADGES } from '../constants'
 
-const gam = () => (supabase as any).from('member_gamification')
-const events = () => (supabase as any).from('gamification_events')
+const gam = () => supabase.from('member_gamification')
+const events = () => supabase.from('gamification_events')
 
 // ─── Profile CRUD ──────────────────────────────────────────────────────────
 
@@ -239,7 +239,7 @@ export async function getLeaderboard(
   // Fetch member names via member_profiles view (has email from auth.users)
   const memberIds = (data as any[]).map((d) => d.member_id)
   const { data: profiles } = await supabase
-    .from('member_profiles' as any)
+    .from('member_profiles')
     .select('id, email, full_name')
     .in('id', memberIds)
 
