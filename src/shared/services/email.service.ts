@@ -11,10 +11,22 @@ export async function sendEmail(
   data: Record<string, unknown>,
 ): Promise<void> {
   try {
-    const { error } = await supabase.functions.invoke('send-email', {
+    const { data: result, error } = await supabase.functions.invoke('send-email', {
       body: { to, type, data },
     })
-    if (error) logger.warn(`[email] Failed to send "${type}" to ${to}:`, error.message)
+    if (error) {
+      logger.warn(`[email] Failed to send "${type}" to ${to}:`, error.message)
+      return
+    }
+    const ok = result && typeof result === 'object' && (result as { success?: boolean }).success
+    if (!ok && result && typeof result === 'object') {
+      const r = result as { dry_run?: boolean; error?: string }
+      if (r.dry_run) {
+        logger.warn(`[email] Not sent (dry run): "${type}" to ${to}. Configure RESEND_API_KEY in Supabase Edge Function secrets.`)
+      } else {
+        logger.warn(`[email] Send failed "${type}" to ${to}:`, r.error)
+      }
+    }
   } catch (err) {
     logger.warn(`[email] Failed to send "${type}" to ${to}:`, err)
   }

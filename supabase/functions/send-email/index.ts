@@ -1,7 +1,12 @@
 import { serve } from 'https://deno.land/std@0.220.0/http/server.ts'
 
+// Required in Supabase: Edge Functions → send-email → Secrets
+// - RESEND_API_KEY: API key from https://resend.com (re_...)
+// - FROM_EMAIL (optional): si no tienes dominio verificado en Resend, no lo pongas;
+//   se usa onboarding@resend.dev (solo llega al email de tu cuenta Resend en sandbox).
+//   Cuando verifiques un dominio, pon ej. notificaciones@tudominio.com
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
-const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'notificaciones@civitas.app'
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'onboarding@resend.dev'
 
 interface EmailRequest {
   to: string
@@ -194,10 +199,12 @@ serve(async (req) => {
     }
 
     if (!RESEND_API_KEY) {
-      console.log(`[send-email] Would send "${rendered.subject}" to ${to} (no API key configured)`)
-      return new Response(JSON.stringify({ success: true, dry_run: true }), {
-        headers: { 'Content-Type': 'application/json' },
-      })
+      const msg = '[send-email] RESEND_API_KEY not set — add it in Supabase: Edge Functions → send-email → Secrets'
+      console.error(msg)
+      return new Response(
+        JSON.stringify({ success: false, dry_run: true, error: msg }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )
     }
 
     const res = await fetch('https://api.resend.com/emails', {
@@ -214,10 +221,17 @@ serve(async (req) => {
       }),
     })
 
-    const result = await res.json()
+    const result = (await res.json()) as Record<string, unknown>
+    if (!res.ok) {
+      console.error('[send-email] Resend API error:', res.status, result)
+      return new Response(
+        JSON.stringify({ success: false, error: result?.message ?? result, status: res.status }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
 
-    return new Response(JSON.stringify({ success: res.ok, ...result }), {
-      status: res.ok ? 200 : 500,
+    return new Response(JSON.stringify({ success: true, ...result }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err) {
