@@ -130,6 +130,27 @@ export async function softDeleteComment(commentId: string): Promise<void> {
   if (error) throw error
 }
 
+/**
+ * Moderate (hide) a comment. Only admins/comité de vigilancia should call this.
+ * Replaces content with a moderation notice and records the reason.
+ */
+export async function moderateComment(
+  commentId: string,
+  moderatorId: string,
+  reason: string
+): Promise<void> {
+  const { error } = await (supabase.from('discussion_comments') as any)
+    .update({
+      deleted_at: new Date().toISOString(),
+      content: `[Comentario eliminado por moderación: ${reason}]`,
+      moderated_by: moderatorId,
+      moderation_reason: reason,
+    })
+    .eq('id', commentId)
+
+  if (error) throw error
+}
+
 // ---------------------------------------------------------------------------
 // Reactions
 // ---------------------------------------------------------------------------
