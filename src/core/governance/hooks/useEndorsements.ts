@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
-import { useAuth } from '@/app/providers'
 import {
   getEndorsements,
   addEndorsement,
@@ -18,7 +17,6 @@ export function useEndorsements(proposalId: string | undefined) {
 
 export function useAddEndorsement() {
   const { communityId } = useCommunityContext()
-  const { user } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({

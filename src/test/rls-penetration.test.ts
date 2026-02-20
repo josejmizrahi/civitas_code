@@ -40,7 +40,7 @@ const skipIfNoKey = SUPABASE_ANON_KEY ? describe : describe.skip
 
 skipIfNoKey('RLS Penetration Tests', () => {
   let memberClient: SupabaseClient
-  let _adminClient: SupabaseClient
+  let adminClient: SupabaseClient
   let otherClient: SupabaseClient
   let anonClient: SupabaseClient
 
@@ -49,7 +49,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
 
     try {
       memberClient = await createAuthenticatedClient(MEMBER_EMAIL, MEMBER_PASSWORD)
-      _adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
+      adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
       otherClient = await createAuthenticatedClient(OTHER_COMMUNITY_MEMBER_EMAIL, OTHER_COMMUNITY_MEMBER_PASSWORD)
     } catch (e) {
       console.warn('Skipping RLS tests — test accounts not available:', (e as Error).message)
@@ -221,6 +221,18 @@ skipIfNoKey('RLS Penetration Tests', () => {
         rules: {},
       })
       expect(error).toBeTruthy()
+    })
+  })
+
+  // =========================================================================
+  // Admin privilege verification
+  // =========================================================================
+  describe('Admin privileges', () => {
+    it('admin client should be able to read communities', async () => {
+      if (!adminClient) return
+
+      const { data } = await adminClient.from('communities').select('id')
+      expect(data).toBeDefined()
     })
   })
 

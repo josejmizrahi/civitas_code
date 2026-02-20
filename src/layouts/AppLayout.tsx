@@ -21,7 +21,6 @@ import {
   Plus,
   Menu,
   X,
-  User,
   Shield,
   BookOpen,
   Ellipsis,

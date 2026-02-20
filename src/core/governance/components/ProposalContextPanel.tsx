@@ -2,12 +2,11 @@ import { useQuery } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { supabase } from '@/shared/lib/supabase'
-import { RULES_CATALOG, getRuleCatalogEntry } from '@/shared/config/rules-catalog'
+import { getRuleCatalogEntry } from '@/shared/config/rules-catalog'
 import { getCategories, getDashboardStats } from '@/core/treasury/services/treasury.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
-import { Progress } from '@/shared/components/ui/progress'
 import { Link } from 'react-router-dom'
 import {
   BookOpen,
@@ -393,7 +392,7 @@ function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal
   )
 }
 
-function MemberAdmissionPanel({ proposal }: { proposal: Proposal }) {
+function MemberAdmissionPanel({ proposal: _proposal }: { proposal: Proposal }) {
   return (
     <Card className="border-sky-200 bg-sky-50/30">
       <CardHeader className="pb-3">
@@ -421,7 +420,7 @@ function MemberAdmissionPanel({ proposal }: { proposal: Proposal }) {
   )
 }
 
-function ElectionPanel({ proposal }: { proposal: Proposal }) {
+function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
   const { communityId } = useCommunityContext()
 
   const { data: currentTerms } = useQuery({

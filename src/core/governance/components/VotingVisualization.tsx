@@ -30,12 +30,6 @@ const OPTION_COLORS = [
   '#22c55e', '#14b8a6',
 ]
 
-const SIMPLE_LABELS: Record<string, string> = {
-  yes: 'A favor',
-  no: 'En contra',
-  abstain: 'Abstención',
-}
-
 const CONSENSUS_LABELS: Record<string, string> = {
   agree: 'De acuerdo',
   disagree: 'En desacuerdo',
@@ -57,7 +51,7 @@ export function VotingVisualization({ votes, voteSummary, votingModel, votingOpt
     ? buildConsensusData(votes)
     : buildSimpleData(voteSummary)
 
-  const _labels = model === 'consensus' ? CONSENSUS_LABELS : SIMPLE_LABELS
+  
 
   return (
     <Card>

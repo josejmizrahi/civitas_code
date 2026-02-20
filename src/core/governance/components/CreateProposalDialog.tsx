@@ -8,7 +8,6 @@ import {
   RULES_CATALOG,
   getRuleCatalogEntry,
   CATEGORY_LABELS,
-  type RuleCatalogEntry,
 } from '@/shared/config/rules-catalog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Input } from '@/shared/components/ui/input'
@@ -33,7 +32,6 @@ import {
   Plus,
   Search,
   BookOpen,
-  ChevronDown,
   Scale,
 } from 'lucide-react'
 import type { FinancialInstruction } from '@/shared/types/rules'

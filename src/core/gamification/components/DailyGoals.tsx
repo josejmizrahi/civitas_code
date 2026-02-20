@@ -7,7 +7,7 @@ import type { DailyGoal } from '../types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { getStreakWarning } from '../constants'
 import { DynamicIcon } from '@/shared/components/DynamicIcon'
-import { Target, Check, Flame, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Target, Check, Flame, CheckCircle } from 'lucide-react'
 
 /**
  * Daily Goals — the core behavioral loop.

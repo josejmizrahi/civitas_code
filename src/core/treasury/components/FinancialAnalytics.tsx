@@ -38,7 +38,6 @@ export function FinancialAnalytics() {
     if (!stats || !transactions) return null
 
     const monthCount = parseInt(period)
-    const _now = new Date()
 
     // Monthly trends (limited to period)
     const monthlyTrends = (stats.monthlyData || []).slice(-monthCount)

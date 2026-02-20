@@ -76,8 +76,6 @@ export async function awardXp(
   // Streak calculation
   const today = new Date().toISOString().split('T')[0]
   let newStreak = profile.current_streak
-  let streakBroken = false
-
   if (profile.last_activity_date) {
     const lastDate = new Date(profile.last_activity_date)
     const todayDate = new Date(today)
@@ -86,11 +84,8 @@ export async function awardXp(
     if (diffDays === 0) {
       // Same day, streak unchanged
     } else if (diffDays === 1) {
-      // Consecutive day
       newStreak += 1
     } else {
-      // Streak broken
-      streakBroken = true
       newStreak = 1
     }
   } else {

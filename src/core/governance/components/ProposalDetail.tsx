@@ -175,7 +175,7 @@ export function ProposalDetail({ proposalId }: Props) {
 
   const endorsementsOk = proposal.endorsements_required === 0 || proposal.endorsements_met
   const canStartDiscussion = proposal.status === 'draft' && isAdmin && endorsementsOk
-  const _canActivate = (proposal.status === 'draft' || proposal.status === 'discussion') && isAdmin
+  
   const canClose = proposal.status === 'active'
   const isVotingOpen = proposal.status === 'active' &&
     (!proposal.voting_end || new Date(proposal.voting_end) > new Date())

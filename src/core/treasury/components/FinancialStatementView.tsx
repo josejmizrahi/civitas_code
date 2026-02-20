@@ -51,10 +51,7 @@ export function FinancialStatementView({ statementId, onBack }: FinancialStateme
   if (isLoading) return <LoadingSpinner message="Cargando estado financiero..." className="py-8" />
   if (!statement) return <p className="text-muted-foreground">Estado financiero no encontrado.</p>
 
-  const _incomeItems = (statement.line_items ?? []).filter((item) => Number(item.amount) > 0)
-  const _expenseItems = (statement.line_items ?? []).filter((item) => Number(item.amount) < 0)
-
-  // Group line items by type based on category patterns or just show all
+  
   const allItems = statement.line_items ?? []
 
   return (
