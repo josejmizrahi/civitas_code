@@ -86,7 +86,12 @@ function RoleGuard({ requiredRole, children }: { requiredRole: string; children:
   return <>{children}</>
 }
 
-/** Catch-all that must never show 404 for root path (some deployments match "*" before "/"). */
+/**
+ * Catch-all for unauthenticated users.
+ * Renders the landing page for "/" or the 404 page for everything else.
+ * IMPORTANT: This must NOT be wrapped in AuthLayout — the landing page
+ * is a full-width page and AuthLayout constrains content to max-w-md.
+ */
 function UnauthenticatedCatchAll() {
   const { pathname } = useLocation()
   if (pathname === '/' || pathname === '') {
@@ -158,10 +163,8 @@ export function AppRouter() {
           <Route path="*" element={<ProtectedCatchAll />} />
         </Route>
 
-        {/* Unauthenticated catch-all — ensure "/" never shows 404 (SPA / base path edge cases) */}
-        <Route path="*" element={<AuthLayout />}>
-          <Route index element={<UnauthenticatedCatchAll />} />
-        </Route>
+        {/* Unauthenticated catch-all — NOT wrapped in AuthLayout so the landing page renders full-width */}
+        <Route path="*" element={<UnauthenticatedCatchAll />} />
       </Routes>
     </BrowserRouter>
   )
