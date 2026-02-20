@@ -246,9 +246,10 @@ export async function markInstallmentPaid(
   const allPaid = allInstallments.every((i) => i.status === 'paid')
 
   if (allPaid) {
-    await (supabase.from('payment_plans') as any)
+    const { error: planErr } = await (supabase.from('payment_plans') as any)
       .update({ status: 'completed' })
       .eq('id', installment.plan_id)
+    if (planErr) throw planErr
   }
 
   return installment

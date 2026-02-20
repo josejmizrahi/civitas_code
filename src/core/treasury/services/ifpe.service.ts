@@ -62,11 +62,12 @@ export async function manualReconcile(
     .single()
   if (txErr) throw txErr
 
-  await (supabase.from('payment_obligations') as any)
+  const { error: obErr } = await (supabase.from('payment_obligations') as any)
     .update({ status: 'paid', payment_transaction_id: tx.id })
     .eq('id', obligationId)
+  if (obErr) throw obErr
 
-  await (supabase as any).from('ifpe_webhook_events')
+  const { error: evtErr } = await (supabase as any).from('ifpe_webhook_events')
     .update({
       reconciliation_status: 'manual',
       matched_obligation_id: obligationId,
@@ -74,15 +75,17 @@ export async function manualReconcile(
       processed_at: new Date().toISOString(),
     })
     .eq('id', eventId)
+  if (evtErr) throw evtErr
 }
 
 export async function ignoreEvent(eventId: string): Promise<void> {
-  await (supabase as any).from('ifpe_webhook_events')
+  const { error } = await (supabase as any).from('ifpe_webhook_events')
     .update({
       reconciliation_status: 'ignored',
       processed_at: new Date().toISOString(),
     })
     .eq('id', eventId)
+  if (error) throw error
 }
 
 export async function getReconciliationStats(communityId: string): Promise<{

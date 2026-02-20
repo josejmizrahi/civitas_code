@@ -18,14 +18,32 @@ interface SpeiPayload {
   clave_rastreo: string
 }
 
-function verifySignature(body: string, signature: string | null): boolean {
-  if (!IFPE_WEBHOOK_SECRET) return true
+async function verifySignature(body: string, signature: string | null): Promise<boolean> {
+  if (!IFPE_WEBHOOK_SECRET) return false
   if (!signature) return false
 
-  // HMAC-SHA256 verification (standard for IFPE providers like STP, Arcus, etc.)
-  // In production, use crypto.subtle.importKey + sign + timingSafeEqual
-  // For now, simple comparison for mock/dev
-  return signature === IFPE_WEBHOOK_SECRET
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(IFPE_WEBHOOK_SECRET),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const expected = new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(body)))
+
+  let received: Uint8Array
+  try {
+    received = Uint8Array.from(atob(signature), c => c.charCodeAt(0))
+  } catch {
+    return false
+  }
+
+  if (expected.length !== received.length) return false
+  // Timing-safe comparison
+  let diff = 0
+  for (let i = 0; i < expected.length; i++) diff |= expected[i] ^ received[i]
+  return diff === 0
 }
 
 serve(async (req) => {
@@ -46,7 +64,7 @@ serve(async (req) => {
   const rawBody = await req.text()
   const signature = req.headers.get('x-webhook-signature')
 
-  if (!verifySignature(rawBody, signature)) {
+  if (!(await verifySignature(rawBody, signature))) {
     return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401 })
   }
 
@@ -59,6 +77,10 @@ serve(async (req) => {
 
   if (!payload.clabe_destino || !payload.clave_rastreo) {
     return new Response(JSON.stringify({ error: 'Missing clabe_destino or clave_rastreo' }), { status: 400 })
+  }
+
+  if (typeof payload.monto !== 'number' || payload.monto <= 0) {
+    return new Response(JSON.stringify({ error: 'Invalid monto: must be a positive number' }), { status: 400 })
   }
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)

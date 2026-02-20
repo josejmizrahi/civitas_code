@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react'
 import { useComments, useReactions, useSentimentSummary, useCreateComment, useUpdateComment, useDeleteComment, useAddReaction, useRemoveReaction } from '../hooks/useDiscussion'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { useAuth } from '@/app/providers'
@@ -30,13 +31,13 @@ export function DiscussionThread({ proposalId, canComment }: Props) {
   const addReactionMut = useAddReaction(proposalId)
   const removeReactionMut = useRemoveReaction(proposalId)
 
-  const memberOptions = (members ?? []).map((m) => ({
+  const memberOptions = useMemo(() => (members ?? []).map((m) => ({
     id: m.id,
     display_name: (m as any).display_name ?? (m as any).name ?? 'Miembro',
     role: (m as any).role,
-  }))
+  })), [members])
 
-  const handleCreateComment = (content: string, sentiment: Sentiment, mentions: MentionRef[]) => {
+  const handleCreateComment = useCallback((content: string, sentiment: Sentiment, mentions: MentionRef[]) => {
     if (!currentMember) return
     createCommentMut.mutate({
       proposal_id: proposalId,
@@ -45,9 +46,9 @@ export function DiscussionThread({ proposalId, canComment }: Props) {
       sentiment,
       mentions,
     })
-  }
+  }, [currentMember, proposalId, createCommentMut])
 
-  const handleReply = (parentId: string, content: string, sentiment: Sentiment, mentions: MentionRef[]) => {
+  const handleReply = useCallback((parentId: string, content: string, sentiment: Sentiment, mentions: MentionRef[]) => {
     if (!currentMember) return
     createCommentMut.mutate({
       proposal_id: proposalId,
@@ -57,25 +58,25 @@ export function DiscussionThread({ proposalId, canComment }: Props) {
       parent_comment_id: parentId,
       mentions,
     })
-  }
+  }, [currentMember, proposalId, createCommentMut])
 
-  const handleEdit = (commentId: string, content: string, sentiment?: Sentiment) => {
+  const handleEdit = useCallback((commentId: string, content: string, sentiment?: Sentiment) => {
     updateCommentMut.mutate({ commentId, content, sentiment })
-  }
+  }, [updateCommentMut])
 
-  const handleDelete = (commentId: string) => {
+  const handleDelete = useCallback((commentId: string) => {
     deleteCommentMut.mutate(commentId)
-  }
+  }, [deleteCommentMut])
 
-  const handleAddReaction = (commentId: string, reaction: ReactionType) => {
+  const handleAddReaction = useCallback((commentId: string, reaction: ReactionType) => {
     if (!currentMember) return
     addReactionMut.mutate({ commentId, memberId: currentMember.id, reaction })
-  }
+  }, [currentMember, addReactionMut])
 
-  const handleRemoveReaction = (commentId: string, reaction: ReactionType) => {
+  const handleRemoveReaction = useCallback((commentId: string, reaction: ReactionType) => {
     if (!currentMember) return
     removeReactionMut.mutate({ commentId, memberId: currentMember.id, reaction })
-  }
+  }, [currentMember, removeReactionMut])
 
   return (
     <Card>

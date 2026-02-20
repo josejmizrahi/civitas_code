@@ -1,6 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
 import type { CommunityRules, FinancialStanding } from '@/shared/types/rules'
 import { DEFAULT_RULES } from '@/shared/types/rules'
+import type { Role } from '@/shared/types'
 
 export function getCommunityRules(config: Record<string, unknown> | null, rules?: Record<string, unknown> | null): CommunityRules {
   const raw = rules || config?.rules as Record<string, unknown> | undefined
@@ -62,7 +63,7 @@ export async function refreshFinancialStandings(communityId: string): Promise<vo
 // Check if a member can perform an action based on rules
 export function canPerformAction(
   action: 'vote' | 'propose' | 'delegate' | 'be_elected' | 'quorum_excluded',
-  memberRole: string,
+  memberRole: Role | string,
   financialStanding: FinancialStanding,
   rules: CommunityRules
 ): { allowed: boolean; reason?: string } {
