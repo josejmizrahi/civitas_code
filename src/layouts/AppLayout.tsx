@@ -160,7 +160,7 @@ export function AppLayout() {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="truncate text-sm font-semibold">{community?.name || 'Ryve'}</span>
+          <span className="truncate text-sm font-semibold">{community?.name || 'RYVE'}</span>
         </div>
         <div className="flex items-center gap-1">
           <NotificationBell />
@@ -198,7 +198,7 @@ export function AppLayout() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-sidebar-primary">
-                  {community?.name || 'Ryve'}
+                  {community?.name || 'RYVE'}
                 </p>
                 {currentMember?.role && (
                   <p className="truncate text-xs text-muted-foreground capitalize">

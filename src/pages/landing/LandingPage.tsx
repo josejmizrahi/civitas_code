@@ -249,7 +249,7 @@ export function LandingPage() {
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:h-16 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
             <Shield className="h-6 w-6 sm:h-7 sm:w-7" />
-            <span className="text-lg font-bold tracking-tight sm:text-xl">Ryve</span>
+            <span className="text-lg font-bold tracking-tight sm:text-xl">RYVE</span>
           </Link>
 
           {/* Desktop nav */}
@@ -340,7 +340,7 @@ export function LandingPage() {
               <span className="block text-primary">autodeterminacion colectiva</span>
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:mt-6 sm:text-lg lg:text-xl leading-relaxed">
-              Ryve es el sistema operativo para comunidades autogobernadas.
+              RYVE es el sistema operativo para comunidades autogobernadas.
               Tres primitivas integradas — Identidad, Tesoreria, Gobernanza —
               que convierten decisiones en acciones con consecuencias reales.
             </p>
@@ -376,7 +376,7 @@ export function LandingPage() {
               desconexion entre quienes deciden, quienes pagan y quienes administran.&rdquo;
             </p>
             <Link to="/whitepaper" className="mt-3 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Ryve Whitepaper v4 — La tesis fundacional
+              RYVE Whitepaper v4 — La tesis fundacional
               <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
@@ -458,7 +458,7 @@ export function LandingPage() {
             <div className="mx-auto max-w-2xl text-center mb-6 sm:mb-10">
               <h3 className="text-lg font-semibold sm:text-xl">El ciclo cerrado</h3>
               <p className="mt-1.5 text-sm text-muted-foreground sm:mt-2">
-                Lo que hace a Ryve unico: las primitivas se alimentan entre si.
+                Lo que hace a RYVE unico: las primitivas se alimentan entre si.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:grid sm:grid-cols-3 sm:gap-4">
@@ -561,7 +561,7 @@ export function LandingPage() {
                 <span className="block text-primary">al network state</span>
               </h2>
               <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
-                No necesitas transformarte de golpe. Ryve crece contigo:
+                No necesitas transformarte de golpe. RYVE crece contigo:
                 empieza importando tu Excel, termina operando como un estado digital.
               </p>
               <ul className="mt-6 space-y-3 sm:mt-8 sm:space-y-4">
@@ -634,7 +634,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-20 lg:py-28">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl text-balance">
-              Por que Ryve es diferente
+              Por que RYVE es diferente
             </h2>
             <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
               La unica plataforma donde las decisiones colectivas tienen consecuencias financieras reales.
@@ -644,7 +644,7 @@ export function LandingPage() {
             <div className="rounded-xl border overflow-hidden">
               <div className="hidden sm:grid grid-cols-2 bg-muted/50 px-6 py-3 text-sm font-semibold">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-primary" /> Ryve
+                  <Shield className="h-4 w-4 text-primary" /> RYVE
                 </div>
                 <div className="text-muted-foreground">Herramientas tradicionales</div>
               </div>
@@ -679,7 +679,7 @@ export function LandingPage() {
               Para todo tipo de comunidades
             </h2>
             <p className="mt-3 text-base text-muted-foreground sm:mt-4 sm:text-lg">
-              Ryve se adapta a cualquier organizacion colectiva que necesite
+              RYVE se adapta a cualquier organizacion colectiva que necesite
               gobernarse, cobrar y rendir cuentas.
             </p>
           </div>
@@ -717,7 +717,7 @@ export function LandingPage() {
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed sm:text-base">
                   Conoce en detalle la tesis fundacional, la arquitectura del sistema de primitivas integradas,
-                  el motor de reglas configurable y la vision a largo plazo de Ryve como infraestructura
+                  el motor de reglas configurable y la vision a largo plazo de RYVE como infraestructura
                   para network states.
                 </p>
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -746,7 +746,7 @@ export function LandingPage() {
               De la transparencia a la autodeterminacion
             </h2>
             <p className="mt-4 text-base text-muted-foreground leading-relaxed sm:mt-6 sm:text-lg">
-              Ryve no es solo una herramienta de administracion. Es infraestructura
+              RYVE no es solo una herramienta de administracion. Es infraestructura
               para que cualquier grupo humano pueda gobernarse a si mismo de forma
               transparente, democratica y eficiente.
             </p>
@@ -797,7 +797,7 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-6 sm:flex-row sm:justify-between sm:px-6 sm:py-8">
           <div className="flex items-center gap-2 shrink-0">
             <Shield className="h-5 w-5 shrink-0" />
-            <span className="font-semibold">Ryve</span>
+            <span className="font-semibold">RYVE</span>
             <span className="hidden text-sm text-muted-foreground sm:inline">/ Infrastructure for Network States</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground sm:gap-x-6">

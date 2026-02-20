@@ -78,7 +78,7 @@ export function exportToPDF(elementId: string, options: ExportOptions): void {
       </div>
       ${element.innerHTML}
       <div class="export-footer">
-        Exportado desde Ryve — ${new Date().toISOString()}
+        Exportado desde RYVE — ${new Date().toISOString()}
       </div>
     </body>
     </html>

@@ -11,8 +11,8 @@ interface PrivacyNoticeModalProps {
 
 export function PrivacyNoticeModal({ open, onAccept, onClose, communityName }: PrivacyNoticeModalProps) {
   const responsibleParty = communityName
-    ? `Ryve Platform / ${communityName}`
-    : 'Ryve Platform'
+    ? `RYVE Platform / ${communityName}`
+    : 'RYVE Platform'
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>

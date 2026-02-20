@@ -240,7 +240,7 @@ export function CollectionView() {
                 <li>IFPE genera una CLABE unica para la comunidad</li>
                 <li>Admin configura cuotas y genera obligaciones con referencia de pago</li>
                 <li>Miembros realizan transferencia SPEI a la CLABE con su referencia</li>
-                <li>IFPE notifica a Ryve via webhook</li>
+                <li>IFPE notifica a RYVE via webhook</li>
                 <li>La obligacion se marca como pagada automaticamente</li>
                 <li>Transaccion registrada, dashboard actualizado, identidad refrescada</li>
               </ol>

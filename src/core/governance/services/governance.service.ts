@@ -1161,7 +1161,7 @@ export async function generateMinutes(
     isResidential ? `Fecha:                      _________________________` : '',
     isResidential ? `` : '',
     `${'─'.repeat(60)}`,
-    `Este documento fue generado automáticamente por Ryve.`,
+    `Este documento fue generado automáticamente por RYVE.`,
     `La integridad del acta está protegida mediante firma digital SHA-256.`,
     isResidential ? `Conforme a la Ley de Propiedad en Condominio (LPCI CDMX).` : '',
   ].filter(Boolean).join('\n')
