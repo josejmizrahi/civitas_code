@@ -4,19 +4,25 @@ import { cn } from '@/shared/lib/utils'
 interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: number
   max?: number
+  /** Tailwind class for the filled bar (e.g. "bg-green-500", "bg-red-500"). Defaults to "bg-primary". */
+  indicatorClassName?: string
 }
 
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
-  ({ className, value = 0, max = 100, ...props }, ref) => {
+  ({ className, value = 0, max = 100, indicatorClassName, ...props }, ref) => {
     const percentage = Math.min(Math.max((value / max) * 100, 0), 100)
     return (
       <div
         ref={ref}
-        className={cn('relative h-2 w-full overflow-hidden rounded-full bg-primary/20', className)}
+        role="progressbar"
+        aria-valuenow={value}
+        aria-valuemin={0}
+        aria-valuemax={max}
+        className={cn('relative h-2 w-full overflow-hidden rounded-full bg-muted', className)}
         {...props}
       >
         <div
-          className="h-full bg-primary transition-all"
+          className={cn('h-full transition-all', indicatorClassName || 'bg-primary')}
           style={{ width: `${percentage}%` }}
         />
       </div>

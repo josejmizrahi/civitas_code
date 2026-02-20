@@ -3,6 +3,7 @@ import { useCommunityContext } from '@/app/providers'
 import { useToast } from '@/shared/components/ui/toast'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
+import { Progress } from '@/shared/components/ui/progress'
 import { UserCheck, Users } from 'lucide-react'
 import type { Proposal } from '../types'
 
@@ -84,14 +85,7 @@ export function EndorsementBar({ proposal }: Props) {
           <span className="text-xs text-muted-foreground">Tu propuesta</span>
         )}
       </div>
-      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${
-            isMet ? 'bg-green-500' : 'bg-blue-500'
-          }`}
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+      <Progress value={progress} className="h-1.5" indicatorClassName={isMet ? 'bg-green-500' : 'bg-blue-500'} />
     </div>
   )
 }

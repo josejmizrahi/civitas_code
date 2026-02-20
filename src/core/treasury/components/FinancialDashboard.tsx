@@ -2,6 +2,7 @@ import { useDashboard } from '../hooks/useDashboard'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { useCollectionStats } from '../hooks/usePaymentStatus'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Progress } from '@/shared/components/ui/progress'
 import { IncomeVsExpenseChart } from './IncomeVsExpenseChart'
 import { formatCurrency } from '@/shared/lib/utils'
 import { TrendingUp, TrendingDown, Wallet, AlertTriangle, ArrowUpCircle } from 'lucide-react'
@@ -87,12 +88,7 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
               </CardHeader>
               <CardContent>
                 <div className="text-xl sm:text-2xl font-bold">{(collStats.collectionRate * 100).toFixed(0)}%</div>
-                <div className="mt-1 h-2 rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-blue-500 transition-all"
-                    style={{ width: `${collStats.collectionRate * 100}%` }}
-                  />
-                </div>
+                <Progress value={collStats.collectionRate * 100} className="mt-1" indicatorClassName="bg-blue-500" />
               </CardContent>
             </Card>
           </>
