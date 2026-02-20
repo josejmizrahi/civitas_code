@@ -23,8 +23,18 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    const emailTrimmed = email.trim()
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailTrimmed) {
+      setError('El correo electrónico es obligatorio')
+      return
+    }
+    if (!emailRegex.test(emailTrimmed)) {
+      setError('Introduce un correo electrónico válido')
+      return
+    }
     try {
-      const result = await inviteMember.mutateAsync({ email, role })
+      const result = await inviteMember.mutateAsync({ email: emailTrimmed, role })
       setCreatedToken(result.token)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al enviar invitación')

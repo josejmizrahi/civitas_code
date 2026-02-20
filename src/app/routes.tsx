@@ -134,8 +134,8 @@ export function AppRouter() {
           <Route path="*" element={<LazyPage><NotFoundPage /></LazyPage>} />
         </Route>
 
-        {/* Unauthenticated 404 */}
-        <Route path="*" element={<LazyPage><NotFoundPage /></LazyPage>} />
+        {/* Unauthenticated 404 — same layout as login/register */}
+        <Route path="*" element={<AuthLayout><LazyPage><NotFoundPage /></LazyPage></AuthLayout>} />
       </Routes>
     </BrowserRouter>
   )

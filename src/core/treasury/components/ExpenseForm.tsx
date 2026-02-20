@@ -46,6 +46,10 @@ export function ExpenseForm({ open, onOpenChange }: Props) {
       setError('El monto excede el límite permitido')
       return
     }
+    if (type === 'expense' && filteredCategories.length > 0 && !categoryId) {
+      setError('Selecciona una categoría para el egreso')
+      return
+    }
 
     try {
       await createTx.mutateAsync({

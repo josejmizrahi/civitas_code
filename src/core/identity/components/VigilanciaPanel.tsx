@@ -60,7 +60,7 @@ function ReportForm({ onClose }: { onClose: () => void }) {
 
   const handleSubmit = () => {
     if (!title.trim() || !period.trim() || !content.trim()) return
-    const authorId = (currentMember as any)?.id ?? user?.id ?? ''
+    const authorId = currentMember?.id ?? user?.id ?? ''
     createReport.mutate(
       {
         author_id: authorId,

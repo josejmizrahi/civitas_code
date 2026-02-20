@@ -59,7 +59,7 @@ export async function getAssembly(assemblyId: string): Promise<Assembly> {
         .eq('id', assembly.called_by)
         .maybeSingle()
 
-      assembly.caller_name = (profile as any)?.full_name || 'Administrador'
+      assembly.caller_name = (profile as { full_name?: string } | null)?.full_name || 'Administrador'
     }
   }
 
@@ -84,10 +84,8 @@ export async function createAssembly(
     .eq('id', communityId)
     .single()
 
-  const rules = getCommunityRules(
-    (community as any)?.config ?? null,
-    (community as any)?.rules ?? null
-  )
+  const comm = community as { config?: Record<string, unknown>; rules?: Record<string, unknown> } | null
+  const rules = getCommunityRules(comm?.config ?? null, comm?.rules ?? null)
   const minNoticeDays = rules.governance.minimum_notice_days || 7
 
   const scheduledDate = new Date(data.scheduled_date)
@@ -121,8 +119,9 @@ export async function createAssembly(
   if (error) throw error
 
   // Auto-create first convocatoria
+  const assemblyRow = assembly as { id: string }
   await createConvocatoria(communityId, {
-    assembly_id: (assembly as any).id,
+    assembly_id: assemblyRow.id,
     call_number: 1,
     type: data.type,
     scheduled_date: data.scheduled_date,
@@ -140,7 +139,7 @@ export async function createAssembly(
       'assembly_scheduled',
       `Nueva asamblea: ${data.title}`,
       `Programada para ${new Date(data.scheduled_date).toLocaleDateString('es-MX')}. Ubicación: ${data.location}`,
-      { assembly_id: (assembly as any).id }
+      { assembly_id: assemblyRow.id }
     )
   } catch { /* notifications are best-effort */ }
 
@@ -289,7 +288,7 @@ export async function recordDelivery(
 
   if (fetchErr) throw fetchErr
 
-  const existingLog = ((conv as any)?.delivery_log ?? []) as DeliveryRecord[]
+  const existingLog = ((conv as { delivery_log?: unknown } | null)?.delivery_log ?? []) as DeliveryRecord[]
   const newRecord: DeliveryRecord = {
     member_id: memberId,
     member_name: memberName,

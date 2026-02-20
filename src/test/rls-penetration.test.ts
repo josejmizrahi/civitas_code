@@ -18,11 +18,11 @@ const SUPABASE_URL = process.env.TEST_SUPABASE_URL || 'http://127.0.0.1:54321'
 const SUPABASE_ANON_KEY = process.env.TEST_SUPABASE_ANON_KEY || ''
 
 // Test accounts — set via env or use defaults for local dev
-const MEMBER_EMAIL = process.env.TEST_MEMBER_EMAIL || 'test-member@ryve.test'
+const MEMBER_EMAIL = process.env.TEST_MEMBER_EMAIL || 'test-member@civitas.test'
 const MEMBER_PASSWORD = process.env.TEST_MEMBER_PASSWORD || 'testpassword123'
-const ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL || 'test-admin@ryve.test'
+const ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL || 'test-admin@civitas.test'
 const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'testpassword123'
-const OTHER_COMMUNITY_MEMBER_EMAIL = process.env.TEST_OTHER_EMAIL || 'test-other@ryve.test'
+const OTHER_COMMUNITY_MEMBER_EMAIL = process.env.TEST_OTHER_EMAIL || 'test-other@civitas.test'
 const OTHER_COMMUNITY_MEMBER_PASSWORD = process.env.TEST_OTHER_PASSWORD || 'testpassword123'
 
 function createAnonClient(): SupabaseClient {

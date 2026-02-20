@@ -24,6 +24,7 @@ import {
   Wrench,
 } from 'lucide-react'
 import type { Proposal } from '../types'
+import type { FinancialInstruction } from '@/shared/types/rules'
 
 interface Props {
   proposal: Proposal
@@ -34,7 +35,7 @@ interface Props {
  * Connects each proposal type with the relevant module data.
  */
 export function ProposalContextPanel({ proposal }: Props) {
-  const fi = proposal.financial_instruction as any
+  const fi = proposal.financial_instruction
   const templateId = proposal.template_id
 
   if (!templateId) return null
@@ -59,7 +60,7 @@ export function ProposalContextPanel({ proposal }: Props) {
   }
 }
 
-function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: any }) {
+function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
   const { rules } = useRulesEngine()
   const configKey = fi?.config_key as string | undefined
   const newValue = fi?.config_value
@@ -130,7 +131,7 @@ function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: 
   )
 }
 
-function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: Proposal; fi: any; templateId: string }) {
+function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: Proposal; fi: FinancialInstruction | null; templateId: string }) {
   const { communityId } = useCommunityContext()
   const amount = Number(fi?.amount) || 0
 
@@ -230,7 +231,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
         {category && (
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">Categoría:</span>
-            <Badge variant="outline">{(category as any).name}</Badge>
+            <Badge variant="outline">{category.name}</Badge>
           </div>
         )}
 
@@ -241,11 +242,11 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
               <span className="text-muted-foreground">Beneficiario:</span>
               <span className="font-medium">{fi.recipient_name}</span>
               {entity && (
-                <Badge variant="secondary" className="text-[10px]">{(entity as any).type}</Badge>
+                <Badge variant="secondary" className="text-[10px]">{entity.type}</Badge>
               )}
             </div>
             {entity && (
-              <Link to={`/entities/${(entity as any).id}`}>
+              <Link to={`/entities/${entity.id}`}>
                 <Button variant="ghost" size="sm" className="gap-1 text-xs">
                   Ver entidad <ArrowRight className="h-3 w-3" />
                 </Button>
@@ -266,7 +267,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
   )
 }
 
-function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: any }) {
+function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
   const { communityId } = useCommunityContext()
   const newAmount = Number(fi?.new_amount || fi?.amount) || 0
 
@@ -337,7 +338,7 @@ function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi:
   )
 }
 
-function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: any }) {
+function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
   const { communityId } = useCommunityContext()
   const amount = Number(fi?.amount) || 0
   const categoryId = fi?.category_id
@@ -426,12 +427,13 @@ function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
   const { data: currentTerms } = useQuery({
     queryKey: ['admin-terms-active', communityId],
     queryFn: async () => {
-      const { data } = await (supabase.from('admin_terms') as any)
+      const { data } = await supabase
+        .from('admin_terms')
         .select('id, role, term_number, term_start, member_id')
         .eq('community_id', communityId!)
         .eq('status', 'active')
         .order('role')
-      return data ?? []
+      return (data ?? []) as { id: string; role: string; term_number: number; term_start: string; member_id: string }[]
     },
     enabled: !!communityId,
     staleTime: 60_000,
@@ -453,7 +455,7 @@ function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
         {currentTerms && currentTerms.length > 0 && (
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase">Cargos actuales</p>
-            {(currentTerms as any[]).map((term) => (
+            {currentTerms.map((term) => (
               <div key={term.id} className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
                 <Badge variant="outline" className="capitalize">{term.role}</Badge>
                 <span className="text-xs text-muted-foreground">Periodo #{term.term_number}</span>

@@ -33,7 +33,7 @@ export function WhitepaperPage() {
           </Link>
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            <span className="font-semibold">RYVE</span>
+            <span className="font-semibold">Civitas</span>
             <span className="hidden sm:inline text-xs text-muted-foreground">/ Whitepaper v4</span>
           </div>
           <Link to="/register">
@@ -74,7 +74,7 @@ export function WhitepaperPage() {
                 Whitepaper v4
               </div>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl text-balance">
-                RYVE: Infraestructura para comunidades autogobernadas
+                Civitas: Infraestructura para comunidades autogobernadas
               </h1>
               <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
                 Un sistema de primitivas integradas — Identidad, Tesoreria, Gobernanza —
@@ -83,7 +83,7 @@ export function WhitepaperPage() {
               <div className="mt-6 flex flex-wrap gap-4 text-sm text-muted-foreground">
                 <span>Febrero 2026</span>
                 <span className="hidden sm:inline">|</span>
-                <span>RYVE Labs</span>
+                <span>Civitas Labs</span>
               </div>
             </div>
 
@@ -106,8 +106,8 @@ export function WhitepaperPage() {
               <h2 className="mb-4 text-2xl font-bold tracking-tight">Resumen Ejecutivo</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  RYVE es un sistema operativo para comunidades autogobernadas. A diferencia de las herramientas
-                  de administracion fragmentadas que existen hoy, RYVE integra tres primitivas fundamentales
+                  Civitas es un sistema operativo para comunidades autogobernadas. A diferencia de las herramientas
+                  de administracion fragmentadas que existen hoy, Civitas integra tres primitivas fundamentales
                   — <strong className="text-foreground">Identidad</strong>, <strong className="text-foreground">Tesoreria</strong> y <strong className="text-foreground">Gobernanza</strong> — en un ciclo cerrado donde
                   cada decision tiene consecuencias financieras, cada pago afecta los derechos y cada derecho
                   habilita decisiones.
@@ -119,7 +119,7 @@ export function WhitepaperPage() {
                 </p>
                 <p>
                   Este documento describe el problema que resolvemos, la tesis que guia nuestro diseno, la
-                  arquitectura tecnica del sistema y la vision a largo plazo de RYVE como infraestructura
+                  arquitectura tecnica del sistema y la vision a largo plazo de Civitas como infraestructura
                   para la autodeterminacion colectiva.
                 </p>
               </div>
@@ -172,7 +172,7 @@ export function WhitepaperPage() {
               <h2 className="mb-4 text-2xl font-bold tracking-tight">2. Tesis Fundacional</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  RYVE parte de una tesis simple: <strong className="text-foreground">la gobernanza comunitaria
+                  Civitas parte de una tesis simple: <strong className="text-foreground">la gobernanza comunitaria
                   solo funciona cuando las decisiones, el dinero y la identidad estan conectados en un
                   sistema integrado.</strong>
                 </p>
@@ -185,14 +185,14 @@ export function WhitepaperPage() {
                   <li>Los roles, el peso de voto y el standing financiero deben determinar quien puede votar y proponer.</li>
                 </ul>
                 <p>
-                  Esta integracion no es un feature: es la arquitectura fundamental del sistema. RYVE no es
+                  Esta integracion no es un feature: es la arquitectura fundamental del sistema. Civitas no es
                   tres herramientas empaquetadas juntas — es un sistema donde las primitivas se alimentan entre si.
                 </p>
               </div>
 
               <blockquote className="mt-6 border-l-2 border-foreground/20 pl-4 text-lg font-medium text-foreground/80 italic">
                 Las decisiones colectivas que no tienen consecuencias financieras reales son ejercicios decorativos.
-                RYVE hace que cada voto cuente — literalmente.
+                Civitas hace que cada voto cuente — literalmente.
               </blockquote>
             </section>
 
@@ -200,7 +200,7 @@ export function WhitepaperPage() {
             <section id="primitives" className="mb-14 scroll-mt-20">
               <h2 className="mb-4 text-2xl font-bold tracking-tight">3. Primitivas del Sistema</h2>
               <p className="mb-6 text-muted-foreground leading-relaxed">
-                RYVE se construye sobre tres primitivas composables. Cada una puede funcionar de forma
+                Civitas se construye sobre tres primitivas composables. Cada una puede funcionar de forma
                 independiente, pero su verdadero poder emerge cuando operan juntas.
               </p>
 
@@ -271,7 +271,7 @@ export function WhitepaperPage() {
                       con firma digital SHA-256 verificable.
                     </p>
                     <p>
-                      Lo que distingue a RYVE de un sistema de encuestas es que las propuestas aprobadas
+                      Lo que distingue a Civitas de un sistema de encuestas es que las propuestas aprobadas
                       se ejecutan. Una propuesta de gasto aprobada genera el registro de egreso en Tesoreria.
                       Una propuesta de cambio de cuota actualiza las obligaciones de pago. Las decisiones
                       tienen consecuencias reales e inmediatas.
@@ -286,7 +286,7 @@ export function WhitepaperPage() {
               <h2 className="mb-4 text-2xl font-bold tracking-tight">4. El Ciclo Cerrado</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Lo que hace a RYVE fundamentalmente distinto es que las tres primitivas forman un ciclo
+                  Lo que hace a Civitas fundamentalmente distinto es que las tres primitivas forman un ciclo
                   cerrado. No son modulos separados que comparten una base de datos — son componentes de un
                   sistema donde cada salida alimenta la entrada de otro.
                 </p>
@@ -330,7 +330,7 @@ export function WhitepaperPage() {
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
                   Cada comunidad es diferente. Un condominio en la Ciudad de Mexico tiene reglas distintas a una
-                  cooperativa agricola en Oaxaca o una parroquia en Guadalajara. RYVE no impone un modelo
+                  cooperativa agricola en Oaxaca o una parroquia en Guadalajara. Civitas no impone un modelo
                   unico — proporciona un motor de reglas configurable que cada comunidad adapta a su realidad.
                 </p>
                 <p>
@@ -367,7 +367,7 @@ export function WhitepaperPage() {
               <h2 className="mb-4 text-2xl font-bold tracking-tight">6. Arquitectura Tecnica</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  RYVE se construye sobre una arquitectura multi-tenant con aislamiento real a nivel de
+                  Civitas se construye sobre una arquitectura multi-tenant con aislamiento real a nivel de
                   base de datos usando Row-Level Security (RLS) en PostgreSQL.
                 </p>
               </div>
@@ -406,7 +406,7 @@ export function WhitepaperPage() {
               <h2 className="mb-4 text-2xl font-bold tracking-tight">7. Activacion Progresiva</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  RYVE no requiere una transformacion digital completa desde el dia uno. El sistema esta
+                  Civitas no requiere una transformacion digital completa desde el dia uno. El sistema esta
                   disenado para una adopcion progresiva que respeta la realidad de cada comunidad.
                 </p>
               </div>
@@ -435,7 +435,7 @@ export function WhitepaperPage() {
               <h2 className="mb-4 text-2xl font-bold tracking-tight">8. Mercado Objetivo</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  RYVE se dirige a cualquier organizacion colectiva que necesite gobernarse, cobrar y
+                  Civitas se dirige a cualquier organizacion colectiva que necesite gobernarse, cobrar y
                   rendir cuentas. Comenzamos con los verticales de mayor urgencia y volumen en Latinoamerica.
                 </p>
               </div>
@@ -482,7 +482,7 @@ export function WhitepaperPage() {
               <h2 className="mb-4 text-2xl font-bold tracking-tight">9. Vision a Futuro</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  RYVE no es solo una herramienta de administracion. Es infraestructura para que cualquier
+                  Civitas no es solo una herramienta de administracion. Es infraestructura para que cualquier
                   grupo humano pueda gobernarse a si mismo de forma transparente, democratica y eficiente.
                 </p>
                 <p>
@@ -491,7 +491,7 @@ export function WhitepaperPage() {
                   socios o una comunidad digital de 5,000 miembros.
                 </p>
                 <p>
-                  A largo plazo, RYVE construye la infraestructura para una red federada de comunidades
+                  A largo plazo, Civitas construye la infraestructura para una red federada de comunidades
                   autogobernadas. Cada comunidad opera de forma soberana con sus propias reglas, pero puede
                   conectarse a una red mas amplia para compartir metricas agregadas, comparar su salud
                   organizacional y aprender de otras comunidades.
@@ -507,7 +507,7 @@ export function WhitepaperPage() {
             <div className="rounded-xl border bg-muted/30 p-6 sm:p-8 text-center">
               <h3 className="text-xl font-bold">Construye con nosotros</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                RYVE esta en desarrollo activo. Crea tu comunidad hoy y se parte
+                Civitas esta en desarrollo activo. Crea tu comunidad hoy y se parte
                 de la primera generacion de comunidades autogobernadas.
               </p>
               <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -534,7 +534,7 @@ export function WhitepaperPage() {
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6">
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            <span className="font-semibold">RYVE</span>
+            <span className="font-semibold">Civitas</span>
           </div>
           <span className="text-sm text-muted-foreground">Whitepaper v4 — Febrero 2026</span>
         </div>

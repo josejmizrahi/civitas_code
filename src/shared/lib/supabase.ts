@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/shared/types/database'
+import { logger } from '@/shared/lib/logger'
 
 // VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are injected by vite.config.ts
 // from the Vercel Supabase integration env vars (NEXT_PUBLIC_SUPABASE_URL, etc.)
@@ -17,7 +18,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
       '<p style="color:#888;font-size:14px">Configúralas en Vercel (Settings → Environment Variables) o en un archivo <code>.env</code> local.</p>' +
       '</div>'
   }
-  console.error(
+  logger.error(
     'Missing Supabase environment variables (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY). ' +
     'These are automatically mapped from NEXT_PUBLIC_SUPABASE_URL / SUPABASE_ANON_KEY in vite.config.ts.'
   )

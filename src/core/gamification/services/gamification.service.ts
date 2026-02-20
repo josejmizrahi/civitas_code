@@ -169,7 +169,8 @@ async function getActionCounts(
     .eq('member_id', memberId)
     .eq('community_id', communityId)
 
-  if (error || !data) return {}
+  if (error) throw error
+  if (!data) return {}
 
   const counts: Record<string, number> = {}
   for (const row of data as { action: string }[]) {

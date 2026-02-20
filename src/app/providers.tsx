@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/shared/lib/supabase'
 import { getCommunity, getCurrentMember, getUserCommunities } from '@/core/identity/services/identity.service'
@@ -32,36 +32,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const { info: toastInfo } = useToast()
+  const sessionRef = useRef<Session | null>(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      sessionRef.current = s
+      setSession(s)
+      setUser(s?.user ?? null)
       setLoading(false)
     }).catch(() => {
+      sessionRef.current = null
       setSession(null)
       setUser(null)
       setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      const hadUser = !!user
-      setSession(session)
-      setUser(session?.user ?? null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      const hadSession = !!sessionRef.current
+      sessionRef.current = newSession
+      setSession(newSession)
+      setUser(newSession?.user ?? null)
 
       if (event === 'PASSWORD_RECOVERY' && !window.location.pathname.includes('/reset-password')) {
-        // Full-page redirect is intentional here: this event fires on initial
-        // load from the email link, before the SPA router is ready.
         window.location.href = '/reset-password'
+        return
       }
 
-      if (event === 'SIGNED_OUT' && hadUser) {
-        toastInfo('Tu sesión ha finalizado')
+      if (event === 'SIGNED_OUT' && hadSession) {
+        toastInfo('Tu sesión ha finalizado. Vuelve a iniciar sesión si quieres continuar.')
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [toastInfo])
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -127,7 +130,7 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const { error: toastError } = useToast()
   const [communityId, setCommunityIdState] = useState<string | null>(() => {
-    return localStorage.getItem('ryve_community_id')
+    return localStorage.getItem('civitas_community_id')
   })
   const [community, setCommunity] = useState<Community | null>(null)
   const [currentMember, setCurrentMember] = useState<Member | null>(null)
@@ -138,9 +141,9 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
   const handleSetCommunityId = (id: string | null) => {
     setCommunityIdState(id)
     if (id) {
-      localStorage.setItem('ryve_community_id', id)
+      localStorage.setItem('civitas_community_id', id)
     } else {
-      localStorage.removeItem('ryve_community_id')
+      localStorage.removeItem('civitas_community_id')
       setCommunity(null)
       setCurrentMember(null)
     }

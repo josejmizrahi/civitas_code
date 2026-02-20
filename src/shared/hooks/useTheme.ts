@@ -8,7 +8,7 @@ interface ThemeContextValue {
   setTheme: (theme: Theme) => void
 }
 
-const STORAGE_KEY = 'ryve_theme'
+const STORAGE_KEY = 'civitas_theme'
 
 function getSystemPreference(): 'light' | 'dark' {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useCreateProposal } from '../hooks/useProposals'
+import type { Proposal } from '../types'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { PROPOSAL_TEMPLATES, type ProposalTemplate } from '../services/proposal-templates'
 import { TemplateForm } from './proposal-forms'
@@ -174,6 +175,13 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
         setError('Debes agregar al menos 2 opciones para votación de opción múltiple'); return
       }
     }
+    const fi = templateFormData.financialInstruction
+    if (fi?.amount != null && (Number.isNaN(Number(fi.amount)) || Number(fi.amount) < 0)) {
+      setError('El monto de la instrucción financiera debe ser mayor o igual a cero'); return
+    }
+    if (fi?.new_amount != null && (Number.isNaN(Number(fi.new_amount)) || Number(fi.new_amount) < 0)) {
+      setError('El nuevo monto (cuota) debe ser mayor o igual a cero'); return
+    }
 
     try {
       let financialInstruction: FinancialInstruction | undefined = templateFormData.financialInstruction
@@ -207,7 +215,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
         voting_options: votingOptions,
       })
       onOpenChange(false)
-      onCreated?.({ endorsementsRequired: (created as any)?.endorsements_required ?? 0 })
+      onCreated?.({ endorsementsRequired: (created as Proposal).endorsements_required ?? 0 })
       // Reset form
       handleBack()
     } catch (err: unknown) {
@@ -215,7 +223,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
         err instanceof Error
           ? err.message
           : (err && typeof err === 'object' && 'message' in err)
-            ? String((err as any).message)
+            ? String((err as { message: unknown }).message)
             : 'Error al crear propuesta'
       setError(message)
     }

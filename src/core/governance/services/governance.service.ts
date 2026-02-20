@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { logger } from '@/shared/lib/logger'
 import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
 import { sendEmailToMembers } from '@/shared/services/email.service'
 import type { Proposal, Vote, VoteSummary, Delegation, Minutes, Endorsement } from '../types'
@@ -67,10 +68,8 @@ export async function createProposal(
     .eq('id', communityId)
     .single()
 
-  const rules = getCommunityRules(
-    (community as any)?.config ?? null,
-    (community as any)?.rules ?? null
-  )
+  const communityRow = community as { config?: Record<string, unknown>; rules?: Record<string, unknown> } | null
+  const rules = getCommunityRules(communityRow?.config ?? null, communityRow?.rules ?? null)
 
   // Determine if this creator bypasses endorsements (admin/tesorero)
   const { data: creatorMember } = await supabase
@@ -80,7 +79,7 @@ export async function createProposal(
     .eq('user_id', proposal.created_by)
     .single()
 
-  const creatorRole = (creatorMember as any)?.role ?? 'miembro'
+  const creatorRole = (creatorMember as { role?: string } | null)?.role ?? 'miembro'
   const bypassRoles = rules.governance.endorsement_bypass_roles ?? ['admin', 'tesorero']
   const canBypass = bypassRoles.includes(creatorRole)
   const minEndorsements = rules.governance.min_endorsements ?? 0
@@ -117,7 +116,7 @@ export async function createProposal(
     .single()
 
   if (error) {
-    console.error('Supabase proposals INSERT error:', { code: error.code, message: error.message, details: (error as any).details, hint: (error as any).hint })
+    logger.error('Supabase proposals INSERT error:', { code: error.code, message: error.message, details: (error as { details?: unknown }).details, hint: (error as { hint?: unknown }).hint })
     throw new Error(error.message || 'Error al insertar propuesta')
   }
 
@@ -408,7 +407,7 @@ export async function castVote(vote: {
     .single()
 
   if (memberErr) throw memberErr
-  const weight = Number((member as any)?.voting_weight) || 1
+  const weight = Number((member as { voting_weight?: unknown })?.voting_weight) || 1
 
   // 5. Atomic upsert: insert or update on (proposal_id, member_id)
   const upsertData: Record<string, unknown> = {
@@ -481,7 +480,8 @@ export async function castVoteWithDelegations(
   const existingVotes = await getVotes(proposalId)
   const votedMemberIds = new Set(existingVotes.map((v) => v.member_id))
 
-  for (const delegation of delegations as any[]) {
+  type DelegationRow = { from_member_id: string; to_member_id: string; [k: string]: unknown }
+  for (const delegation of (delegations ?? []) as DelegationRow[]) {
     // Skip if delegating member already voted directly
     if (votedMemberIds.has(delegation.from_member_id)) continue
 
@@ -492,7 +492,7 @@ export async function castVoteWithDelegations(
       .eq('id', delegation.from_member_id)
       .single()
 
-    const weight = Number((delMember as any)?.voting_weight) || 1
+    const weight = Number((delMember as { voting_weight?: unknown } | null)?.voting_weight) || 1
 
     const { data: delegatedVote, error: voteErr } = await (supabase.from('votes') as any)
       .insert({
@@ -598,10 +598,11 @@ export async function getVoteSummary(
     .eq('community_id', communityId)
     .eq('status', 'active')
 
-  const totalAvailableWeight = (members ?? [])
-    .filter((m: any) => m.financial_standing !== 'moroso')
+  type MemberWeightRow = { financial_standing?: string; voting_weight?: unknown }
+  const totalAvailableWeight = ((members ?? []) as MemberWeightRow[])
+    .filter((m) => m.financial_standing !== 'moroso')
     .reduce(
-      (sum: number, m: any) => sum + (Number(m.voting_weight) || 1),
+      (sum: number, m) => sum + (Number(m.voting_weight) || 1),
       0
     )
 
@@ -653,10 +654,8 @@ export async function closeProposal(
       .eq('id', communityId)
       .single()
 
-    const rules = getCommunityRules(
-      (community as any)?.config ?? null,
-      (community as any)?.rules ?? null
-    )
+    const comm = community as { config?: Record<string, unknown>; rules?: Record<string, unknown> } | null
+    const rules = getCommunityRules(comm?.config ?? null, comm?.rules ?? null)
 
     const instruction = proposal.financial_instruction as unknown as Record<string, unknown>
     const amount = Number(instruction.amount ?? instruction.new_amount ?? 0)
@@ -726,7 +725,7 @@ export async function closeProposal(
 export async function processExpiredProposals(): Promise<number> {
   const { data, error } = await (supabase as any).rpc('process_expired_proposals')
   if (error) {
-    console.warn('process_expired_proposals RPC not available yet, falling back to client-side', error.message)
+    logger.warn('process_expired_proposals RPC not available yet, falling back to client-side', error.message)
     return 0
   }
   return (data as number) ?? 0
@@ -739,7 +738,7 @@ export async function processExpiredProposals(): Promise<number> {
 export async function processAutoExecutions(): Promise<number> {
   const { data, error } = await (supabase as any).rpc('process_auto_executions')
   if (error) {
-    console.warn('process_auto_executions RPC not available yet:', error.message)
+    logger.warn('process_auto_executions RPC not available yet:', error.message)
     return 0
   }
   return (data as number) ?? 0
@@ -854,7 +853,8 @@ export async function executeProposal(
         if (membersErr) throw membersErr
 
         if (activeMembers && activeMembers.length > 0) {
-          const obligations = activeMembers.map((m: any) => ({
+          type ActiveMemberRow = { id: string; [k: string]: unknown }
+          const obligations = (activeMembers as ActiveMemberRow[]).map((m) => ({
             community_id: communityId,
             member_id: m.id,
             amount: newAmount,
@@ -884,24 +884,22 @@ export async function executeProposal(
           .single()
         if (comErr) throw comErr
 
-        const currentRules = getCommunityRules(
-          (community as any)?.config ?? null,
-          (community as any)?.rules ?? null
-        )
+        const commRow = community as { config?: Record<string, unknown>; rules?: Record<string, unknown> } | null
+        const currentRules = getCommunityRules(commRow?.config ?? null, commRow?.rules ?? null)
 
         // Apply the config change using dot notation: "governance.cool_down_hours" → rules.governance.cool_down_hours
         const parts = configKey.split('.')
         if (parts.length === 2) {
           const [section, key] = parts as [keyof typeof currentRules, string]
           if (section in currentRules) {
-            ;(currentRules[section] as any)[key] = configValue
+            ;(currentRules[section] as Record<string, unknown>)[key] = configValue
           }
         } else if (parts.length === 1) {
           // Direct key on a section (try each)
           const key = parts[0]
           for (const section of ['governance', 'treasury', 'identity'] as const) {
             if (key in currentRules[section]) {
-              ;(currentRules[section] as any)[key] = configValue
+              ;(currentRules[section] as Record<string, unknown>)[key] = configValue
               break
             }
           }
@@ -1100,8 +1098,9 @@ export async function generateMinutes(
     .eq('id', communityId)
     .single()
 
-  const communityName = (community as any)?.name || 'Comunidad'
-  const communityType = (community as any)?.type || 'general'
+  const communityRow = community as { name?: string; type?: string } | null
+  const communityName = communityRow?.name || 'Comunidad'
+  const communityType = communityRow?.type || 'general'
   const isResidential = communityType === 'residential'
 
   const resultText = voteSummary.majority_met ? 'APROBADA' : 'RECHAZADA'
@@ -1161,7 +1160,7 @@ export async function generateMinutes(
     isResidential ? `Fecha:                      _________________________` : '',
     isResidential ? `` : '',
     `${'─'.repeat(60)}`,
-    `Este documento fue generado automáticamente por RYVE.`,
+    `Este documento fue generado automáticamente por Civitas.`,
     `La integridad del acta está protegida mediante firma digital SHA-256.`,
     isResidential ? `Conforme a la Ley de Propiedad en Condominio (LPCI CDMX).` : '',
   ].filter(Boolean).join('\n')

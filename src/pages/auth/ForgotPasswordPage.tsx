@@ -30,7 +30,7 @@ export function ForgotPasswordPage() {
       }
 
       setSent(true)
-    } catch (err: unknown) {
+    } catch {
       // Even on error, show success to prevent email enumeration
       setSent(true)
     } finally {

@@ -5,6 +5,7 @@
  */
 
 import { downloadAsExcel } from '@/shared/lib/utils'
+import { logger } from '@/shared/lib/logger'
 
 export interface ExportOptions {
   filename: string
@@ -19,13 +20,13 @@ export interface ExportOptions {
 export function exportToPDF(elementId: string, options: ExportOptions): void {
   const element = document.getElementById(elementId)
   if (!element) {
-    console.warn(`Export target element #${elementId} not found`)
+    logger.warn(`Export target element #${elementId} not found`)
     return
   }
 
   const win = window.open('', '_blank')
   if (!win) {
-    console.warn('Could not open print window — popup may be blocked')
+    logger.warn('Could not open print window — popup may be blocked')
     return
   }
 
@@ -78,7 +79,7 @@ export function exportToPDF(elementId: string, options: ExportOptions): void {
       </div>
       ${element.innerHTML}
       <div class="export-footer">
-        Exportado desde RYVE — ${new Date().toISOString()}
+        Exportado desde CIVITAS — ${new Date().toISOString()}
       </div>
     </body>
     </html>

@@ -276,7 +276,7 @@ export function ProposalDetail({ proposalId }: Props) {
               {proposal.appealed && (
                 <Badge variant="destructive" className="text-xs">Apelada</Badge>
               )}
-              <Badge variant={(STATUS_VARIANTS[proposal.status] || 'default') as any}>
+              <Badge variant={(STATUS_VARIANTS[proposal.status] || 'default') as 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'}>
                 {STATUS_LABELS[proposal.status] || proposal.status}
               </Badge>
             </div>
@@ -285,7 +285,7 @@ export function ProposalDetail({ proposalId }: Props) {
         <CardContent className="space-y-4">
           <p className="whitespace-pre-wrap text-sm">{proposal.description}</p>
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-            {(proposal as any).creator_name && <span>Por: <span className="font-medium text-foreground">{(proposal as any).creator_name}</span></span>}
+            {proposal.creator_name && <span>Por: <span className="font-medium text-foreground">{proposal.creator_name}</span></span>}
             <span>Creada: {formatDate(proposal.created_at)}</span>
             {proposal.discussion_start && <span>Discusión: {formatDate(proposal.discussion_start)}</span>}
             {proposal.voting_start && <span>Inicio votación: {formatDate(proposal.voting_start)}</span>}
@@ -565,7 +565,7 @@ export function ProposalDetail({ proposalId }: Props) {
           <CardContent className="space-y-4">
             <div className="rounded-md bg-muted p-3 text-sm space-y-1">
               {(() => {
-                const fi = proposal.financial_instruction as any
+                const fi = proposal.financial_instruction
                 const typeLabels: Record<string, string> = {
                   disbursement: 'Desembolso',
                   budget_allocation: 'Asignación Presupuestal',

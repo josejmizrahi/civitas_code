@@ -283,7 +283,7 @@ function PlatformCensusTab() {
               <Globe className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">Red RYVE</h2>
+              <h2 className="text-lg font-bold">Red Civitas</h2>
               <p className="text-sm text-muted-foreground">
                 Censo global de la red — datos agregados, sin información individual
               </p>
@@ -476,7 +476,7 @@ export function CensusPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Censo</h1>
-          <p className="text-sm text-muted-foreground">Métricas de tu comunidad y de la red RYVE</p>
+          <p className="text-sm text-muted-foreground">Métricas de tu comunidad y de la red Civitas</p>
         </div>
       </div>
 
@@ -488,7 +488,7 @@ export function CensusPage() {
           </TabsTrigger>
           <TabsTrigger value="platform">
             <Globe className="mr-2 h-4 w-4" />
-            Red RYVE
+            Red Civitas
           </TabsTrigger>
         </TabsList>
         <TabsContent value="community">

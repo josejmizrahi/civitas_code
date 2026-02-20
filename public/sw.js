@@ -1,4 +1,4 @@
-// RYVE Service Worker — Push Notifications
+// CIVITAS Service Worker — Push Notifications
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -10,7 +10,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('push', (event) => {
   const defaultData = {
-    title: 'RYVE',
+    title: 'CIVITAS',
     body: 'Tienes una nueva notificacion',
     icon: '/favicon.ico',
     badge: '/favicon.ico',

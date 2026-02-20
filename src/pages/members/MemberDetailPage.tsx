@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
@@ -114,6 +114,18 @@ export function MemberDetailPage() {
     queryFn: () => getProfile(memberId!, communityId!),
     enabled: !!communityId && !!memberId,
   })
+
+  // Mostrar toast si fallan gamificación o auditoría (datos secundarios)
+  useEffect(() => {
+    if (gamQuery.isError && gamQuery.error) {
+      toastError(gamQuery.error instanceof Error ? gamQuery.error.message : 'Error al cargar gamificación')
+    }
+  }, [gamQuery.isError, gamQuery.error, toastError])
+  useEffect(() => {
+    if (auditQuery.isError && auditQuery.error) {
+      toastError(auditQuery.error instanceof Error ? auditQuery.error.message : 'Error al cargar historial')
+    }
+  }, [auditQuery.isError, auditQuery.error, toastError])
 
   const member = memberQuery.data
   const loading = memberQuery.isLoading

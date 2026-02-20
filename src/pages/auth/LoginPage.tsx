@@ -26,7 +26,7 @@ export function LoginPage() {
         .then(() => navigate('/dashboard'))
         .catch((err) => {
           setInviteError(err instanceof Error ? err.message : 'No se pudo aceptar la invitación')
-          navigate('/dashboard')
+          // No navegar para que el usuario vea el mensaje de error
         })
     }
   }, [user, inviteToken, navigate])
@@ -48,7 +48,7 @@ export function LoginPage() {
     <Card>
       <CardHeader>
         <CardTitle>Iniciar Sesión</CardTitle>
-        <CardDescription>Ingresa a tu cuenta de RYVE</CardDescription>
+        <CardDescription>Ingresa a tu cuenta de Civitas</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">

@@ -24,7 +24,7 @@ export function MorosoStatusBanner() {
   const { currentMember } = useCommunityContext()
 
   // Only render if user is moroso
-  const isMoroso = (currentMember as any)?.financial_standing === 'moroso'
+  const isMoroso = currentMember?.financial_standing === 'moroso'
 
   const { data: debt } = useMemberDebt(
     isMoroso && currentMember ? currentMember.id : '',

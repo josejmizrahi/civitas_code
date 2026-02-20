@@ -1,4 +1,4 @@
-export const APP_NAME = 'RYVE'
+export const APP_NAME = 'Civitas'
 export const APP_DESCRIPTION = 'Infrastructure for Network States'
 
 export const DEFAULT_QUORUM = 0.5

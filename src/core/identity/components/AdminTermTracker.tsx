@@ -66,7 +66,7 @@ export function AdminTermTracker() {
   const [selectedMemberId, setSelectedMemberId] = useState('')
   const [selectedRole, setSelectedRole] = useState('admin')
 
-  const rules = getCommunityRules(null, (community as any)?.rules)
+  const rules = getCommunityRules(null, community?.rules ?? null)
   const maxTerms = rules.identity.admin_max_consecutive_terms
   const termMonths = rules.identity.admin_term_months
 
@@ -75,7 +75,7 @@ export function AdminTermTracker() {
 
   // Build member name map
   const memberMap = new Map<string, string>()
-  ;(members ?? []).forEach((m: any) => {
+  ;(members ?? []).forEach((m: { id: string; full_name?: string; email?: string }) => {
     memberMap.set(m.id, m.full_name || m.email || m.id)
   })
 
@@ -192,7 +192,7 @@ export function AdminTermTracker() {
                   className="w-full sm:w-60"
                 >
                   <option value="">Seleccionar miembro...</option>
-                  {(members ?? []).map((m: any) => (
+                  {(members ?? []).map((m: { id: string; full_name?: string; email?: string }) => (
                     <option key={m.id} value={m.id}>
                       {m.full_name || m.email || m.id}
                     </option>

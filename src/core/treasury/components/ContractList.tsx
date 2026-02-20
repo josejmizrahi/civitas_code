@@ -305,6 +305,9 @@ export function ContractList() {
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Contratos con planes de pago y parcialidades (obra, arrendamiento, servicios, etc.).
+      </p>
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-4">

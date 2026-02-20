@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { logger } from '@/shared/lib/logger'
 import type { Role } from '@/shared/types'
 import type { Member, Invitation, Community } from '../types'
 
@@ -29,7 +30,8 @@ export async function getMembers(communityId: string, currentUserId?: string): P
     return (fallback ?? []) as Member[]
   }
 
-  return (data ?? []).map((m: any) => ({
+  type MemberRow = Member & { user_id?: string }
+  return (data ?? []).map((m: MemberRow) => ({
     ...m,
     is_current_user: currentUserId ? m.user_id === currentUserId : false,
   })) as Member[]
@@ -155,7 +157,7 @@ export async function createCommunity(
 
   if (error) {
     // Fallback: if RPC not available yet, try the old way
-    console.warn('create_community_with_admin RPC not available, falling back:', error.message)
+    logger.warn('create_community_with_admin RPC not available, falling back:', error.message)
     const { data: community, error: communityError } = await (supabase
       .from('communities') as any)
       .insert({
@@ -199,7 +201,7 @@ export async function getUserCommunities(
 
   if (error) throw error
 
-  return (data ?? []).map((row: any) => row.communities).filter(Boolean) as Community[]
+  return (data ?? []).map((row: { communities?: Community | null }) => row.communities).filter(Boolean) as Community[]
 }
 
 export async function joinCommunity(

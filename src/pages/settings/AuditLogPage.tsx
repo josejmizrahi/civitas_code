@@ -132,7 +132,7 @@ export function AuditLogPage() {
       Usuario_ID: e.user_id || '',
       Detalles: JSON.stringify(e.details),
     }))
-    exportToExcel(data, { filename: `auditoria-${community?.name || 'ryve'}`, sheetName: 'Auditoria' })
+    exportToExcel(data, { filename: `auditoria-${community?.name || 'civitas'}`, sheetName: 'Auditoria' })
   }
 
   return (

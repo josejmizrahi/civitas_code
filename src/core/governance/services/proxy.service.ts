@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { logger } from '@/shared/lib/logger'
 import type { AssemblyProxy } from '../types'
 
 // ---------------------------------------------------------------------------
@@ -158,7 +159,7 @@ export async function canRepresent(
   }
 
   // Fallback: client-side validation
-  console.warn('validate_proxy_limits RPC not available, using client-side validation', error?.message)
+  logger.warn('validate_proxy_limits RPC not available, using client-side validation', error?.message)
 
   // Check admin role
   const { data: member } = await supabase
