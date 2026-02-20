@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Button } from '@/shared/components/ui/button'
 import { FinancialDashboard } from '@/core/treasury/components/FinancialDashboard'
 import { TransactionList } from '@/core/treasury/components/TransactionList'
@@ -19,17 +19,43 @@ import { useRefreshOverdueInstallments } from '@/core/treasury/hooks/useContract
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityContext } from '@/app/providers'
 import {
-  Plus, FileSpreadsheet, CreditCard, BarChart3, Receipt, PiggyBank,
-  Banknote, User, RefreshCw, FileText, ClipboardList, Download, CalendarRange,
+  Plus,
+  FileSpreadsheet,
+  BarChart3,
+  Receipt,
+  Banknote,
+  User,
+  RefreshCw,
+  FileText,
+  ClipboardList,
+  Download,
+  CalendarRange,
+  Wallet,
+  ArrowRightLeft,
+  CalendarCheck,
+  PieChart,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTransactions } from '@/core/treasury/hooks/useTransactions'
 import { exportToPDF, exportToExcel } from '@/shared/services/export.service'
 import type { TreasuryRules, FundType } from '@/shared/types/rules'
+import { cn } from '@/shared/lib/utils'
+
+type MainSection = 'resumen' | 'cobro' | 'programacion' | 'datos'
+
+const MAIN_SECTIONS: { id: MainSection; label: string; icon: typeof Wallet; description: string }[] = [
+  { id: 'resumen', label: 'Resumen', icon: BarChart3, description: 'Visión general' },
+  { id: 'cobro', label: 'Cobro', icon: Receipt, description: 'Obligaciones y pagos' },
+  { id: 'programacion', label: 'Programación', icon: CalendarCheck, description: 'Recurrentes y contratos' },
+  { id: 'datos', label: 'Datos e informes', icon: PieChart, description: 'Movimientos y reportes' },
+]
 
 export function TreasuryPage() {
   const { canManageTreasury, canImportData } = usePermissions()
-  const [tab, setTab] = useState(canManageTreasury ? 'dashboard' : 'my-payments')
+  const [mainSection, setMainSection] = useState<MainSection>(canManageTreasury ? 'resumen' : 'cobro')
+  const [cobroTab, setCobroTab] = useState(canManageTreasury ? 'obligations' : 'my-payments')
+  const [programacionTab, setProgramacionTab] = useState('recurring')
+  const [datosTab, setDatosTab] = useState('transactions')
   const [showForm, setShowForm] = useState(false)
   const [selectedFund, setSelectedFund] = useState<FundType>('mantenimiento')
   const refreshOverdue = useRefreshOverdueObligations()
@@ -79,135 +105,197 @@ export function TreasuryPage() {
     hybrid: 'Híbrido',
   }
 
-  const fundAffectedTabs = ['dashboard', 'transactions', 'budgets', 'statements']
-  const showFundSelector = fundAffectedTabs.includes(tab)
+  const showFundSelector =
+    mainSection === 'resumen' || (mainSection === 'datos' && ['transactions', 'budgets', 'statements'].includes(datosTab))
 
   return (
     <div id="treasury-content" className="space-y-6">
-      <div className="no-print flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Tesorería</h1>
-          <p className="text-sm text-muted-foreground">
-            Dashboard financiero y transparencia
-            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-              <CreditCard className="h-3 w-3" />
-              {modeLabel[treasuryMode] || treasuryMode}
-            </span>
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={handleExportPDF} title="Exporta la vista actual a PDF">
-            <Download className="mr-1 h-4 w-4" />
-            PDF (vista)
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={!transactions?.length} title="Exporta el listado de transacciones a Excel">
-            <Download className="mr-1 h-4 w-4" />
-            Excel (trans.)
-          </Button>
-          {canImportData && (
-            <Button variant="outline" onClick={() => navigate('/ingestion')}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Importar CSV/Excel
+      {/* Header: título, modo, acciones */}
+      <header className="no-print space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">Tesorería</h1>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Resumen, cobro y movimientos de la comunidad
+            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
+                  'bg-primary/10 text-primary border border-primary/20'
+                )}
+              >
+                <Wallet className="h-3.5 w-3.5" />
+                {modeLabel[treasuryMode] || treasuryMode}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportPDF}
+              title="Exporta la vista actual a PDF"
+              className="gap-1.5"
+            >
+              <Download className="h-4 w-4" />
+              PDF
             </Button>
-          )}
-          {canManageTreasury && (
-            <Button onClick={() => setShowForm(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Captura Manual
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportExcel}
+              disabled={!transactions?.length}
+              title="Exporta el listado de transacciones a Excel"
+              className="gap-1.5"
+            >
+              <Download className="h-4 w-4" />
+              Excel
             </Button>
-          )}
+            {canImportData && (
+              <Button variant="outline" size="sm" onClick={() => navigate('/ingestion')} className="gap-1.5">
+                <FileSpreadsheet className="h-4 w-4" />
+                Importar
+              </Button>
+            )}
+            {canManageTreasury && (
+              <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
+                <Plus className="h-4 w-4" />
+                Captura manual
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Mensaje modo actual — U4.2 */}
-      {treasuryMode !== 'fintech_rail' && (
-        <div className="no-print rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40 px-4 py-2 text-sm text-amber-800 dark:text-amber-200">
-          Hoy: importación y registro manual. SPEI automático en Fase 2 con socio IFPE.
+        {/* Banner modo actual (solo cuando no hay SPEI) */}
+        {treasuryMode !== 'fintech_rail' && (
+          <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 px-4 py-2.5 text-sm text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-200">
+            Hoy: importación y registro manual. SPEI automático en Fase 2 con socio IFPE.
+          </div>
+        )}
+
+        {/* Selector de fondo — solo donde aplica */}
+        {showFundSelector && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Fondo:</span>
+            <FundSelector value={selectedFund} onChange={setSelectedFund} />
+          </div>
+        )}
+      </header>
+
+      {/* Navegación principal: 4 secciones */}
+      <nav className="no-print" aria-label="Secciones de tesorería">
+        <div className="flex flex-wrap gap-1 rounded-xl bg-muted/60 p-1.5">
+          {MAIN_SECTIONS.map((section) => {
+            const Icon = section.icon
+            const isActive = mainSection === section.id
+            return (
+              <button
+                key={section.id}
+                type="button"
+                onClick={() => setMainSection(section.id)}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
+                )}
+                title={section.description}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">{section.label}</span>
+              </button>
+            )
+          })}
         </div>
-      )}
+      </nav>
 
-      {/* Fund Selector — solo en pestañas donde aplica (LPCI Art. 57-58) */}
-      {showFundSelector && (
-        <div className="no-print flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground">Vista por fondo:</span>
-          <FundSelector value={selectedFund} onChange={setSelectedFund} />
-        </div>
-      )}
-
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="no-print flex w-full overflow-x-auto overflow-y-hidden scrollbar-hide flex-nowrap sm:flex-wrap gap-1 min-w-0 h-auto py-1">
-          <TabsTrigger value="dashboard" className="shrink-0 gap-1 whitespace-nowrap" title="Resumen y métricas de cobranza">
-            <BarChart3 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Dashboard</span>
-          </TabsTrigger>
-          <TabsTrigger value="obligations" className="shrink-0 gap-1 whitespace-nowrap" title="Crear obligaciones y registrar pagos">
-            <Receipt className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Obligaciones</span>
-          </TabsTrigger>
-          <TabsTrigger value="collection" className="shrink-0 gap-1 whitespace-nowrap" title="Cuenta e instrucciones de cobro (CLABE, SPEI)">
-            <Banknote className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Cuenta y cobro</span>
-          </TabsTrigger>
-          <TabsTrigger value="my-payments" className="shrink-0 gap-1 whitespace-nowrap" title="Tus obligaciones y cómo pagar">
-            <User className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Mis Pagos</span>
-          </TabsTrigger>
-          <TabsTrigger value="recurring" className="shrink-0 gap-1 whitespace-nowrap" title="Cobros o pagos que se repiten (ej. cuota mensual)">
-            <RefreshCw className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Recurrentes</span>
-          </TabsTrigger>
-          <TabsTrigger value="contracts" className="shrink-0 gap-1 whitespace-nowrap" title="Contratos con planes de pago y parcialidades">
-            <FileText className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Contratos</span>
-          </TabsTrigger>
-          <TabsTrigger value="payment-plans" className="shrink-0 gap-1 whitespace-nowrap" title="Planes de pago para morosos">
-            <CalendarRange className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Planes de pago</span>
-          </TabsTrigger>
-          <TabsTrigger value="transactions" className="shrink-0 gap-1 whitespace-nowrap" title="Listado de movimientos">
-            <CreditCard className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Transacciones</span>
-          </TabsTrigger>
-          <TabsTrigger value="budgets" className="shrink-0 gap-1 whitespace-nowrap" title="Presupuesto por categoría y periodo">
-            <PiggyBank className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Presupuestos</span>
-          </TabsTrigger>
-          <TabsTrigger value="statements" className="shrink-0 gap-1 whitespace-nowrap" title="Estados financieros mensuales">
-            <ClipboardList className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Est. Financieros</span>
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="dashboard">
+      {/* Contenido por sección */}
+      {mainSection === 'resumen' && (
+        <section className="animate-in fade-in duration-200" aria-label="Resumen financiero">
           <FinancialDashboard fundType={selectedFund} />
-        </TabsContent>
-        <TabsContent value="obligations">
-          <PaymentObligationList />
-        </TabsContent>
-        <TabsContent value="collection">
-          <CollectionView onGoToObligations={() => setTab('obligations')} />
-        </TabsContent>
-        <TabsContent value="my-payments">
-          <MyPayments />
-        </TabsContent>
-        <TabsContent value="recurring">
-          <RecurringScheduleList />
-        </TabsContent>
-        <TabsContent value="contracts">
-          <ContractList />
-        </TabsContent>
-        <TabsContent value="payment-plans">
-          <PaymentPlanManager />
-        </TabsContent>
-        <TabsContent value="transactions">
-          <TransactionList fundType={selectedFund} />
-        </TabsContent>
-        <TabsContent value="budgets">
-          <BudgetOverview fundType={selectedFund} />
-        </TabsContent>
-        <TabsContent value="statements">
-          <StatementList fundType={selectedFund} />
-        </TabsContent>
-      </Tabs>
+        </section>
+      )}
+
+      {mainSection === 'cobro' && (
+        <section className="space-y-4 animate-in fade-in duration-200" aria-label="Cobro">
+          <Tabs value={cobroTab} onValueChange={(v) => setCobroTab(v)}>
+            {canManageTreasury && (
+              <TabsList className="mb-4 h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
+                <TabsTrigger value="obligations" className="gap-1.5 text-xs sm:text-sm">
+                  <Receipt className="h-3.5 w-3.5" />
+                  Obligaciones
+                </TabsTrigger>
+                <TabsTrigger value="collection" className="gap-1.5 text-xs sm:text-sm">
+                  <Banknote className="h-3.5 w-3.5" />
+                  Cuenta y cobro
+                </TabsTrigger>
+                <TabsTrigger value="my-payments" className="gap-1.5 text-xs sm:text-sm">
+                  <User className="h-3.5 w-3.5" />
+                  Mis pagos
+                </TabsTrigger>
+              </TabsList>
+            )}
+            <div className={canManageTreasury ? undefined : 'mt-0'}>
+              {cobroTab === 'obligations' && <PaymentObligationList />}
+              {cobroTab === 'collection' && <CollectionView onGoToObligations={() => setCobroTab('obligations')} />}
+              {cobroTab === 'my-payments' && <MyPayments />}
+            </div>
+          </Tabs>
+        </section>
+      )}
+
+      {mainSection === 'programacion' && (
+        <section className="space-y-4 animate-in fade-in duration-200" aria-label="Programación">
+          <Tabs value={programacionTab} onValueChange={(v) => setProgramacionTab(v)}>
+            <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
+              <TabsTrigger value="recurring" className="gap-1.5 text-xs sm:text-sm">
+                <RefreshCw className="h-3.5 w-3.5" />
+                Recurrentes
+              </TabsTrigger>
+              <TabsTrigger value="contracts" className="gap-1.5 text-xs sm:text-sm">
+                <FileText className="h-3.5 w-3.5" />
+                Contratos
+              </TabsTrigger>
+              <TabsTrigger value="payment-plans" className="gap-1.5 text-xs sm:text-sm">
+                <CalendarRange className="h-3.5 w-3.5" />
+                Planes de pago
+              </TabsTrigger>
+            </TabsList>
+            <div className="mt-4">
+              {programacionTab === 'recurring' && <RecurringScheduleList />}
+              {programacionTab === 'contracts' && <ContractList />}
+              {programacionTab === 'payment-plans' && <PaymentPlanManager />}
+            </div>
+          </Tabs>
+        </section>
+      )}
+
+      {mainSection === 'datos' && (
+        <section className="space-y-4 animate-in fade-in duration-200" aria-label="Datos e informes">
+          <Tabs value={datosTab} onValueChange={(v) => setDatosTab(v)}>
+            <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
+              <TabsTrigger value="transactions" className="gap-1.5 text-xs sm:text-sm">
+                <ArrowRightLeft className="h-3.5 w-3.5" />
+                Transacciones
+              </TabsTrigger>
+              <TabsTrigger value="budgets" className="gap-1.5 text-xs sm:text-sm">
+                <PieChart className="h-3.5 w-3.5" />
+                Presupuestos
+              </TabsTrigger>
+              <TabsTrigger value="statements" className="gap-1.5 text-xs sm:text-sm">
+                <ClipboardList className="h-3.5 w-3.5" />
+                Estados financieros
+              </TabsTrigger>
+            </TabsList>
+            <div className="mt-4">
+              {datosTab === 'transactions' && <TransactionList fundType={selectedFund} />}
+              {datosTab === 'budgets' && <BudgetOverview fundType={selectedFund} />}
+              {datosTab === 'statements' && <StatementList fundType={selectedFund} />}
+            </div>
+          </Tabs>
+        </section>
+      )}
 
       <ExpenseForm open={showForm} onOpenChange={setShowForm} />
     </div>
