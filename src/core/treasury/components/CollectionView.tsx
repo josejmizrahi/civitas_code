@@ -3,6 +3,8 @@ import { getCollectionConfig } from '../services/treasury.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { PaymentPlanManager } from './PaymentPlanManager'
+import { IfpeReconciliationPanel } from './IfpeReconciliationPanel'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -162,6 +164,14 @@ export function CollectionView({ onGoToObligations }: { onGoToObligations?: () =
 
       {/* CLABE / Account info */}
       {canManageTreasury && <ClabeDisplay config={collectionConfig} />}
+
+      {/* IFPE Reconciliation — visible when fintech_rail or hybrid */}
+      {canManageTreasury && (treasuryMode === 'fintech_rail' || treasuryMode === 'hybrid') && (
+        <IfpeReconciliationPanel />
+      )}
+
+      {/* Payment Plans */}
+      <PaymentPlanManager />
 
       {/* How it works */}
       <Card>
