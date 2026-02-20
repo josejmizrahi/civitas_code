@@ -111,6 +111,7 @@ export function createMockTransaction(overrides: Partial<Transaction> = {}): Tra
     category_id: overrides.category_id ?? null,
     description: overrides.description ?? 'Test transaction',
     date: overrides.date ?? new Date().toISOString().split('T')[0],
+    origin: overrides.origin ?? 'manual',
     source_id: overrides.source_id ?? null,
     evidence_url: overrides.evidence_url ?? null,
     external_ref: overrides.external_ref ?? null,
