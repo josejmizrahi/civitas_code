@@ -3,6 +3,8 @@ import type {
   RecurringType, RecurringFrequency, ContractType, ContractStatus,
 } from '@/shared/types'
 
+export type TransactionOrigin = 'manual' | 'import' | 'rail' | 'system'
+
 export interface Transaction {
   id: string
   community_id: string
@@ -11,6 +13,7 @@ export interface Transaction {
   category_id: string | null
   description: string
   date: string
+  origin: TransactionOrigin
   source_id: string | null
   evidence_url: string | null
   external_ref: string | null

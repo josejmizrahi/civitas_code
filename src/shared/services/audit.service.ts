@@ -1,5 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
-import { logger } from '@/shared/lib/logger'
+import { createModuleLogger } from '@/shared/lib/logger'
+
+const log = createModuleLogger('audit')
 
 export interface AuditEntry {
   id: string
@@ -28,7 +30,7 @@ export async function logAuditAction(
     entity_id: entityId ?? null,
     details: details ?? {},
   })
-  if (error) logger.warn('Audit log insert failed:', error.message)
+  if (error) log.warn('Audit log insert failed', { error: error.message, action, entityType })
 }
 
 export async function getAuditLog(

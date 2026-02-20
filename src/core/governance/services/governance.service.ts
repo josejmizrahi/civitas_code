@@ -794,6 +794,7 @@ export async function executeProposal(
           date: new Date().toISOString().split('T')[0],
           category_id: (instruction.category_id as string) || null,
           created_by: executedByUserId,
+          origin: 'system',
         })
         if (txErr) throw txErr
         break

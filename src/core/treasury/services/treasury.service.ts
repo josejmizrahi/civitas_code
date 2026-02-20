@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { handleServiceError } from '@/shared/lib/errors'
 import type { Transaction, Category, Budget, PaymentObligation, DashboardStats, CollectionConfig } from '../types'
 
 /**
@@ -22,7 +23,7 @@ export async function getTransactions(
   if (filters?.fundType) query = (query as any).eq('fund_type', filters.fundType)
 
   const { data, error } = await query
-  if (error) throw error
+  if (error) throw handleServiceError(error, 'treasury.getTransactions')
   return (data ?? []).map((row: any) => ({
     ...row,
     category_name: row.categories?.name,
@@ -138,10 +139,15 @@ export async function createTransaction(
     description: string
     date: string
     created_by: string
+    origin?: string
   }
 ): Promise<Transaction> {
   const { data, error } = await (supabase.from('transactions') as any)
-    .insert({ community_id: communityId, ...transaction })
+    .insert({
+      community_id: communityId,
+      origin: transaction.origin ?? 'manual',
+      ...transaction,
+    })
     .select()
     .single()
 
@@ -263,6 +269,7 @@ export async function markObligationAsPaid(
     date: paymentDetails.date || new Date().toISOString().split('T')[0],
     created_by: paymentDetails.created_by,
     external_ref: paymentDetails.reference || null,
+    origin: 'system' as const,
   }
 
   const { data: tx, error: txError } = await (supabase.from('transactions') as any)

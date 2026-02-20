@@ -104,6 +104,16 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data } = await (anonClient.from('push_subscriptions') as any).select('*')
       expect(data?.length ?? 0).toBe(0)
     })
+
+    it('should not access ifpe_webhook_events without auth', async () => {
+      const { data } = await (anonClient.from('ifpe_webhook_events') as any).select('*')
+      expect(data?.length ?? 0).toBe(0)
+    })
+
+    it('should not access payment_plans without auth', async () => {
+      const { data } = await (anonClient.from('payment_plans') as any).select('*')
+      expect(data?.length ?? 0).toBe(0)
+    })
   })
 
   // =========================================================================
@@ -122,8 +132,6 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const otherCommunities = new Set(otherData.map((m: any) => m.community_id))
 
       const overlap = [...memberCommunities].filter((c) => otherCommunities.has(c))
-      // If they are in different communities, there should be no overlap
-      // (or if there is, it's because they share a community — that's valid)
       expect(overlap.length).toBeLessThanOrEqual(1)
     })
 
@@ -162,9 +170,9 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data: txs } = await memberClient.from('transactions').select('id').limit(1)
       if (!txs?.length) return
 
-      const { error, count } = await memberClient.from('transactions').delete({ count: 'exact' }).eq('id', txs[0].id)
+      const txId = txs[0].id
+      const { error, count } = await memberClient.from('transactions').delete({ count: 'exact' }).eq('id', txId)
       if (!error) {
-        // RLS should prevent deletion — the row should still exist
         expect(count ?? 0).toBe(0)
       } else {
         expect(error).toBeTruthy()
@@ -174,17 +182,38 @@ skipIfNoKey('RLS Penetration Tests', () => {
     it('regular member should not update community rules', async () => {
       if (!memberClient) return
 
-      const { data: communities } = await memberClient.from('communities').select('id').limit(1)
+      const { data: communities } = await memberClient.from('communities').select('id, rules').limit(1)
       if (!communities?.length) return
+
+      const originalRules = communities[0].rules
 
       const { error, count } = await (memberClient.from('communities') as any)
         .update({ rules: { test: true } }, { count: 'exact' })
         .eq('id', communities[0].id)
 
-      // RLS should either reject with an error or silently match 0 rows
       if (!error) {
         expect(count ?? 0).toBe(0)
-      } else {
+      }
+
+      // Double-check: rules should be unchanged
+      const { data: afterUpdate } = await memberClient.from('communities').select('rules').eq('id', communities[0].id).single()
+      expect(afterUpdate?.rules).toEqual(originalRules)
+    })
+
+    it('regular member should not insert transactions', async () => {
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id, role').limit(1)
+      if (!members?.length) return
+
+      if (members[0].role !== 'admin' && members[0].role !== 'tesorero') {
+        const { error } = await (memberClient.from('transactions') as any).insert({
+          community_id: members[0].community_id,
+          type: 'income',
+          amount: 0.01,
+          description: 'RLS test — should be blocked',
+          date: '2026-01-01',
+        })
         expect(error).toBeTruthy()
       }
     })
@@ -195,7 +224,6 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data: members } = await memberClient.from('members').select('id, community_id, role').limit(1)
       if (!members?.length) return
 
-      // Only admin or comite_vigilancia should be able to insert
       if (members[0].role !== 'admin' && members[0].role !== 'comite_vigilancia') {
         const { error } = await (memberClient.from('vigilancia_reports') as any).insert({
           community_id: members[0].community_id,
@@ -221,6 +249,119 @@ skipIfNoKey('RLS Penetration Tests', () => {
         rules: {},
       })
       expect(error).toBeTruthy()
+    })
+
+    it('regular member should not delete other members', async () => {
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('id, role').limit(2)
+      if (!members || members.length < 2) return
+
+      const target = members.find((m: any) => m.role !== 'admin')
+      if (!target) return
+
+      const { error, count } = await memberClient.from('members').delete({ count: 'exact' }).eq('id', target.id)
+      if (!error) {
+        expect(count ?? 0).toBe(0)
+      }
+    })
+
+    it('member from community A should not insert into community B tables', async () => {
+      if (!memberClient || !otherClient) return
+
+      const { data: myMembers } = await memberClient.from('members').select('community_id').limit(1)
+      const { data: otherMembers } = await otherClient.from('members').select('community_id').limit(1)
+      if (!myMembers?.length || !otherMembers?.length) return
+
+      const myCommunityId = myMembers[0].community_id
+      const otherCommunityId = otherMembers[0].community_id
+      if (myCommunityId === otherCommunityId) return
+
+      const { error } = await (memberClient.from('transactions') as any).insert({
+        community_id: otherCommunityId,
+        type: 'expense',
+        amount: 0.01,
+        description: 'Cross-community RLS test',
+        date: '2026-01-01',
+      })
+      expect(error).toBeTruthy()
+    })
+  })
+
+  // =========================================================================
+  // Explicit RLS policy validation per table
+  // =========================================================================
+  describe('Explicit RLS policy validation', () => {
+    it('should enforce community_id isolation on payment_obligations', async () => {
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: obligations } = await (memberClient.from('payment_obligations') as any).select('community_id')
+      for (const ob of obligations || []) {
+        expect(myCommunityIds.has(ob.community_id)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on budgets', async () => {
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: budgets } = await (memberClient.from('budgets') as any).select('community_id')
+      for (const b of budgets || []) {
+        expect(myCommunityIds.has(b.community_id)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on categories', async () => {
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: categories } = await memberClient.from('categories').select('community_id')
+      for (const c of categories || []) {
+        expect(myCommunityIds.has((c as any).community_id)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on audit_log', async () => {
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: logs } = await memberClient.from('audit_log').select('community_id').limit(50)
+      for (const entry of logs || []) {
+        expect(myCommunityIds.has((entry as any).community_id)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on payment_plans', async () => {
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: plans } = await (memberClient.from('payment_plans') as any).select('community_id')
+      for (const plan of plans || []) {
+        expect(myCommunityIds.has(plan.community_id)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on ifpe_webhook_events', async () => {
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: events } = await (memberClient.from('ifpe_webhook_events') as any).select('community_id')
+      for (const event of events || []) {
+        expect(myCommunityIds.has(event.community_id)).toBe(true)
+      }
     })
   })
 

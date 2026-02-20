@@ -1,7 +1,9 @@
 import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
-import { logger } from '@/shared/lib/logger'
+import { createModuleLogger } from '@/shared/lib/logger'
+
+const log = createModuleLogger('ErrorBoundary')
 
 interface Props {
   children: ReactNode
@@ -24,7 +26,9 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('ErrorBoundary caught:', error, errorInfo)
+    log.error('Unhandled render error', error, {
+      componentStack: errorInfo.componentStack ?? undefined,
+    } as Record<string, unknown>)
   }
 
   handleReset = () => {

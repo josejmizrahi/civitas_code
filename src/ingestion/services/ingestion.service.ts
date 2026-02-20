@@ -182,6 +182,7 @@ export async function importTransactions(
         community_id: communityId,
         ...tx,
         import_job_id: tx.import_job_id || importJobId || null,
+        origin: 'import',
       })
 
     if (error) {
