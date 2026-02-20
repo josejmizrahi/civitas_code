@@ -892,14 +892,14 @@ export async function executeProposal(
         if (parts.length === 2) {
           const [section, key] = parts as [keyof typeof currentRules, string]
           if (section in currentRules) {
-            ;(currentRules[section] as Record<string, unknown>)[key] = configValue
+            ;(currentRules[section] as unknown as Record<string, unknown>)[key] = configValue
           }
         } else if (parts.length === 1) {
           // Direct key on a section (try each)
           const key = parts[0]
           for (const section of ['governance', 'treasury', 'identity'] as const) {
             if (key in currentRules[section]) {
-              ;(currentRules[section] as Record<string, unknown>)[key] = configValue
+              ;(currentRules[section] as unknown as Record<string, unknown>)[key] = configValue
               break
             }
           }

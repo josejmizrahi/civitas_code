@@ -66,7 +66,7 @@ export function AdminTermTracker() {
   const [selectedMemberId, setSelectedMemberId] = useState('')
   const [selectedRole, setSelectedRole] = useState('admin')
 
-  const rules = getCommunityRules(null, community?.rules ?? null)
+  const rules = getCommunityRules(null, (community?.rules ?? null) as Record<string, unknown> | null)
   const maxTerms = rules.identity.admin_max_consecutive_terms
   const termMonths = rules.identity.admin_term_months
 

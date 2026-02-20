@@ -134,8 +134,10 @@ export function AppRouter() {
           <Route path="*" element={<LazyPage><NotFoundPage /></LazyPage>} />
         </Route>
 
-        {/* Unauthenticated 404 — same layout as login/register */}
-        <Route path="*" element={<AuthLayout><LazyPage><NotFoundPage /></LazyPage></AuthLayout>} />
+        {/* Unauthenticated 404 — same layout as login/register (AuthLayout uses Outlet) */}
+        <Route path="*" element={<AuthLayout />}>
+          <Route index element={<LazyPage><NotFoundPage /></LazyPage>} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )

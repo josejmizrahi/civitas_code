@@ -201,7 +201,7 @@ export async function getUserCommunities(
 
   if (error) throw error
 
-  return (data ?? []).map((row: { communities?: Community | null }) => row.communities).filter(Boolean) as Community[]
+  return (data ?? []).map((row: { communities?: unknown }) => row.communities as Community | null).filter(Boolean) as Community[]
 }
 
 export async function joinCommunity(
