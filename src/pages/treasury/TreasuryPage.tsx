@@ -9,6 +9,7 @@ import { CollectionView } from '@/core/treasury/components/CollectionView'
 import { MyPayments } from '@/core/treasury/components/MyPayments'
 import { RecurringScheduleList } from '@/core/treasury/components/RecurringScheduleList'
 import { ContractList } from '@/core/treasury/components/ContractList'
+import { PaymentPlanManager } from '@/core/treasury/components/PaymentPlanManager'
 import { ExpenseForm } from '@/core/treasury/components/ExpenseForm'
 import { FundSelector } from '@/core/treasury/components/FundSelector'
 import { StatementList } from '@/core/treasury/components/StatementList'
@@ -19,7 +20,7 @@ import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityContext } from '@/app/providers'
 import {
   Plus, FileSpreadsheet, CreditCard, BarChart3, Receipt, PiggyBank,
-  Banknote, User, RefreshCw, FileText, ClipboardList, Download,
+  Banknote, User, RefreshCw, FileText, ClipboardList, Download, CalendarRange,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTransactions } from '@/core/treasury/hooks/useTransactions'
@@ -118,6 +119,13 @@ export function TreasuryPage() {
         </div>
       </div>
 
+      {/* Mensaje modo actual — U4.2 */}
+      {treasuryMode !== 'fintech_rail' && (
+        <div className="no-print rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/40 px-4 py-2 text-sm text-amber-800 dark:text-amber-200">
+          Hoy: importación y registro manual. SPEI automático en Fase 2 con socio IFPE.
+        </div>
+      )}
+
       {/* Fund Selector — solo en pestañas donde aplica (LPCI Art. 57-58) */}
       {showFundSelector && (
         <div className="no-print flex flex-wrap items-center gap-2">
@@ -152,6 +160,10 @@ export function TreasuryPage() {
             <FileText className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Contratos</span>
           </TabsTrigger>
+          <TabsTrigger value="payment-plans" className="shrink-0 gap-1 whitespace-nowrap" title="Planes de pago para morosos">
+            <CalendarRange className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Planes de pago</span>
+          </TabsTrigger>
           <TabsTrigger value="transactions" className="shrink-0 gap-1 whitespace-nowrap" title="Listado de movimientos">
             <CreditCard className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Transacciones</span>
@@ -182,6 +194,9 @@ export function TreasuryPage() {
         </TabsContent>
         <TabsContent value="contracts">
           <ContractList />
+        </TabsContent>
+        <TabsContent value="payment-plans">
+          <PaymentPlanManager />
         </TabsContent>
         <TabsContent value="transactions">
           <TransactionList fundType={selectedFund} />

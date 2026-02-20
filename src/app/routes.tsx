@@ -35,6 +35,7 @@ const VigilanciaPage = lazy(() => import('@/pages/governance/VigilanciaPage').th
 const DecisionArchivePage = lazy(() => import('@/pages/governance/DecisionArchivePage').then(m => ({ default: m.DecisionArchivePage })))
 const RulesPage = lazy(() => import('@/pages/rules/RulesPage').then(m => ({ default: m.RulesPage })))
 const AuditLogPage = lazy(() => import('@/pages/settings/AuditLogPage').then(m => ({ default: m.AuditLogPage })))
+const ResidentialPage = lazy(() => import('@/pages/residential/ResidentialPage').then(m => ({ default: m.ResidentialPage })))
 const OnboardingWizard = lazy(() => import('@/pages/onboarding/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
@@ -117,6 +118,7 @@ export function AppRouter() {
           <Route path="/members" element={<LazyPage><MembersPage /></LazyPage>} />
           <Route path="/members/:memberId" element={<LazyPage><MemberDetailPage /></LazyPage>} />
           <Route path="/treasury" element={<LazyPage><TreasuryPage /></LazyPage>} />
+          <Route path="/residential" element={<LazyPage><ResidentialPage /></LazyPage>} />
           <Route path="/ingestion" element={<RoleGuard requiredRole="tesorero"><LazyPage><IngestionPage /></LazyPage></RoleGuard>} />
           <Route path="/governance" element={<LazyPage><GovernancePage /></LazyPage>} />
           <Route path="/governance/assemblies/:assemblyId" element={<LazyPage><AssemblyDetailPage /></LazyPage>} />
