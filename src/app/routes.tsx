@@ -3,8 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { useAuth } from './providers'
 import { AppLayout } from '@/layouts/AppLayout'
 import { AuthLayout } from '@/layouts/AuthLayout'
-import { LandingPage } from '@/pages/landing/LandingPage'
-import { WhitepaperPage } from '@/pages/whitepaper/WhitepaperPage'
+const LandingPage = lazy(() => import('@/pages/landing/LandingPage').then(m => ({ default: m.LandingPage })))
+const WhitepaperPage = lazy(() => import('@/pages/whitepaper/WhitepaperPage').then(m => ({ default: m.WhitepaperPage })))
 import { useCommunityContext } from './providers'
 import { hasPermission, type Role } from '@/shared/types'
 import type { ReactNode } from 'react'
@@ -73,10 +73,10 @@ function LandingRedirect() {
   const { user, loading } = useAuth()
   if (loading) return <LoadingSpinner message="Cargando..." fullPage />
   if (user) return <Navigate to="/dashboard" replace />
-  return <LandingPage />
+  return <LazyPage><LandingPage /></LazyPage>
 }
 
-function RoleGuard({ requiredRole, children }: { requiredRole: string; children: ReactNode }) {
+function RoleGuard({ requiredRole, children }: { requiredRole: Role; children: ReactNode }) {
   const { currentMember, communityLoading } = useCommunityContext()
   if (communityLoading) return <LoadingSpinner message="Cargando..." className="py-20" />
   const role = (currentMember?.role ?? 'observador') as Role
@@ -115,7 +115,7 @@ export function AppRouter() {
       <Routes>
         {/* Landing page — public */}
         <Route path="/" element={<LandingRedirect />} />
-        <Route path="/whitepaper" element={<WhitepaperPage />} />
+        <Route path="/whitepaper" element={<LazyPage><WhitepaperPage /></LazyPage>} />
 
         {/* Auth routes */}
         <Route element={<PublicRoute><AuthLayout /></PublicRoute>}>

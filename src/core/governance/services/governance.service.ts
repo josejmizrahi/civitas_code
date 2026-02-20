@@ -481,18 +481,25 @@ export async function castVoteWithDelegations(
   const votedMemberIds = new Set(existingVotes.map((v) => v.member_id))
 
   type DelegationRow = { from_member_id: string; to_member_id: string; [k: string]: unknown }
-  for (const delegation of (delegations ?? []) as DelegationRow[]) {
-    // Skip if delegating member already voted directly
-    if (votedMemberIds.has(delegation.from_member_id)) continue
+  const eligibleDelegations = ((delegations ?? []) as DelegationRow[])
+    .filter((d) => !votedMemberIds.has(d.from_member_id))
 
-    // Get delegating member's weight
-    const { data: delMember } = await supabase
-      .from('members')
-      .select('voting_weight')
-      .eq('id', delegation.from_member_id)
-      .single()
+  if (eligibleDelegations.length === 0) return results
 
-    const weight = Number((delMember as { voting_weight?: unknown } | null)?.voting_weight) || 1
+  // Batch: fetch all delegating members' weights in one query (avoids N+1)
+  const delegatorIds = eligibleDelegations.map((d) => d.from_member_id)
+  const { data: delegatorMembers } = await supabase
+    .from('members')
+    .select('id, voting_weight')
+    .in('id', delegatorIds)
+
+  const weightMap = new Map<string, number>()
+  for (const m of (delegatorMembers ?? []) as { id: string; voting_weight?: number }[]) {
+    weightMap.set(m.id, Number(m.voting_weight) || 1)
+  }
+
+  for (const delegation of eligibleDelegations) {
+    const weight = weightMap.get(delegation.from_member_id) ?? 1
 
     const { data: delegatedVote, error: voteErr } = await (supabase.from('votes') as any)
       .insert({

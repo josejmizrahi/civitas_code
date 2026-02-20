@@ -34,6 +34,20 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(supabaseAnonKey),
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            'query-vendor': ['@tanstack/react-query'],
+            'ui-vendor': ['@radix-ui/react-checkbox', '@radix-ui/react-slider', '@radix-ui/react-switch'],
+            'charts': ['recharts'],
+            'xlsx': ['xlsx'],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 1000,
+    },
     test: {
       globals: true,
       environment: 'jsdom',
