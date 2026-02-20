@@ -84,7 +84,7 @@ export async function signMinutes(minutesId: string, memberId: string, memberNam
   const signatures = [...(minutes.signatures || []), { member_id: memberId, member_name: memberName, signed_at: signedAt, hash }]
 
   const { data, error } = await supabase.from('minutes')
-    .update({ signatures }).eq('id', minutesId).select().single()
+    .update({ signatures: signatures as unknown as import('@/shared/types/database').Json }).eq('id', minutesId).select().single()
   if (error) throw error
   return data as unknown as Minutes
 }

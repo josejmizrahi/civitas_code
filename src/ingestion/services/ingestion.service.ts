@@ -65,7 +65,7 @@ export async function updateImportJob(
   updates: Partial<ImportJob>
 ): Promise<void> {
   const { error } = await supabase.from('import_jobs')
-    .update(updates)
+    .update(updates as any)
     .eq('id', jobId)
 
   if (error) throw error
@@ -180,7 +180,13 @@ export async function importTransactions(
     const { error } = await supabase.from('transactions')
       .insert({
         community_id: communityId,
-        ...tx,
+        type: tx.type,
+        amount: tx.amount,
+        category_id: tx.category_id,
+        description: tx.description || '',
+        date: tx.date,
+        source_id: tx.source_id,
+        external_ref: tx.external_ref,
         import_job_id: tx.import_job_id || importJobId || null,
         origin: 'import',
       })

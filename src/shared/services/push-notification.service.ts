@@ -57,8 +57,8 @@ export async function subscribeToPush(memberId: string): Promise<boolean> {
       {
         member_id: memberId,
         user_id: user.id,
-        endpoint: sub.endpoint,
-        keys: sub.keys || {},
+        endpoint: sub.endpoint!,
+        keys: (sub.keys || {}) as import('@/shared/types/database').Json,
       },
       { onConflict: 'user_id,endpoint' }
     )

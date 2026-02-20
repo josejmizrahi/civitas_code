@@ -20,7 +20,7 @@ export async function getOrCreateProfile(
     .maybeSingle()
 
   if (error) throw error
-  if (data) return data as GamificationProfile
+  if (data) return data as unknown as GamificationProfile
 
   // Create new profile
   const { data: created, error: createErr } = await gam()
@@ -36,11 +36,11 @@ export async function getOrCreateProfile(
         .eq('member_id', memberId)
         .eq('community_id', communityId)
         .single()
-      return existing as GamificationProfile
+      return existing as unknown as GamificationProfile
     }
     throw createErr
   }
-  return created as GamificationProfile
+  return created as unknown as GamificationProfile
 }
 
 /** Get profile (returns null if not found). */
@@ -55,7 +55,7 @@ export async function getProfile(
     .maybeSingle()
 
   if (error) throw error
-  return data as GamificationProfile | null
+  return data as unknown as GamificationProfile | null
 }
 
 // ─── XP Award Engine ───────────────────────────────────────────────────────
@@ -121,7 +121,7 @@ export async function awardXp(
       current_streak: newStreak,
       max_streak: newMaxStreak,
       last_activity_date: today,
-      badges: updatedBadges,
+      badges: updatedBadges as unknown as import('@/shared/types/database').Json,
       updated_at: new Date().toISOString(),
     })
     .eq('id', profile.id)
@@ -275,5 +275,5 @@ export async function getRecentEvents(
     .limit(limit)
 
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as unknown as GamificationEvent[]
 }

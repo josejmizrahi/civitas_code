@@ -41,7 +41,7 @@ export async function castVote(vote: {
   }
 
   const { data, error } = await supabase.from('votes')
-    .upsert(upsertData, { onConflict: 'proposal_id,member_id' })
+    .upsert(upsertData as any, { onConflict: 'proposal_id,member_id' })
     .select().single()
   if (error) throw error
   return data as Vote

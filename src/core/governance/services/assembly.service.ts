@@ -108,7 +108,7 @@ export async function createAssembly(
       title: data.title,
       scheduled_date: data.scheduled_date,
       location: data.location,
-      agenda: data.agenda,
+      agenda: data.agenda as unknown as import('@/shared/types/database').Json,
       called_by: data.called_by,
       status: 'scheduled',
       current_call: 1,
@@ -198,7 +198,7 @@ export async function recordAttendance(
 
   const { error } = await supabase.from('assemblies')
     .update({
-      attendance: attendanceRecords,
+      attendance: attendanceRecords as unknown as import('@/shared/types/database').Json,
       quorum_pct: quorumPct,
       quorum_met: quorumPct >= 50,
     })
@@ -233,7 +233,7 @@ export async function createConvocatoria(
       type: data.type,
       scheduled_date: data.scheduled_date,
       location: data.location,
-      agenda: data.agenda,
+      agenda: data.agenda as unknown as import('@/shared/types/database').Json,
       called_by: data.called_by,
       issued_at: new Date().toISOString(),
       minimum_notice_days: data.minimum_notice_days,
@@ -297,7 +297,7 @@ export async function recordDelivery(
 
   const { error } = await supabase.from('convocatorias')
     .update({
-      delivery_log: [...existingLog, newRecord],
+      delivery_log: [...existingLog, newRecord] as unknown as import('@/shared/types/database').Json,
     })
     .eq('id', convocatoriaId)
 

@@ -79,7 +79,7 @@ export async function createContract(
 ): Promise<Contract> {
   const { data, error } = await supabase
     .from('contracts')
-    .insert({ community_id: communityId, ...contract })
+    .insert({ community_id: communityId, ...contract, terms: contract.terms as unknown as import('@/shared/types/database').Json })
     .select()
     .single()
   if (error) throw error
@@ -92,7 +92,7 @@ export async function updateContract(
 ): Promise<Contract> {
   const { data, error } = await supabase
     .from('contracts')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...updates, terms: updates.terms as unknown as import('@/shared/types/database').Json, updated_at: new Date().toISOString() })
     .eq('id', contractId)
     .select()
     .single()

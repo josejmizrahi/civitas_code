@@ -28,7 +28,7 @@ export async function logAuditAction(
     action,
     entity_type: entityType,
     entity_id: entityId ?? null,
-    details: details ?? {},
+    details: (details ?? {}) as import('@/shared/types/database').Json,
   })
   if (error) log.warn('Audit log insert failed', { error: error.message, action, entityType })
 }

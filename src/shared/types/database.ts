@@ -59,6 +59,27 @@ export type Database = {
             referencedRelation: "communities"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "admin_terms_elected_in_assembly_fkey"
+            columns: ["elected_in_assembly"]
+            isOneToOne: false
+            referencedRelation: "assemblies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_terms_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_terms_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
         ]
       }
       arco_requests: {
@@ -224,6 +245,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "assembly_proxies_assembly_id_fkey"
+            columns: ["assembly_id"]
+            isOneToOne: false
+            referencedRelation: "assemblies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "assembly_proxies_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
@@ -339,7 +367,6 @@ export type Database = {
         Row: {
           community_id: string
           created_at: string
-          deleted_at: string | null
           id: string
           is_active: boolean
           is_system: boolean
@@ -350,7 +377,6 @@ export type Database = {
         Insert: {
           community_id: string
           created_at?: string
-          deleted_at?: string | null
           id?: string
           is_active?: boolean
           is_system?: boolean
@@ -361,7 +387,6 @@ export type Database = {
         Update: {
           community_id?: string
           created_at?: string
-          deleted_at?: string | null
           id?: string
           is_active?: boolean
           is_system?: boolean
@@ -579,6 +604,7 @@ export type Database = {
       common_areas: {
         Row: {
           community_id: string
+          created_at: string | null
           id: string
           name: string
           reservation_enabled: boolean
@@ -586,6 +612,7 @@ export type Database = {
         }
         Insert: {
           community_id: string
+          created_at?: string | null
           id?: string
           name: string
           reservation_enabled?: boolean
@@ -593,6 +620,7 @@ export type Database = {
         }
         Update: {
           community_id?: string
+          created_at?: string | null
           id?: string
           name?: string
           reservation_enabled?: boolean
@@ -1378,31 +1406,31 @@ export type Database = {
       }
       gamification_events: {
         Row: {
-          id: string
+          action: string
           community_id: string
-          member_id: string
-          event_type: string
-          points: number
-          metadata: Json
           created_at: string
+          id: string
+          member_id: string
+          metadata: Json | null
+          xp_earned: number
         }
         Insert: {
-          id?: string
+          action: string
           community_id: string
-          member_id: string
-          event_type: string
-          points?: number
-          metadata?: Json
           created_at?: string
+          id?: string
+          member_id: string
+          metadata?: Json | null
+          xp_earned?: number
         }
         Update: {
-          id?: string
+          action?: string
           community_id?: string
-          member_id?: string
-          event_type?: string
-          points?: number
-          metadata?: Json
           created_at?: string
+          id?: string
+          member_id?: string
+          metadata?: Json | null
+          xp_earned?: number
         }
         Relationships: [
           {
@@ -1412,68 +1440,82 @@ export type Database = {
             referencedRelation: "communities"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "gamification_events_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gamification_events_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ifpe_webhook_events: {
         Row: {
-          id: string
-          community_id: string
-          event_type: string
           clabe_destino: string | null
           clabe_origen: string | null
-          monto: number | null
-          referencia_numerica: string | null
-          concepto: string | null
-          nombre_ordenante: string | null
-          rfc_ordenante: string | null
-          fecha_operacion: string | null
           clave_rastreo: string | null
-          raw_payload: Json
-          reconciliation_status: string
+          community_id: string
+          concepto: string | null
+          created_at: string
+          event_type: string
+          fecha_operacion: string | null
+          id: string
           matched_obligation_id: string | null
           matched_transaction_id: string | null
+          monto: number | null
+          nombre_ordenante: string | null
           processed_at: string | null
-          created_at: string
+          raw_payload: Json
+          reconciliation_status: string
+          referencia_numerica: string | null
+          rfc_ordenante: string | null
         }
         Insert: {
-          id?: string
-          community_id: string
-          event_type: string
           clabe_destino?: string | null
           clabe_origen?: string | null
-          monto?: number | null
-          referencia_numerica?: string | null
-          concepto?: string | null
-          nombre_ordenante?: string | null
-          rfc_ordenante?: string | null
-          fecha_operacion?: string | null
           clave_rastreo?: string | null
-          raw_payload?: Json
-          reconciliation_status?: string
+          community_id: string
+          concepto?: string | null
+          created_at?: string
+          event_type: string
+          fecha_operacion?: string | null
+          id?: string
           matched_obligation_id?: string | null
           matched_transaction_id?: string | null
+          monto?: number | null
+          nombre_ordenante?: string | null
           processed_at?: string | null
-          created_at?: string
+          raw_payload?: Json
+          reconciliation_status?: string
+          referencia_numerica?: string | null
+          rfc_ordenante?: string | null
         }
         Update: {
-          id?: string
-          community_id?: string
-          event_type?: string
           clabe_destino?: string | null
           clabe_origen?: string | null
-          monto?: number | null
-          referencia_numerica?: string | null
-          concepto?: string | null
-          nombre_ordenante?: string | null
-          rfc_ordenante?: string | null
-          fecha_operacion?: string | null
           clave_rastreo?: string | null
-          raw_payload?: Json
-          reconciliation_status?: string
+          community_id?: string
+          concepto?: string | null
+          created_at?: string
+          event_type?: string
+          fecha_operacion?: string | null
+          id?: string
           matched_obligation_id?: string | null
           matched_transaction_id?: string | null
+          monto?: number | null
+          nombre_ordenante?: string | null
           processed_at?: string | null
-          created_at?: string
+          raw_payload?: Json
+          reconciliation_status?: string
+          referencia_numerica?: string | null
+          rfc_ordenante?: string | null
         }
         Relationships: [
           {
@@ -1481,6 +1523,20 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ifpe_webhook_events_matched_obligation_id_fkey"
+            columns: ["matched_obligation_id"]
+            isOneToOne: false
+            referencedRelation: "payment_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ifpe_webhook_events_matched_transaction_id_fkey"
+            columns: ["matched_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -1576,8 +1632,6 @@ export type Database = {
           error_log: Json
           file_url: string | null
           id: string
-          rolled_back: boolean
-          rolled_back_at: string | null
           rows_imported: number
           rows_skipped: number
           rows_total: number
@@ -1591,8 +1645,6 @@ export type Database = {
           error_log?: Json
           file_url?: string | null
           id?: string
-          rolled_back?: boolean
-          rolled_back_at?: string | null
           rows_imported?: number
           rows_skipped?: number
           rows_total?: number
@@ -1606,8 +1658,6 @@ export type Database = {
           error_log?: Json
           file_url?: string | null
           id?: string
-          rolled_back?: boolean
-          rolled_back_at?: string | null
           rows_imported?: number
           rows_skipped?: number
           rows_total?: number
@@ -1741,6 +1791,70 @@ export type Database = {
           },
         ]
       }
+      member_gamification: {
+        Row: {
+          badges: Json
+          community_id: string
+          created_at: string
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          level: number
+          max_streak: number
+          member_id: string
+          updated_at: string
+          xp: number
+        }
+        Insert: {
+          badges?: Json
+          community_id: string
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          max_streak?: number
+          member_id: string
+          updated_at?: string
+          xp?: number
+        }
+        Update: {
+          badges?: Json
+          community_id?: string
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          level?: number
+          max_streak?: number
+          member_id?: string
+          updated_at?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_gamification_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_gamification_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_gamification_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       members: {
         Row: {
           community_id: string
@@ -1787,53 +1901,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "members_community_id_fkey"
-            columns: ["community_id"]
-            isOneToOne: false
-            referencedRelation: "communities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      member_gamification: {
-        Row: {
-          id: string
-          community_id: string
-          member_id: string
-          total_xp: number
-          level: number
-          badges: Json
-          streak_days: number
-          last_active_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          community_id: string
-          member_id: string
-          total_xp?: number
-          level?: number
-          badges?: Json
-          streak_days?: number
-          last_active_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          community_id?: string
-          member_id?: string
-          total_xp?: number
-          level?: number
-          badges?: Json
-          streak_days?: number
-          last_active_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "member_gamification_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
@@ -2081,7 +2148,6 @@ export type Database = {
           obligation_type: string
           payment_transaction_id: string | null
           status: string
-          transaction_id: string | null
         }
         Insert: {
           amount: number
@@ -2095,7 +2161,6 @@ export type Database = {
           obligation_type?: string
           payment_transaction_id?: string | null
           status?: string
-          transaction_id?: string | null
         }
         Update: {
           amount?: number
@@ -2109,16 +2174,8 @@ export type Database = {
           obligation_type?: string
           payment_transaction_id?: string | null
           status?: string
-          transaction_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "obligations_transaction_fk"
-            columns: ["transaction_id"]
-            isOneToOne: false
-            referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "payment_obligations_community_id_fkey"
             columns: ["community_id"]
@@ -2352,6 +2409,66 @@ export type Database = {
         }
         Relationships: []
       }
+      proposal_endorsements: {
+        Row: {
+          community_id: string
+          endorsed_at: string
+          id: string
+          member_id: string
+          proposal_id: string
+        }
+        Insert: {
+          community_id: string
+          endorsed_at?: string
+          id?: string
+          member_id: string
+          proposal_id: string
+        }
+        Update: {
+          community_id?: string
+          endorsed_at?: string
+          id?: string
+          member_id?: string
+          proposal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_endorsements_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_endorsements_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_endorsements_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_endorsements_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "decision_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_endorsements_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposals: {
         Row: {
           appealed: boolean | null
@@ -2366,6 +2483,8 @@ export type Database = {
           discussion_end: string | null
           discussion_min_hours: number | null
           discussion_start: string | null
+          endorsements_met: boolean
+          endorsements_required: number
           executed_at: string | null
           execution_status: string | null
           financial_instruction: Json | null
@@ -2399,6 +2518,8 @@ export type Database = {
           discussion_end?: string | null
           discussion_min_hours?: number | null
           discussion_start?: string | null
+          endorsements_met?: boolean
+          endorsements_required?: number
           executed_at?: string | null
           execution_status?: string | null
           financial_instruction?: Json | null
@@ -2432,6 +2553,8 @@ export type Database = {
           discussion_end?: string | null
           discussion_min_hours?: number | null
           discussion_start?: string | null
+          endorsements_met?: boolean
+          endorsements_required?: number
           executed_at?: string | null
           execution_status?: string | null
           financial_instruction?: Json | null
@@ -2465,45 +2588,6 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      proposal_endorsements: {
-        Row: {
-          id: string
-          proposal_id: string
-          member_id: string
-          community_id: string
-          endorsed_at: string
-        }
-        Insert: {
-          id?: string
-          proposal_id: string
-          member_id: string
-          community_id: string
-          endorsed_at?: string
-        }
-        Update: {
-          id?: string
-          proposal_id?: string
-          member_id?: string
-          community_id?: string
-          endorsed_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "proposal_endorsements_proposal_id_fkey"
-            columns: ["proposal_id"]
-            isOneToOne: false
-            referencedRelation: "proposals"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "proposal_endorsements_proposal_id_fkey"
-            columns: ["proposal_id"]
-            isOneToOne: false
-            referencedRelation: "decision_archive"
             referencedColumns: ["id"]
           },
         ]
@@ -3006,6 +3090,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "vigilancia_reports_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vigilancia_reports_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "vigilancia_reports_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
@@ -3227,14 +3325,12 @@ export type Database = {
           created_at: string | null
           custom_attributes: Json | null
           email: string | null
-          financial_standing: string | null
           full_name: string | null
           id: string | null
           joined_at: string | null
           role: string | null
           status: string | null
           user_id: string | null
-          voting_weight: number | null
         }
         Relationships: [
           {
@@ -3303,6 +3399,13 @@ export type Database = {
           ordinary_unpaid: number
           restrictions: Json
           total_debt: number
+        }[]
+      }
+      get_member_emails: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          email: string
+          user_id: string
         }[]
       }
       get_next_rule_version: {

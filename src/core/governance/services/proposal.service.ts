@@ -1,6 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { logger } from '@/shared/lib/logger'
-import { AppError, handleServiceError } from '@/shared/lib/errors'
+import { AppError } from '@/shared/lib/errors'
 import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
 import { sendEmailToMembers } from '@/shared/services/email.service'
 import type { Proposal } from '../types'

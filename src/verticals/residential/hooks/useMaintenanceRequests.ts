@@ -39,7 +39,7 @@ export function useCreateMaintenanceRequest() {
     }) => {
       const { data, error } = await supabase.from('maintenance_requests')
         .insert({
-          community_id: communityId,
+          community_id: communityId!,
           ...request,
           status: 'open',
           created_by: user!.id,

@@ -52,7 +52,7 @@ export async function manualReconcile(
     .insert({
       community_id: communityId,
       type: 'income',
-      amount: evt.monto,
+      amount: evt.monto!,
       description: `SPEI (conciliación manual): ${evt.concepto || evt.nombre_ordenante || ''} (${evt.clave_rastreo})`,
       date: evt.fecha_operacion || new Date().toISOString().split('T')[0],
       external_ref: evt.clave_rastreo,

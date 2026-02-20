@@ -87,7 +87,7 @@ export async function createComment(comment: {
     } catch { /* notifications are best-effort */ }
   }
 
-  return data as DiscussionComment
+  return data as unknown as DiscussionComment
 }
 
 /**
@@ -113,7 +113,7 @@ export async function updateComment(
     .single()
 
   if (error) throw error
-  return data as DiscussionComment
+  return data as unknown as DiscussionComment
 }
 
 /**

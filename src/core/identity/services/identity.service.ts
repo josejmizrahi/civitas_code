@@ -330,7 +330,7 @@ export async function updateCommunity(
 ): Promise<Community> {
   const { data, error } = await supabase
     .from('communities')
-    .update(updates)
+    .update(updates as any)
     .eq('id', communityId)
     .select()
     .single()
