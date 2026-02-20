@@ -51,8 +51,12 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 function PublicRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth()
+  const location = useLocation()
   if (loading) return <LoadingSpinner message="Cargando..." fullPage />
-  if (user) return <Navigate to="/dashboard" replace />
+  if (user) {
+    const from = (location.state as { from?: string } | null)?.from
+    return <Navigate to={from ?? '/dashboard'} replace />
+  }
   return <>{children}</>
 }
 
