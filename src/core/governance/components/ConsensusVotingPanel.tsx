@@ -6,6 +6,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { cn } from '@/shared/lib/utils'
 import { ThumbsUp, ThumbsDown, Minus, ShieldAlert } from 'lucide-react'
 import type { Vote, VoteSummary } from '../types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   proposalId: string
@@ -18,10 +19,10 @@ interface Props {
 }
 
 const CONSENSUS_OPTIONS = [
-  { value: 'agree', label: 'De acuerdo', icon: ThumbsUp, color: 'text-green-600', bg: 'bg-green-50 border-green-200 hover:bg-green-100' },
-  { value: 'disagree', label: 'En desacuerdo', icon: ThumbsDown, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200 hover:bg-amber-100' },
-  { value: 'abstain', label: 'Abstención', icon: Minus, color: 'text-gray-600', bg: 'bg-gray-50 border-gray-200 hover:bg-gray-100' },
-  { value: 'block', label: 'Bloquear', icon: ShieldAlert, color: 'text-red-600', bg: 'bg-red-50 border-red-200 hover:bg-red-100' },
+  { value: 'agree', labelKey: 'consensus.option.agree', icon: ThumbsUp, color: 'text-green-600', bg: 'bg-green-50 border-green-200 hover:bg-green-100' },
+  { value: 'disagree', labelKey: 'consensus.option.disagree', icon: ThumbsDown, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200 hover:bg-amber-100' },
+  { value: 'abstain', labelKey: 'consensus.option.abstain', icon: Minus, color: 'text-gray-600', bg: 'bg-gray-50 border-gray-200 hover:bg-gray-100' },
+  { value: 'block', labelKey: 'consensus.option.block', icon: ShieldAlert, color: 'text-red-600', bg: 'bg-red-50 border-red-200 hover:bg-red-100' },
 ] as const
 
 export function ConsensusVotingPanel({
@@ -33,6 +34,7 @@ export function ConsensusVotingPanel({
   onVote,
   isPending,
 }: Props) {
+  const { t } = useI18n()
   const [blockReason, setBlockReason] = useState('')
   const [showBlockReason, setShowBlockReason] = useState(false)
 
@@ -69,7 +71,7 @@ export function ConsensusVotingPanel({
           {hasBlocks && (
             <Badge variant="destructive" className="text-xs">
               <ShieldAlert className="mr-1 h-3 w-3" />
-              Bloqueada
+              {t('consensus.blocked')}
             </Badge>
           )}
         </CardTitle>
@@ -78,9 +80,9 @@ export function ConsensusVotingPanel({
         {/* My vote status */}
         {myVote && (
           <div className="rounded-md bg-muted p-2 text-sm">
-            Tu voto: <strong>{CONSENSUS_OPTIONS.find((o) => o.value === myVote.value)?.label ?? myVote.value}</strong>
+            {t('consensus.myVote')} <strong>{t(CONSENSUS_OPTIONS.find((o) => o.value === myVote.value)?.labelKey ?? 'consensus.option.abstain')}</strong>
             {myVote.value === 'block' && myVote.block_reason && (
-              <p className="mt-1 text-xs text-muted-foreground">Razón: {myVote.block_reason}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t('consensus.reason')}: {myVote.block_reason}</p>
             )}
           </div>
         )}
@@ -104,7 +106,7 @@ export function ConsensusVotingPanel({
                 )}
               >
                 <Icon className={cn('h-5 w-5', opt.color)} />
-                {opt.label}
+                {t(opt.labelKey)}
               </button>
             )
           })}
@@ -114,21 +116,21 @@ export function ConsensusVotingPanel({
         {showBlockReason && (
           <div className="space-y-2 rounded-md border border-red-200 bg-red-50 p-3">
             <p className="text-sm font-medium text-red-800">
-              Bloquear detiene la propuesta. Explica tu razón:
+              {t('consensus.blockWarning')}
             </p>
             <Textarea
               value={blockReason}
               onChange={(e) => setBlockReason(e.target.value)}
-              placeholder="Razón del bloqueo (obligatorio)..."
+              placeholder={t('consensus.blockPlaceholder')}
               rows={2}
               autoFocus
             />
             <div className="flex gap-2">
               <Button size="sm" variant="destructive" onClick={handleBlock} disabled={!blockReason.trim() || isPending}>
-                Confirmar Bloqueo
+                {t('consensus.confirmBlock')}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setShowBlockReason(false)}>
-                Cancelar
+                {t('consensus.cancel')}
               </Button>
             </div>
           </div>
@@ -144,10 +146,10 @@ export function ConsensusVotingPanel({
               {blockCt > 0 && <div className="bg-red-500" style={{ width: `${(blockCt / totalWeight) * 100}%` }} />}
             </div>
             <div className="flex justify-between text-[10px] text-muted-foreground">
-              <span className="text-green-600">Acuerdo: {agreeCt}</span>
-              <span className="text-amber-600">Desacuerdo: {disagreeCt}</span>
-              <span className="text-gray-500">Abstención: {abstainCt}</span>
-              <span className="text-red-600">Bloqueo: {blockCt}</span>
+              <span className="text-green-600">{t('consensus.agree')}: {agreeCt}</span>
+              <span className="text-amber-600">{t('consensus.disagree')}: {disagreeCt}</span>
+              <span className="text-gray-500">{t('consensus.abstain')}: {abstainCt}</span>
+              <span className="text-red-600">{t('consensus.block')}: {blockCt}</span>
             </div>
           </div>
         )}
@@ -155,7 +157,7 @@ export function ConsensusVotingPanel({
         {/* Block reasons display */}
         {existingVotes.filter((v) => v.value === 'block' && v.block_reason).length > 0 && (
           <div className="space-y-1">
-            <p className="text-xs font-medium text-red-800">Razones de bloqueo:</p>
+            <p className="text-xs font-medium text-red-800">{t('consensus.blockReasons')}</p>
             {existingVotes.filter((v) => v.value === 'block' && v.block_reason).map((v) => (
               <div key={v.id} className="rounded bg-red-50 p-2 text-xs text-red-700">
                 {v.block_reason}

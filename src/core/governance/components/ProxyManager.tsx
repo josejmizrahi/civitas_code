@@ -9,6 +9,7 @@ import { useAssemblyProxies, useGrantProxy, useRevokeProxy } from '../hooks/useP
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Users, ArrowRight, X, AlertTriangle, Shield, Info } from 'lucide-react'
 import type { AssemblyProxy } from '../types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   assemblyId: string
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function ProxyManager({ assemblyId, disabled = false }: Props) {
+  const { t } = useI18n()
   const toast = useToast()
   const { isAdmin } = usePermissions()
   const { data: members } = useMembers()
@@ -63,20 +65,20 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
         grantor_id: grantorId,
         representative_id: representativeId,
       })
-      toast.success('Representación otorgada exitosamente')
+      toast.success(t('proxy.toast.granted'))
       setGrantorId('')
       setRepresentativeId('')
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Error al otorgar representación')
+      toast.error(err instanceof Error ? err.message : t('proxy.toast.grantError'))
     }
   }
 
   const handleRevoke = async (proxy: AssemblyProxy) => {
     try {
       await revokeMut.mutateAsync(proxy.id)
-      toast.success('Representación revocada')
+      toast.success(t('proxy.toast.revoked'))
     } catch {
-      toast.error('Error al revocar representación')
+      toast.error(t('proxy.toast.revokeError'))
     }
   }
 
@@ -86,11 +88,11 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Shield className="h-4 w-4" />
-            Representación (Proxies)
+            {t('proxy.title')}
           </CardTitle>
           {activeProxies.length > 0 && (
             <Badge variant="secondary">
-              {activeProxies.length} representaci{activeProxies.length === 1 ? 'ón' : 'ones'} activa{activeProxies.length === 1 ? '' : 's'}
+              {t('proxy.activeCount').replace('{count}', String(activeProxies.length))}
             </Badge>
           )}
         </div>
@@ -100,21 +102,21 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
         <div className="flex items-start gap-2 rounded-md bg-blue-50 border border-blue-200 p-3">
           <Info className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
           <div className="text-sm text-blue-800">
-            <p className="font-medium">Art. 36 LPCI CDMX - Reglas de Representación:</p>
+            <p className="font-medium">{t('proxy.rulesTitle')}</p>
             <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs">
-              <li>Cada condómino puede designar un representante</li>
-              <li>Un representante no puede representar a más de 2 condóminos</li>
-              <li>El administrador no puede actuar como representante</li>
+              <li>{t('proxy.rule.1')}</li>
+              <li>{t('proxy.rule.2')}</li>
+              <li>{t('proxy.rule.3')}</li>
             </ul>
           </div>
         </div>
 
         {/* Active proxies list */}
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Cargando representaciones...</p>
+          <p className="text-sm text-muted-foreground">{t('proxy.loading')}</p>
         ) : activeProxies.length > 0 ? (
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Representaciones activas:</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('proxy.activeList')}</p>
             {activeProxies.map((proxy) => (
               <div
                 key={proxy.id}
@@ -125,7 +127,7 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
                   <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
                   <Badge variant="default">{proxy.representative_name || getMemberName(proxy.representative_id)}</Badge>
                   {(proxiesPerRep.get(proxy.representative_id) || 0) >= 2 && (
-                    <Badge variant="warning" className="text-xs">Máx. alcanzado</Badge>
+                    <Badge variant="warning" className="text-xs">{t('proxy.maxReached')}</Badge>
                   )}
                 </div>
                 {isAdmin && !disabled && (
@@ -134,8 +136,8 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
                     variant="ghost"
                     onClick={() => handleRevoke(proxy)}
                     disabled={revokeMut.isPending}
-                    aria-label="Revocar representación"
-                    title="Revocar representación"
+                    aria-label={t('proxy.revoke')}
+                    title={t('proxy.revoke')}
                   >
                     <X className="h-3.5 w-3.5 text-destructive" />
                   </Button>
@@ -144,13 +146,13 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No hay representaciones activas para esta asamblea.</p>
+          <p className="text-sm text-muted-foreground">{t('proxy.empty')}</p>
         )}
 
         {/* Grant proxy form (admin only) */}
         {isAdmin && !disabled && (
           <div className="space-y-3 pt-2 border-t">
-            <p className="text-sm font-medium">Otorgar representación</p>
+            <p className="text-sm font-medium">{t('proxy.grant')}</p>
             <div className="flex flex-col sm:flex-row gap-2">
               <Select
                 value={grantorId}
@@ -160,7 +162,7 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
                 }}
                 className="flex-1"
               >
-                <option value="">Condómino que delega...</option>
+                <option value="">{t('proxy.grantorPlaceholder')}</option>
                 {eligibleGrantors.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.full_name || m.email}
@@ -173,12 +175,12 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
                 className="flex-1"
                 disabled={!grantorId}
               >
-                <option value="">Representante...</option>
+                <option value="">{t('proxy.representativePlaceholder')}</option>
                 {eligibleRepresentatives.map((m) => {
                   const count = proxiesPerRep.get(m.id) || 0
                   return (
                     <option key={m.id} value={m.id}>
-                      {m.full_name || m.email}{count > 0 ? ` (${count}/2 representaciones)` : ''}
+                      {m.full_name || m.email}{count > 0 ? ` ${t('proxy.representationsCount').replace('{count}', String(count))}` : ''}
                     </option>
                   )
                 })}
@@ -189,14 +191,14 @@ export function ProxyManager({ assemblyId, disabled = false }: Props) {
                 className="shrink-0"
               >
                 <Users className="h-4 w-4 mr-2" />
-                {grantMut.isPending ? 'Otorgando...' : 'Otorgar'}
+                {grantMut.isPending ? t('proxy.granting') : t('proxy.grantButton')}
               </Button>
             </div>
             {grantorId && eligibleRepresentatives.length === 0 && (
               <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 p-3">
                 <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
                 <p className="text-sm text-amber-800">
-                  No hay representantes disponibles. Todos los condóminos ya representan a 2 personas o son administradores.
+                  {t('proxy.noRepresentatives')}
                 </p>
               </div>
             )}

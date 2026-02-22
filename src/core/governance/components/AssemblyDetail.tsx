@@ -22,16 +22,17 @@ import {
   XCircle,
 } from 'lucide-react'
 import type { AssemblyStatus } from '../types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
-const STATUS_LABELS: Record<string, string> = {
-  scheduled: 'Programada',
-  convened: 'Convocada',
-  in_session: 'En sesion',
-  first_call: '1a Llamada',
-  second_call: '2a Llamada',
-  third_call: '3a Llamada',
-  completed: 'Completada',
-  cancelled: 'Cancelada',
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  scheduled: 'assemblyDetail.status.scheduled',
+  convened: 'assemblyDetail.status.convened',
+  in_session: 'assemblyDetail.status.inSession',
+  first_call: 'assemblyDetail.status.firstCall',
+  second_call: 'assemblyDetail.status.secondCall',
+  third_call: 'assemblyDetail.status.thirdCall',
+  completed: 'assemblyDetail.status.completed',
+  cancelled: 'assemblyDetail.status.cancelled',
 }
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
@@ -45,9 +46,9 @@ const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'w
   cancelled: 'destructive',
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  ordinary: 'Ordinaria',
-  extraordinary: 'Extraordinaria',
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  ordinary: 'assemblyDetail.type.ordinary',
+  extraordinary: 'assemblyDetail.type.extraordinary',
 }
 
 interface Props {
@@ -55,6 +56,7 @@ interface Props {
 }
 
 export function AssemblyDetail({ assemblyId }: Props) {
+  const { t } = useI18n()
   const { data: assembly, isLoading } = useAssembly(assemblyId)
   const { data: convocatorias } = useConvocatorias(assemblyId)
   const updateStatus = useUpdateAssemblyStatus()
@@ -67,8 +69,8 @@ export function AssemblyDetail({ assemblyId }: Props) {
     : null
   const governanceRules = rules?.governance
 
-  if (isLoading) return <LoadingSpinner message="Cargando asamblea..." className="py-8" />
-  if (!assembly) return <p className="text-muted-foreground">Asamblea no encontrada.</p>
+  if (isLoading) return <LoadingSpinner message={t('assemblyDetail.loading')} className="py-8" />
+  if (!assembly) return <p className="text-muted-foreground">{t('assemblyDetail.notFound')}</p>
 
   const quorumInfo =
     governanceRules && assembly.attendance?.length
@@ -88,9 +90,14 @@ export function AssemblyDetail({ assemblyId }: Props) {
         assemblyId: assembly!.id,
         status: newStatus,
       })
-      toast.success(`Estado actualizado: ${STATUS_LABELS[newStatus] || newStatus}`)
+      toast.success(
+        t('assemblyDetail.statusUpdated').replace(
+          '{status}',
+          STATUS_LABEL_KEYS[newStatus] ? t(STATUS_LABEL_KEYS[newStatus] as never) : newStatus
+        )
+      )
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al actualizar estado')
+      toast.error(err instanceof Error ? err.message : t('assemblyDetail.statusUpdateError'))
     }
   }
 
@@ -102,12 +109,12 @@ export function AssemblyDetail({ assemblyId }: Props) {
       case 'scheduled':
         availableActions.push({
           status: 'first_call',
-          label: 'Iniciar 1a Llamada',
+          label: t('assemblyDetail.action.startFirst'),
           icon: PlayCircle,
         })
         availableActions.push({
           status: 'cancelled',
-          label: 'Cancelar',
+          label: t('assemblyDetail.action.cancel'),
           icon: XCircle,
           variant: 'destructive',
         })
@@ -115,13 +122,13 @@ export function AssemblyDetail({ assemblyId }: Props) {
       case 'first_call':
         availableActions.push({
           status: 'second_call',
-          label: 'Avanzar a 2a Llamada',
+          label: t('assemblyDetail.action.toSecond'),
           icon: SkipForward,
         })
         if (quorumInfo?.quorumMet) {
           availableActions.push({
             status: 'in_session',
-            label: 'Iniciar Sesion',
+            label: t('assemblyDetail.action.startSession'),
             icon: PlayCircle,
           })
         }
@@ -129,13 +136,13 @@ export function AssemblyDetail({ assemblyId }: Props) {
       case 'second_call':
         availableActions.push({
           status: 'third_call',
-          label: 'Avanzar a 3a Llamada',
+          label: t('assemblyDetail.action.toThird'),
           icon: SkipForward,
         })
         if (quorumInfo?.quorumMet) {
           availableActions.push({
             status: 'in_session',
-            label: 'Iniciar Sesion',
+            label: t('assemblyDetail.action.startSession'),
             icon: PlayCircle,
           })
         }
@@ -143,14 +150,14 @@ export function AssemblyDetail({ assemblyId }: Props) {
       case 'third_call':
         availableActions.push({
           status: 'in_session',
-          label: 'Iniciar Sesion',
+          label: t('assemblyDetail.action.startSession'),
           icon: PlayCircle,
         })
         break
       case 'in_session':
         availableActions.push({
           status: 'completed',
-          label: 'Completar Asamblea',
+          label: t('assemblyDetail.action.complete'),
           icon: CheckCircle2,
         })
         break
@@ -173,13 +180,13 @@ export function AssemblyDetail({ assemblyId }: Props) {
               <CardTitle className="text-xl">{assembly.title}</CardTitle>
               <div className="flex flex-wrap gap-2">
                 <Badge variant={assembly.type === 'extraordinary' ? 'default' : 'secondary'}>
-                  {TYPE_LABELS[assembly.type] || assembly.type}
+                  {TYPE_LABEL_KEYS[assembly.type] ? t(TYPE_LABEL_KEYS[assembly.type] as never) : assembly.type}
                 </Badge>
                 <Badge variant={STATUS_VARIANTS[assembly.status] || 'default'}>
-                  {STATUS_LABELS[assembly.status] || assembly.status}
+                  {STATUS_LABEL_KEYS[assembly.status] ? t(STATUS_LABEL_KEYS[assembly.status] as never) : assembly.status}
                 </Badge>
                 {assembly.quorum_met && (
-                  <Badge variant="success">Quorum alcanzado</Badge>
+                  <Badge variant="success">{t('assemblyDetail.quorumMet')}</Badge>
                 )}
               </div>
             </div>
@@ -193,11 +200,11 @@ export function AssemblyDetail({ assemblyId }: Props) {
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4" />
-              <span>{assembly.location || 'Sin ubicacion'}</span>
+              <span>{assembly.location || t('assemblyDetail.noLocation')}</span>
             </div>
             <div className="flex items-center gap-2 text-muted-foreground">
               <User className="h-4 w-4" />
-              <span>Convocado por: {assembly.caller_name || 'Administrador'}</span>
+              <span>{t('assemblyDetail.calledBy')}: {assembly.caller_name || t('assemblyDetail.callerDefault')}</span>
             </div>
           </div>
 
@@ -260,7 +267,7 @@ export function AssemblyDetail({ assemblyId }: Props) {
       {assembly.agenda && assembly.agenda.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Orden del Dia</CardTitle>
+            <CardTitle className="text-base">{t('assemblyDetail.agenda')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ol className="space-y-3">
@@ -288,7 +295,7 @@ export function AssemblyDetail({ assemblyId }: Props) {
       {assembly.notes && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Notas</CardTitle>
+            <CardTitle className="text-base">{t('assemblyDetail.notes')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm whitespace-pre-wrap">{assembly.notes}</p>

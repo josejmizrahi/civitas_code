@@ -433,6 +433,280 @@ export type I18nKey =
   | 'admisionFields.unitLabel'
   | 'admisionFields.unitPlaceholder'
   | 'admisionFields.docsLabel'
+  | 'proposalDetail.loading'
+  | 'proposalDetail.notFoundAccess'
+  | 'proposalDetail.backToGovernance'
+  | 'proposalDetail.status.draft'
+  | 'proposalDetail.status.discussion'
+  | 'proposalDetail.status.active'
+  | 'proposalDetail.status.closed'
+  | 'proposalDetail.status.approved'
+  | 'proposalDetail.status.rejected'
+  | 'proposalDetail.status.executed'
+  | 'proposalDetail.countdown.expired'
+  | 'proposalDetail.countdown.time'
+  | 'proposalDetail.countdown.timeLeft'
+  | 'proposalDetail.badge.appealed'
+  | 'proposalDetail.meta.by'
+  | 'proposalDetail.meta.created'
+  | 'proposalDetail.meta.discussion'
+  | 'proposalDetail.meta.votingStart'
+  | 'proposalDetail.meta.close'
+  | 'proposalDetail.meta.quorum'
+  | 'proposalDetail.meta.majority'
+  | 'proposalDetail.model.consensus'
+  | 'proposalDetail.model.multiple'
+  | 'proposalDetail.closed'
+  | 'proposalDetail.method'
+  | 'proposalDetail.method.autoClose'
+  | 'proposalDetail.countdown.discussion'
+  | 'proposalDetail.countdown.voting'
+  | 'proposalDetail.countdown.appeal'
+  | 'proposalDetail.appealedPaused'
+  | 'proposalDetail.discussionHours'
+  | 'proposalDetail.starting'
+  | 'proposalDetail.startDiscussion'
+  | 'proposalDetail.votingClose'
+  | 'proposalDetail.opening'
+  | 'proposalDetail.openVoting'
+  | 'proposalDetail.openDirectVoting'
+  | 'proposalDetail.closeVoting'
+  | 'proposalDetail.appealing'
+  | 'proposalDetail.appealProposal'
+  | 'proposalDetail.outcomeTitle'
+  | 'proposalDetail.outcomeDeclared'
+  | 'proposalDetail.outcomeDeclaredAt'
+  | 'proposalDetail.outcomePlaceholder'
+  | 'proposalDetail.declaring'
+  | 'proposalDetail.declareOutcome'
+  | 'proposalDetail.cancel'
+  | 'proposalDetail.voteRegistered'
+  | 'proposalDetail.voteError'
+  | 'proposalDetail.toast.discussionStarted'
+  | 'proposalDetail.toast.discussionError'
+  | 'proposalDetail.toast.votingOpened'
+  | 'proposalDetail.toast.votingOpenError'
+  | 'proposalDetail.toast.outcomeDeclared'
+  | 'proposalDetail.toast.outcomeError'
+  | 'proposalDetail.toast.appealed'
+  | 'proposalDetail.toast.appealError'
+  | 'proposalDetail.financialInstruction'
+  | 'proposalDetail.fi.type'
+  | 'proposalDetail.fi.amount'
+  | 'proposalDetail.fi.newAmount'
+  | 'proposalDetail.fi.description'
+  | 'proposalDetail.fi.period'
+  | 'proposalDetail.fi.effectiveDate'
+  | 'proposalDetail.fi.beneficiary'
+  | 'proposalDetail.fi.config'
+  | 'proposalDetail.fi.type.disbursement'
+  | 'proposalDetail.fi.type.budgetAllocation'
+  | 'proposalDetail.fi.type.quotaChange'
+  | 'proposalDetail.fi.type.configChange'
+  | 'proposalDetail.fi.type.none'
+  | 'proposalDetail.executedAt'
+  | 'proposalDetail.executionPausedByAppeal'
+  | 'proposalDetail.cooldownRunning'
+  | 'proposalDetail.cooldownComplete'
+  | 'proposalDetail.executeNow'
+  | 'proposalDetail.executing'
+  | 'proposalDetail.executionFailed'
+  | 'proposalDetail.retrying'
+  | 'proposalDetail.retryExecution'
+  | 'proposalDetail.executeManually'
+  | 'attendance.title'
+  | 'attendance.presentCount'
+  | 'attendance.indiviso'
+  | 'attendance.searchPlaceholder'
+  | 'attendance.markAll'
+  | 'attendance.saving'
+  | 'attendance.save'
+  | 'attendance.weight'
+  | 'attendance.toast.saved'
+  | 'attendance.toast.error'
+  | 'convocatoria.title'
+  | 'convocatoria.badge.noticeValid'
+  | 'convocatoria.badge.noticeInsufficient'
+  | 'convocatoria.typeLabel'
+  | 'convocatoria.locationLabel'
+  | 'convocatoria.locationMissing'
+  | 'convocatoria.dateLabel'
+  | 'convocatoria.calledByLabel'
+  | 'convocatoria.calledByDefault'
+  | 'convocatoria.issuedLabel'
+  | 'convocatoria.noticeLabel'
+  | 'convocatoria.noticeValue'
+  | 'convocatoria.agenda'
+  | 'convocatoria.notificationsDelivered'
+  | 'proxy.title'
+  | 'proxy.activeCount'
+  | 'proxy.rulesTitle'
+  | 'proxy.rule.1'
+  | 'proxy.rule.2'
+  | 'proxy.rule.3'
+  | 'proxy.loading'
+  | 'proxy.activeList'
+  | 'proxy.maxReached'
+  | 'proxy.revoke'
+  | 'proxy.empty'
+  | 'proxy.grant'
+  | 'proxy.grantorPlaceholder'
+  | 'proxy.representativePlaceholder'
+  | 'proxy.representationsCount'
+  | 'proxy.granting'
+  | 'proxy.grantButton'
+  | 'proxy.noRepresentatives'
+  | 'proxy.toast.granted'
+  | 'proxy.toast.grantError'
+  | 'proxy.toast.revoked'
+  | 'proxy.toast.revokeError'
+  | 'votingPanel.title'
+  | 'votingPanel.toast.success'
+  | 'votingPanel.toast.error'
+  | 'votingPanel.voiceOnly'
+  | 'votingPanel.alreadyVoted'
+  | 'votingPanel.canChange'
+  | 'votingPanel.yes'
+  | 'votingPanel.no'
+  | 'votingPanel.abstain'
+  | 'multipleChoice.title'
+  | 'multipleChoice.myVote'
+  | 'multipleChoice.votesCount'
+  | 'multipleChoice.totalVotes'
+  | 'consensus.option.agree'
+  | 'consensus.option.disagree'
+  | 'consensus.option.abstain'
+  | 'consensus.option.block'
+  | 'consensus.blocked'
+  | 'consensus.myVote'
+  | 'consensus.reason'
+  | 'consensus.blockWarning'
+  | 'consensus.blockPlaceholder'
+  | 'consensus.confirmBlock'
+  | 'consensus.cancel'
+  | 'consensus.agree'
+  | 'consensus.disagree'
+  | 'consensus.abstain'
+  | 'consensus.block'
+  | 'consensus.blockReasons'
+  | 'lifecycle.draft'
+  | 'lifecycle.discussion'
+  | 'lifecycle.voting'
+  | 'lifecycle.result'
+  | 'lifecycle.executed'
+  | 'delegation.title'
+  | 'delegation.votingFor'
+  | 'delegation.toMe'
+  | 'delegation.you'
+  | 'delegation.myDelegation'
+  | 'delegation.revoke'
+  | 'delegation.placeholder'
+  | 'delegation.delegate'
+  | 'delegation.empty'
+  | 'delegation.toast.created'
+  | 'delegation.toast.createError'
+  | 'delegation.toast.revoked'
+  | 'delegation.toast.revokeError'
+  | 'minutes.title'
+  | 'minutes.approved'
+  | 'minutes.approvedAt'
+  | 'minutes.signatures'
+  | 'minutes.role.secretary'
+  | 'minutes.role.committee'
+  | 'minutes.memberFallback'
+  | 'minutes.approving'
+  | 'minutes.approve'
+  | 'minutes.signing'
+  | 'minutes.sign'
+  | 'minutes.alreadySigned'
+  | 'minutes.description'
+  | 'minutes.generating'
+  | 'minutes.generate'
+  | 'votingViz.title'
+  | 'votingViz.multipleTitle'
+  | 'votingViz.weight'
+  | 'votingViz.votes'
+  | 'votingViz.participation'
+  | 'votingViz.quorum'
+  | 'votingViz.majority'
+  | 'votingViz.reached'
+  | 'votingViz.notReached'
+  | 'votingViz.notReachedF'
+  | 'votingViz.totalVotes'
+  | 'delivery.status.delivered'
+  | 'delivery.status.sent'
+  | 'delivery.status.pending'
+  | 'delivery.status.failed'
+  | 'delivery.loading'
+  | 'delivery.empty'
+  | 'delivery.title'
+  | 'delivery.rate'
+  | 'assemblyDetail.status.scheduled'
+  | 'assemblyDetail.status.convened'
+  | 'assemblyDetail.status.inSession'
+  | 'assemblyDetail.status.firstCall'
+  | 'assemblyDetail.status.secondCall'
+  | 'assemblyDetail.status.thirdCall'
+  | 'assemblyDetail.status.completed'
+  | 'assemblyDetail.status.cancelled'
+  | 'assemblyDetail.type.ordinary'
+  | 'assemblyDetail.type.extraordinary'
+  | 'assemblyDetail.loading'
+  | 'assemblyDetail.notFound'
+  | 'assemblyDetail.statusUpdated'
+  | 'assemblyDetail.statusUpdateError'
+  | 'assemblyDetail.action.startFirst'
+  | 'assemblyDetail.action.cancel'
+  | 'assemblyDetail.action.toSecond'
+  | 'assemblyDetail.action.startSession'
+  | 'assemblyDetail.action.toThird'
+  | 'assemblyDetail.action.complete'
+  | 'assemblyDetail.quorumMet'
+  | 'assemblyDetail.noLocation'
+  | 'assemblyDetail.calledBy'
+  | 'assemblyDetail.callerDefault'
+  | 'assemblyDetail.agenda'
+  | 'assemblyDetail.notes'
+  | 'context.ruleChange.title'
+  | 'context.currentValue'
+  | 'context.proposedValue'
+  | 'context.key'
+  | 'context.current'
+  | 'context.proposed'
+  | 'context.noRuleDetail'
+  | 'context.viewRules'
+  | 'context.disbursement'
+  | 'context.emergencyExpense'
+  | 'context.majorWork'
+  | 'context.amount'
+  | 'context.currentBalance'
+  | 'context.impact'
+  | 'context.moreThanHalf'
+  | 'context.category'
+  | 'context.beneficiary'
+  | 'context.viewEntity'
+  | 'context.viewTreasury'
+  | 'context.quotaChange'
+  | 'context.newFee'
+  | 'context.activeMembers'
+  | 'context.monthlyCollection'
+  | 'context.effectiveDate'
+  | 'context.quotaExecuteWarning'
+  | 'context.viewCollection'
+  | 'context.budgetAllocation'
+  | 'context.assignedAmount'
+  | 'context.period'
+  | 'context.viewBudgets'
+  | 'context.memberAdmission'
+  | 'context.memberAdmissionDescription'
+  | 'context.memberAdmissionWarning'
+  | 'context.viewMembers'
+  | 'context.electionTitle'
+  | 'context.electionDescription'
+  | 'context.currentRoles'
+  | 'context.periodN'
+  | 'context.electionLegal'
+  | 'context.viewAdminTerms'
 
 type Dictionary = Record<I18nKey, string>
 
@@ -871,6 +1145,280 @@ const es: Dictionary = {
   'admisionFields.unitLabel': 'Unidad / Departamento',
   'admisionFields.unitPlaceholder': 'Opcional',
   'admisionFields.docsLabel': 'Documentacion presentada',
+  'proposalDetail.loading': 'Cargando propuesta...',
+  'proposalDetail.notFoundAccess': 'Propuesta no encontrada o no tienes acceso.',
+  'proposalDetail.backToGovernance': 'Volver a Gobernanza',
+  'proposalDetail.status.draft': 'Borrador',
+  'proposalDetail.status.discussion': 'En Discusion',
+  'proposalDetail.status.active': 'Votacion Activa',
+  'proposalDetail.status.closed': 'Cerrada',
+  'proposalDetail.status.approved': 'Aprobada',
+  'proposalDetail.status.rejected': 'Rechazada',
+  'proposalDetail.status.executed': 'Ejecutada',
+  'proposalDetail.countdown.expired': 'Expirado',
+  'proposalDetail.countdown.time': 'Tiempo',
+  'proposalDetail.countdown.timeLeft': 'Tiempo restante',
+  'proposalDetail.badge.appealed': 'Apelada',
+  'proposalDetail.meta.by': 'Por',
+  'proposalDetail.meta.created': 'Creada',
+  'proposalDetail.meta.discussion': 'Discusion',
+  'proposalDetail.meta.votingStart': 'Inicio votacion',
+  'proposalDetail.meta.close': 'Cierre',
+  'proposalDetail.meta.quorum': 'Quorum',
+  'proposalDetail.meta.majority': 'Mayoria',
+  'proposalDetail.model.consensus': 'Consenso',
+  'proposalDetail.model.multiple': 'Opcion multiple',
+  'proposalDetail.closed': 'Cerrada',
+  'proposalDetail.method': 'Metodo',
+  'proposalDetail.method.autoClose': 'Cierre automatico',
+  'proposalDetail.countdown.discussion': 'Discusion',
+  'proposalDetail.countdown.voting': 'Votacion',
+  'proposalDetail.countdown.appeal': 'Periodo de apelacion',
+  'proposalDetail.appealedPaused': 'Esta propuesta fue apelada — la ejecucion automatica esta pausada',
+  'proposalDetail.discussionHours': 'Horas de discusion',
+  'proposalDetail.starting': 'Iniciando...',
+  'proposalDetail.startDiscussion': 'Iniciar Discusion',
+  'proposalDetail.votingClose': 'Cierre de votacion',
+  'proposalDetail.opening': 'Abriendo...',
+  'proposalDetail.openVoting': 'Abrir Votacion',
+  'proposalDetail.openDirectVoting': 'Abrir Votacion Directa',
+  'proposalDetail.closeVoting': 'Cerrar Votacion',
+  'proposalDetail.appealing': 'Apelando...',
+  'proposalDetail.appealProposal': 'Apelar Propuesta',
+  'proposalDetail.outcomeTitle': 'Declaracion de Resultado',
+  'proposalDetail.outcomeDeclared': 'Resultado declarado:',
+  'proposalDetail.outcomeDeclaredAt': 'Declarado el',
+  'proposalDetail.outcomePlaceholder': 'Describe el resultado oficial de esta propuesta...',
+  'proposalDetail.declaring': 'Declarando...',
+  'proposalDetail.declareOutcome': 'Declarar Resultado',
+  'proposalDetail.cancel': 'Cancelar',
+  'proposalDetail.voteRegistered': 'Voto registrado',
+  'proposalDetail.voteError': 'Error al registrar voto',
+  'proposalDetail.toast.discussionStarted': 'Periodo de discusion iniciado',
+  'proposalDetail.toast.discussionError': 'Error al iniciar discusion',
+  'proposalDetail.toast.votingOpened': 'Votacion abierta',
+  'proposalDetail.toast.votingOpenError': 'Error al abrir votacion',
+  'proposalDetail.toast.outcomeDeclared': 'Resultado declarado',
+  'proposalDetail.toast.outcomeError': 'Error al declarar resultado',
+  'proposalDetail.toast.appealed': 'Propuesta apelada — ejecucion pausada',
+  'proposalDetail.toast.appealError': 'Error al apelar',
+  'proposalDetail.financialInstruction': 'Instruccion Financiera',
+  'proposalDetail.fi.type': 'Tipo',
+  'proposalDetail.fi.amount': 'Monto',
+  'proposalDetail.fi.newAmount': 'Nuevo monto',
+  'proposalDetail.fi.description': 'Descripcion',
+  'proposalDetail.fi.period': 'Periodo',
+  'proposalDetail.fi.effectiveDate': 'Fecha efectiva',
+  'proposalDetail.fi.beneficiary': 'Beneficiario',
+  'proposalDetail.fi.config': 'Configuracion',
+  'proposalDetail.fi.type.disbursement': 'Desembolso',
+  'proposalDetail.fi.type.budgetAllocation': 'Asignacion Presupuestal',
+  'proposalDetail.fi.type.quotaChange': 'Cambio de Cuota',
+  'proposalDetail.fi.type.configChange': 'Cambio de Configuracion',
+  'proposalDetail.fi.type.none': 'Sin instruccion',
+  'proposalDetail.executedAt': 'Ejecutada el',
+  'proposalDetail.executionPausedByAppeal': 'Ejecucion pausada por apelacion',
+  'proposalDetail.cooldownRunning': 'Periodo de enfriamiento — se auto-ejecutara el {date}',
+  'proposalDetail.cooldownComplete': 'Periodo de enfriamiento completado — lista para ejecutar',
+  'proposalDetail.executeNow': 'Ejecutar Ahora',
+  'proposalDetail.executing': 'Ejecutando...',
+  'proposalDetail.executionFailed': 'La ejecucion fallo — puedes reintentar',
+  'proposalDetail.retrying': 'Reintentando...',
+  'proposalDetail.retryExecution': 'Reintentar Ejecucion',
+  'proposalDetail.executeManually': 'Ejecutar Manualmente',
+  'attendance.title': 'Control de Asistencia',
+  'attendance.presentCount': '{present}/{total} presentes',
+  'attendance.indiviso': '{pct}% indiviso',
+  'attendance.searchPlaceholder': 'Buscar miembro...',
+  'attendance.markAll': 'Marcar todos',
+  'attendance.saving': 'Guardando...',
+  'attendance.save': 'Guardar',
+  'attendance.weight': '{value}% peso',
+  'attendance.toast.saved': 'Asistencia registrada exitosamente',
+  'attendance.toast.error': 'Error al registrar asistencia',
+  'convocatoria.title': 'Convocatoria - {call}a Llamada',
+  'convocatoria.badge.noticeValid': 'Aviso valido',
+  'convocatoria.badge.noticeInsufficient': 'Aviso insuficiente',
+  'convocatoria.typeLabel': 'Tipo de Asamblea:',
+  'convocatoria.locationLabel': 'Ubicacion:',
+  'convocatoria.locationMissing': 'No especificada',
+  'convocatoria.dateLabel': 'Fecha y Hora:',
+  'convocatoria.calledByLabel': 'Convocado por:',
+  'convocatoria.calledByDefault': 'Administrador',
+  'convocatoria.issuedLabel': 'Fecha de emision:',
+  'convocatoria.noticeLabel': 'Aviso minimo:',
+  'convocatoria.noticeValue': '{days} dias ({required} requeridos)',
+  'convocatoria.agenda': 'Orden del Dia',
+  'convocatoria.notificationsDelivered': '{count} notificaciones entregadas',
+  'proxy.title': 'Representacion (Proxies)',
+  'proxy.activeCount': '{count} representaciones activas',
+  'proxy.rulesTitle': 'Art. 36 LPCI CDMX - Reglas de Representacion:',
+  'proxy.rule.1': 'Cada condomino puede designar un representante',
+  'proxy.rule.2': 'Un representante no puede representar a mas de 2 condominos',
+  'proxy.rule.3': 'El administrador no puede actuar como representante',
+  'proxy.loading': 'Cargando representaciones...',
+  'proxy.activeList': 'Representaciones activas:',
+  'proxy.maxReached': 'Max. alcanzado',
+  'proxy.revoke': 'Revocar representacion',
+  'proxy.empty': 'No hay representaciones activas para esta asamblea.',
+  'proxy.grant': 'Otorgar representacion',
+  'proxy.grantorPlaceholder': 'Condomino que delega...',
+  'proxy.representativePlaceholder': 'Representante...',
+  'proxy.representationsCount': '({count}/2 representaciones)',
+  'proxy.granting': 'Otorgando...',
+  'proxy.grantButton': 'Otorgar',
+  'proxy.noRepresentatives': 'No hay representantes disponibles. Todos los condominos ya representan a 2 personas o son administradores.',
+  'proxy.toast.granted': 'Representacion otorgada exitosamente',
+  'proxy.toast.grantError': 'Error al otorgar representacion',
+  'proxy.toast.revoked': 'Representacion revocada',
+  'proxy.toast.revokeError': 'Error al revocar representacion',
+  'votingPanel.title': 'Tu Voto',
+  'votingPanel.toast.success': 'Voto registrado',
+  'votingPanel.toast.error': 'Error al registrar voto',
+  'votingPanel.voiceOnly': 'Tienes derecho a voz en la asamblea pero no a voto.',
+  'votingPanel.alreadyVoted': 'Ya votaste:',
+  'votingPanel.canChange': 'Puedes cambiar tu voto.',
+  'votingPanel.yes': 'A favor',
+  'votingPanel.no': 'En contra',
+  'votingPanel.abstain': 'Abstencion',
+  'multipleChoice.title': 'Votacion Multiple',
+  'multipleChoice.myVote': 'Tu voto:',
+  'multipleChoice.votesCount': '{count} votos',
+  'multipleChoice.totalVotes': '{count} votos emitidos',
+  'consensus.option.agree': 'De acuerdo',
+  'consensus.option.disagree': 'En desacuerdo',
+  'consensus.option.abstain': 'Abstencion',
+  'consensus.option.block': 'Bloquear',
+  'consensus.blocked': 'Bloqueada',
+  'consensus.myVote': 'Tu voto:',
+  'consensus.reason': 'Razon',
+  'consensus.blockWarning': 'Bloquear detiene la propuesta. Explica tu razon:',
+  'consensus.blockPlaceholder': 'Razon del bloqueo (obligatorio)...',
+  'consensus.confirmBlock': 'Confirmar Bloqueo',
+  'consensus.cancel': 'Cancelar',
+  'consensus.agree': 'Acuerdo',
+  'consensus.disagree': 'Desacuerdo',
+  'consensus.abstain': 'Abstencion',
+  'consensus.block': 'Bloqueo',
+  'consensus.blockReasons': 'Razones de bloqueo:',
+  'lifecycle.draft': 'Borrador',
+  'lifecycle.discussion': 'Discusion',
+  'lifecycle.voting': 'Votacion',
+  'lifecycle.result': 'Resultado',
+  'lifecycle.executed': 'Ejecutada',
+  'delegation.title': 'Delegaciones',
+  'delegation.votingFor': 'Votas en nombre de {count} miembro(s)',
+  'delegation.toMe': 'Te delegaron su voto:',
+  'delegation.you': 'Tu',
+  'delegation.myDelegation': 'Tu voto delegado a:',
+  'delegation.revoke': 'Revocar',
+  'delegation.placeholder': 'Delegar mi voto a...',
+  'delegation.delegate': 'Delegar',
+  'delegation.empty': 'No hay delegaciones activas.',
+  'delegation.toast.created': 'Delegacion creada exitosamente',
+  'delegation.toast.createError': 'Error al crear delegacion',
+  'delegation.toast.revoked': 'Delegacion revocada',
+  'delegation.toast.revokeError': 'Error al revocar delegacion',
+  'minutes.title': 'Acta de Votacion',
+  'minutes.approved': 'Aprobada',
+  'minutes.approvedAt': 'Aprobada el',
+  'minutes.signatures': 'Firmas ({count}):',
+  'minutes.role.secretary': 'Secretario',
+  'minutes.role.committee': 'Comite Vigilancia',
+  'minutes.memberFallback': 'Miembro',
+  'minutes.approving': 'Aprobando...',
+  'minutes.approve': 'Aprobar Acta',
+  'minutes.signing': 'Firmando...',
+  'minutes.sign': 'Firmar Acta',
+  'minutes.alreadySigned': 'Ya firmaste',
+  'minutes.description': 'Genera el acta automatica con los resultados de la votacion.',
+  'minutes.generating': 'Generando...',
+  'minutes.generate': 'Generar Acta',
+  'votingViz.title': 'Resultados de Votacion',
+  'votingViz.multipleTitle': 'Resultados de Votacion Multiple',
+  'votingViz.weight': '{count} pesos',
+  'votingViz.votes': '{count} votos',
+  'votingViz.participation': 'Participacion',
+  'votingViz.quorum': 'Quorum',
+  'votingViz.majority': 'Mayoria',
+  'votingViz.reached': 'Alcanzado',
+  'votingViz.notReached': 'No alcanzado',
+  'votingViz.notReachedF': 'No alcanzada',
+  'votingViz.totalVotes': 'Total votos',
+  'delivery.status.delivered': 'Entregadas',
+  'delivery.status.sent': 'Enviadas',
+  'delivery.status.pending': 'Pendientes',
+  'delivery.status.failed': 'Fallidas',
+  'delivery.loading': 'Cargando estado de entrega...',
+  'delivery.empty': 'No hay notificaciones para rastrear.',
+  'delivery.title': 'Estado de Entrega',
+  'delivery.rate': 'Tasa de entrega',
+  'assemblyDetail.status.scheduled': 'Programada',
+  'assemblyDetail.status.convened': 'Convocada',
+  'assemblyDetail.status.inSession': 'En sesion',
+  'assemblyDetail.status.firstCall': '1a Llamada',
+  'assemblyDetail.status.secondCall': '2a Llamada',
+  'assemblyDetail.status.thirdCall': '3a Llamada',
+  'assemblyDetail.status.completed': 'Completada',
+  'assemblyDetail.status.cancelled': 'Cancelada',
+  'assemblyDetail.type.ordinary': 'Ordinaria',
+  'assemblyDetail.type.extraordinary': 'Extraordinaria',
+  'assemblyDetail.loading': 'Cargando asamblea...',
+  'assemblyDetail.notFound': 'Asamblea no encontrada.',
+  'assemblyDetail.statusUpdated': 'Estado actualizado: {status}',
+  'assemblyDetail.statusUpdateError': 'Error al actualizar estado',
+  'assemblyDetail.action.startFirst': 'Iniciar 1a Llamada',
+  'assemblyDetail.action.cancel': 'Cancelar',
+  'assemblyDetail.action.toSecond': 'Avanzar a 2a Llamada',
+  'assemblyDetail.action.startSession': 'Iniciar Sesion',
+  'assemblyDetail.action.toThird': 'Avanzar a 3a Llamada',
+  'assemblyDetail.action.complete': 'Completar Asamblea',
+  'assemblyDetail.quorumMet': 'Quorum alcanzado',
+  'assemblyDetail.noLocation': 'Sin ubicacion',
+  'assemblyDetail.calledBy': 'Convocado por',
+  'assemblyDetail.callerDefault': 'Administrador',
+  'assemblyDetail.agenda': 'Orden del Dia',
+  'assemblyDetail.notes': 'Notas',
+  'context.ruleChange.title': 'Cambio de Reglamento',
+  'context.currentValue': 'Valor actual',
+  'context.proposedValue': 'Valor propuesto',
+  'context.key': 'Clave',
+  'context.current': 'Actual',
+  'context.proposed': 'Propuesto',
+  'context.noRuleDetail': 'Sin detalle de regla especificado.',
+  'context.viewRules': 'Ver Reglamento Completo',
+  'context.disbursement': 'Desembolso',
+  'context.emergencyExpense': 'Gasto de Emergencia',
+  'context.majorWork': 'Obra / Mantenimiento Mayor',
+  'context.amount': 'Monto',
+  'context.currentBalance': 'Balance actual',
+  'context.impact': 'Impacto',
+  'context.moreThanHalf': 'Mas del 50% del balance',
+  'context.category': 'Categoria',
+  'context.beneficiary': 'Beneficiario',
+  'context.viewEntity': 'Ver entidad',
+  'context.viewTreasury': 'Ver Tesoreria',
+  'context.quotaChange': 'Cambio de Cuota',
+  'context.newFee': 'Nueva cuota',
+  'context.activeMembers': 'Miembros activos',
+  'context.monthlyCollection': 'Recaudacion mensual',
+  'context.effectiveDate': 'Fecha efectiva',
+  'context.quotaExecuteWarning': 'Al ejecutarse, se generara una obligacion de pago para cada miembro activo.',
+  'context.viewCollection': 'Ver Cobranza',
+  'context.budgetAllocation': 'Asignacion de Presupuesto',
+  'context.assignedAmount': 'Monto asignado',
+  'context.period': 'Periodo',
+  'context.viewBudgets': 'Ver Presupuestos',
+  'context.memberAdmission': 'Admision de Miembro',
+  'context.memberAdmissionDescription': 'Esta propuesta requiere aprobacion de la asamblea para admitir un nuevo miembro a la comunidad.',
+  'context.memberAdmissionWarning': 'Una vez aprobada, el administrador debera enviar la invitacion manualmente desde la seccion de Miembros.',
+  'context.viewMembers': 'Ver Miembros',
+  'context.electionTitle': 'Eleccion de Mesa Directiva',
+  'context.electionDescription': 'Proceso electoral para elegir cargos administrativos de la comunidad.',
+  'context.currentRoles': 'Cargos actuales',
+  'context.periodN': 'Periodo #{n}',
+  'context.electionLegal': 'Art. 42-46 LPCI CDMX — Los morosos no pueden ser electos para cargos administrativos.',
+  'context.viewAdminTerms': 'Ver Terminos Administrativos',
 }
 
 const en: Dictionary = {
@@ -1308,6 +1856,280 @@ const en: Dictionary = {
   'admisionFields.unitLabel': 'Unit / Department',
   'admisionFields.unitPlaceholder': 'Optional',
   'admisionFields.docsLabel': 'Submitted documentation',
+  'proposalDetail.loading': 'Loading proposal...',
+  'proposalDetail.notFoundAccess': 'Proposal not found or you do not have access.',
+  'proposalDetail.backToGovernance': 'Back to Governance',
+  'proposalDetail.status.draft': 'Draft',
+  'proposalDetail.status.discussion': 'In Discussion',
+  'proposalDetail.status.active': 'Voting Active',
+  'proposalDetail.status.closed': 'Closed',
+  'proposalDetail.status.approved': 'Approved',
+  'proposalDetail.status.rejected': 'Rejected',
+  'proposalDetail.status.executed': 'Executed',
+  'proposalDetail.countdown.expired': 'Expired',
+  'proposalDetail.countdown.time': 'Time',
+  'proposalDetail.countdown.timeLeft': 'Time left',
+  'proposalDetail.badge.appealed': 'Appealed',
+  'proposalDetail.meta.by': 'By',
+  'proposalDetail.meta.created': 'Created',
+  'proposalDetail.meta.discussion': 'Discussion',
+  'proposalDetail.meta.votingStart': 'Voting start',
+  'proposalDetail.meta.close': 'Close',
+  'proposalDetail.meta.quorum': 'Quorum',
+  'proposalDetail.meta.majority': 'Majority',
+  'proposalDetail.model.consensus': 'Consensus',
+  'proposalDetail.model.multiple': 'Multiple choice',
+  'proposalDetail.closed': 'Closed',
+  'proposalDetail.method': 'Method',
+  'proposalDetail.method.autoClose': 'Auto close',
+  'proposalDetail.countdown.discussion': 'Discussion',
+  'proposalDetail.countdown.voting': 'Voting',
+  'proposalDetail.countdown.appeal': 'Appeal period',
+  'proposalDetail.appealedPaused': 'This proposal was appealed — automatic execution is paused',
+  'proposalDetail.discussionHours': 'Discussion hours',
+  'proposalDetail.starting': 'Starting...',
+  'proposalDetail.startDiscussion': 'Start Discussion',
+  'proposalDetail.votingClose': 'Voting close',
+  'proposalDetail.opening': 'Opening...',
+  'proposalDetail.openVoting': 'Open Voting',
+  'proposalDetail.openDirectVoting': 'Open Direct Voting',
+  'proposalDetail.closeVoting': 'Close Voting',
+  'proposalDetail.appealing': 'Appealing...',
+  'proposalDetail.appealProposal': 'Appeal Proposal',
+  'proposalDetail.outcomeTitle': 'Outcome Declaration',
+  'proposalDetail.outcomeDeclared': 'Declared outcome:',
+  'proposalDetail.outcomeDeclaredAt': 'Declared on',
+  'proposalDetail.outcomePlaceholder': 'Describe the official outcome of this proposal...',
+  'proposalDetail.declaring': 'Declaring...',
+  'proposalDetail.declareOutcome': 'Declare Outcome',
+  'proposalDetail.cancel': 'Cancel',
+  'proposalDetail.voteRegistered': 'Vote recorded',
+  'proposalDetail.voteError': 'Error recording vote',
+  'proposalDetail.toast.discussionStarted': 'Discussion period started',
+  'proposalDetail.toast.discussionError': 'Error starting discussion',
+  'proposalDetail.toast.votingOpened': 'Voting opened',
+  'proposalDetail.toast.votingOpenError': 'Error opening voting',
+  'proposalDetail.toast.outcomeDeclared': 'Outcome declared',
+  'proposalDetail.toast.outcomeError': 'Error declaring outcome',
+  'proposalDetail.toast.appealed': 'Proposal appealed — execution paused',
+  'proposalDetail.toast.appealError': 'Error appealing',
+  'proposalDetail.financialInstruction': 'Financial Instruction',
+  'proposalDetail.fi.type': 'Type',
+  'proposalDetail.fi.amount': 'Amount',
+  'proposalDetail.fi.newAmount': 'New amount',
+  'proposalDetail.fi.description': 'Description',
+  'proposalDetail.fi.period': 'Period',
+  'proposalDetail.fi.effectiveDate': 'Effective date',
+  'proposalDetail.fi.beneficiary': 'Beneficiary',
+  'proposalDetail.fi.config': 'Configuration',
+  'proposalDetail.fi.type.disbursement': 'Disbursement',
+  'proposalDetail.fi.type.budgetAllocation': 'Budget allocation',
+  'proposalDetail.fi.type.quotaChange': 'Fee change',
+  'proposalDetail.fi.type.configChange': 'Config change',
+  'proposalDetail.fi.type.none': 'No instruction',
+  'proposalDetail.executedAt': 'Executed on',
+  'proposalDetail.executionPausedByAppeal': 'Execution paused by appeal',
+  'proposalDetail.cooldownRunning': 'Cool down period — auto execution on {date}',
+  'proposalDetail.cooldownComplete': 'Cool down period completed — ready to execute',
+  'proposalDetail.executeNow': 'Execute Now',
+  'proposalDetail.executing': 'Executing...',
+  'proposalDetail.executionFailed': 'Execution failed — you can retry',
+  'proposalDetail.retrying': 'Retrying...',
+  'proposalDetail.retryExecution': 'Retry Execution',
+  'proposalDetail.executeManually': 'Execute Manually',
+  'attendance.title': 'Attendance Control',
+  'attendance.presentCount': '{present}/{total} present',
+  'attendance.indiviso': '{pct}% indiviso',
+  'attendance.searchPlaceholder': 'Search member...',
+  'attendance.markAll': 'Mark all',
+  'attendance.saving': 'Saving...',
+  'attendance.save': 'Save',
+  'attendance.weight': '{value}% weight',
+  'attendance.toast.saved': 'Attendance recorded successfully',
+  'attendance.toast.error': 'Error recording attendance',
+  'convocatoria.title': 'Notice - {call}th Call',
+  'convocatoria.badge.noticeValid': 'Valid notice',
+  'convocatoria.badge.noticeInsufficient': 'Insufficient notice',
+  'convocatoria.typeLabel': 'Assembly type:',
+  'convocatoria.locationLabel': 'Location:',
+  'convocatoria.locationMissing': 'Not specified',
+  'convocatoria.dateLabel': 'Date and time:',
+  'convocatoria.calledByLabel': 'Called by:',
+  'convocatoria.calledByDefault': 'Administrator',
+  'convocatoria.issuedLabel': 'Issued date:',
+  'convocatoria.noticeLabel': 'Minimum notice:',
+  'convocatoria.noticeValue': '{days} days ({required} required)',
+  'convocatoria.agenda': 'Agenda',
+  'convocatoria.notificationsDelivered': '{count} notifications delivered',
+  'proxy.title': 'Representation (Proxies)',
+  'proxy.activeCount': '{count} active representations',
+  'proxy.rulesTitle': 'Art. 36 LPCI CDMX - Representation rules:',
+  'proxy.rule.1': 'Each condo owner may designate one representative',
+  'proxy.rule.2': 'A representative cannot represent more than 2 owners',
+  'proxy.rule.3': 'Administrator cannot act as representative',
+  'proxy.loading': 'Loading representations...',
+  'proxy.activeList': 'Active representations:',
+  'proxy.maxReached': 'Max reached',
+  'proxy.revoke': 'Revoke representation',
+  'proxy.empty': 'No active representations for this assembly.',
+  'proxy.grant': 'Grant representation',
+  'proxy.grantorPlaceholder': 'Owner delegating...',
+  'proxy.representativePlaceholder': 'Representative...',
+  'proxy.representationsCount': '({count}/2 representations)',
+  'proxy.granting': 'Granting...',
+  'proxy.grantButton': 'Grant',
+  'proxy.noRepresentatives': 'No representatives available. Everyone already represents 2 people or are administrators.',
+  'proxy.toast.granted': 'Representation granted successfully',
+  'proxy.toast.grantError': 'Error granting representation',
+  'proxy.toast.revoked': 'Representation revoked',
+  'proxy.toast.revokeError': 'Error revoking representation',
+  'votingPanel.title': 'Your Vote',
+  'votingPanel.toast.success': 'Vote recorded',
+  'votingPanel.toast.error': 'Error recording vote',
+  'votingPanel.voiceOnly': 'You have speaking rights in the assembly but no voting rights.',
+  'votingPanel.alreadyVoted': 'You already voted:',
+  'votingPanel.canChange': 'You can change your vote.',
+  'votingPanel.yes': 'In favor',
+  'votingPanel.no': 'Against',
+  'votingPanel.abstain': 'Abstain',
+  'multipleChoice.title': 'Multiple Choice Voting',
+  'multipleChoice.myVote': 'Your vote:',
+  'multipleChoice.votesCount': '{count} votes',
+  'multipleChoice.totalVotes': '{count} votes cast',
+  'consensus.option.agree': 'Agree',
+  'consensus.option.disagree': 'Disagree',
+  'consensus.option.abstain': 'Abstain',
+  'consensus.option.block': 'Block',
+  'consensus.blocked': 'Blocked',
+  'consensus.myVote': 'Your vote:',
+  'consensus.reason': 'Reason',
+  'consensus.blockWarning': 'Blocking stops the proposal. Explain your reason:',
+  'consensus.blockPlaceholder': 'Block reason (required)...',
+  'consensus.confirmBlock': 'Confirm Block',
+  'consensus.cancel': 'Cancel',
+  'consensus.agree': 'Agree',
+  'consensus.disagree': 'Disagree',
+  'consensus.abstain': 'Abstain',
+  'consensus.block': 'Block',
+  'consensus.blockReasons': 'Blocking reasons:',
+  'lifecycle.draft': 'Draft',
+  'lifecycle.discussion': 'Discussion',
+  'lifecycle.voting': 'Voting',
+  'lifecycle.result': 'Result',
+  'lifecycle.executed': 'Executed',
+  'delegation.title': 'Delegations',
+  'delegation.votingFor': 'You vote on behalf of {count} member(s)',
+  'delegation.toMe': 'They delegated their vote to you:',
+  'delegation.you': 'You',
+  'delegation.myDelegation': 'Your vote delegated to:',
+  'delegation.revoke': 'Revoke',
+  'delegation.placeholder': 'Delegate my vote to...',
+  'delegation.delegate': 'Delegate',
+  'delegation.empty': 'There are no active delegations.',
+  'delegation.toast.created': 'Delegation created successfully',
+  'delegation.toast.createError': 'Error creating delegation',
+  'delegation.toast.revoked': 'Delegation revoked',
+  'delegation.toast.revokeError': 'Error revoking delegation',
+  'minutes.title': 'Voting Minutes',
+  'minutes.approved': 'Approved',
+  'minutes.approvedAt': 'Approved on',
+  'minutes.signatures': 'Signatures ({count}):',
+  'minutes.role.secretary': 'Secretary',
+  'minutes.role.committee': 'Oversight Committee',
+  'minutes.memberFallback': 'Member',
+  'minutes.approving': 'Approving...',
+  'minutes.approve': 'Approve Minutes',
+  'minutes.signing': 'Signing...',
+  'minutes.sign': 'Sign Minutes',
+  'minutes.alreadySigned': 'You already signed',
+  'minutes.description': 'Generate automatic minutes with the voting results.',
+  'minutes.generating': 'Generating...',
+  'minutes.generate': 'Generate Minutes',
+  'votingViz.title': 'Voting Results',
+  'votingViz.multipleTitle': 'Multiple Choice Voting Results',
+  'votingViz.weight': '{count} weights',
+  'votingViz.votes': '{count} votes',
+  'votingViz.participation': 'Participation',
+  'votingViz.quorum': 'Quorum',
+  'votingViz.majority': 'Majority',
+  'votingViz.reached': 'Reached',
+  'votingViz.notReached': 'Not reached',
+  'votingViz.notReachedF': 'Not reached',
+  'votingViz.totalVotes': 'Total votes',
+  'delivery.status.delivered': 'Delivered',
+  'delivery.status.sent': 'Sent',
+  'delivery.status.pending': 'Pending',
+  'delivery.status.failed': 'Failed',
+  'delivery.loading': 'Loading delivery status...',
+  'delivery.empty': 'No notifications to track.',
+  'delivery.title': 'Delivery Status',
+  'delivery.rate': 'Delivery rate',
+  'assemblyDetail.status.scheduled': 'Scheduled',
+  'assemblyDetail.status.convened': 'Convened',
+  'assemblyDetail.status.inSession': 'In session',
+  'assemblyDetail.status.firstCall': '1st Call',
+  'assemblyDetail.status.secondCall': '2nd Call',
+  'assemblyDetail.status.thirdCall': '3rd Call',
+  'assemblyDetail.status.completed': 'Completed',
+  'assemblyDetail.status.cancelled': 'Cancelled',
+  'assemblyDetail.type.ordinary': 'Ordinary',
+  'assemblyDetail.type.extraordinary': 'Extraordinary',
+  'assemblyDetail.loading': 'Loading assembly...',
+  'assemblyDetail.notFound': 'Assembly not found.',
+  'assemblyDetail.statusUpdated': 'Status updated: {status}',
+  'assemblyDetail.statusUpdateError': 'Error updating status',
+  'assemblyDetail.action.startFirst': 'Start 1st Call',
+  'assemblyDetail.action.cancel': 'Cancel',
+  'assemblyDetail.action.toSecond': 'Move to 2nd Call',
+  'assemblyDetail.action.startSession': 'Start Session',
+  'assemblyDetail.action.toThird': 'Move to 3rd Call',
+  'assemblyDetail.action.complete': 'Complete Assembly',
+  'assemblyDetail.quorumMet': 'Quorum reached',
+  'assemblyDetail.noLocation': 'No location',
+  'assemblyDetail.calledBy': 'Called by',
+  'assemblyDetail.callerDefault': 'Administrator',
+  'assemblyDetail.agenda': 'Agenda',
+  'assemblyDetail.notes': 'Notes',
+  'context.ruleChange.title': 'Rule Change',
+  'context.currentValue': 'Current value',
+  'context.proposedValue': 'Proposed value',
+  'context.key': 'Key',
+  'context.current': 'Current',
+  'context.proposed': 'Proposed',
+  'context.noRuleDetail': 'No rule detail specified.',
+  'context.viewRules': 'View Full Rules',
+  'context.disbursement': 'Disbursement',
+  'context.emergencyExpense': 'Emergency Expense',
+  'context.majorWork': 'Major Work / Maintenance',
+  'context.amount': 'Amount',
+  'context.currentBalance': 'Current balance',
+  'context.impact': 'Impact',
+  'context.moreThanHalf': 'More than 50% of balance',
+  'context.category': 'Category',
+  'context.beneficiary': 'Beneficiary',
+  'context.viewEntity': 'View entity',
+  'context.viewTreasury': 'View Treasury',
+  'context.quotaChange': 'Fee Change',
+  'context.newFee': 'New fee',
+  'context.activeMembers': 'Active members',
+  'context.monthlyCollection': 'Monthly collection',
+  'context.effectiveDate': 'Effective date',
+  'context.quotaExecuteWarning': 'When executed, a payment obligation will be generated for each active member.',
+  'context.viewCollection': 'View Collection',
+  'context.budgetAllocation': 'Budget Allocation',
+  'context.assignedAmount': 'Assigned amount',
+  'context.period': 'Period',
+  'context.viewBudgets': 'View Budgets',
+  'context.memberAdmission': 'Member Admission',
+  'context.memberAdmissionDescription': 'This proposal requires assembly approval to admit a new member to the community.',
+  'context.memberAdmissionWarning': 'Once approved, the administrator must send the invitation manually from the Members section.',
+  'context.viewMembers': 'View Members',
+  'context.electionTitle': 'Board Election',
+  'context.electionDescription': 'Electoral process to choose community administrative roles.',
+  'context.currentRoles': 'Current roles',
+  'context.periodN': 'Term #{n}',
+  'context.electionLegal': 'Art. 42-46 LPCI CDMX — delinquent members cannot be elected to administrative roles.',
+  'context.viewAdminTerms': 'View Administrative Terms',
 }
 
 export const MESSAGES: Record<string, Dictionary> = {

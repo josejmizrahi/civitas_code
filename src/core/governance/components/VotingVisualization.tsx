@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { BarChart3 } from 'lucide-react'
 import type { Vote, VoteSummary, VotingOption } from '../types'
 import type { VotingModel } from '@/shared/types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   votes: Vote[]
@@ -30,14 +31,8 @@ const OPTION_COLORS = [
   '#22c55e', '#14b8a6',
 ]
 
-const CONSENSUS_LABELS: Record<string, string> = {
-  agree: 'De acuerdo',
-  disagree: 'En desacuerdo',
-  abstain: 'Abstención',
-  block: 'Bloqueo',
-}
-
 export function VotingVisualization({ votes, voteSummary, votingModel, votingOptions }: Props) {
+  const { t } = useI18n()
   if (!voteSummary || voteSummary.total === 0) return null
 
   const model = votingModel || 'simple'
@@ -48,8 +43,8 @@ export function VotingVisualization({ votes, voteSummary, votingModel, votingOpt
 
   // Simple or consensus → Pie chart
   const data = model === 'consensus'
-    ? buildConsensusData(votes)
-    : buildSimpleData(voteSummary)
+    ? buildConsensusData(votes, t)
+    : buildSimpleData(voteSummary, t)
 
   
 
@@ -58,7 +53,7 @@ export function VotingVisualization({ votes, voteSummary, votingModel, votingOpt
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <BarChart3 className="h-4 w-4" />
-          Resultados de Votación
+          {t('votingViz.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -81,7 +76,7 @@ export function VotingVisualization({ votes, voteSummary, votingModel, votingOpt
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: any, name: any) => [`${value} peso${value !== 1 ? 's' : ''}`, name]}
+                formatter={(value: any, name: any) => [t('votingViz.weight').replace('{count}', String(value)), name]}
               />
               <Legend />
             </PieChart>
@@ -90,23 +85,23 @@ export function VotingVisualization({ votes, voteSummary, votingModel, votingOpt
           {/* Stats sidebar */}
           <div className="space-y-2 text-sm">
             <div>
-              <span className="text-muted-foreground">Participación:</span>{' '}
+              <span className="text-muted-foreground">{t('votingViz.participation')}:</span>{' '}
               <span className="font-bold">{(voteSummary.participation_pct * 100).toFixed(1)}%</span>
             </div>
             <div>
-              <span className="text-muted-foreground">Quórum:</span>{' '}
+              <span className="text-muted-foreground">{t('votingViz.quorum')}:</span>{' '}
               <span className={voteSummary.quorum_met ? 'font-bold text-green-600' : 'font-bold text-red-600'}>
-                {voteSummary.quorum_met ? 'Alcanzado' : 'No alcanzado'}
+                {voteSummary.quorum_met ? t('votingViz.reached') : t('votingViz.notReached')}
               </span>
             </div>
             <div>
-              <span className="text-muted-foreground">Mayoría:</span>{' '}
+              <span className="text-muted-foreground">{t('votingViz.majority')}:</span>{' '}
               <span className={voteSummary.majority_met ? 'font-bold text-green-600' : 'font-bold text-red-600'}>
-                {voteSummary.majority_met ? 'Alcanzada' : 'No alcanzada'}
+                {voteSummary.majority_met ? t('votingViz.reached') : t('votingViz.notReachedF')}
               </span>
             </div>
             <div>
-              <span className="text-muted-foreground">Total votos:</span>{' '}
+              <span className="text-muted-foreground">{t('votingViz.totalVotes')}:</span>{' '}
               <span className="font-bold">{voteSummary.total}</span>
             </div>
           </div>
@@ -116,15 +111,15 @@ export function VotingVisualization({ votes, voteSummary, votingModel, votingOpt
   )
 }
 
-function buildSimpleData(summary: VoteSummary) {
+function buildSimpleData(summary: VoteSummary, t: (key: any) => string) {
   const data = []
-  if (summary.yes > 0) data.push({ name: 'A favor', value: summary.yes, color: SIMPLE_COLORS.yes })
-  if (summary.no > 0) data.push({ name: 'En contra', value: summary.no, color: SIMPLE_COLORS.no })
-  if (summary.abstain > 0) data.push({ name: 'Abstención', value: summary.abstain, color: SIMPLE_COLORS.abstain })
+  if (summary.yes > 0) data.push({ name: t('votingPanel.yes'), value: summary.yes, color: SIMPLE_COLORS.yes })
+  if (summary.no > 0) data.push({ name: t('votingPanel.no'), value: summary.no, color: SIMPLE_COLORS.no })
+  if (summary.abstain > 0) data.push({ name: t('votingPanel.abstain'), value: summary.abstain, color: SIMPLE_COLORS.abstain })
   return data
 }
 
-function buildConsensusData(votes: Vote[]) {
+function buildConsensusData(votes: Vote[], t: (key: any) => string) {
   const counts: Record<string, number> = { agree: 0, disagree: 0, abstain: 0, block: 0 }
   for (const v of votes) {
     const w = v.weight || 1
@@ -132,14 +127,15 @@ function buildConsensusData(votes: Vote[]) {
   }
 
   const data = []
-  if (counts.agree > 0) data.push({ name: CONSENSUS_LABELS.agree, value: counts.agree, color: CONSENSUS_COLORS.agree })
-  if (counts.disagree > 0) data.push({ name: CONSENSUS_LABELS.disagree, value: counts.disagree, color: CONSENSUS_COLORS.disagree })
-  if (counts.abstain > 0) data.push({ name: CONSENSUS_LABELS.abstain, value: counts.abstain, color: CONSENSUS_COLORS.abstain })
-  if (counts.block > 0) data.push({ name: CONSENSUS_LABELS.block, value: counts.block, color: CONSENSUS_COLORS.block })
+  if (counts.agree > 0) data.push({ name: t('consensus.agree'), value: counts.agree, color: CONSENSUS_COLORS.agree })
+  if (counts.disagree > 0) data.push({ name: t('consensus.disagree'), value: counts.disagree, color: CONSENSUS_COLORS.disagree })
+  if (counts.abstain > 0) data.push({ name: t('consensus.abstain'), value: counts.abstain, color: CONSENSUS_COLORS.abstain })
+  if (counts.block > 0) data.push({ name: t('consensus.block'), value: counts.block, color: CONSENSUS_COLORS.block })
   return data
 }
 
 function MultipleChoiceChart({ votes, votingOptions }: { votes: Vote[]; votingOptions: VotingOption[] }) {
+  const { t } = useI18n()
   // Count votes per option
   const optionCounts: Record<string, number> = {}
   for (const v of votes) {
@@ -163,7 +159,7 @@ function MultipleChoiceChart({ votes, votingOptions }: { votes: Vote[]; votingOp
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <BarChart3 className="h-4 w-4" />
-          Resultados de Votación Múltiple
+          {t('votingViz.multipleTitle')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -171,7 +167,7 @@ function MultipleChoiceChart({ votes, votingOptions }: { votes: Vote[]; votingOp
           <BarChart data={data} layout="vertical" margin={{ left: 20, right: 20 }}>
             <XAxis type="number" />
             <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(value: any) => [`${value} voto${value !== 1 ? 's' : ''}`, 'Votos']} />
+            <Tooltip formatter={(value: any) => [t('votingViz.votes').replace('{count}', String(value)), t('votingViz.totalVotes')]} />
             <Bar dataKey="votos" radius={[0, 4, 4, 0]}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />

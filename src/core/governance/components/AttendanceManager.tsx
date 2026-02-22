@@ -7,6 +7,7 @@ import { useToast } from '@/shared/components/ui/toast'
 import { useRecordAttendance } from '../hooks/useAssemblies'
 import { UserCheck, UserX, Search, Save, Users } from 'lucide-react'
 import type { AttendanceRecord } from '../types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   assemblyId: string
@@ -21,6 +22,7 @@ export function AttendanceManager({
   memberList,
   disabled = false,
 }: Props) {
+  const { t } = useI18n()
   const toast = useToast()
   const recordAttendance = useRecordAttendance()
   const [search, setSearch] = useState('')
@@ -80,9 +82,9 @@ export function AttendanceManager({
   const handleSave = async () => {
     try {
       await recordAttendance.mutateAsync({ assemblyId, records: attendance })
-      toast.success('Asistencia registrada exitosamente')
+      toast.success(t('attendance.toast.saved'))
     } catch {
-      toast.error('Error al registrar asistencia')
+      toast.error(t('attendance.toast.error'))
     }
   }
 
@@ -92,14 +94,14 @@ export function AttendanceManager({
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Users className="h-4 w-4" />
-            Control de Asistencia
+            {t('attendance.title')}
           </CardTitle>
           <div className="flex items-center gap-2 text-sm">
             <Badge variant={presentCount > 0 ? 'success' : 'secondary'}>
-              {presentCount}/{totalCount} presentes
+              {t('attendance.presentCount').replace('{present}', String(presentCount)).replace('{total}', String(totalCount))}
             </Badge>
             <Badge variant="secondary">
-              {(quorumPct * 100).toFixed(1)}% indiviso
+              {t('attendance.indiviso').replace('{pct}', (quorumPct * 100).toFixed(1))}
             </Badge>
           </div>
         </div>
@@ -109,7 +111,7 @@ export function AttendanceManager({
           <div className="relative flex-1 min-w-0 sm:min-w-[200px]">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar miembro..."
+              placeholder={t('attendance.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8"
@@ -118,11 +120,11 @@ export function AttendanceManager({
           {!disabled && (
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={markAllPresent}>
-                Marcar todos
+                {t('attendance.markAll')}
               </Button>
               <Button size="sm" onClick={handleSave} disabled={recordAttendance.isPending}>
                 <Save className="h-3.5 w-3.5 mr-1" />
-                {recordAttendance.isPending ? 'Guardando...' : 'Guardar'}
+                {recordAttendance.isPending ? t('attendance.saving') : t('attendance.save')}
               </Button>
             </div>
           )}
@@ -152,7 +154,7 @@ export function AttendanceManager({
                 </span>
               </div>
               <span className="text-xs text-muted-foreground shrink-0">
-                {(record.indiviso_pct ?? 1).toFixed(2)}% peso
+                {t('attendance.weight').replace('{value}', (record.indiviso_pct ?? 1).toFixed(2))}
               </span>
             </button>
           ))}

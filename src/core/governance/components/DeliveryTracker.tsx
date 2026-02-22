@@ -6,6 +6,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Progress } from '@/shared/components/ui/progress'
 import { formatDate } from '@/shared/lib/utils'
 import { Send, Check, AlertTriangle, Clock } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface DeliveryRecord {
   id: string
@@ -24,14 +25,15 @@ interface Props {
   relatedId?: string
 }
 
-const statusConfig: Record<string, { label: string; icon: typeof Check; color: string; variant: 'default' | 'secondary' | 'success' | 'destructive' | 'warning' | 'outline' }> = {
-  delivered: { label: 'Entregada', icon: Check, color: 'text-green-600', variant: 'success' },
-  sent: { label: 'Enviada', icon: Send, color: 'text-blue-600', variant: 'default' },
-  pending: { label: 'Pendiente', icon: Clock, color: 'text-muted-foreground', variant: 'secondary' },
-  failed: { label: 'Fallida', icon: AlertTriangle, color: 'text-red-600', variant: 'destructive' },
+const statusConfig: Record<string, { labelKey: string; icon: typeof Check; color: string; variant: 'default' | 'secondary' | 'success' | 'destructive' | 'warning' | 'outline' }> = {
+  delivered: { labelKey: 'delivery.status.delivered', icon: Check, color: 'text-green-600', variant: 'success' },
+  sent: { labelKey: 'delivery.status.sent', icon: Send, color: 'text-blue-600', variant: 'default' },
+  pending: { labelKey: 'delivery.status.pending', icon: Clock, color: 'text-muted-foreground', variant: 'secondary' },
+  failed: { labelKey: 'delivery.status.failed', icon: AlertTriangle, color: 'text-red-600', variant: 'destructive' },
 }
 
 export function DeliveryTracker({ notificationType, relatedId }: Props) {
+  const { t } = useI18n()
   const { communityId } = useCommunityContext()
 
   const { data: records, isLoading } = useQuery({
@@ -54,7 +56,7 @@ export function DeliveryTracker({ notificationType, relatedId }: Props) {
   })
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground text-center py-4">Cargando estado de entrega...</p>
+    return <p className="text-sm text-muted-foreground text-center py-4">{t('delivery.loading')}</p>
   }
 
   const items = records ?? []
@@ -62,7 +64,7 @@ export function DeliveryTracker({ notificationType, relatedId }: Props) {
     return (
       <Card>
         <CardContent className="py-6 text-center text-sm text-muted-foreground">
-          No hay notificaciones para rastrear.
+          {t('delivery.empty')}
         </CardContent>
       </Card>
     )
@@ -80,33 +82,33 @@ export function DeliveryTracker({ notificationType, relatedId }: Props) {
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <Send className="h-5 w-5 text-blue-600" />
-          Estado de Entrega
+          {t('delivery.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Summary */}
         <div className="grid grid-cols-4 gap-3 text-center">
           <div>
-            <p className="text-xs text-muted-foreground">Entregadas</p>
+            <p className="text-xs text-muted-foreground">{t('delivery.status.delivered')}</p>
             <p className="text-lg font-bold text-green-600">{delivered}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Enviadas</p>
+            <p className="text-xs text-muted-foreground">{t('delivery.status.sent')}</p>
             <p className="text-lg font-bold text-blue-600">{sent}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Pendientes</p>
+            <p className="text-xs text-muted-foreground">{t('delivery.status.pending')}</p>
             <p className="text-lg font-bold text-muted-foreground">{pending}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Fallidas</p>
+            <p className="text-xs text-muted-foreground">{t('delivery.status.failed')}</p>
             <p className="text-lg font-bold text-red-600">{failed}</p>
           </div>
         </div>
 
         <div className="space-y-1">
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Tasa de entrega</span>
+            <span>{t('delivery.rate')}</span>
             <span>{deliveryPct}%</span>
           </div>
           <Progress value={deliveryPct} className="h-2" />
@@ -124,7 +126,7 @@ export function DeliveryTracker({ notificationType, relatedId }: Props) {
                   <span className="truncate max-w-[200px]">{(record as any).member_name || record.member_id?.slice(0, 8)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={cfg.variant} className="text-[10px]">{cfg.label}</Badge>
+                  <Badge variant={cfg.variant} className="text-[10px]">{t(cfg.labelKey as never)}</Badge>
                   <span className="text-xs text-muted-foreground">
                     {formatDate(record.delivered_at || record.created_at)}
                   </span>

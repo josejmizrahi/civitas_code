@@ -1,19 +1,21 @@
 import { CheckCircle2, Circle, MessageSquare, Vote, XCircle, Gavel, Play } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import type { ProposalStatus } from '@/shared/types'
+import { useI18n } from '@/shared/hooks/useI18n'
+import type { I18nKey } from '@/shared/i18n/messages'
 
 interface Step {
   key: ProposalStatus | 'appeal'
-  label: string
+  labelKey: I18nKey
   icon: typeof Circle
 }
 
 const LIFECYCLE_STEPS: Step[] = [
-  { key: 'draft', label: 'Borrador', icon: Circle },
-  { key: 'discussion', label: 'Discusión', icon: MessageSquare },
-  { key: 'active', label: 'Votación', icon: Vote },
-  { key: 'approved', label: 'Resultado', icon: Gavel },
-  { key: 'executed', label: 'Ejecutada', icon: Play },
+  { key: 'draft', labelKey: 'lifecycle.draft', icon: Circle },
+  { key: 'discussion', labelKey: 'lifecycle.discussion', icon: MessageSquare },
+  { key: 'active', labelKey: 'lifecycle.voting', icon: Vote },
+  { key: 'approved', labelKey: 'lifecycle.result', icon: Gavel },
+  { key: 'executed', labelKey: 'lifecycle.executed', icon: Play },
 ]
 
 // Map each status to its step index
@@ -34,6 +36,7 @@ interface Props {
 }
 
 export function ProposalLifecycleIndicator({ status, appealed, className }: Props) {
+  const { t } = useI18n()
   const currentIndex = STATUS_INDEX[status] ?? 0
   const isRejected = status === 'rejected'
 
@@ -73,7 +76,7 @@ export function ProposalLifecycleIndicator({ status, appealed, className }: Prop
                   'flex h-8 w-8 items-center justify-center rounded-full transition-colors',
                   dotColor
                 )}
-                title={step.label}
+                title={t(step.labelKey)}
               >
                 {isCompleted ? (
                   <CheckCircle2 className="h-4 w-4" />
@@ -89,7 +92,7 @@ export function ProposalLifecycleIndicator({ status, appealed, className }: Prop
                   isCurrent ? 'text-foreground' : isFuture ? 'text-muted-foreground/50' : 'text-muted-foreground'
                 )}
               >
-                {step.label}
+                {t(step.labelKey)}
               </span>
             </div>
 

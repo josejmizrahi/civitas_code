@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import type { Proposal } from '../types'
 import type { FinancialInstruction } from '@/shared/types/rules'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   proposal: Proposal
@@ -61,6 +62,7 @@ export function ProposalContextPanel({ proposal }: Props) {
 }
 
 function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
+  const { t } = useI18n()
   const { rules } = useRulesEngine()
   const configKey = fi?.config_key as string | undefined
   const newValue = fi?.config_value
@@ -73,7 +75,7 @@ function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: 
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <BookOpen className="h-5 w-5 text-blue-600" />
-          Cambio de Reglamento
+          {t('context.ruleChange.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -91,11 +93,11 @@ function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: 
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border bg-background p-3 space-y-1">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Valor actual</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{t('context.currentValue')}</p>
                 <p className="text-sm font-mono font-bold">{catalogEntry.format(rules)}</p>
               </div>
               <div className="rounded-lg border-2 border-blue-300 bg-background p-3 space-y-1">
-                <p className="text-[10px] font-medium text-blue-600 uppercase tracking-wider">Valor propuesto</p>
+                <p className="text-[10px] font-medium text-blue-600 uppercase tracking-wider">{t('context.proposedValue')}</p>
                 <p className="text-sm font-mono font-bold text-blue-700">
                   {formatProposedValue(newValue)}
                 </p>
@@ -104,25 +106,25 @@ function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: 
           </>
         ) : configKey ? (
           <div className="space-y-2">
-            <p className="text-sm"><span className="font-medium">Clave:</span> <code className="text-xs bg-muted px-1 py-0.5 rounded">{configKey}</code></p>
+            <p className="text-sm"><span className="font-medium">{t('context.key')}:</span> <code className="text-xs bg-muted px-1 py-0.5 rounded">{configKey}</code></p>
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border bg-background p-3">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase">Actual</p>
+                <p className="text-[10px] font-medium text-muted-foreground uppercase">{t('context.current')}</p>
                 <p className="text-sm font-mono">{formatProposedValue(currentValue)}</p>
               </div>
               <div className="rounded-lg border-2 border-blue-300 bg-background p-3">
-                <p className="text-[10px] font-medium text-blue-600 uppercase">Propuesto</p>
+                <p className="text-[10px] font-medium text-blue-600 uppercase">{t('context.proposed')}</p>
                 <p className="text-sm font-mono text-blue-700">{formatProposedValue(newValue)}</p>
               </div>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">Sin detalle de regla especificado.</p>
+          <p className="text-sm text-muted-foreground">{t('context.noRuleDetail')}</p>
         )}
         <Link to="/rules">
           <Button variant="outline" size="sm" className="gap-1.5">
             <BookOpen className="h-3.5 w-3.5" />
-            Ver Reglamento Completo
+            {t('context.viewRules')}
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>
@@ -132,6 +134,7 @@ function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: 
 }
 
 function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: Proposal; fi: FinancialInstruction | null; templateId: string }) {
+  const { t } = useI18n()
   const { communityId } = useCommunityContext()
   const amount = Number(fi?.amount) || 0
 
@@ -177,9 +180,9 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
   const impactPct = balance > 0 ? Math.round((amount / balance) * 100) : 0
 
   const templateLabels: Record<string, { label: string; icon: typeof Wallet; color: string }> = {
-    gasto: { label: 'Desembolso', icon: Wallet, color: 'text-emerald-600' },
-    emergencia: { label: 'Gasto de Emergencia', icon: Zap, color: 'text-red-600' },
-    obra: { label: 'Obra / Mantenimiento Mayor', icon: Wrench, color: 'text-orange-600' },
+    gasto: { label: t('context.disbursement'), icon: Wallet, color: 'text-emerald-600' },
+    emergencia: { label: t('context.emergencyExpense'), icon: Zap, color: 'text-red-600' },
+    obra: { label: t('context.majorWork'), icon: Wrench, color: 'text-orange-600' },
   }
   const tpl = templateLabels[templateId] || templateLabels.gasto
   const Icon = tpl.icon
@@ -195,12 +198,12 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="rounded-lg border bg-background p-3 space-y-1">
-            <p className="text-[10px] font-medium text-muted-foreground uppercase">Monto</p>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase">{t('context.amount')}</p>
             <p className="text-lg font-bold">${amount.toLocaleString('es-MX')}</p>
           </div>
           {stats && (
             <div className="rounded-lg border bg-background p-3 space-y-1">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase">Balance actual</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase">{t('context.currentBalance')}</p>
               <p className={`text-lg font-bold ${balance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                 ${balance.toLocaleString('es-MX')}
               </p>
@@ -208,7 +211,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
           )}
           {stats && balance > 0 && (
             <div className="rounded-lg border bg-background p-3 space-y-1">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase">Impacto</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase">{t('context.impact')}</p>
               <div className="flex items-center gap-1.5">
                 {impactPct > 50 ? (
                   <TrendingDown className="h-4 w-4 text-red-500" />
@@ -221,7 +224,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
               </div>
               {impactPct > 50 && (
                 <p className="text-[10px] text-red-600 flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" /> Más del 50% del balance
+                  <AlertTriangle className="h-3 w-3" /> {t('context.moreThanHalf')}
                 </p>
               )}
             </div>
@@ -230,7 +233,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
 
         {category && (
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Categoría:</span>
+            <span className="text-muted-foreground">{t('context.category')}:</span>
             <Badge variant="outline">{category.name}</Badge>
           </div>
         )}
@@ -239,7 +242,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               <Building2 className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Beneficiario:</span>
+              <span className="text-muted-foreground">{t('context.beneficiary')}:</span>
               <span className="font-medium">{fi.recipient_name}</span>
               {entity && (
                 <Badge variant="secondary" className="text-[10px]">{entity.type}</Badge>
@@ -248,7 +251,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
             {entity && (
               <Link to={`/entities/${entity.id}`}>
                 <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                  Ver entidad <ArrowRight className="h-3 w-3" />
+                  {t('context.viewEntity')} <ArrowRight className="h-3 w-3" />
                 </Button>
               </Link>
             )}
@@ -258,7 +261,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
         <Link to="/treasury">
           <Button variant="outline" size="sm" className="gap-1.5">
             <Wallet className="h-3.5 w-3.5" />
-            Ver Tesorería
+            {t('context.viewTreasury')}
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>
@@ -268,6 +271,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
 }
 
 function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
+  const { t } = useI18n()
   const { communityId } = useCommunityContext()
   const newAmount = Number(fi?.new_amount || fi?.amount) || 0
 
@@ -292,22 +296,22 @@ function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi:
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Users className="h-5 w-5 text-violet-600" />
-          Cambio de Cuota
+          {t('context.quotaChange')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="rounded-lg border-2 border-violet-300 bg-background p-3 space-y-1">
-            <p className="text-[10px] font-medium text-violet-600 uppercase">Nueva cuota</p>
+            <p className="text-[10px] font-medium text-violet-600 uppercase">{t('context.newFee')}</p>
             <p className="text-lg font-bold text-violet-700">${newAmount.toLocaleString('es-MX')}</p>
           </div>
           <div className="rounded-lg border bg-background p-3 space-y-1">
-            <p className="text-[10px] font-medium text-muted-foreground uppercase">Miembros activos</p>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase">{t('context.activeMembers')}</p>
             <p className="text-lg font-bold">{activeMembers ?? '...'}</p>
           </div>
           {activeMembers && activeMembers > 0 && (
             <div className="rounded-lg border bg-background p-3 space-y-1">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase">Recaudación mensual</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase">{t('context.monthlyCollection')}</p>
               <p className="text-lg font-bold text-emerald-600">${monthlyProjection.toLocaleString('es-MX')}</p>
             </div>
           )}
@@ -315,21 +319,21 @@ function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi:
 
         {fi?.effective_date && (
           <p className="text-sm text-muted-foreground">
-            Fecha efectiva: <span className="font-medium text-foreground">{fi.effective_date}</span>
+            {t('context.effectiveDate')}: <span className="font-medium text-foreground">{fi.effective_date}</span>
           </p>
         )}
 
         <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
           <p className="flex items-center gap-1.5 font-medium">
             <AlertTriangle className="h-4 w-4" />
-            Al ejecutarse, se generará una obligación de pago para cada miembro activo.
+            {t('context.quotaExecuteWarning')}
           </p>
         </div>
 
         <Link to="/treasury">
           <Button variant="outline" size="sm" className="gap-1.5">
             <Wallet className="h-3.5 w-3.5" />
-            Ver Cobranza
+            {t('context.viewCollection')}
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>
@@ -339,6 +343,7 @@ function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi:
 }
 
 function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
+  const { t } = useI18n()
   const { communityId } = useCommunityContext()
   const amount = Number(fi?.amount) || 0
   const categoryId = fi?.category_id
@@ -358,24 +363,24 @@ function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Wallet className="h-5 w-5 text-amber-600" />
-          Asignación de Presupuesto
+          {t('context.budgetAllocation')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="rounded-lg border-2 border-amber-300 bg-background p-3 space-y-1">
-            <p className="text-[10px] font-medium text-amber-600 uppercase">Monto asignado</p>
+            <p className="text-[10px] font-medium text-amber-600 uppercase">{t('context.assignedAmount')}</p>
             <p className="text-lg font-bold text-amber-700">${amount.toLocaleString('es-MX')}</p>
           </div>
           {category && (
             <div className="rounded-lg border bg-background p-3 space-y-1">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase">Categoría</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase">{t('context.category')}</p>
               <p className="text-sm font-bold">{category.name}</p>
             </div>
           )}
           {period && (
             <div className="rounded-lg border bg-background p-3 space-y-1">
-              <p className="text-[10px] font-medium text-muted-foreground uppercase">Periodo</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase">{t('context.period')}</p>
               <p className="text-sm font-bold">{period}</p>
             </div>
           )}
@@ -384,7 +389,7 @@ function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal
         <Link to="/treasury">
           <Button variant="outline" size="sm" className="gap-1.5">
             <Wallet className="h-3.5 w-3.5" />
-            Ver Presupuestos
+            {t('context.viewBudgets')}
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>
@@ -394,25 +399,26 @@ function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal
 }
 
 function MemberAdmissionPanel({ proposal: _proposal }: { proposal: Proposal }) {
+  const { t } = useI18n()
   return (
     <Card className="border-sky-200 bg-sky-50/30">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <UserPlus className="h-5 w-5 text-sky-600" />
-          Admisión de Miembro
+          {t('context.memberAdmission')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          Esta propuesta requiere aprobación de la asamblea para admitir un nuevo miembro a la comunidad.
+          {t('context.memberAdmissionDescription')}
         </p>
         <div className="rounded-lg bg-sky-50 border border-sky-200 p-3 text-sm text-sky-800">
-          <p>Una vez aprobada, el administrador deberá enviar la invitación manualmente desde la sección de Miembros.</p>
+          <p>{t('context.memberAdmissionWarning')}</p>
         </div>
         <Link to="/members">
           <Button variant="outline" size="sm" className="gap-1.5">
             <Users className="h-3.5 w-3.5" />
-            Ver Miembros
+            {t('context.viewMembers')}
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>
@@ -422,6 +428,7 @@ function MemberAdmissionPanel({ proposal: _proposal }: { proposal: Proposal }) {
 }
 
 function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
+  const { t } = useI18n()
   const { communityId } = useCommunityContext()
 
   const { data: currentTerms } = useQuery({
@@ -444,21 +451,21 @@ function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Crown className="h-5 w-5 text-purple-600" />
-          Elección de Mesa Directiva
+          {t('context.electionTitle')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Proceso electoral para elegir cargos administrativos de la comunidad.
+          {t('context.electionDescription')}
         </p>
 
         {currentTerms && currentTerms.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase">Cargos actuales</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase">{t('context.currentRoles')}</p>
             {currentTerms.map((term) => (
               <div key={term.id} className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
                 <Badge variant="outline" className="capitalize">{term.role}</Badge>
-                <span className="text-xs text-muted-foreground">Periodo #{term.term_number}</span>
+                <span className="text-xs text-muted-foreground">{t('context.periodN').replace('{n}', String(term.term_number))}</span>
               </div>
             ))}
           </div>
@@ -467,14 +474,14 @@ function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
         <div className="rounded-lg bg-purple-50 border border-purple-200 p-3 text-sm text-purple-800">
           <p className="flex items-center gap-1.5">
             <Scale className="h-4 w-4" />
-            Art. 42-46 LPCI CDMX — Los morosos no pueden ser electos para cargos administrativos.
+            {t('context.electionLegal')}
           </p>
         </div>
 
         <Link to="/governance/vigilancia">
           <Button variant="outline" size="sm" className="gap-1.5">
             <Crown className="h-3.5 w-3.5" />
-            Ver Términos Administrativos
+            {t('context.viewAdminTerms')}
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>
@@ -485,7 +492,7 @@ function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
 
 function formatProposedValue(value: unknown): string {
   if (value === null || value === undefined) return '—'
-  if (typeof value === 'boolean') return value ? 'Sí' : 'No'
+  if (typeof value === 'boolean') return value ? 'Si' : 'No'
   if (typeof value === 'number') {
     if (value >= 0 && value <= 1) return `${Math.round(value * 100)}%`
     return value.toLocaleString('es-MX')

@@ -39,19 +39,21 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
 import { Link } from 'react-router-dom'
+import { useI18n } from '@/shared/hooks/useI18n'
+import type { I18nKey } from '@/shared/i18n/messages'
 
 interface Props {
   proposalId: string
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Borrador',
-  discussion: 'En Discusión',
-  active: 'Votación Activa',
-  closed: 'Cerrada',
-  approved: 'Aprobada',
-  rejected: 'Rechazada',
-  executed: 'Ejecutada',
+const STATUS_LABEL_KEYS: Record<string, I18nKey> = {
+  draft: 'proposalDetail.status.draft',
+  discussion: 'proposalDetail.status.discussion',
+  active: 'proposalDetail.status.active',
+  closed: 'proposalDetail.status.closed',
+  approved: 'proposalDetail.status.approved',
+  rejected: 'proposalDetail.status.rejected',
+  executed: 'proposalDetail.status.executed',
 }
 
 const STATUS_VARIANTS: Record<string, string> = {
@@ -64,7 +66,19 @@ const STATUS_VARIANTS: Record<string, string> = {
   executed: 'success',
 }
 
-function CountdownTimer({ endDate, label }: { endDate: string; label?: string }) {
+function CountdownTimer({
+  endDate,
+  label,
+  expiredLabel,
+  timeLabel,
+  timeLeftLabel,
+}: {
+  endDate: string
+  label?: string
+  expiredLabel: string
+  timeLabel: string
+  timeLeftLabel: string
+}) {
   const [timeLeft, setTimeLeft] = useState('')
   const [expired, setExpired] = useState(false)
 
@@ -75,7 +89,7 @@ function CountdownTimer({ endDate, label }: { endDate: string; label?: string })
       const diff = end - now
 
       if (diff <= 0) {
-        setTimeLeft('Expirado')
+        setTimeLeft(expiredLabel)
         setExpired(true)
         return
       }
@@ -93,17 +107,18 @@ function CountdownTimer({ endDate, label }: { endDate: string; label?: string })
     update()
     const interval = setInterval(update, 1000)
     return () => clearInterval(interval)
-  }, [endDate])
+  }, [endDate, expiredLabel])
 
   return (
     <div className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium ${expired ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'}`}>
       {expired ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
-      {expired ? `${label || 'Tiempo'} expirado` : `${label || 'Tiempo restante'}: ${timeLeft}`}
+      {expired ? `${label || timeLabel} ${expiredLabel.toLowerCase()}` : `${label || timeLeftLabel}: ${timeLeft}`}
     </div>
   )
 }
 
 export function ProposalDetail({ proposalId }: Props) {
+  const { t } = useI18n()
   const { user } = useAuth()
   const { communityId: _communityId } = useCommunityContext()
   const { isAdmin } = usePermissions()
@@ -156,16 +171,16 @@ export function ProposalDetail({ proposalId }: Props) {
     }
   }, [proposal?.status, proposal?.voting_end])
 
-  if (isLoading) return <LoadingSpinner message="Cargando propuesta..." className="py-12" />
+  if (isLoading) return <LoadingSpinner message={t('proposalDetail.loading')} className="py-12" />
   if (!proposal) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-          <p className="text-muted-foreground">Propuesta no encontrada o no tienes acceso.</p>
+          <p className="text-muted-foreground">{t('proposalDetail.notFoundAccess')}</p>
           <Link to="/governance">
             <Button variant="outline" size="sm">
               <ArrowRight className="mr-2 h-4 w-4 rotate-180" />
-              Volver a Gobernanza
+              {t('proposalDetail.backToGovernance')}
             </Button>
           </Link>
         </CardContent>
@@ -193,8 +208,8 @@ export function ProposalDetail({ proposalId }: Props) {
     startDiscussionMut.mutate(
       { proposalId, discussionHours: parseInt(discussionHours) },
       {
-        onSuccess: () => { toast.success('Periodo de discusión iniciado'); refetchProposal() },
-        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al iniciar discusión'),
+        onSuccess: () => { toast.success(t('proposalDetail.toast.discussionStarted')); refetchProposal() },
+        onError: (err) => toast.error(err instanceof Error ? err.message : t('proposalDetail.toast.discussionError')),
       }
     )
   }
@@ -204,14 +219,14 @@ export function ProposalDetail({ proposalId }: Props) {
       openVotingMut.mutate(
         { proposalId, votingEnd: votingEndInput || null },
         {
-          onSuccess: () => { toast.success('Votación abierta'); refetchProposal() },
-          onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al abrir votación'),
+          onSuccess: () => { toast.success(t('proposalDetail.toast.votingOpened')); refetchProposal() },
+          onError: (err) => toast.error(err instanceof Error ? err.message : t('proposalDetail.toast.votingOpenError')),
         }
       )
     } else {
       updateStatus.mutate({ proposalId, status: 'active' }, {
-        onSuccess: () => toast.success('Votación abierta'),
-        onError: () => toast.error('Error al abrir votación'),
+        onSuccess: () => toast.success(t('proposalDetail.toast.votingOpened')),
+        onError: () => toast.error(t('proposalDetail.toast.votingOpenError')),
       })
     }
   }
@@ -230,12 +245,12 @@ export function ProposalDetail({ proposalId }: Props) {
       { proposalId, outcome: outcomeText, userId: user.id },
       {
         onSuccess: () => {
-          toast.success('Resultado declarado')
+          toast.success(t('proposalDetail.toast.outcomeDeclared'))
           setShowOutcomeForm(false)
           setOutcomeText('')
           refetchProposal()
         },
-        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al declarar resultado'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : t('proposalDetail.toast.outcomeError')),
       }
     )
   }
@@ -245,8 +260,8 @@ export function ProposalDetail({ proposalId }: Props) {
     appealMut.mutate(
       { proposalId, userId: user.id },
       {
-        onSuccess: () => { toast.success('Propuesta apelada — ejecución pausada'); refetchProposal() },
-        onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al apelar'),
+        onSuccess: () => { toast.success(t('proposalDetail.toast.appealed')); refetchProposal() },
+        onError: (err) => toast.error(err instanceof Error ? err.message : t('proposalDetail.toast.appealError')),
       }
     )
   }
@@ -274,10 +289,10 @@ export function ProposalDetail({ proposalId }: Props) {
                 <Badge variant="outline" className="text-xs">{proposal.result}</Badge>
               )}
               {proposal.appealed && (
-                <Badge variant="destructive" className="text-xs">Apelada</Badge>
+                <Badge variant="destructive" className="text-xs">{t('proposalDetail.badge.appealed')}</Badge>
               )}
               <Badge variant={(STATUS_VARIANTS[proposal.status] || 'default') as 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'}>
-                {STATUS_LABELS[proposal.status] || proposal.status}
+                {STATUS_LABEL_KEYS[proposal.status] ? t(STATUS_LABEL_KEYS[proposal.status]) : proposal.status}
               </Badge>
             </div>
           </div>
@@ -285,51 +300,69 @@ export function ProposalDetail({ proposalId }: Props) {
         <CardContent className="space-y-4">
           <p className="whitespace-pre-wrap text-sm">{proposal.description}</p>
           <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-            {proposal.creator_name && <span>Por: <span className="font-medium text-foreground">{proposal.creator_name}</span></span>}
-            <span>Creada: {formatDate(proposal.created_at)}</span>
-            {proposal.discussion_start && <span>Discusión: {formatDate(proposal.discussion_start)}</span>}
-            {proposal.voting_start && <span>Inicio votación: {formatDate(proposal.voting_start)}</span>}
-            {proposal.voting_end && <span>Cierre: {formatDate(proposal.voting_end)}</span>}
-            <span>Quórum: {(proposal.quorum_required * 100).toFixed(0)}%</span>
-            <span>Mayoría: {(proposal.majority_required * 100).toFixed(0)}%</span>
+            {proposal.creator_name && <span>{t('proposalDetail.meta.by')}: <span className="font-medium text-foreground">{proposal.creator_name}</span></span>}
+            <span>{t('proposalDetail.meta.created')}: {formatDate(proposal.created_at)}</span>
+            {proposal.discussion_start && <span>{t('proposalDetail.meta.discussion')}: {formatDate(proposal.discussion_start)}</span>}
+            {proposal.voting_start && <span>{t('proposalDetail.meta.votingStart')}: {formatDate(proposal.voting_start)}</span>}
+            {proposal.voting_end && <span>{t('proposalDetail.meta.close')}: {formatDate(proposal.voting_end)}</span>}
+            <span>{t('proposalDetail.meta.quorum')}: {(proposal.quorum_required * 100).toFixed(0)}%</span>
+            <span>{t('proposalDetail.meta.majority')}: {(proposal.majority_required * 100).toFixed(0)}%</span>
             {proposal.voting_model && proposal.voting_model !== 'simple' && (
               <Badge variant="outline" className="text-[10px]">
-                {proposal.voting_model === 'consensus' ? 'Consenso' : proposal.voting_model === 'multiple_choice' ? 'Opción múltiple' : proposal.voting_model}
+                {proposal.voting_model === 'consensus' ? t('proposalDetail.model.consensus') : proposal.voting_model === 'multiple_choice' ? t('proposalDetail.model.multiple') : proposal.voting_model}
               </Badge>
             )}
           </div>
 
           {proposal.closed_at && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Cerrada</span>
+              <span className="text-muted-foreground">{t('proposalDetail.closed')}</span>
               <span>{formatDateTime(proposal.closed_at)}</span>
             </div>
           )}
           {proposal.closed_at && !proposal.closed_by && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Método</span>
-              <Badge variant="secondary">Cierre automático</Badge>
+              <span className="text-muted-foreground">{t('proposalDetail.method')}</span>
+              <Badge variant="secondary">{t('proposalDetail.method.autoClose')}</Badge>
             </div>
           )}
 
           {/* Discussion countdown */}
           {proposal.status === 'discussion' && proposal.discussion_end && (
-            <CountdownTimer endDate={proposal.discussion_end} label="Discusión" />
+            <CountdownTimer
+              endDate={proposal.discussion_end}
+              label={t('proposalDetail.countdown.discussion')}
+              expiredLabel={t('proposalDetail.countdown.expired')}
+              timeLabel={t('proposalDetail.countdown.time')}
+              timeLeftLabel={t('proposalDetail.countdown.timeLeft')}
+            />
           )}
 
           {/* Voting countdown */}
           {proposal.status === 'active' && proposal.voting_end && (
-            <CountdownTimer endDate={proposal.voting_end} label="Votación" />
+            <CountdownTimer
+              endDate={proposal.voting_end}
+              label={t('proposalDetail.countdown.voting')}
+              expiredLabel={t('proposalDetail.countdown.expired')}
+              timeLabel={t('proposalDetail.countdown.time')}
+              timeLeftLabel={t('proposalDetail.countdown.timeLeft')}
+            />
           )}
 
           {/* Grace period countdown */}
           {proposal.status === 'approved' && proposal.grace_period_end && (
             <div className="space-y-2">
-              <CountdownTimer endDate={proposal.grace_period_end} label="Periodo de apelación" />
+              <CountdownTimer
+                endDate={proposal.grace_period_end}
+                label={t('proposalDetail.countdown.appeal')}
+                expiredLabel={t('proposalDetail.countdown.expired')}
+                timeLabel={t('proposalDetail.countdown.time')}
+                timeLeftLabel={t('proposalDetail.countdown.timeLeft')}
+              />
               {proposal.appealed && (
                 <div className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
                   <Shield className="h-4 w-4" />
-                  <span>Esta propuesta fue apelada — la ejecución automática está pausada</span>
+                  <span>{t('proposalDetail.appealedPaused')}</span>
                 </div>
               )}
             </div>
@@ -346,7 +379,7 @@ export function ProposalDetail({ proposalId }: Props) {
             {canStartDiscussion && proposal.discussion_min_hours && (
               <div className="flex items-end gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">Horas de discusión</Label>
+                  <Label className="text-xs">{t('proposalDetail.discussionHours')}</Label>
                   <Input
                     type="number"
                     min="1"
@@ -362,7 +395,7 @@ export function ProposalDetail({ proposalId }: Props) {
                   variant="secondary"
                 >
                   <MessageSquare className="mr-2 h-4 w-4" />
-                  {startDiscussionMut.isPending ? 'Iniciando...' : 'Iniciar Discusión'}
+                  {startDiscussionMut.isPending ? t('proposalDetail.starting') : t('proposalDetail.startDiscussion')}
                 </Button>
               </div>
             )}
@@ -371,7 +404,7 @@ export function ProposalDetail({ proposalId }: Props) {
             {proposal.status === 'discussion' && isAdmin && discussionExpired && (
               <div className="flex items-end gap-2">
                 <div className="space-y-1">
-                  <Label className="text-xs">Cierre de votación</Label>
+                  <Label className="text-xs">{t('proposalDetail.votingClose')}</Label>
                   <Input
                     type="datetime-local"
                     value={votingEndInput}
@@ -384,7 +417,7 @@ export function ProposalDetail({ proposalId }: Props) {
                   disabled={openVotingMut.isPending}
                 >
                   <ArrowRight className="mr-2 h-4 w-4" />
-                  {openVotingMut.isPending ? 'Abriendo...' : 'Abrir Votación'}
+                  {openVotingMut.isPending ? t('proposalDetail.opening') : t('proposalDetail.openVoting')}
                 </Button>
               </div>
             )}
@@ -392,14 +425,14 @@ export function ProposalDetail({ proposalId }: Props) {
             {/* Draft → Active (skip discussion) */}
             {proposal.status === 'draft' && isAdmin && endorsementsOk && (
               <Button onClick={handleOpenVoting} disabled={updateStatus.isPending}>
-                Abrir Votación Directa
+                {t('proposalDetail.openDirectVoting')}
               </Button>
             )}
 
             {/* Close voting */}
             {canClose && isAdmin && (
               <Button variant="outline" onClick={handleClose} disabled={closeProposalMut.isPending}>
-                Cerrar Votación
+                {t('proposalDetail.closeVoting')}
               </Button>
             )}
 
@@ -412,7 +445,7 @@ export function ProposalDetail({ proposalId }: Props) {
                 className="border-amber-300 text-amber-700 hover:bg-amber-50"
               >
                 <Shield className="mr-2 h-4 w-4" />
-                {appealMut.isPending ? 'Apelando...' : 'Apelar Propuesta'}
+                {appealMut.isPending ? t('proposalDetail.appealing') : t('proposalDetail.appealProposal')}
               </Button>
             )}
           </div>
@@ -428,18 +461,18 @@ export function ProposalDetail({ proposalId }: Props) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Gavel className="h-4 w-4" />
-              Declaración de Resultado
+              {t('proposalDetail.outcomeTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {proposal.outcome_declared ? (
               <div className="space-y-2">
                 <div className="rounded-md bg-muted p-3 text-sm">
-                  <p className="font-medium">Resultado declarado:</p>
+                  <p className="font-medium">{t('proposalDetail.outcomeDeclared')}</p>
                   <p className="mt-1 whitespace-pre-wrap">{proposal.outcome_declared}</p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Declarado el {proposal.outcome_declared_at ? formatDateTime(proposal.outcome_declared_at) : ''}
+                  {t('proposalDetail.outcomeDeclaredAt')} {proposal.outcome_declared_at ? formatDateTime(proposal.outcome_declared_at) : ''}
                 </p>
               </div>
             ) : showOutcomeForm ? (
@@ -447,7 +480,7 @@ export function ProposalDetail({ proposalId }: Props) {
                 <Textarea
                   value={outcomeText}
                   onChange={(e) => setOutcomeText(e.target.value)}
-                  placeholder="Describe el resultado oficial de esta propuesta..."
+                  placeholder={t('proposalDetail.outcomePlaceholder')}
                   rows={3}
                 />
                 <div className="flex gap-2">
@@ -456,17 +489,17 @@ export function ProposalDetail({ proposalId }: Props) {
                     disabled={declareOutcomeMut.isPending || !outcomeText.trim()}
                     size="sm"
                   >
-                    {declareOutcomeMut.isPending ? 'Declarando...' : 'Declarar Resultado'}
+                    {declareOutcomeMut.isPending ? t('proposalDetail.declaring') : t('proposalDetail.declareOutcome')}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setShowOutcomeForm(false)}>
-                    Cancelar
+                    {t('proposalDetail.cancel')}
                   </Button>
                 </div>
               </div>
             ) : (
               <Button variant="outline" size="sm" onClick={() => setShowOutcomeForm(true)}>
                 <Gavel className="mr-2 h-4 w-4" />
-                Declarar Resultado
+                {t('proposalDetail.declareOutcome')}
               </Button>
             )}
           </CardContent>
@@ -500,8 +533,8 @@ export function ProposalDetail({ proposalId }: Props) {
           castVoteMut.mutate(
             { proposalId, memberId: currentMember.id, value, blockReason },
             {
-              onSuccess: () => toast.success('Voto registrado'),
-              onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al registrar voto'),
+              onSuccess: () => toast.success(t('proposalDetail.voteRegistered')),
+              onError: (err) => toast.error(err instanceof Error ? err.message : t('proposalDetail.voteError')),
             }
           )
         }
@@ -560,29 +593,29 @@ export function ProposalDetail({ proposalId }: Props) {
       {(proposal.status === 'approved' || proposal.status === 'executed') && proposal.financial_instruction && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Instrucción Financiera</CardTitle>
+            <CardTitle className="text-base">{t('proposalDetail.financialInstruction')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-md bg-muted p-3 text-sm space-y-1">
               {(() => {
                 const fi = proposal.financial_instruction
                 const typeLabels: Record<string, string> = {
-                  disbursement: 'Desembolso',
-                  budget_allocation: 'Asignación Presupuestal',
-                  quota_change: 'Cambio de Cuota',
-                  config_change: 'Cambio de Configuración',
-                  none: 'Sin instrucción',
+                  disbursement: t('proposalDetail.fi.type.disbursement'),
+                  budget_allocation: t('proposalDetail.fi.type.budgetAllocation'),
+                  quota_change: t('proposalDetail.fi.type.quotaChange'),
+                  config_change: t('proposalDetail.fi.type.configChange'),
+                  none: t('proposalDetail.fi.type.none'),
                 }
                 return (
                   <>
-                    <p><strong>Tipo:</strong> {typeLabels[fi.type] || fi.type}</p>
-                    {fi.amount != null && <p><strong>Monto:</strong> ${Number(fi.amount).toLocaleString('es-MX')}</p>}
-                    {fi.new_amount != null && <p><strong>Nuevo monto:</strong> ${Number(fi.new_amount).toLocaleString('es-MX')}</p>}
-                    {fi.description && <p><strong>Descripción:</strong> {fi.description}</p>}
-                    {fi.period && <p><strong>Periodo:</strong> {fi.period}</p>}
-                    {fi.effective_date && <p><strong>Fecha efectiva:</strong> {fi.effective_date}</p>}
-                    {fi.recipient_name && <p><strong>Beneficiario:</strong> {fi.recipient_name}</p>}
-                    {fi.config_key && <p><strong>Configuración:</strong> {fi.config_key} = {JSON.stringify(fi.config_value)}</p>}
+                    <p><strong>{t('proposalDetail.fi.type')}:</strong> {typeLabels[fi.type] || fi.type}</p>
+                    {fi.amount != null && <p><strong>{t('proposalDetail.fi.amount')}:</strong> ${Number(fi.amount).toLocaleString('es-MX')}</p>}
+                    {fi.new_amount != null && <p><strong>{t('proposalDetail.fi.newAmount')}:</strong> ${Number(fi.new_amount).toLocaleString('es-MX')}</p>}
+                    {fi.description && <p><strong>{t('proposalDetail.fi.description')}:</strong> {fi.description}</p>}
+                    {fi.period && <p><strong>{t('proposalDetail.fi.period')}:</strong> {fi.period}</p>}
+                    {fi.effective_date && <p><strong>{t('proposalDetail.fi.effectiveDate')}:</strong> {fi.effective_date}</p>}
+                    {fi.recipient_name && <p><strong>{t('proposalDetail.fi.beneficiary')}:</strong> {fi.recipient_name}</p>}
+                    {fi.config_key && <p><strong>{t('proposalDetail.fi.config')}:</strong> {fi.config_key} = {JSON.stringify(fi.config_value)}</p>}
                   </>
                 )
               })()}
@@ -592,22 +625,22 @@ export function ProposalDetail({ proposalId }: Props) {
               <div className="flex items-center gap-2 text-green-600">
                 <CheckCircle2 className="h-5 w-5" />
                 <span className="text-sm font-medium">
-                  Ejecutada el {proposal.executed_at ? formatDate(proposal.executed_at) : ''}
+                  {t('proposalDetail.executedAt')} {proposal.executed_at ? formatDate(proposal.executed_at) : ''}
                 </span>
               </div>
             ) : proposal.appealed ? (
               <div className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
                 <Shield className="h-4 w-4" />
-                <span>Ejecución pausada por apelación</span>
+                <span>{t('proposalDetail.executionPausedByAppeal')}</span>
               </div>
             ) : proposal.execution_status === 'cool_down' && proposal.cool_down_until ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
                   <Timer className="h-4 w-4" />
                   {new Date(proposal.cool_down_until) > new Date() ? (
-                    <span>Periodo de enfriamiento — se auto-ejecutará el {formatDateTime(proposal.cool_down_until)}</span>
+                    <span>{t('proposalDetail.cooldownRunning').replace('{date}', formatDateTime(proposal.cool_down_until))}</span>
                   ) : (
-                    <span>Periodo de enfriamiento completado — lista para ejecutar</span>
+                    <span>{t('proposalDetail.cooldownComplete')}</span>
                   )}
                 </div>
                 {isAdmin && new Date(proposal.cool_down_until) <= new Date() && (
@@ -615,14 +648,14 @@ export function ProposalDetail({ proposalId }: Props) {
                     onClick={() => user && executeMut.mutate(
                       { proposalId, userId: user.id },
                       {
-                        onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
+                        onSuccess: () => { toast.success(t('proposalDetail.status.executed')); refetchProposal() },
                         onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                       }
                     )}
                     disabled={executeMut.isPending}
                   >
                     <Play className="mr-2 h-4 w-4" />
-                    {executeMut.isPending ? 'Ejecutando...' : 'Ejecutar Ahora'}
+                    {executeMut.isPending ? t('proposalDetail.executing') : t('proposalDetail.executeNow')}
                   </Button>
                 )}
               </div>
@@ -630,7 +663,7 @@ export function ProposalDetail({ proposalId }: Props) {
               <div className="space-y-3">
                 <div className="flex items-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
                   <XCircle className="h-4 w-4" />
-                  <span>La ejecución falló — puedes reintentar</span>
+                  <span>{t('proposalDetail.executionFailed')}</span>
                 </div>
                 {isAdmin && (
                   <Button
@@ -638,14 +671,14 @@ export function ProposalDetail({ proposalId }: Props) {
                     onClick={() => user && executeMut.mutate(
                       { proposalId, userId: user.id },
                       {
-                        onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
+                        onSuccess: () => { toast.success(t('proposalDetail.status.executed')); refetchProposal() },
                         onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                       }
                     )}
                     disabled={executeMut.isPending}
                   >
                     <Play className="mr-2 h-4 w-4" />
-                    {executeMut.isPending ? 'Reintentando...' : 'Reintentar Ejecución'}
+                    {executeMut.isPending ? t('proposalDetail.retrying') : t('proposalDetail.retryExecution')}
                   </Button>
                 )}
               </div>
@@ -655,14 +688,14 @@ export function ProposalDetail({ proposalId }: Props) {
                   onClick={() => user && executeMut.mutate(
                     { proposalId, userId: user.id },
                     {
-                      onSuccess: () => { toast.success('Propuesta ejecutada'); refetchProposal() },
+                      onSuccess: () => { toast.success(t('proposalDetail.status.executed')); refetchProposal() },
                       onError: (err) => toast.error(err instanceof Error ? err.message : 'Error al ejecutar'),
                     }
                   )}
                   disabled={executeMut.isPending}
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  {executeMut.isPending ? 'Ejecutando...' : 'Ejecutar Manualmente'}
+                  {executeMut.isPending ? t('proposalDetail.executing') : t('proposalDetail.executeManually')}
                 </Button>
               )
             )}

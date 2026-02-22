@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { cn } from '@/shared/lib/utils'
 import { CheckCircle2 } from 'lucide-react'
 import type { Vote, VotingOption } from '../types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   proposalId: string
@@ -23,6 +24,7 @@ export function MultipleChoiceVotingPanel({
   onVote,
   isPending,
 }: Props) {
+  const { t } = useI18n()
   const myVote = existingVotes.find((v) => v.member_id === memberId && !v.delegated_from)
   const [selected, setSelected] = useState<string | null>(myVote?.value ?? null)
 
@@ -44,13 +46,13 @@ export function MultipleChoiceVotingPanel({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Votación Múltiple</CardTitle>
+        <CardTitle className="text-base">{t('multipleChoice.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* My vote status */}
         {myVote && (
           <div className="rounded-md bg-muted p-2 text-sm">
-            Tu voto: <strong>{options.find((_, i) => `option_${i + 1}` === myVote.value)?.label ?? myVote.value}</strong>
+            {t('multipleChoice.myVote')} <strong>{options.find((_, i) => `option_${i + 1}` === myVote.value)?.label ?? myVote.value}</strong>
           </div>
         )}
 
@@ -98,7 +100,7 @@ export function MultipleChoiceVotingPanel({
                 {/* Vote count */}
                 <div className="relative text-right">
                   <span className="text-sm font-bold">{pct.toFixed(0)}%</span>
-                  <p className="text-[10px] text-muted-foreground">{count} votos</p>
+                  <p className="text-[10px] text-muted-foreground">{t('multipleChoice.votesCount').replace('{count}', String(count))}</p>
                 </div>
               </button>
             )
@@ -107,7 +109,7 @@ export function MultipleChoiceVotingPanel({
 
         {totalWeight > 0 && (
           <p className="text-xs text-muted-foreground text-center">
-            {totalWeight} voto{totalWeight !== 1 ? 's' : ''} emitido{totalWeight !== 1 ? 's' : ''}
+            {t('multipleChoice.totalVotes').replace('{count}', String(totalWeight))}
           </p>
         )}
       </CardContent>

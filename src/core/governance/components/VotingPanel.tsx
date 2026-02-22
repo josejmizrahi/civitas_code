@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { cn } from '@/shared/lib/utils'
 import type { VoteSummary, Vote } from '../types'
 import { ThumbsUp, ThumbsDown, MinusCircle, AlertTriangle } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   proposalId: string
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, disabled }: Props) {
+  const { t } = useI18n()
   const castVote = useCastVoteWithDelegations()
   const { canVote } = useRulesEngine()
   const toast = useToast()
@@ -23,8 +25,8 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
 
   const handleVote = (value: string) => {
     castVote.mutate({ proposalId, memberId, value }, {
-      onSuccess: () => toast.success('Voto registrado'),
-      onError: () => toast.error('Error al registrar voto'),
+      onSuccess: () => toast.success(t('votingPanel.toast.success')),
+      onError: () => toast.error(t('votingPanel.toast.error')),
     })
   }
 
@@ -33,7 +35,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Tu Voto</CardTitle>
+        <CardTitle className="text-base">{t('votingPanel.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {!canVote.allowed && (
@@ -53,7 +55,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
                 canVote.reason?.includes('moroso') ? "text-red-800" : "text-amber-800"
               )}>{canVote.reason}</p>
               {canVote.reason?.includes('moroso') && (
-                <p className="text-xs text-red-600 mt-1">Tienes derecho a voz en la asamblea pero no a voto.</p>
+                <p className="text-xs text-red-600 mt-1">{t('votingPanel.voiceOnly')}</p>
               )}
             </div>
           </div>
@@ -61,8 +63,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
 
         {myVote ? (
           <p className="text-sm text-muted-foreground">
-            Ya votaste: <strong>{myVote.value === 'yes' ? 'A favor' : myVote.value === 'no' ? 'En contra' : 'Abstención'}</strong>.
-            Puedes cambiar tu voto.
+            {t('votingPanel.alreadyVoted')} <strong>{myVote.value === 'yes' ? t('votingPanel.yes') : myVote.value === 'no' ? t('votingPanel.no') : t('votingPanel.abstain')}</strong>. {t('votingPanel.canChange')}
           </p>
         ) : null}
 
@@ -74,7 +75,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
             disabled={votingDisabled || castVote.isPending}
           >
             <ThumbsUp className="mr-2 h-4 w-4" />
-            A favor
+            {t('votingPanel.yes')}
           </Button>
           <Button
             variant={myVote?.value === 'no' ? 'default' : 'outline'}
@@ -83,7 +84,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
             disabled={votingDisabled || castVote.isPending}
           >
             <ThumbsDown className="mr-2 h-4 w-4" />
-            En contra
+            {t('votingPanel.no')}
           </Button>
           <Button
             variant={myVote?.value === 'abstain' ? 'default' : 'outline'}
@@ -92,7 +93,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
             disabled={votingDisabled || castVote.isPending}
           >
             <MinusCircle className="mr-2 h-4 w-4" />
-            Abstención
+            {t('votingPanel.abstain')}
           </Button>
         </div>
 
@@ -100,15 +101,15 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
           <div className="grid grid-cols-3 gap-2 text-center text-sm">
             <div className="rounded-md bg-green-50 p-2">
               <div className="text-lg font-bold text-green-600">{voteSummary.yes}</div>
-              <div className="text-xs text-muted-foreground">A favor</div>
+              <div className="text-xs text-muted-foreground">{t('votingPanel.yes')}</div>
             </div>
             <div className="rounded-md bg-red-50 p-2">
               <div className="text-lg font-bold text-red-600">{voteSummary.no}</div>
-              <div className="text-xs text-muted-foreground">En contra</div>
+              <div className="text-xs text-muted-foreground">{t('votingPanel.no')}</div>
             </div>
             <div className="rounded-md bg-gray-50 p-2">
               <div className="text-lg font-bold text-gray-600">{voteSummary.abstain}</div>
-              <div className="text-xs text-muted-foreground">Abstención</div>
+              <div className="text-xs text-muted-foreground">{t('votingPanel.abstain')}</div>
             </div>
           </div>
         )}

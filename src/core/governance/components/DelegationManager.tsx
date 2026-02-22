@@ -10,12 +10,14 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Users, ArrowRight, X, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
 import { useState } from 'react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   memberId: string
 }
 
 export function DelegationManager({ memberId }: Props) {
+  const { t } = useI18n()
   const { communityId } = useCommunityContext()
   const queryClient = useQueryClient()
   const { data: members } = useMembers()
@@ -67,10 +69,10 @@ export function DelegationManager({ memberId }: Props) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Users className="h-4 w-4" />
-          Delegaciones
+          {t('delegation.title')}
           {delegationsToMe.length > 0 && (
             <Badge variant="secondary" className="ml-2">
-              Votas en nombre de {delegationsToMe.length} miembro{delegationsToMe.length > 1 ? 's' : ''}
+              {t('delegation.votingFor').replace('{count}', String(delegationsToMe.length))}
             </Badge>
           )}
         </CardTitle>
@@ -86,12 +88,12 @@ export function DelegationManager({ memberId }: Props) {
         {/* Delegations to me */}
         {delegationsToMe.length > 0 && (
           <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">Te delegaron su voto:</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('delegation.toMe')}</p>
             {delegationsToMe.map((d) => (
               <div key={d.id} className="flex items-center gap-2 text-sm">
                 <Badge variant="outline">{getMemberName(d.from_member_id)}</Badge>
                 <ArrowRight className="h-3 w-3" />
-                <span>Tú</span>
+                <span>{t('delegation.you')}</span>
               </div>
             ))}
           </div>
@@ -100,21 +102,21 @@ export function DelegationManager({ memberId }: Props) {
         {/* My delegations */}
         {myDelegations.length > 0 && (
           <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">Tu voto delegado a:</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('delegation.myDelegation')}</p>
             {myDelegations.map((d) => (
               <div key={d.id} className="flex items-center gap-2 text-sm">
-                <span>Tú</span>
+                <span>{t('delegation.you')}</span>
                 <ArrowRight className="h-3 w-3" />
                 <Badge variant="outline">{getMemberName(d.to_member_id)}</Badge>
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={() => revokeMut.mutate(d.id, {
-                    onSuccess: () => toast.success('Delegación revocada'),
-                    onError: () => toast.error('Error al revocar delegación'),
+                    onSuccess: () => toast.success(t('delegation.toast.revoked')),
+                    onError: () => toast.error(t('delegation.toast.revokeError')),
                   })}
                   disabled={revokeMut.isPending}
-                  aria-label="Revocar"
+                  aria-label={t('delegation.revoke')}
                 >
                   <X className="h-3 w-3 text-destructive" />
                 </Button>
@@ -131,7 +133,7 @@ export function DelegationManager({ memberId }: Props) {
               onChange={(e) => setSelectedMember(e.target.value)}
               className="flex-1"
             >
-              <option value="">Delegar mi voto a...</option>
+              <option value="">{t('delegation.placeholder')}</option>
               {eligibleMembers.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.full_name || m.email}
@@ -141,18 +143,18 @@ export function DelegationManager({ memberId }: Props) {
             <Button
               size="sm"
               onClick={() => createMut.mutate(undefined, {
-                onSuccess: () => toast.success('Delegación creada exitosamente'),
-                onError: () => toast.error('Error al crear delegación'),
+                onSuccess: () => toast.success(t('delegation.toast.created')),
+                onError: () => toast.error(t('delegation.toast.createError')),
               })}
               disabled={!selectedMember || createMut.isPending}
             >
-              Delegar
+              {t('delegation.delegate')}
             </Button>
           </div>
         )}
 
         {myDelegations.length === 0 && delegationsToMe.length === 0 && eligibleMembers.length === 0 && (
-          <p className="text-sm text-muted-foreground">No hay delegaciones activas.</p>
+          <p className="text-sm text-muted-foreground">{t('delegation.empty')}</p>
         )}
       </CardContent>
     </Card>

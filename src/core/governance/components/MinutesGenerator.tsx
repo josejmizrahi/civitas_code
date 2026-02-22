@@ -11,6 +11,7 @@ import type { Proposal, VoteSummary } from '../types'
 import { FileText, Loader2, CheckCircle, PenTool, Shield } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { formatDate } from '@/shared/lib/utils'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   proposal: Proposal
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export function MinutesGenerator({ proposal, voteSummary }: Props) {
+  const { t } = useI18n()
   const { communityId } = useCommunityContext()
   const { user } = useAuth()
   const { isAdmin } = usePermissions()
@@ -59,7 +61,7 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
       {
         minutesId: existingMinutes.id,
         memberId: currentMember.id,
-        memberName: currentMember.full_name || currentMember.email || 'Miembro',
+        memberName: currentMember.full_name || currentMember.email || t('minutes.memberFallback'),
       },
       { onSuccess: () => refetch() }
     )
@@ -74,11 +76,11 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <FileText className="h-4 w-4" />
-          Acta de Votación
+          {t('minutes.title')}
           {existingMinutes?.approved && (
             <Badge variant="success" className="ml-2">
               <CheckCircle className="mr-1 h-3 w-3" />
-              Aprobada
+              {t('minutes.approved')}
             </Badge>
           )}
         </CardTitle>
@@ -93,17 +95,17 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
             {/* Approval info */}
             {existingMinutes.approved && existingMinutes.approved_at && (
               <p className="text-xs text-muted-foreground">
-                Aprobada el {formatDate(existingMinutes.approved_at)}
+                {t('minutes.approvedAt')} {formatDate(existingMinutes.approved_at)}
               </p>
             )}
 
             {/* Signatures */}
             {existingMinutes.signatures && existingMinutes.signatures.length > 0 && (
               <div className="space-y-1">
-                <p className="text-sm font-medium">Firmas ({existingMinutes.signatures.length}):</p>
+                <p className="text-sm font-medium">{t('minutes.signatures').replace('{count}', String(existingMinutes.signatures.length))}</p>
                 {existingMinutes.signatures.map((sig, i) => {
                   const member = members?.find(m => m.id === sig.member_id)
-                  const roleLabel = member?.role === 'admin' ? 'Secretario' : member?.role === 'comite_vigilancia' ? 'Comité Vigilancia' : 'Miembro'
+                  const roleLabel = member?.role === 'admin' ? t('minutes.role.secretary') : member?.role === 'comite_vigilancia' ? t('minutes.role.committee') : t('minutes.memberFallback')
                   return (
                     <div key={i} className="flex flex-wrap items-center gap-2 text-xs">
                       <Shield className="h-3 w-3 text-green-600 shrink-0" />
@@ -131,7 +133,7 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
                   size="sm"
                 >
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  {approveMinutesMut.isPending ? 'Aprobando...' : 'Aprobar Acta'}
+                  {approveMinutesMut.isPending ? t('minutes.approving') : t('minutes.approve')}
                 </Button>
               )}
 
@@ -144,13 +146,13 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
                   size="sm"
                 >
                   <PenTool className="mr-2 h-4 w-4" />
-                  {signMinutesMut.isPending ? 'Firmando...' : 'Firmar Acta'}
+                  {signMinutesMut.isPending ? t('minutes.signing') : t('minutes.sign')}
                 </Button>
               )}
 
               {alreadySigned && (
                 <Badge variant="outline" className="text-green-600">
-                  <CheckCircle className="mr-1 h-3 w-3" /> Ya firmaste
+                  <CheckCircle className="mr-1 h-3 w-3" /> {t('minutes.alreadySigned')}
                 </Badge>
               )}
             </div>
@@ -158,7 +160,7 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              Genera el acta automática con los resultados de la votación.
+              {t('minutes.description')}
             </p>
             <Button
               onClick={handleGenerate}
@@ -168,12 +170,12 @@ export function MinutesGenerator({ proposal, voteSummary }: Props) {
               {generating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generando...
+                  {t('minutes.generating')}
                 </>
               ) : (
                 <>
                   <FileText className="mr-2 h-4 w-4" />
-                  Generar Acta
+                  {t('minutes.generate')}
                 </>
               )}
             </Button>
