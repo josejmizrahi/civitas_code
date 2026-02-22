@@ -166,6 +166,11 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data } = await (anonClient.from('payment_plans') as any).select('*')
       expect(data?.length ?? 0).toBe(0)
     })
+
+    it('should not access discretionary_approvals without auth', async () => {
+      const { data } = await (anonClient.from('discretionary_approvals') as any).select('*')
+      expect(data?.length ?? 0).toBe(0)
+    })
   })
 
   // =========================================================================
@@ -213,6 +218,26 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data: proposals } = await memberClient.from('proposals').select('community_id')
       for (const p of proposals || []) {
         expect(myCommunityIds.has((p as any).community_id)).toBe(true)
+      }
+    })
+
+    it('member should not read another community by explicit id', async () => {
+      requireAuth()
+      requireOther()
+      requireCrossTenantFixture()
+      if (!memberClient || !otherCommunityId) return
+
+      const { data, error } = await memberClient
+        .from('communities')
+        .select('id, name')
+        .eq('id', otherCommunityId)
+        .single()
+
+      if (error) {
+        expect(error).toBeTruthy()
+      } else {
+        // If RLS returns no rows instead of an auth error, data should be null/undefined.
+        expect(data).toBeFalsy()
       }
     })
   })
@@ -433,6 +458,73 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const { data: events } = await (memberClient.from('ifpe_webhook_events') as any).select('community_id')
       for (const event of events || []) {
         expect(myCommunityIds.has(event.community_id)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on discretionary_approvals', async () => {
+      requireAuth()
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: approvals } = await (memberClient.from('discretionary_approvals') as any).select('community_id')
+      for (const approval of approvals || []) {
+        expect(myCommunityIds.has(approval.community_id)).toBe(true)
+      }
+    })
+
+    // GAP-16: RLS tests for governance tables
+    it('should enforce community isolation on votes (via proposal)', async () => {
+      requireAuth()
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: votes } = await (memberClient.from('votes') as any).select('id, proposals(community_id)').limit(50)
+      for (const v of votes || []) {
+        const cid = (v as any).proposals?.community_id
+        if (cid) expect(myCommunityIds.has(cid)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on delegations', async () => {
+      requireAuth()
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: rows } = await (memberClient.from('delegations') as any).select('community_id')
+      for (const row of rows || []) {
+        expect(myCommunityIds.has(row.community_id)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on proposal_endorsements', async () => {
+      requireAuth()
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: rows } = await (memberClient.from('proposal_endorsements') as any).select('community_id')
+      for (const row of rows || []) {
+        expect(myCommunityIds.has(row.community_id)).toBe(true)
+      }
+    })
+
+    it('should enforce community_id isolation on assemblies', async () => {
+      requireAuth()
+      if (!memberClient) return
+
+      const { data: members } = await memberClient.from('members').select('community_id')
+      const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
+
+      const { data: rows } = await (memberClient.from('assemblies') as any).select('community_id')
+      for (const row of rows || []) {
+        expect(myCommunityIds.has(row.community_id)).toBe(true)
       }
     })
   })

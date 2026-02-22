@@ -10,7 +10,7 @@ import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from '@/shared/components/ui/table'
 import { formatDate, formatCurrency } from '@/shared/lib/utils'
-import { AlertTriangle, RefreshCw, Bell, Ban, UserX, UsersRound } from 'lucide-react'
+import { AlertTriangle, RefreshCw, Bell, Ban, UserX, UsersRound, CheckCircle } from 'lucide-react'
 import { useMemberDebt } from '../hooks/useMoroso'
 import type { Member } from '../types'
 
@@ -37,7 +37,7 @@ const restrictionIcons: Record<string, typeof Ban> = {
 // Single row sub-component (fetches debt per member)
 // ---------------------------------------------------------------------------
 
-function MorosoRow({ member }: { member: MorosoMember }) {
+function MorosoRow({ member, onRegisterPayment }: { member: MorosoMember; onRegisterPayment?: (memberId: string) => void }) {
   const { data: debt, isLoading } = useMemberDebt(member.id)
 
   return (
@@ -79,6 +79,19 @@ function MorosoRow({ member }: { member: MorosoMember }) {
           })}
         </div>
       </TableCell>
+      {onRegisterPayment && (
+        <TableCell>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onRegisterPayment(member.id)}
+            className="text-xs"
+          >
+            <CheckCircle className="mr-1 h-3 w-3" />
+            Registrar pago
+          </Button>
+        </TableCell>
+      )}
     </TableRow>
   )
 }
@@ -87,7 +100,7 @@ function MorosoRow({ member }: { member: MorosoMember }) {
 // MorosoAdminPanel
 // ---------------------------------------------------------------------------
 
-export function MorosoAdminPanel() {
+export function MorosoAdminPanel({ onRegisterPayment }: { onRegisterPayment?: (memberId: string) => void } = {}) {
   const navigate = useNavigate()
   const { data: morosos, isLoading, error } = useMorosoMembers()
   const { rules } = useRulesEngine()
@@ -210,11 +223,12 @@ export function MorosoAdminPanel() {
                   <TableHead className="hidden sm:table-cell">Moroso desde</TableHead>
                   <TableHead className="hidden lg:table-cell">Notificado</TableHead>
                   <TableHead>Restricciones</TableHead>
+                  {onRegisterPayment && <TableHead>Acciones</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {morosos.map((member) => (
-                  <MorosoRow key={member.id} member={member} />
+                  <MorosoRow key={member.id} member={member} onRegisterPayment={onRegisterPayment} />
                 ))}
               </TableBody>
             </Table>

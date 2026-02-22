@@ -1233,6 +1233,58 @@ export type Database = {
           },
         ]
       }
+      discretionary_approvals: {
+        Row: {
+          id: string
+          community_id: string
+          requested_by: string
+          amount: number
+          description: string
+          category_id: string | null
+          beneficiary_entity_id: string | null
+          status: string
+          approved_by: string | null
+          response_note: string | null
+          transaction_id: string | null
+          responded_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          community_id: string
+          requested_by: string
+          amount: number
+          description: string
+          category_id?: string | null
+          beneficiary_entity_id?: string | null
+          status?: string
+          approved_by?: string | null
+          response_note?: string | null
+          transaction_id?: string | null
+          responded_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          community_id?: string
+          requested_by?: string
+          amount?: number
+          description?: string
+          category_id?: string | null
+          beneficiary_entity_id?: string | null
+          status?: string
+          approved_by?: string | null
+          response_note?: string | null
+          transaction_id?: string | null
+          responded_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "discretionary_approvals_community_id_fkey", columns: ["community_id"], isOneToOne: false, referencedRelation: "communities", referencedColumns: ["id"] },
+          { foreignKeyName: "discretionary_approvals_requested_by_fkey", columns: ["requested_by"], isOneToOne: false, referencedRelation: "members", referencedColumns: ["id"] },
+          { foreignKeyName: "discretionary_approvals_transaction_id_fkey", columns: ["transaction_id"], isOneToOne: false, referencedRelation: "transactions", referencedColumns: ["id"] },
+        ]
+      }
       entities: {
         Row: {
           address: string | null
@@ -2895,11 +2947,247 @@ export type Database = {
           },
         ]
       }
+      spend_request_attachments: {
+        Row: {
+          id: string
+          spend_request_id: string
+          type: string
+          file_url: string
+          description: string | null
+          uploaded_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          spend_request_id: string
+          type: string
+          file_url: string
+          description?: string | null
+          uploaded_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          spend_request_id?: string
+          type?: string
+          file_url?: string
+          description?: string | null
+          uploaded_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_request_attachments_spend_request_id_fkey"
+            columns: ["spend_request_id"]
+            isOneToOne: false
+            referencedRelation: "spend_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_request_comments: {
+        Row: {
+          id: string
+          spend_request_id: string
+          member_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          spend_request_id: string
+          member_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          spend_request_id?: string
+          member_id?: string
+          content?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_request_comments_spend_request_id_fkey"
+            columns: ["spend_request_id"]
+            isOneToOne: false
+            referencedRelation: "spend_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_request_comments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spend_requests: {
+        Row: {
+          id: string
+          community_id: string
+          title: string
+          description: string | null
+          amount: number
+          category_id: string
+          fund: string
+          beneficiary_entity_id: string | null
+          evidence_url: string | null
+          status: string
+          authorization_level: number | null
+          budget_id: string | null
+          proposal_id: string | null
+          approved_by: string | null
+          approval_note: string | null
+          rejection_reason: string | null
+          transaction_id: string | null
+          payment_reference: string | null
+          paid_at: string | null
+          verified_by: string | null
+          verification_note: string | null
+          verified_at: string | null
+          is_emergency: boolean
+          ratification_proposal_id: string | null
+          ratification_deadline: string | null
+          requested_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          community_id: string
+          title: string
+          description?: string | null
+          amount: number
+          category_id: string
+          fund?: string
+          beneficiary_entity_id?: string | null
+          evidence_url?: string | null
+          status?: string
+          authorization_level?: number | null
+          budget_id?: string | null
+          proposal_id?: string | null
+          approved_by?: string | null
+          approval_note?: string | null
+          rejection_reason?: string | null
+          transaction_id?: string | null
+          payment_reference?: string | null
+          paid_at?: string | null
+          verified_by?: string | null
+          verification_note?: string | null
+          verified_at?: string | null
+          is_emergency?: boolean
+          ratification_proposal_id?: string | null
+          ratification_deadline?: string | null
+          requested_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          community_id?: string
+          title?: string
+          description?: string | null
+          amount?: number
+          category_id?: string
+          fund?: string
+          beneficiary_entity_id?: string | null
+          evidence_url?: string | null
+          status?: string
+          authorization_level?: number | null
+          budget_id?: string | null
+          proposal_id?: string | null
+          approved_by?: string | null
+          approval_note?: string | null
+          rejection_reason?: string | null
+          transaction_id?: string | null
+          payment_reference?: string | null
+          paid_at?: string | null
+          verified_by?: string | null
+          verification_note?: string | null
+          verified_at?: string | null
+          is_emergency?: boolean
+          ratification_proposal_id?: string | null
+          ratification_deadline?: string | null
+          requested_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spend_requests_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_beneficiary_entity_id_fkey"
+            columns: ["beneficiary_entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
           category_id: string | null
           community_id: string
+          correction_note: string | null
+          correction_of: string | null
           created_at: string
           created_by: string | null
           date: string
@@ -2911,15 +3199,20 @@ export type Database = {
           import_job_id: string | null
           origin: string
           source_id: string | null
+          spend_request_id: string | null
           type: string
           verification_status: string
           verified_at: string | null
           verified_by: string | null
+          vigilance_flag: boolean
+          vigilance_note: string | null
         }
         Insert: {
           amount: number
           category_id?: string | null
           community_id: string
+          correction_note?: string | null
+          correction_of?: string | null
           created_at?: string
           created_by?: string | null
           date: string
@@ -2931,15 +3224,20 @@ export type Database = {
           import_job_id?: string | null
           origin?: string
           source_id?: string | null
+          spend_request_id?: string | null
           type: string
           verification_status?: string
           verified_at?: string | null
           verified_by?: string | null
+          vigilance_flag?: boolean
+          vigilance_note?: string | null
         }
         Update: {
           amount?: number
           category_id?: string | null
           community_id?: string
+          correction_note?: string | null
+          correction_of?: string | null
           created_at?: string
           created_by?: string | null
           date?: string
@@ -2951,10 +3249,13 @@ export type Database = {
           import_job_id?: string | null
           origin?: string
           source_id?: string | null
+          spend_request_id?: string | null
           type?: string
           verification_status?: string
           verified_at?: string | null
           verified_by?: string | null
+          vigilance_flag?: boolean
+          vigilance_note?: string | null
         }
         Relationships: [
           {
@@ -2983,6 +3284,13 @@ export type Database = {
             columns: ["source_id"]
             isOneToOne: false
             referencedRelation: "data_sources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_spend_request_id_fkey"
+            columns: ["spend_request_id"]
+            isOneToOne: false
+            referencedRelation: "spend_requests"
             referencedColumns: ["id"]
           },
         ]

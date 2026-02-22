@@ -13,6 +13,8 @@ export type I18nKey =
   | 'common.logout'
   | 'onboarding.step.type'
   | 'onboarding.step.data'
+  | 'onboarding.step.structure'
+  | 'onboarding.step.categories'
   | 'onboarding.step.rules'
   | 'onboarding.step.confirm'
   | 'onboarding.back'
@@ -725,6 +727,8 @@ const es: Dictionary = {
   'common.logout': 'Cerrar sesion',
   'onboarding.step.type': 'Tipo',
   'onboarding.step.data': 'Datos',
+  'onboarding.step.structure': 'Estructura',
+  'onboarding.step.categories': 'Categorías',
   'onboarding.step.rules': 'Reglas',
   'onboarding.step.confirm': 'Confirmar',
   'onboarding.back': 'Atras',
@@ -1432,6 +1436,8 @@ const en: Dictionary = {
   'common.logout': 'Sign out',
   'onboarding.step.type': 'Type',
   'onboarding.step.data': 'Data',
+  'onboarding.step.structure': 'Structure',
+  'onboarding.step.categories': 'Categories',
   'onboarding.step.rules': 'Rules',
   'onboarding.step.confirm': 'Confirm',
   'onboarding.back': 'Back',

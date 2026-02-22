@@ -43,6 +43,7 @@ Variables de entorno (crear `.env` a partir de `.env.example` si existe):
 | `npm run preview` | Vista previa del build |
 | `npm run lint` | ESLint |
 | `npm run test` | Tests unitarios (Vitest) |
+| `npm run test:rls` | Suite de aislamiento RLS (Supabase) |
 | `npm run test:watch` | Tests en modo watch |
 | `npm run test:coverage` | Cobertura de tests |
 | `npm run test:e2e` | Tests E2E (Playwright) |
@@ -64,4 +65,25 @@ Si no están definidas, los tests E2E se omiten. En CI el servidor de desarrollo
 
 ```bash
 npm run test:e2e
+```
+
+## Tests RLS (aislamiento multi-community)
+
+La suite `src/test/rls-penetration.test.ts` valida aislamiento por `community_id` y permisos por rol.
+
+Variables mínimas recomendadas en `.env`:
+
+- `TEST_SUPABASE_URL`
+- `TEST_SUPABASE_ANON_KEY`
+- `TEST_MEMBER_EMAIL`
+- `TEST_MEMBER_PASSWORD`
+- `TEST_ADMIN_EMAIL`
+- `TEST_ADMIN_PASSWORD`
+- `TEST_OTHER_EMAIL`
+- `TEST_OTHER_PASSWORD`
+
+Ejecución:
+
+```bash
+npm run test:rls
 ```

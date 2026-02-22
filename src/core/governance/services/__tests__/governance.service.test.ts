@@ -17,6 +17,7 @@ function createBuilder(data: any = [], error: any = null) {
     update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
     not: vi.fn().mockReturnThis(),
@@ -86,6 +87,7 @@ describe('executeProposal', () => {
     const approvedNoFinancial = {
       id: 'p1',
       status: 'approved',
+      type: 'ordinary',
       financial_instruction: null,
       execution_status: null,
     }
@@ -94,7 +96,7 @@ describe('executeProposal', () => {
     const { executeProposal } = await import('../governance.service')
     await expect(
       executeProposal('p1', 'comm-1', 'user-1')
-    ).rejects.toThrow('no tiene instrucción financiera')
+    ).rejects.toThrow('no tiene instrucción ejecutable')
   })
 
   it('throws when proposal already executed', async () => {
@@ -110,6 +112,70 @@ describe('executeProposal', () => {
     await expect(
       executeProposal('p1', 'comm-1', 'user-1')
     ).rejects.toThrow('ya fue ejecutada')
+  })
+
+  it('executes election and records admin term', async () => {
+    const approvedElection = {
+      id: 'p-election',
+      community_id: 'comm-1',
+      status: 'approved',
+      type: 'election',
+      financial_instruction: null,
+      execution_status: 'pending',
+      title: 'Elección de Administrador',
+      description: 'Cargo ID: admin\nVacantes: 1',
+      assembly_id: null,
+      voting_options: [{ id: 'member-member-1', label: 'Alice' }],
+    }
+
+    let proposalsUpdateCalled = false
+    let roleUpdateCalled = false
+    let termInsertCalled = false
+
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'proposals') {
+        let mode: 'select' | 'update' = 'select'
+        const builder = createBuilder(approvedElection)
+        builder.update = vi.fn(() => { mode = 'update'; proposalsUpdateCalled = true; return builder })
+        builder.single = vi.fn().mockImplementation(async () => {
+          if (mode === 'update') return { data: { ...approvedElection, status: 'executed', execution_status: 'executed' }, error: null }
+          return { data: approvedElection, error: null }
+        })
+        return builder
+      }
+      if (table === 'votes') {
+        return createBuilder([{ value: 'member-member-1', weight: 3 }])
+      }
+      if (table === 'members') {
+        let isUpdate = false
+        const builder = createBuilder({ id: 'member-1', status: 'active', financial_standing: 'good_standing' })
+        builder.update = vi.fn(() => { isUpdate = true; roleUpdateCalled = true; return builder })
+        builder.single = vi.fn().mockImplementation(async () => {
+          if (isUpdate) return { data: { id: 'member-1' }, error: null }
+          return { data: { id: 'member-1', status: 'active', financial_standing: 'good_standing' }, error: null }
+        })
+        return builder
+      }
+      if (table === 'admin_terms') {
+        let isInsert = false
+        const builder = createBuilder({ term_number: 1 })
+        builder.insert = vi.fn(() => { isInsert = true; termInsertCalled = true; return builder })
+        builder.maybeSingle = vi.fn().mockResolvedValue({ data: { term_number: 1 }, error: null })
+        builder.single = vi.fn().mockImplementation(async () => {
+          if (isInsert) return { data: { id: 'term-1' }, error: null }
+          return { data: { term_number: 1 }, error: null }
+        })
+        return builder
+      }
+      return createBuilder()
+    })
+
+    const { executeProposal } = await import('../governance.service')
+    const result = await executeProposal('p-election', 'comm-1', 'user-1')
+    expect(result.status).toBe('executed')
+    expect(proposalsUpdateCalled).toBe(true)
+    expect(roleUpdateCalled).toBe(true)
+    expect(termInsertCalled).toBe(true)
   })
 })
 

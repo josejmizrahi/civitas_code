@@ -5,6 +5,7 @@ import {
   getMembers,
   getMemberProfile,
   updateMemberRole,
+  updateMemberCustomAttributes,
   createInvitation,
   deactivateMember,
   reactivateMember,
@@ -54,6 +55,20 @@ export function useUpdateMemberRole() {
   return useMutation({
     mutationFn: ({ memberId, role }: { memberId: string; role: string }) =>
       updateMemberRole(memberId, role),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: memberKeys.list(communityId!) })
+      queryClient.invalidateQueries({ queryKey: memberKeys.detail(variables.memberId) })
+    },
+  })
+}
+
+export function useUpdateMemberCustomAttributes() {
+  const queryClient = useQueryClient()
+  const { communityId } = useCommunityContext()
+
+  return useMutation({
+    mutationFn: ({ memberId, custom_attributes }: { memberId: string; custom_attributes: Record<string, unknown> }) =>
+      updateMemberCustomAttributes(memberId, custom_attributes),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: memberKeys.list(communityId!) })
       queryClient.invalidateQueries({ queryKey: memberKeys.detail(variables.memberId) })

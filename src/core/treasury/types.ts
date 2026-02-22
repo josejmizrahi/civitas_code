@@ -23,6 +23,10 @@ export interface Transaction {
   verification_status?: 'reported' | 'verified' | 'disputed'
   verified_by?: string | null
   verified_at?: string | null
+  correction_of?: string | null
+  correction_note?: string | null
+  vigilance_flag?: boolean
+  vigilance_note?: string | null
   // Joined
   category_name?: string
 }
@@ -80,6 +84,75 @@ export interface DiscretionaryApproval {
   created_at: string
 }
 
+// ==================== SPEND REQUESTS ====================
+
+export type SpendRequestStatus =
+  | 'draft'
+  | 'pending_approval'
+  | 'pending_vote'
+  | 'approved'
+  | 'executing'
+  | 'executed'
+  | 'verified'
+  | 'rejected'
+  | 'cancelled'
+
+export type SpendRequestAttachmentType = 'quote' | 'invoice' | 'receipt' | 'evidence' | 'delivery' | 'other'
+
+export interface SpendRequest {
+  id: string
+  community_id: string
+  title: string
+  description: string | null
+  amount: number
+  category_id: string
+  fund: string
+  beneficiary_entity_id: string | null
+  evidence_url: string | null
+  status: SpendRequestStatus
+  authorization_level: number | null
+  budget_id: string | null
+  proposal_id: string | null
+  approved_by: string | null
+  approval_note: string | null
+  rejection_reason: string | null
+  transaction_id: string | null
+  payment_reference: string | null
+  paid_at: string | null
+  verified_by: string | null
+  verification_note: string | null
+  verified_at: string | null
+  is_emergency: boolean
+  ratification_proposal_id: string | null
+  ratification_deadline: string | null
+  requested_by: string
+  created_at: string
+  updated_at: string
+  // Joined
+  category_name?: string
+  beneficiary_name?: string
+  requested_by_name?: string
+}
+
+export interface SpendRequestAttachment {
+  id: string
+  spend_request_id: string
+  type: SpendRequestAttachmentType
+  file_url: string
+  description: string | null
+  uploaded_by: string | null
+  created_at: string
+}
+
+export interface SpendRequestComment {
+  id: string
+  spend_request_id: string
+  member_id: string
+  content: string
+  created_at: string
+  member_name?: string
+}
+
 export type TreasuryMode = 'import' | 'connector' | 'fintech_rail' | 'hybrid'
 
 export interface CollectionConfig {
@@ -127,6 +200,9 @@ export interface RecurringSchedule {
   created_by: string | null
   created_at: string
   updated_at: string
+  // GAP-10: proportional obligations
+  proportional_attribute?: string | null
+  total_amount?: number | null
   // Joined
   category_name?: string
   entity_name?: string

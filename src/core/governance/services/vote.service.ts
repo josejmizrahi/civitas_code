@@ -72,7 +72,11 @@ export async function castVote(vote: {
 function getValidVoteValues(model: string, options?: { id: string; label: string }[]): string[] {
   switch (model) {
     case 'consensus': return ['agree', 'disagree', 'abstain', 'block']
-    case 'multiple_choice': return (options ?? []).map((_, i) => `option_${i + 1}`)
+    case 'multiple_choice': {
+      const withIds = (options ?? []).map((opt) => opt.id).filter(Boolean)
+      const legacy = (options ?? []).map((_, i) => `option_${i + 1}`)
+      return [...new Set([...withIds, ...legacy])]
+    }
     default: return ['yes', 'no', 'abstain']
   }
 }

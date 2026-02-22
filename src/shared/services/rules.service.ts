@@ -112,19 +112,36 @@ export type ProtectedAction =
   | 'create_proposal'
   | 'cast_vote'
   | 'delegate_vote'
+  | 'endorse_proposal'
   | 'open_voting'
   | 'close_proposal'
   | 'execute_proposal'
   | 'register_transaction'
+  | 'register_income'
   | 'approve_discretionary'
+  | 'create_spend_request'
+  | 'approve_spend_request'
+  | 'execute_spend_request'
+  | 'verify_spend_request'
+  | 'cancel_spend_request'
+  | 'create_emergency_spend'
   | 'reconcile_payment'
+  | 'flag_transaction'
+  | 'request_audit'
+  | 'invite_member'
+  | 'change_role'
+  | 'modify_settings'
+  | 'create_category'
+  | 'export_report'
+  | 'manage_assembly'
+  | 'sign_minutes'
 
 function hasRole(memberRole: Role, allowed: Role[]): boolean {
   return allowed.includes(memberRole)
 }
 
 function mapProtectedActionToRuleAction(action: ProtectedAction): 'vote' | 'propose' | 'delegate' | null {
-  if (action === 'create_proposal') return 'propose'
+  if (action === 'create_proposal' || action === 'endorse_proposal') return 'propose'
   if (action === 'cast_vote') return 'vote'
   if (action === 'delegate_vote') return 'delegate'
   return null
@@ -170,8 +187,24 @@ export async function assertCanPerformAction(
     close_proposal: ['admin', 'platform_admin'],
     execute_proposal: ['admin', 'platform_admin'],
     register_transaction: ['admin', 'platform_admin', 'tesorero'],
+    register_income: ['admin', 'platform_admin', 'tesorero'],
     approve_discretionary: ['admin', 'platform_admin', 'comite_vigilancia'],
+    create_spend_request: ['admin', 'platform_admin', 'tesorero'],
+    approve_spend_request: ['admin', 'platform_admin', 'comite_vigilancia'],
+    execute_spend_request: ['admin', 'platform_admin', 'tesorero'],
+    verify_spend_request: ['admin', 'platform_admin', 'comite_vigilancia'],
+    cancel_spend_request: ['admin', 'platform_admin', 'tesorero'],
+    create_emergency_spend: ['admin', 'platform_admin', 'tesorero'],
     reconcile_payment: ['admin', 'platform_admin', 'tesorero'],
+    flag_transaction: ['admin', 'platform_admin', 'comite_vigilancia'],
+    request_audit: ['admin', 'platform_admin', 'comite_vigilancia', 'miembro'],
+    invite_member: ['admin', 'platform_admin'],
+    change_role: ['admin', 'platform_admin'],
+    modify_settings: ['admin', 'platform_admin'],
+    create_category: ['admin', 'platform_admin', 'tesorero'],
+    export_report: ['admin', 'platform_admin', 'tesorero', 'comite_vigilancia', 'miembro'],
+    manage_assembly: ['admin', 'platform_admin'],
+    sign_minutes: ['admin', 'platform_admin', 'comite_vigilancia'],
   }
 
   const allowedRoles = roleGuards[action]

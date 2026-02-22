@@ -1118,8 +1118,8 @@ export function OnboardingWizard() {
   const stepLabels = [
     t('onboarding.step.type'),
     t('onboarding.step.data'),
-    'Estructura',
-    'Categorías',
+    t('onboarding.step.structure'),
+    t('onboarding.step.categories'),
     t('onboarding.step.rules'),
     t('onboarding.step.confirm'),
   ]

@@ -8,6 +8,7 @@ import { AdmisionFields } from './AdmisionFields'
 import { EleccionFields } from './EleccionFields'
 import { EmergenciaFields } from './EmergenciaFields'
 import { ObraFields } from './ObraFields'
+import { RemocionFields } from './RemocionFields'
 import { GeneralFields } from './GeneralFields'
 
 export type ProposalTemplateId =
@@ -18,6 +19,7 @@ export type ProposalTemplateId =
   | 'admision'
   | 'eleccion'
   | 'emergencia'
+  | 'remocion'
   | 'obra'
   | 'general'
 
@@ -53,6 +55,8 @@ export function TemplateForm({ templateId, rules, onFieldsChange, initialData }:
       return <EmergenciaFields {...common} />
     case 'obra':
       return <ObraFields {...common} />
+    case 'remocion':
+      return <RemocionFields {...common} />
     case 'general':
       return <GeneralFields {...common} />
     default:

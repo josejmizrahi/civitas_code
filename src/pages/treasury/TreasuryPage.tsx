@@ -11,6 +11,7 @@ import { RecurringScheduleList } from '@/core/treasury/components/RecurringSched
 import { ContractList } from '@/core/treasury/components/ContractList'
 import { PaymentPlanManager } from '@/core/treasury/components/PaymentPlanManager'
 import { DiscretionaryApprovalsPanel } from '@/core/treasury/components/DiscretionaryApprovalsPanel'
+import { MorosoAdminPanel } from '@/core/identity/components/MorosoAdminPanel'
 import { ExpenseForm } from '@/core/treasury/components/ExpenseForm'
 import { FundSelector } from '@/core/treasury/components/FundSelector'
 import { StatementList } from '@/core/treasury/components/StatementList'
@@ -68,6 +69,9 @@ export function TreasuryPage() {
   )
   const [cobroTab, setCobroTab] = useState(
     initialState?.cobroTab ?? (canManageTreasury ? 'obligations' : 'my-payments')
+  )
+  const [memberIdFilter, setMemberIdFilter] = useState<string | null>(
+    (initialState as { memberIdFilter?: string } | null)?.memberIdFilter ?? null
   )
   const [programacionTab, setProgramacionTab] = useState(initialState?.programacionTab ?? 'recurring')
   const [datosTab, setDatosTab] = useState(initialState?.datosTab ?? 'transactions')
@@ -174,10 +178,16 @@ export function TreasuryPage() {
               </Button>
             )}
             {canManageTreasury && (
-              <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
-                <Plus className="h-4 w-4" />
-                {t('treasury.manualCapture')}
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={() => navigate('/treasury/requests')} className="gap-1.5">
+                  <FileText className="h-4 w-4" />
+                  Solicitudes de gasto
+                </Button>
+                <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  {t('treasury.manualCapture')}
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -249,6 +259,10 @@ export function TreasuryPage() {
                   <User className="h-3.5 w-3.5" />
                   {t('treasury.cobro.myPayments')}
                 </TabsTrigger>
+                <TabsTrigger value="morosos" className="gap-1.5 text-xs sm:text-sm">
+                  <User className="h-3.5 w-3.5" />
+                  Morosos
+                </TabsTrigger>
                 <TabsTrigger value="discretionary" className="gap-1.5 text-xs sm:text-sm">
                   <ClipboardList className="h-3.5 w-3.5" />
                   Discrecional
@@ -256,9 +270,22 @@ export function TreasuryPage() {
               </TabsList>
             )}
             <div className={canManageTreasury ? undefined : 'mt-0'}>
-              {cobroTab === 'obligations' && <PaymentObligationList />}
+              {cobroTab === 'obligations' && (
+                <PaymentObligationList
+                  memberIdFilter={memberIdFilter}
+                  onClearMemberFilter={() => setMemberIdFilter(null)}
+                />
+              )}
               {cobroTab === 'collection' && <CollectionView onGoToObligations={() => setCobroTab('obligations')} />}
               {cobroTab === 'my-payments' && <MyPayments />}
+              {cobroTab === 'morosos' && canManageTreasury && (
+                <MorosoAdminPanel
+                  onRegisterPayment={(memberId) => {
+                    setMemberIdFilter(memberId)
+                    setCobroTab('obligations')
+                  }}
+                />
+              )}
               {cobroTab === 'discretionary' && canManageTreasury && <DiscretionaryApprovalsPanel />}
             </div>
           </Tabs>

@@ -31,6 +31,7 @@ export function SettingsPage() {
   const queryClient = useQueryClient()
   const [tab, setTab] = useState('general')
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
+  const [, setNotifPrefsVersion] = useState(0)
 
   // Push notification state
   const [pushSubscribed, setPushSubscribed] = useState<boolean | null>(null)
@@ -218,6 +219,10 @@ export function SettingsPage() {
           <TabsTrigger value="terminos" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <CalendarClock className="h-3.5 w-3.5" />
             {t('settings.tab.terms')}
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
+            <Bell className="h-3.5 w-3.5" />
+            Notificaciones
           </TabsTrigger>
         </TabsList>
 
@@ -978,6 +983,101 @@ export function SettingsPage() {
           <div className="space-y-6">
             <AdminTermTracker />
             <VigilanciaPanel />
+          </div>
+        </TabsContent>
+
+        {/* Notificaciones Tab — GAP-13 */}
+        <TabsContent value="notifications">
+          <div className="space-y-6 rounded-lg border p-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Bell className="h-5 w-5 text-amber-600" />
+                  Notificaciones Push
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {!import.meta.env.VITE_VAPID_PUBLIC_KEY && (
+                  <div className="rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+                    La clave pública VAPID no está configurada. Las notificaciones push no estarán disponibles.
+                  </div>
+                )}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm">
+                      {pushSubscribed === null ? 'Verificando...' : pushSubscribed ? 'Push activadas en este dispositivo.' : 'Push desactivadas.'}
+                    </p>
+                  </div>
+                  <Button variant={pushSubscribed ? 'outline' : 'default'} onClick={togglePush} disabled={pushLoading || pushSubscribed === null}>
+                    {pushLoading ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : pushSubscribed ? <BellOff className="h-4 w-4 mr-1.5" /> : <Bell className="h-4 w-4 mr-1.5" />}
+                    {pushLoading ? 'Procesando...' : pushSubscribed ? 'Desactivar' : 'Activar notificaciones'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Preferencias por tipo</CardTitle>
+                <p className="text-sm text-muted-foreground">Activa o desactiva tipos de notificación (se aplican al recibir push/email).</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {[
+                  { key: 'proposal_new', label: 'Nuevas propuestas y avales' },
+                  { key: 'obligation_reminder', label: 'Recordatorios de pago' },
+                  { key: 'monthly_report', label: 'Reporte mensual' },
+                  { key: 'budget_exceeded', label: 'Alertas de presupuesto (vigilancia)' },
+                ].map(({ key, label }) => {
+                  const prefsKey = `civitas_notif_${communityId}_${key}`
+                  const enabled = typeof localStorage !== 'undefined' && localStorage.getItem(prefsKey) !== 'off'
+                  return (
+                    <div key={key} className="flex items-center justify-between">
+                      <Label className="text-sm font-normal">{label}</Label>
+                      <Button
+                        variant={enabled ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          if (typeof localStorage !== 'undefined') {
+                            localStorage.setItem(prefsKey, enabled ? 'off' : 'on')
+                            setNotifPrefsVersion((v) => v + 1)
+                          }
+                        }}
+                      >
+                        {enabled ? 'On' : 'Off'}
+                      </Button>
+                    </div>
+                  )
+                })}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Parámetros</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <Label className="text-sm">Día del reporte mensual (1-28)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={28}
+                    defaultValue={typeof localStorage !== 'undefined' ? localStorage.getItem(`civitas_report_day_${communityId}`) || '1' : '1'}
+                    onChange={(e) => { const v = e.target.value; if (typeof localStorage !== 'undefined' && v) localStorage.setItem(`civitas_report_day_${communityId}`, v) }}
+                    className="mt-1 w-24"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm">Días de anticipación para recordatorios de pago</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={30}
+                    defaultValue={typeof localStorage !== 'undefined' ? localStorage.getItem(`civitas_reminder_days_${communityId}`) || '3' : '3'}
+                    onChange={(e) => { const v = e.target.value; if (typeof localStorage !== 'undefined' && v) localStorage.setItem(`civitas_reminder_days_${communityId}`, v) }}
+                    className="mt-1 w-24"
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>

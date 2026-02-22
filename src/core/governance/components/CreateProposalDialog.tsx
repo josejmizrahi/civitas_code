@@ -21,6 +21,7 @@ import {
   Receipt,
   PieChart,
   UserPlus,
+  UserMinus,
   Crown,
   Hammer,
   FileText,
@@ -37,6 +38,7 @@ const TEMPLATE_ICONS: Record<string, typeof Banknote> = {
   Receipt,
   PieChart,
   UserPlus,
+  UserMinus,
   Crown,
   AlertTriangle,
   Hammer,
@@ -177,6 +179,14 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
         setError(t('proposalDialog.error.multipleChoiceMin')); return
       }
     }
+    if (selectedTemplate?.id === 'eleccion') {
+      const candidates = ((templateFormData.metadata?.candidatos as string[] | undefined) ?? [])
+        .map((c) => c?.trim())
+        .filter(Boolean)
+      if (candidates.length < 2) {
+        setError(t('proposalDialog.error.multipleChoiceMin')); return
+      }
+    }
     const fi = templateFormData.financialInstruction
     if (fi?.amount != null && (Number.isNaN(Number(fi.amount)) || Number(fi.amount) < 0)) {
       setError(t('proposalDialog.error.fiAmount')); return
@@ -195,12 +205,28 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
         }
       }
 
-      // Build voting options for multiple choice
-      const votingOptions = votingModel === 'multiple_choice'
+      // Build voting options (elections force multiple-choice with candidate options)
+      let resolvedVotingModel: VotingModel = votingModel
+      let votingOptions = votingModel === 'multiple_choice'
         ? multipleChoiceOptions
             .filter((opt) => opt.trim())
             .map((label, idx) => ({ id: `option_${idx + 1}`, label: label.trim() }))
         : undefined
+
+      if (selectedTemplate?.id === 'eleccion') {
+        const labels = ((templateFormData.metadata?.candidatos as string[] | undefined) ?? [])
+          .map((c) => c?.trim())
+          .filter(Boolean)
+        const candidateMemberIds = (templateFormData.metadata?.candidate_member_ids as string[] | undefined) ?? []
+        votingOptions = labels.map((label, idx) => {
+          const memberId = candidateMemberIds[idx]
+          return {
+            id: memberId ? `member_${memberId}` : `option_${idx + 1}`,
+            label,
+          }
+        })
+        resolvedVotingModel = 'multiple_choice'
+      }
 
       const created = await createProposal.mutateAsync({
         title,
@@ -213,7 +239,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
         financial_instruction: financialInstruction,
         template_id: selectedTemplate?.id,
         discussion_min_hours: includeDiscussion ? parseInt(discussionHours) : undefined,
-        voting_model: votingModel,
+        voting_model: resolvedVotingModel,
         voting_options: votingOptions,
       })
       onOpenChange(false)

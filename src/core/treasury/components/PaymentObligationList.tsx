@@ -7,7 +7,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { Select } from '@/shared/components/ui/select'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
-import { Plus, CheckCircle, Link2 } from 'lucide-react'
+import { Plus, CheckCircle, Link2, X } from 'lucide-react'
 import { CreateObligationDialog } from './CreateObligationDialog'
 import { RegisterPaymentDialog } from './RegisterPaymentDialog'
 import type { PaymentObligation } from '../types'
@@ -22,7 +22,13 @@ function statusVariant(status: string): 'warning' | 'success' | 'destructive' | 
   }
 }
 
-export function PaymentObligationList() {
+export function PaymentObligationList({
+  memberIdFilter = null,
+  onClearMemberFilter,
+}: {
+  memberIdFilter?: string | null
+  onClearMemberFilter?: () => void
+} = {}) {
   const { t } = useI18n()
   const [statusFilter, setStatusFilter] = useState<string>('')
   const statusLabels: Record<string, string> = {
@@ -34,12 +40,13 @@ export function PaymentObligationList() {
 
   const [showCreate, setShowCreate] = useState(false)
   const [payObligation, setPayObligation] = useState<PaymentObligation | null>(null)
-  const { data: obligations, isLoading } = usePaymentObligations()
+  const { data: obligations, isLoading } = usePaymentObligations(memberIdFilter ?? undefined)
   const { data: members } = useMembers()
   const { canManageTreasury } = usePermissions()
   const updateStatus = useUpdateObligationStatus()
 
   const memberMap = new Map(members?.map((m) => [m.id, m.full_name || m.email || m.id]) ?? [])
+  const filteredMemberName = memberIdFilter ? memberMap.get(memberIdFilter) : null
 
   const filtered = statusFilter
     ? obligations?.filter((o) => o.status === statusFilter)
@@ -59,6 +66,17 @@ export function PaymentObligationList() {
 
   return (
     <div className="space-y-4">
+      {memberIdFilter && onClearMemberFilter && (
+        <div className="flex items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">
+            Mostrando obligaciones de <strong className="text-foreground">{filteredMemberName ?? memberIdFilter.slice(0, 8)}</strong>
+          </span>
+          <Button variant="ghost" size="sm" onClick={onClearMemberFilter} className="shrink-0">
+            <X className="mr-1 h-3.5 w-3.5" />
+            Quitar filtro
+          </Button>
+        </div>
+      )}
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-lg border bg-yellow-50 p-3">
