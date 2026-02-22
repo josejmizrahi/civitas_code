@@ -352,7 +352,7 @@ export async function updateCommunityConfig(
 ): Promise<void> {
   const { error } = await supabase
     .from('communities')
-    .update({ config })
+    .update({ config: config as any })
     .eq('id', communityId)
 
   if (error) throw error
@@ -382,7 +382,7 @@ export async function seedCommunityCategories(
 
   const { error } = await supabase
     .from('categories')
-    .insert(rows as unknown as Record<string, unknown>[])
+    .insert(rows as any)
 
   if (error) throw error
 }

@@ -607,7 +607,7 @@ export async function getDiscretionaryApprovals(
   communityId: string,
   status?: DiscretionaryApproval['status'],
 ): Promise<DiscretionaryApproval[]> {
-  let query = supabase
+  let query = (supabase as any)
     .from('discretionary_approvals')
     .select('*')
     .eq('community_id', communityId)
@@ -617,7 +617,7 @@ export async function getDiscretionaryApprovals(
 
   const { data, error } = await query
   if (error) throw error
-  return (data ?? []) as DiscretionaryApproval[]
+  return (data ?? []) as unknown as DiscretionaryApproval[]
 }
 
 export async function createDiscretionaryApproval(
@@ -632,7 +632,7 @@ export async function createDiscretionaryApproval(
 ): Promise<DiscretionaryApproval> {
   await assertCanPerformAction(communityId, payload.requested_by_member_id, 'register_transaction')
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('discretionary_approvals')
     .insert({
       community_id: communityId,
@@ -672,7 +672,7 @@ export async function createDiscretionaryApproval(
     approval_id: data.id,
     app_url: typeof window !== 'undefined' ? window.location.origin : '',
   })
-  return data as DiscretionaryApproval
+  return data as unknown as DiscretionaryApproval
 }
 
 export async function respondDiscretionaryApproval(
@@ -681,12 +681,13 @@ export async function respondDiscretionaryApproval(
   decision: 'approved' | 'rejected',
   responseNote?: string,
 ): Promise<DiscretionaryApproval> {
-  const { data: approval, error: approvalError } = await supabase
+  const { data: approvalRaw, error: approvalError } = await (supabase as any)
     .from('discretionary_approvals')
     .select('*')
     .eq('id', approvalId)
     .single()
 
+  const approval = approvalRaw as DiscretionaryApproval | null
   if (approvalError || !approval) throw approvalError ?? new Error('Solicitud discrecional no encontrada')
   await assertCanPerformAction(approval.community_id, responderMemberId, 'approve_discretionary')
   if (approval.status !== 'pending') throw new Error('Esta solicitud ya fue atendida')
@@ -718,7 +719,7 @@ export async function respondDiscretionaryApproval(
     transactionId = tx.id as string
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('discretionary_approvals')
     .update({
       status: decision,
@@ -770,5 +771,5 @@ export async function respondDiscretionaryApproval(
     transaction_id: transactionId,
     app_url: typeof window !== 'undefined' ? window.location.origin : '',
   })
-  return data as DiscretionaryApproval
+  return data as unknown as DiscretionaryApproval
 }
