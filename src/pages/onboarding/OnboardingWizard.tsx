@@ -1200,7 +1200,7 @@ export function OnboardingWizard() {
   const [rules, setRules] = useState<CommunityRules>({ ...DEFAULT_RULES })
   const [submitting, setSubmitting] = useState(false)
 
-  const slugCheckTimer = useRef<ReturnType<typeof setTimeout>>()
+  const slugCheckTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const handleTypeSelect = (type: CommunityType) => {
     setCommunityType(type)
