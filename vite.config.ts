@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => {
             'query-vendor': ['@tanstack/react-query'],
             'ui-vendor': ['@radix-ui/react-checkbox', '@radix-ui/react-slider', '@radix-ui/react-switch'],
             'charts': ['recharts'],
-            'xlsx': ['xlsx'],
+            'exceljs': ['exceljs'],
           },
         },
       },
@@ -63,8 +63,14 @@ export default defineConfig(({ mode }) => {
       coverage: {
         provider: 'v8',
         include: ['src/**/*.{ts,tsx}'],
-        exclude: ['src/test/**', 'src/**/*.test.{ts,tsx}', 'src/**/*.d.ts'],
+        exclude: ['src/test/**', 'src/**/*.test.{ts,tsx}', 'src/**/*.spec.{ts,tsx}', 'src/**/*.d.ts'],
         reporter: ['text', 'text-summary', 'lcov'],
+        thresholds: {
+          lines: 5,
+          functions: 18,
+          branches: 40,
+          statements: 5,
+        },
       },
     },
   }

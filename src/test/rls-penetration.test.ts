@@ -7,8 +7,11 @@
  * - Role-based access controls are enforced
  * - Unauthenticated users cannot access protected data
  *
- * Requirements: A running Supabase instance with test data.
- * Set TEST_SUPABASE_URL and TEST_SUPABASE_ANON_KEY env vars.
+ * Requirements:
+ * - TEST_SUPABASE_URL and TEST_SUPABASE_ANON_KEY (required to run).
+ * - For full suite (authenticated tests): TEST_MEMBER_EMAIL, TEST_MEMBER_PASSWORD,
+ *   TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, TEST_OTHER_EMAIL, TEST_OTHER_PASSWORD.
+ *   If set, setup must succeed or the suite fails (no silent skip).
  */
 
 import { describe, it, expect, beforeAll } from 'vitest'
@@ -17,13 +20,15 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 const SUPABASE_URL = process.env.TEST_SUPABASE_URL || 'http://127.0.0.1:54321'
 const SUPABASE_ANON_KEY = process.env.TEST_SUPABASE_ANON_KEY || ''
 
-// Test accounts — set via env or use defaults for local dev
 const MEMBER_EMAIL = process.env.TEST_MEMBER_EMAIL || 'test-member@civitas.test'
 const MEMBER_PASSWORD = process.env.TEST_MEMBER_PASSWORD || 'testpassword123'
 const ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL || 'test-admin@civitas.test'
 const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'testpassword123'
 const OTHER_COMMUNITY_MEMBER_EMAIL = process.env.TEST_OTHER_EMAIL || 'test-other@civitas.test'
 const OTHER_COMMUNITY_MEMBER_PASSWORD = process.env.TEST_OTHER_PASSWORD || 'testpassword123'
+
+/** When true, authenticated clients are required; setup throws if auth fails. */
+const REQUIRED_AUTH = !!(process.env.TEST_MEMBER_EMAIL && process.env.TEST_SUPABASE_ANON_KEY)
 
 function createAnonClient(): SupabaseClient {
   return createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -39,22 +44,41 @@ async function createAuthenticatedClient(email: string, password: string): Promi
 const skipIfNoKey = SUPABASE_ANON_KEY ? describe : describe.skip
 
 skipIfNoKey('RLS Penetration Tests', () => {
-  let memberClient: SupabaseClient
-  let adminClient: SupabaseClient
-  let otherClient: SupabaseClient
+  let memberClient: SupabaseClient | undefined
+  let adminClient: SupabaseClient | undefined
+  let otherClient: SupabaseClient | undefined
   let anonClient: SupabaseClient
 
   beforeAll(async () => {
     anonClient = createAnonClient()
 
-    try {
-      memberClient = await createAuthenticatedClient(MEMBER_EMAIL, MEMBER_PASSWORD)
-      adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
-      otherClient = await createAuthenticatedClient(OTHER_COMMUNITY_MEMBER_EMAIL, OTHER_COMMUNITY_MEMBER_PASSWORD)
-    } catch (e) {
-      console.warn('Skipping RLS tests — test accounts not available:', (e as Error).message)
+    if (!REQUIRED_AUTH) {
+      try {
+        memberClient = await createAuthenticatedClient(MEMBER_EMAIL, MEMBER_PASSWORD)
+        adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
+        otherClient = await createAuthenticatedClient(OTHER_COMMUNITY_MEMBER_EMAIL, OTHER_COMMUNITY_MEMBER_PASSWORD)
+      } catch (e) {
+        console.warn('RLS tests: authenticated clients skipped (set TEST_MEMBER_EMAIL for full run):', (e as Error).message)
+      }
+      return
     }
+
+    memberClient = await createAuthenticatedClient(MEMBER_EMAIL, MEMBER_PASSWORD)
+    adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
+    otherClient = await createAuthenticatedClient(OTHER_COMMUNITY_MEMBER_EMAIL, OTHER_COMMUNITY_MEMBER_PASSWORD)
   })
+
+  function requireAuth(): void {
+    if (!memberClient && REQUIRED_AUTH) throw new Error('RLS test setup failed: memberClient required')
+  }
+
+  function requireAdmin(): void {
+    if (!adminClient && REQUIRED_AUTH) throw new Error('RLS test setup failed: adminClient required')
+  }
+
+  function requireOther(): void {
+    if (!otherClient && REQUIRED_AUTH) throw new Error('RLS test setup failed: otherClient required')
+  }
 
   // =========================================================================
   // Unauthenticated access
@@ -121,6 +145,8 @@ skipIfNoKey('RLS Penetration Tests', () => {
   // =========================================================================
   describe('Cross-community isolation', () => {
     it('member should only see their own community members', async () => {
+      requireAuth()
+      requireOther()
       if (!memberClient || !otherClient) return
 
       const { data: memberData } = await memberClient.from('members').select('community_id')
@@ -136,6 +162,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('member should not see transactions from other communities', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
@@ -148,6 +175,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('member should not see proposals from other communities', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
@@ -165,6 +193,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
   // =========================================================================
   describe('Role-based write restrictions', () => {
     it('regular member should not be able to delete a transaction', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: txs } = await memberClient.from('transactions').select('id').limit(1)
@@ -180,6 +209,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('regular member should not update community rules', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: communities } = await memberClient.from('communities').select('id, rules').limit(1)
@@ -201,6 +231,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('regular member should not insert transactions', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id, role').limit(1)
@@ -219,6 +250,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('regular member should not insert vigilancia_reports', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('id, community_id, role').limit(1)
@@ -238,6 +270,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('regular member should not insert rule_versions', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id, role').limit(1)
@@ -252,6 +285,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('regular member should not delete other members', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('id, role').limit(2)
@@ -267,6 +301,8 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('member from community A should not insert into community B tables', async () => {
+      requireAuth()
+      requireOther()
       if (!memberClient || !otherClient) return
 
       const { data: myMembers } = await memberClient.from('members').select('community_id').limit(1)
@@ -293,6 +329,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
   // =========================================================================
   describe('Explicit RLS policy validation', () => {
     it('should enforce community_id isolation on payment_obligations', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
@@ -305,6 +342,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('should enforce community_id isolation on budgets', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
@@ -317,6 +355,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('should enforce community_id isolation on categories', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
@@ -329,6 +368,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('should enforce community_id isolation on audit_log', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
@@ -341,6 +381,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('should enforce community_id isolation on payment_plans', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
@@ -353,6 +394,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     })
 
     it('should enforce community_id isolation on ifpe_webhook_events', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
@@ -370,6 +412,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
   // =========================================================================
   describe('Admin privileges', () => {
     it('admin client should be able to read communities', async () => {
+      requireAdmin()
       if (!adminClient) return
 
       const { data } = await adminClient.from('communities').select('id')
@@ -382,6 +425,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
   // =========================================================================
   describe('Push subscription isolation', () => {
     it('user should only see their own push subscriptions', async () => {
+      requireAuth()
       if (!memberClient) return
 
       const { data: { user } } = await memberClient.auth.getUser()

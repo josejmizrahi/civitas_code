@@ -16,7 +16,8 @@ export function useRealtimeSubscription(
   const queryClient = useQueryClient()
   const enabled = options?.enabled !== false && !!communityId
   const event = options?.event ?? '*'
-  const stableKeys = useMemo(() => queryKeys.join(','), [queryKeys.join(',')])
+  const queryKeysSignature = queryKeys.join(',')
+  const stableKeys = useMemo(() => queryKeysSignature, [queryKeysSignature])
 
   useEffect(() => {
     if (!enabled || !communityId) return

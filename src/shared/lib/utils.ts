@@ -61,9 +61,20 @@ export function downloadAsCSV(data: Record<string, unknown>[], filename: string)
 
 export async function downloadAsExcel(data: Record<string, unknown>[], filename: string, sheetName = 'Datos'): Promise<void> {
   if (data.length === 0) return
-  const XLSX = await import('xlsx')
-  const worksheet = XLSX.utils.json_to_sheet(data)
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
-  XLSX.writeFile(workbook, `${filename}.xlsx`)
+  const ExcelJS = await import('exceljs')
+  const workbook = new ExcelJS.Workbook()
+  const sheet = workbook.addWorksheet(sheetName)
+  const headers = Object.keys(data[0])
+  sheet.addRow(headers)
+  for (const row of data) {
+    sheet.addRow(headers.map((h) => row[h] ?? ''))
+  }
+  const buffer = await workbook.xlsx.writeBuffer()
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `${filename}.xlsx`
+  link.click()
+  URL.revokeObjectURL(url)
 }

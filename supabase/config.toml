@@ -16,6 +16,8 @@ site_url = "http://localhost:5173"
 additional_redirect_urls = ["http://localhost:5173", "https://civitas-code.vercel.app"]
 jwt_expiry = 3600
 enable_signup = true
+# Leaked password protection (HaveIBeenPwned). Enable in Dashboard for hosted project.
+password_protection = true
 
 [auth.email]
 enable_signup = true
@@ -25,8 +27,14 @@ enable_confirmations = false
 enabled = true
 file_size_limit = "50MiB"
 
+# send-email: require JWT (user session or service role). Invoked from app (user JWT) and from reset-password (service role).
 [functions.send-email]
+verify_jwt = true
+
+# reset-password: called by unauthenticated users (forgot password). Must stay public; rate-limit at gateway if needed.
+[functions.reset-password]
 verify_jwt = false
 
-[functions.reset-password]
+# ifpe-webhook: auth via x-webhook-signature HMAC. verify_jwt = false. Anti-replay in function body.
+[functions.ifpe-webhook]
 verify_jwt = false

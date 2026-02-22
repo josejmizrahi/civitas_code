@@ -38,7 +38,7 @@ export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsPr
 
   useEffect(() => {
     const cargoLabel = CARGOS.find((c) => c.value === cargo)?.label ?? cargo
-    const title = `Elección: ${cargoLabel}` || (initialData?.title ?? '')
+    const title = cargoLabel ? `Elección: ${cargoLabel}` : (initialData?.title ?? '')
     const list = candidatos.filter(Boolean)
     const description = [
       `Cargo: ${cargoLabel}`,

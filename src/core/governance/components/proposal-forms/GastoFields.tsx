@@ -17,7 +17,7 @@ export function GastoFields({ rules, onFieldsChange, initialData }: TemplateFiel
     recipientName: (initialData?.financialInstruction?.recipient_name as string) ?? '',
   })
   const [amount, setAmount] = useState(
-    String((initialData?.financialInstruction?.amount ?? '') ?? '')
+    String(initialData?.financialInstruction?.amount ?? '')
   )
   const [concepto, setConcepto] = useState(
     (initialData?.financialInstruction?.description as string) ?? ''

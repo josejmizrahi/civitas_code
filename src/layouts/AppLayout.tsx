@@ -64,9 +64,10 @@ export function AppLayout() {
 
   const closeMobileSidebar = () => setMobileSidebarOpen(false)
 
-  // Close sidebar on route change
+  // Close sidebar on route change (defer to avoid synchronous setState in effect)
   useEffect(() => {
-    setMobileSidebarOpen(false)
+    const id = requestAnimationFrame(() => setMobileSidebarOpen(false))
+    return () => cancelAnimationFrame(id)
   }, [location.pathname])
 
   // Lock scroll when sidebar is open

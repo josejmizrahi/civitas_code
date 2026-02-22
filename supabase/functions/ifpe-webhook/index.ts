@@ -5,6 +5,9 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const IFPE_WEBHOOK_SECRET = Deno.env.get('IFPE_WEBHOOK_SECRET') || ''
 
+/** Max age for webhook payload (anti-replay). If payload has `ts` (Unix seconds), reject if older than this. */
+const WEBHOOK_MAX_AGE_SEC = 300
+
 interface SpeiPayload {
   event_type: 'spei_received' | 'spei_returned' | 'clabe_created'
   clabe_destino: string
@@ -16,6 +19,8 @@ interface SpeiPayload {
   rfc_ordenante?: string
   fecha_operacion: string
   clave_rastreo: string
+  /** Optional Unix timestamp (seconds) for anti-replay. Reject if older than WEBHOOK_MAX_AGE_SEC. */
+  ts?: number
 }
 
 async function verifySignature(body: string, signature: string | null): Promise<boolean> {
@@ -83,6 +88,14 @@ serve(async (req) => {
     return new Response(JSON.stringify({ error: 'Invalid monto: must be a positive number' }), { status: 400 })
   }
 
+  // Anti-replay: if provider sends ts (Unix seconds), reject if too old
+  if (typeof payload.ts === 'number') {
+    const now = Math.floor(Date.now() / 1000)
+    if (Math.abs(now - payload.ts) > WEBHOOK_MAX_AGE_SEC) {
+      return new Response(JSON.stringify({ error: 'Request too old or timestamp in future' }), { status: 400 })
+    }
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
   try {
@@ -91,7 +104,7 @@ serve(async (req) => {
       .from('communities')
       .select('id, rules')
 
-    const matchedCommunity = (communities || []).find((c: any) => {
+    const matchedCommunity = (communities || []).find((c: { id: string; rules?: { treasury?: { clabe?: string } } }) => {
       const clabe = c.rules?.treasury?.clabe
       return clabe && clabe === payload.clabe_destino
     })
@@ -153,9 +166,9 @@ serve(async (req) => {
 })
 
 async function attemptReconciliation(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   communityId: string,
-  event: any
+  event: { id: string; referencia_numerica?: string | null; monto: number; concepto?: string | null; nombre_ordenante?: string | null; clave_rastreo: string; fecha_operacion: string }
 ): Promise<boolean> {
   // Strategy 1: Match by referencia_numerica against payment_reference
   if (event.referencia_numerica) {

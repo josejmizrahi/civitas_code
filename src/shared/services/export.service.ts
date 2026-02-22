@@ -1,7 +1,7 @@
 /**
  * Export service — PDF and Excel export for dashboards and reports.
  * Uses browser print for PDF (no heavy dependencies).
- * Uses existing xlsx dependency for Excel export.
+ * Uses exceljs for Excel export (no xlsx/SheetJS).
  */
 
 import { downloadAsExcel } from '@/shared/lib/utils'

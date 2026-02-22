@@ -2,6 +2,18 @@
 
 Aplicación de gestión de comunidades (gobierno, tesorería e identidad) con soporte para reglas configurables, votaciones y cumplimiento normativo (LPCI CDMX, LFPDPPP).
 
+## CI/CD
+
+En cada push y PR a `main` o `develop` se ejecuta el pipeline (`.github/workflows/ci.yml`):
+
+- **Lint** — ESLint (debe pasar sin errores).
+- **Build** — `tsc -b` y `vite build`.
+- **Tests** — Vitest (unitarios) y cobertura con umbrales mínimos.
+- **E2E** — Playwright (smoke) solo en push a `main` si existen `E2E_LOGIN_EMAIL` / `E2E_LOGIN_PASSWORD` en secrets.
+- **Security** — `npm audit --audit-level=high` (informativo).
+
+Para publicar una release, asegurar que el pipeline esté en verde y seguir la documentación en [docs/README.md](./docs/README.md).
+
 ## Requisitos
 
 - Node.js 18+
@@ -43,7 +55,7 @@ Los escenarios E2E requieren credenciales de prueba. Definir en el entorno:
 - `E2E_LOGIN_EMAIL`
 - `E2E_LOGIN_PASSWORD`
 
-Si no están definidas, los tests E2E se omiten. Ejecutar con:
+Si no están definidas, los tests E2E se omiten. En CI el servidor de desarrollo se arranca automáticamente (`reuseExistingServer: false`). La configuración en `playwright.config.ts` (raíz) limita la ejecución a `e2e/specs` para evitar conflicto con Vitest.
 
 ```bash
 npm run test:e2e
