@@ -1,6 +1,7 @@
 // Configurable Rules Engine — The Social Smart Contract
 // Each community defines rules for how Identity ↔ Treasury ↔ Governance interact
 // Compliant with: LPCI CDMX, LFPDPPP 2025, Código de Comercio, NOM-151
+import type { ComplianceRules } from '@/shared/types/compliance'
 
 export interface QuorumByType {
   ordinary: number
@@ -48,6 +49,7 @@ export interface GovernanceRules {
 
 export interface TreasuryRules {
   mode: 'import' | 'connector' | 'fintech_rail' | 'hybrid'
+  locale: string
   currency: string
   admin_spending_limit: number    // admin can spend below this without vote
   require_vote_above: number      // require governance vote above this amount
@@ -82,6 +84,7 @@ export interface CommunityRules {
   governance: GovernanceRules
   treasury: TreasuryRules
   identity: IdentityRules
+  compliance: ComplianceRules
 }
 
 export type FinancialStanding = 'good_standing' | 'grace_period' | 'delinquent' | 'suspended' | 'moroso'
@@ -146,6 +149,7 @@ export const DEFAULT_RULES: CommunityRules = {
   },
   treasury: {
     mode: 'import',
+    locale: 'es-MX',
     currency: 'MXN',
     admin_spending_limit: 50000,
     require_vote_above: 50000,
@@ -169,5 +173,10 @@ export const DEFAULT_RULES: CommunityRules = {
     moroso_restrictions: ['vote', 'be_elected', 'quorum_excluded'],
     admin_max_consecutive_terms: 2,
     admin_term_months: 12,
+  },
+  compliance: {
+    jurisdiction: 'mx',
+    privacy_framework: 'lfpdppp',
+    property_framework: 'lpci_cdmx',
   },
 }

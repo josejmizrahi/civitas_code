@@ -5,17 +5,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { formatDateTime } from '@/shared/lib/utils'
 import { Link } from 'react-router-dom'
 import { Calendar, MapPin, Users } from 'lucide-react'
-
-const STATUS_LABELS: Record<string, string> = {
-  scheduled: 'Programada',
-  convened: 'Convocada',
-  in_session: 'En sesion',
-  first_call: '1a Llamada',
-  second_call: '2a Llamada',
-  third_call: '3a Llamada',
-  completed: 'Completada',
-  cancelled: 'Cancelada',
-}
+import { useI18n } from '@/shared/hooks/useI18n'
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
   scheduled: 'secondary',
@@ -28,11 +18,6 @@ const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'w
   cancelled: 'destructive',
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  ordinary: 'Ordinaria',
-  extraordinary: 'Extraordinaria',
-}
-
 const TYPE_VARIANTS: Record<string, 'default' | 'secondary'> = {
   ordinary: 'secondary',
   extraordinary: 'default',
@@ -43,15 +28,30 @@ interface Props {
 }
 
 export function AssemblyList({ statusFilter }: Props) {
+  const { t } = useI18n()
   const { data: assemblies, isLoading } = useAssemblies(statusFilter)
+  const STATUS_LABELS: Record<string, string> = {
+    scheduled: t('assemblies.status.scheduled'),
+    convened: t('assemblies.status.convened'),
+    in_session: t('assemblies.status.in_session'),
+    first_call: t('assemblies.status.first_call'),
+    second_call: t('assemblies.status.second_call'),
+    third_call: t('assemblies.status.third_call'),
+    completed: t('assemblies.status.completed'),
+    cancelled: t('assemblies.status.cancelled'),
+  }
+  const TYPE_LABELS: Record<string, string> = {
+    ordinary: t('assemblies.type.ordinary'),
+    extraordinary: t('assemblies.type.extraordinary'),
+  }
 
-  if (isLoading) return <LoadingSpinner message="Cargando asambleas..." className="py-8" />
+  if (isLoading) return <LoadingSpinner message={t('assemblies.loading')} className="py-8" />
 
   if (!assemblies || assemblies.length === 0) {
     return (
       <div className="text-center py-12">
         <Users className="mx-auto h-12 w-12 text-muted-foreground/50" />
-        <p className="mt-4 text-muted-foreground">No hay asambleas registradas.</p>
+        <p className="mt-4 text-muted-foreground">{t('assemblies.empty')}</p>
       </div>
     )
   }
@@ -93,11 +93,11 @@ export function AssemblyList({ statusFilter }: Props) {
                   {totalCount > 0 && (
                     <span className="flex items-center gap-1">
                       <Users className="h-3.5 w-3.5" />
-                      {presentCount}/{totalCount} presentes
+                      {presentCount}/{totalCount} {t('assemblies.present')}
                     </span>
                   )}
                   {a.quorum_met && (
-                    <Badge variant="success" className="text-xs">Quorum alcanzado</Badge>
+                    <Badge variant="success" className="text-xs">{t('assemblies.quorumMet')}</Badge>
                   )}
                 </div>
               </CardContent>

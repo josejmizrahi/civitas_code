@@ -16,17 +16,7 @@ import { ProxyManager } from '@/core/governance/components/ProxyManager'
 import { ArrowLeft, Calendar, MapPin, User, Play, SkipForward, CheckCircle, XCircle } from 'lucide-react'
 import { formatDateTime } from '@/shared/lib/utils'
 import type { AssemblyStatus } from '@/core/governance/types'
-
-const STATUS_LABELS: Record<string, string> = {
-  scheduled: 'Programada',
-  convened: 'Convocada',
-  in_session: 'En sesion',
-  first_call: '1a Llamada',
-  second_call: '2a Llamada',
-  third_call: '3a Llamada',
-  completed: 'Completada',
-  cancelled: 'Cancelada',
-}
+import { useI18n } from '@/shared/hooks/useI18n'
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
   scheduled: 'secondary',
@@ -40,6 +30,7 @@ const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'w
 }
 
 export function AssemblyDetailPage() {
+  const { t } = useI18n()
   const { assemblyId } = useParams<{ assemblyId: string }>()
   const navigate = useNavigate()
   const toast = useToast()
@@ -55,17 +46,27 @@ export function AssemblyDetailPage() {
     ? getCommunityRules(community.config, community.rules as any)
     : null
 
-  if (isLoading) return <LoadingSpinner message="Cargando asamblea..." fullPage />
+  if (isLoading) return <LoadingSpinner message={t('assemblyDetail.loading')} fullPage />
 
   if (!assembly) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Asamblea no encontrada.</p>
+        <p className="text-muted-foreground">{t('assemblyDetail.notFound')}</p>
         <Button variant="outline" className="mt-4" onClick={() => navigate('/governance')}>
-          Volver a Gobernanza
+          {t('assemblyDetail.backToGovernance')}
         </Button>
       </div>
     )
+  }
+  const STATUS_LABELS: Record<string, string> = {
+    scheduled: t('assemblies.status.scheduled'),
+    convened: t('assemblies.status.convened'),
+    in_session: t('assemblies.status.in_session'),
+    first_call: t('assemblies.status.first_call'),
+    second_call: t('assemblies.status.second_call'),
+    third_call: t('assemblies.status.third_call'),
+    completed: t('assemblies.status.completed'),
+    cancelled: t('assemblies.status.cancelled'),
   }
 
   const isActive = !['completed', 'cancelled'].includes(assembly.status)
@@ -73,16 +74,16 @@ export function AssemblyDetailPage() {
   const handleStatusChange = async (newStatus: AssemblyStatus) => {
     try {
       await updateStatus.mutateAsync({ assemblyId: assembly.id, status: newStatus })
-      toast.success(`Estado actualizado a: ${STATUS_LABELS[newStatus]}`)
+      toast.success(t('assemblyDetail.toast.statusUpdated').replace('{status}', STATUS_LABELS[newStatus]))
     } catch {
-      toast.error('Error al actualizar el estado')
+      toast.error(t('assemblyDetail.toast.statusError'))
     }
   }
 
   // Member list for attendance: full community members with voting weight (default 1.0 for non-residential)
   const memberList = (members ?? []).map((m) => ({
     id: m.id,
-    name: m.full_name || m.email || 'Miembro',
+    name: m.full_name || m.email || t('assemblyDetail.memberFallback'),
     indiviso_pct: (m as { voting_weight?: number }).voting_weight ?? 1,
   }))
 
@@ -100,7 +101,7 @@ export function AssemblyDetailPage() {
               {STATUS_LABELS[assembly.status] || assembly.status}
             </Badge>
             <Badge variant={assembly.type === 'extraordinary' ? 'default' : 'secondary'}>
-              {assembly.type === 'extraordinary' ? 'Extraordinaria' : 'Ordinaria'}
+              {assembly.type === 'extraordinary' ? t('assemblies.type.extraordinary') : t('assemblies.type.ordinary')}
             </Badge>
           </div>
           <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
@@ -114,7 +115,7 @@ export function AssemblyDetailPage() {
             </span>
             <span className="flex items-center gap-1">
               <User className="h-3.5 w-3.5" />
-              {assembly.caller_name || 'Administrador'}
+              {assembly.caller_name || t('assemblyDetail.defaultCaller')}
             </span>
           </div>
         </div>
@@ -124,48 +125,48 @@ export function AssemblyDetailPage() {
       {isAdmin && isActive && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Acciones</CardTitle>
+            <CardTitle className="text-base">{t('assemblyDetail.actions')}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {assembly.status === 'scheduled' && (
               <Button onClick={() => handleStatusChange('first_call')} disabled={updateStatus.isPending}>
                 <Play className="h-4 w-4 mr-2" />
-                Iniciar 1a Llamada
+                {t('assemblyDetail.startFirstCall')}
               </Button>
             )}
             {assembly.status === 'first_call' && (
               <Button onClick={() => handleStatusChange('second_call')} disabled={updateStatus.isPending}>
                 <SkipForward className="h-4 w-4 mr-2" />
-                Pasar a 2a Llamada
+                {t('assemblyDetail.toSecondCall')}
               </Button>
             )}
             {assembly.status === 'second_call' && (
               <Button onClick={() => handleStatusChange('third_call')} disabled={updateStatus.isPending}>
                 <SkipForward className="h-4 w-4 mr-2" />
-                Pasar a 3a Llamada
+                {t('assemblyDetail.toThirdCall')}
               </Button>
             )}
             {['first_call', 'second_call', 'third_call'].includes(assembly.status) && (
               <>
                 <Button onClick={() => handleStatusChange('in_session')} disabled={updateStatus.isPending} variant="outline">
                   <Play className="h-4 w-4 mr-2" />
-                  Iniciar Sesion
+                  {t('assemblyDetail.startSession')}
                 </Button>
                 <Button onClick={() => handleStatusChange('completed')} disabled={updateStatus.isPending} variant="outline" className="text-green-600 border-green-600 hover:bg-green-50">
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Completar
+                  {t('assemblyDetail.complete')}
                 </Button>
               </>
             )}
             {assembly.status === 'in_session' && (
               <Button onClick={() => handleStatusChange('completed')} disabled={updateStatus.isPending} className="bg-green-600 hover:bg-green-700">
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Completar Asamblea
+                {t('assemblyDetail.completeAssembly')}
               </Button>
             )}
             <Button onClick={() => handleStatusChange('cancelled')} disabled={updateStatus.isPending} variant="destructive">
               <XCircle className="h-4 w-4 mr-2" />
-              Cancelar
+              {t('assemblyDetail.cancel')}
             </Button>
           </CardContent>
         </Card>
@@ -189,7 +190,7 @@ export function AssemblyDetailPage() {
       {assembly.agenda && assembly.agenda.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Orden del Dia</CardTitle>
+            <CardTitle className="text-base">{t('assemblyDetail.agenda')}</CardTitle>
           </CardHeader>
           <CardContent>
             <ol className="list-decimal list-inside space-y-3">
@@ -225,7 +226,7 @@ export function AssemblyDetailPage() {
       {/* Convocatorias */}
       {convocatorias && convocatorias.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Convocatorias</h2>
+          <h2 className="text-lg font-semibold">{t('assemblyDetail.calls')}</h2>
           {convocatorias.map((c) => (
             <ConvocatoriaCard key={c.id} convocatoria={c} />
           ))}
@@ -236,7 +237,7 @@ export function AssemblyDetailPage() {
       {assembly.notes && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Notas</CardTitle>
+            <CardTitle className="text-base">{t('assemblyDetail.notes')}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm whitespace-pre-wrap">{assembly.notes}</p>

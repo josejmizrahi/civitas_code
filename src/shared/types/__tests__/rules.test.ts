@@ -3,10 +3,11 @@ import { DEFAULT_RULES } from '../rules'
 import type { CommunityRules } from '../rules'
 
 describe('DEFAULT_RULES', () => {
-  it('has all three sections', () => {
+  it('has all core sections', () => {
     expect(DEFAULT_RULES).toHaveProperty('governance')
     expect(DEFAULT_RULES).toHaveProperty('treasury')
     expect(DEFAULT_RULES).toHaveProperty('identity')
+    expect(DEFAULT_RULES).toHaveProperty('compliance')
   })
 
   describe('governance defaults', () => {
@@ -125,6 +126,9 @@ describe('CommunityRules type structure', () => {
         payment_to_vote_enabled: true,
         grace_period_months: 1,
         delinquent_restrictions: ['vote', 'propose', 'delegate'],
+      },
+      compliance: {
+        ...DEFAULT_RULES.compliance,
       },
     }
     expect(rules.treasury.mode).toBe('fintech_rail')

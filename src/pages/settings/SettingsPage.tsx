@@ -16,12 +16,14 @@ import { Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, Ca
 import { useNavigate } from 'react-router-dom'
 import { InviteMemberDialog } from '@/core/identity/components/InviteMemberDialog'
 import { formatDate } from '@/shared/lib/utils'
+import { isValidCurrencyCode, isValidLocaleCode, normalizeCurrencyCode, normalizeLocaleCode } from '@/shared/lib/locale'
 import type { CommunityRules } from '@/shared/types/rules'
 import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
 import { ARCOAdminPanel } from '@/core/privacy/components/ARCOAdminPanel'
 import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function SettingsPage() {
   const { communityId, community, currentMember } = useCommunityContext()
@@ -33,6 +35,7 @@ export function SettingsPage() {
   // Push notification state
   const [pushSubscribed, setPushSubscribed] = useState<boolean | null>(null)
   const [pushLoading, setPushLoading] = useState(false)
+  const { t } = useI18n()
 
   useEffect(() => {
     isPushSubscribed().then(setPushSubscribed)
@@ -91,6 +94,11 @@ export function SettingsPage() {
     key: K,
     value: CommunityRules['identity'][K]
   ) => setRules((prev) => ({ ...prev, identity: { ...prev.identity, [key]: value } }))
+
+  const updateCompliance = <K extends keyof CommunityRules['compliance']>(
+    key: K,
+    value: CommunityRules['compliance'][K]
+  ) => setRules((prev) => ({ ...prev, compliance: { ...prev.compliance, [key]: value } }))
 
   const toggleRestriction = (restriction: string) => {
     setRules((prev) => {
@@ -162,6 +170,13 @@ export function SettingsPage() {
     other: 'General',
   }
 
+  const rulesCurrencyValid = isValidCurrencyCode(rules.treasury.currency)
+  const rulesLocaleValid = isValidLocaleCode(rules.treasury.locale)
+  const requiresIfpeConfig = rules.treasury.mode === 'fintech_rail' || rules.treasury.mode === 'hybrid'
+  const clabeValid = !requiresIfpeConfig || /^\d{18}$/.test(rules.treasury.clabe ?? '')
+  const beneficiaryValid = !requiresIfpeConfig || Boolean((rules.treasury.beneficiary_name ?? '').trim())
+  const rulesFormValid = rulesCurrencyValid && rulesLocaleValid && clabeValid && beneficiaryValid
+
   if (!isAdmin) {
     return (
       <div className="space-y-6">
@@ -170,8 +185,8 @@ export function SettingsPage() {
         </Button>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Configuración de la Comunidad</h1>
-            <p className="text-sm text-muted-foreground">Solo los administradores pueden acceder a esta sección.</p>
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('settings.title')}</h1>
+            <p className="text-sm text-muted-foreground">{t('settings.adminOnly')}</p>
           </div>
         </div>
       </div>
@@ -182,27 +197,27 @@ export function SettingsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Configuración de la Comunidad</h1>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('settings.title')}</h1>
           <p className="text-sm text-muted-foreground">Nombre, reglas, categorías e invitaciones de {community?.name || 'tu comunidad'}</p>
         </div>
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="gap-1">
-          <TabsTrigger value="general" className="shrink-0 whitespace-nowrap">General</TabsTrigger>
-          <TabsTrigger value="categories" className="shrink-0 whitespace-nowrap">Categorías</TabsTrigger>
-          <TabsTrigger value="invitations" className="shrink-0 whitespace-nowrap">Invitaciones</TabsTrigger>
+          <TabsTrigger value="general" className="shrink-0 whitespace-nowrap">{t('settings.tab.general')}</TabsTrigger>
+          <TabsTrigger value="categories" className="shrink-0 whitespace-nowrap">{t('settings.tab.categories')}</TabsTrigger>
+          <TabsTrigger value="invitations" className="shrink-0 whitespace-nowrap">{t('settings.tab.invitations')}</TabsTrigger>
           <TabsTrigger value="rules" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <Sliders className="h-3.5 w-3.5" />
-            Reglas
+            {t('settings.tab.rules')}
           </TabsTrigger>
           <TabsTrigger value="privacy" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <ScrollText className="h-3.5 w-3.5" />
-            Privacidad
+            {t('settings.tab.privacy')}
           </TabsTrigger>
           <TabsTrigger value="terminos" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <CalendarClock className="h-3.5 w-3.5" />
-            Terminos
+            {t('settings.tab.terms')}
           </TabsTrigger>
         </TabsList>
 
@@ -664,14 +679,31 @@ export function SettingsPage() {
 
                 {/* Currency */}
                 <div className="space-y-2">
+                  <Label htmlFor="locale">Locale</Label>
+                  <Input
+                    id="locale"
+                    value={rules.treasury.locale}
+                    onChange={(e) => updateTreasury('locale', normalizeLocaleCode(e.target.value))}
+                    className="max-w-[200px]"
+                    placeholder="es-MX"
+                  />
+                  {!rulesLocaleValid && (
+                    <p className="text-xs text-destructive">Locale inválido. Ejemplos: es-MX, en-US, pt-BR.</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="currency">Moneda</Label>
                   <Input
                     id="currency"
                     value={rules.treasury.currency}
-                    onChange={(e) => updateTreasury('currency', e.target.value)}
+                    onChange={(e) => updateTreasury('currency', normalizeCurrencyCode(e.target.value))}
                     className="max-w-[200px]"
                     placeholder="MXN"
                   />
+                  {!rulesCurrencyValid && (
+                    <p className="text-xs text-destructive">Moneda inválida. Usa código ISO 4217 (MXN, USD, EUR).</p>
+                  )}
                 </div>
 
                 {/* Admin spending limit */}
@@ -705,6 +737,68 @@ export function SettingsPage() {
                     Montos superiores a este valor requieren aprobación por votación.
                   </p>
                 </div>
+
+                {/* IFPE config */}
+                {requiresIfpeConfig && (
+                  <div className="space-y-4 rounded-md border border-amber-200 bg-amber-50/40 p-4">
+                    <p className="text-sm font-medium text-amber-900">Configuración IFPE / SPEI</p>
+                    <div className="space-y-2">
+                      <Label htmlFor="ifpe-clabe">CLABE receptora (18 dígitos)</Label>
+                      <Input
+                        id="ifpe-clabe"
+                        value={rules.treasury.clabe ?? ''}
+                        onChange={(e) => updateTreasury('clabe', e.target.value.replace(/\D/g, '').slice(0, 18))}
+                        className="max-w-[260px]"
+                        placeholder="646180157000000000"
+                      />
+                      {!clabeValid && (
+                        <p className="text-xs text-destructive">La CLABE debe tener exactamente 18 dígitos.</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ifpe-beneficiary">Beneficiario</Label>
+                      <Input
+                        id="ifpe-beneficiary"
+                        value={rules.treasury.beneficiary_name ?? ''}
+                        onChange={(e) => updateTreasury('beneficiary_name', e.target.value)}
+                        className="max-w-[360px]"
+                        placeholder="Comunidad Ejemplo A.C."
+                      />
+                      {!beneficiaryValid && (
+                        <p className="text-xs text-destructive">El beneficiario es obligatorio en modo IFPE/híbrido.</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ifpe-bank">Banco / IFPE</Label>
+                      <Input
+                        id="ifpe-bank"
+                        value={rules.treasury.bank_name ?? ''}
+                        onChange={(e) => updateTreasury('bank_name', e.target.value)}
+                        className="max-w-[260px]"
+                        placeholder="STP"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ifpe-prefix">Prefijo referencia</Label>
+                      <Input
+                        id="ifpe-prefix"
+                        value={rules.treasury.payment_reference_prefix ?? ''}
+                        onChange={(e) => updateTreasury('payment_reference_prefix', e.target.value.toUpperCase())}
+                        className="max-w-[200px]"
+                        placeholder="CIV-"
+                      />
+                    </div>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={rules.treasury.auto_reconciliation}
+                        onChange={(e) => updateTreasury('auto_reconciliation', e.target.checked)}
+                        className="h-4 w-4 rounded border-input accent-primary"
+                      />
+                      <span className="text-sm">Auto-conciliación de SPEI</span>
+                    </label>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -792,11 +886,65 @@ export function SettingsPage() {
               </CardContent>
             </Card>
 
+            {/* Compliance */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Shield className="h-5 w-5 text-amber-600" />
+                  Cumplimiento legal
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="compliance_jurisdiction">Jurisdicción</Label>
+                  <select
+                    id="compliance_jurisdiction"
+                    value={rules.compliance.jurisdiction}
+                    onChange={(e) => updateCompliance('jurisdiction', e.target.value as CommunityRules['compliance']['jurisdiction'])}
+                    className="h-10 max-w-[260px] rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="mx">México</option>
+                    <option value="us">Estados Unidos</option>
+                    <option value="eu">Unión Europea</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="compliance_privacy">Marco de privacidad</Label>
+                  <select
+                    id="compliance_privacy"
+                    value={rules.compliance.privacy_framework}
+                    onChange={(e) => updateCompliance('privacy_framework', e.target.value as CommunityRules['compliance']['privacy_framework'])}
+                    className="h-10 max-w-[260px] rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="lfpdppp">LFPDPPP (MX)</option>
+                    <option value="ccpa">CCPA (US)</option>
+                    <option value="gdpr">GDPR (EU)</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="compliance_property">Marco patrimonial / comunidad</Label>
+                  <select
+                    id="compliance_property"
+                    value={rules.compliance.property_framework}
+                    onChange={(e) => updateCompliance('property_framework', e.target.value as CommunityRules['compliance']['property_framework'])}
+                    className="h-10 max-w-[260px] rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="lpci_cdmx">LPCI CDMX (MX)</option>
+                    <option value="hoa_us">HOA (US)</option>
+                    <option value="none">No aplica</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Save button + shortcuts */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button
                 onClick={() => updateRulesMut.mutate(rules)}
-                disabled={updateRulesMut.isPending}
+                disabled={updateRulesMut.isPending || !rulesFormValid}
               >
                 {updateRulesMut.isPending ? 'Guardando...' : 'Guardar Reglas'}
               </Button>

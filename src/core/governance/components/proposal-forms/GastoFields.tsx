@@ -5,13 +5,14 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { SearchableSelect } from './SearchableSelect'
-
-const FONDO_OPTIONS = [
-  { value: 'mantenimiento', label: 'Fondo de mantenimiento' },
-  { value: 'reserva', label: 'Fondo de reserva' },
-]
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function GastoFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
+  const { t } = useI18n()
+  const FONDO_OPTIONS = [
+    { value: 'mantenimiento', label: t('gastoFields.fund.maintenance') },
+    { value: 'reserva', label: t('gastoFields.fund.reserve') },
+  ]
   const [entity, setEntity] = useState<EntityPickerValue>({
     entityId: null,
     recipientName: (initialData?.financialInstruction?.recipient_name as string) ?? '',
@@ -32,11 +33,11 @@ export function GastoFields({ rules, onFieldsChange, initialData }: TemplateFiel
   useEffect(() => {
     const title =
       concepto.trim() && entity.recipientName
-        ? `Gasto: ${concepto.trim()} - ${entity.recipientName}`
+        ? `${t('gastoFields.title')}: ${concepto.trim()} - ${entity.recipientName}`
         : initialData?.title ?? ''
     const description = [
-      concepto && `Concepto: ${concepto}`,
-      cotizaciones && `Cotizaciones o referencias:\n${cotizaciones}`,
+      concepto && t('gastoFields.desc.concept').replace('{value}', concepto),
+      cotizaciones && t('gastoFields.desc.quotes').replace('{value}', cotizaciones),
     ]
       .filter(Boolean)
       .join('\n\n') || (initialData?.description ?? '')
@@ -66,43 +67,43 @@ export function GastoFields({ rules, onFieldsChange, initialData }: TemplateFiel
       <EntityPicker
         value={entity}
         onChange={setEntity}
-        label="Beneficiario / Proveedor"
-        placeholder="Buscar proveedor o beneficiario..."
+        label={t('gastoFields.entityLabel')}
+        placeholder={t('gastoFields.entityPlaceholder')}
       />
       <div className="space-y-2">
-        <Label>Monto ({rules.treasury.currency})</Label>
+        <Label>{t('gastoFields.amountLabel')} ({rules.treasury.currency})</Label>
         <Input
           type="number"
           min="0"
           step="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="0.00"
+          placeholder={t('gastoFields.amountPlaceholder')}
         />
       </div>
       <div className="space-y-2">
-        <Label>Concepto</Label>
+        <Label>{t('gastoFields.conceptLabel')}</Label>
         <Input
           value={concepto}
           onChange={(e) => setConcepto(e.target.value)}
-          placeholder="Descripción del gasto"
+          placeholder={t('gastoFields.conceptPlaceholder')}
         />
       </div>
       <div className="space-y-2">
-        <Label>Cotizaciones (URLs o referencias)</Label>
+        <Label>{t('gastoFields.quotesLabel')}</Label>
         <Textarea
           value={cotizaciones}
           onChange={(e) => setCotizaciones(e.target.value)}
-          placeholder="Enlaces a cotizaciones o notas"
+          placeholder={t('gastoFields.quotesPlaceholder')}
           rows={2}
         />
       </div>
       <SearchableSelect
-        label="Fondo"
+        label={t('gastoFields.fundLabel')}
         value={fondo}
         onChange={(v) => setFondo(v as 'mantenimiento' | 'reserva')}
         options={FONDO_OPTIONS}
-        placeholder="Buscar fondo..."
+        placeholder={t('presupuestoFields.fundPlaceholder')}
       />
     </div>
   )

@@ -52,6 +52,11 @@ async function verifySignature(body: string, signature: string | null): Promise<
 }
 
 serve(async (req) => {
+  const requestId = crypto.randomUUID()
+  const log = (level: 'info' | 'warn' | 'error', message: string, meta: Record<string, unknown> = {}) => {
+    console[level](JSON.stringify({ requestId, level, message, ...meta }))
+  }
+
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
@@ -70,6 +75,7 @@ serve(async (req) => {
   const signature = req.headers.get('x-webhook-signature')
 
   if (!(await verifySignature(rawBody, signature))) {
+    log('warn', 'invalid_signature')
     return new Response(JSON.stringify({ error: 'Invalid signature' }), { status: 401 })
   }
 
@@ -77,14 +83,17 @@ serve(async (req) => {
   try {
     payload = JSON.parse(rawBody)
   } catch {
+    log('warn', 'invalid_json')
     return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 })
   }
 
   if (!payload.clabe_destino || !payload.clave_rastreo) {
+    log('warn', 'missing_required_fields')
     return new Response(JSON.stringify({ error: 'Missing clabe_destino or clave_rastreo' }), { status: 400 })
   }
 
   if (typeof payload.monto !== 'number' || payload.monto <= 0) {
+    log('warn', 'invalid_monto', { monto: payload.monto })
     return new Response(JSON.stringify({ error: 'Invalid monto: must be a positive number' }), { status: 400 })
   }
 
@@ -92,6 +101,7 @@ serve(async (req) => {
   if (typeof payload.ts === 'number') {
     const now = Math.floor(Date.now() / 1000)
     if (Math.abs(now - payload.ts) > WEBHOOK_MAX_AGE_SEC) {
+      log('warn', 'replay_detected', { ts: payload.ts, now })
       return new Response(JSON.stringify({ error: 'Request too old or timestamp in future' }), { status: 400 })
     }
   }
@@ -110,6 +120,7 @@ serve(async (req) => {
     })
 
     if (!matchedCommunity) {
+      log('warn', 'community_not_found', { clabe_destino: payload.clabe_destino })
       return new Response(
         JSON.stringify({ error: 'No community found for CLABE', clabe: payload.clabe_destino }),
         { status: 404 }
@@ -138,6 +149,7 @@ serve(async (req) => {
 
     if (insertErr) {
       if (insertErr.code === '23505') {
+        log('info', 'duplicate_event', { clave_rastreo: payload.clave_rastreo })
         return new Response(JSON.stringify({ status: 'duplicate', clave_rastreo: payload.clave_rastreo }), { status: 200 })
       }
       throw insertErr
@@ -146,18 +158,20 @@ serve(async (req) => {
     // Auto-reconciliation: try to match against pending obligations
     if (payload.event_type === 'spei_received' && matchedCommunity.rules?.treasury?.auto_reconciliation) {
       const reconciled = await attemptReconciliation(supabase, matchedCommunity.id, event)
-      return new Response(JSON.stringify({ status: 'received', event_id: event.id, reconciled }), {
+      log('info', 'event_processed', { event_id: event.id, reconciled })
+      return new Response(JSON.stringify({ status: 'received', event_id: event.id, reconciled, request_id: requestId }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       })
     }
 
-    return new Response(JSON.stringify({ status: 'received', event_id: event.id }), {
+    log('info', 'event_stored', { event_id: event.id, auto_reconciliation: false })
+    return new Response(JSON.stringify({ status: 'received', event_id: event.id, request_id: requestId }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err) {
-    console.error('IFPE webhook error:', err)
+    log('error', 'ifpe_webhook_error', { error: String(err) })
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

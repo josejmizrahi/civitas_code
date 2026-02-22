@@ -10,6 +10,7 @@ export function getCommunityRules(config: Record<string, unknown> | null, rules?
     governance: { ...DEFAULT_RULES.governance, ...(raw.governance as any || {}) },
     treasury: { ...DEFAULT_RULES.treasury, ...(raw.treasury as any || {}) },
     identity: { ...DEFAULT_RULES.identity, ...(raw.identity as any || {}) },
+    compliance: { ...DEFAULT_RULES.compliance, ...(raw.compliance as any || {}) },
   }
 }
 

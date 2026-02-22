@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useRoles } from '@/core/identity/hooks/useRoles'
 import { useMember, useUpdateMemberRole, useDeactivateMember, useReactivateMember } from '@/core/identity/hooks/useMembers'
 import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { getAuditLog } from '@/shared/services/audit.service'
@@ -20,7 +21,6 @@ import {
   ArrowLeft, Wallet, Vote, Activity, Shield,
   UserMinus, UserCheck, AlertCircle, CheckCircle, Clock,
 } from 'lucide-react'
-import type { Role } from '@/shared/types'
 
 const roleLabels: Record<string, string> = {
   platform_admin: 'Admin Plataforma',
@@ -86,6 +86,7 @@ export function MemberDetailPage() {
   const navigate = useNavigate()
   const { communityId } = useCommunityContext()
   const { canManageMembers } = usePermissions()
+  const { data: roles } = useRoles()
   const updateRole = useUpdateMemberRole()
   const deactivate = useDeactivateMember()
   const reactivate = useReactivateMember()
@@ -140,7 +141,7 @@ export function MemberDetailPage() {
 
   const handleRoleChange = async (newRole: string) => {
     try {
-      await updateRole.mutateAsync({ memberId: member.id, role: newRole as Role })
+      await updateRole.mutateAsync({ memberId: member.id, role: newRole })
       toastSuccess('Rol actualizado correctamente')
       setEditingRole(false)
     } catch (err) {
@@ -196,11 +197,9 @@ export function MemberDetailPage() {
                   onBlur={() => setEditingRole(false)}
                   className="w-40"
                 >
-                  <option value="admin">Administrador</option>
-                  <option value="tesorero">Tesorero</option>
-                  <option value="comite_vigilancia">Comité de Vigilancia</option>
-                  <option value="miembro">Miembro</option>
-                  <option value="observador">Observador</option>
+                  {(roles ?? []).map((r) => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
                 </Select>
               ) : (
                 <Badge
@@ -252,6 +251,18 @@ export function MemberDetailPage() {
               >
                 <Shield className="mr-2 h-4 w-4" />
                 Cambiar rol
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  navigate('/treasury', {
+                    state: { mainSection: 'programacion', programacionTab: 'payment-plans' },
+                  })
+                }
+              >
+                <Wallet className="mr-2 h-4 w-4" />
+                Gestionar plan de pago
               </Button>
             </div>
           )}

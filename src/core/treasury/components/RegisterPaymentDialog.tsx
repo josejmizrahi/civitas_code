@@ -8,6 +8,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { formatCurrency } from '@/shared/lib/utils'
 import type { PaymentObligation } from '../types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   open: boolean
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function RegisterPaymentDialog({ open, onOpenChange, obligation }: Props) {
+  const { t } = useI18n()
   const markPaid = useMarkObligationAsPaid()
 
   const [method, setMethod] = useState<'spei' | 'efectivo' | 'transferencia' | 'otro'>('transferencia')
@@ -48,7 +50,7 @@ export function RegisterPaymentDialog({ open, onOpenChange, obligation }: Props)
       reset()
       onOpenChange(false)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al registrar pago')
+      setError(err instanceof Error ? err.message : t('paymentDialog.error.register'))
     }
   }
 
@@ -58,7 +60,7 @@ export function RegisterPaymentDialog({ open, onOpenChange, obligation }: Props)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent onClose={() => onOpenChange(false)}>
         <DialogHeader>
-          <DialogTitle>Registrar Pago</DialogTitle>
+          <DialogTitle>{t('paymentDialog.title')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
@@ -67,13 +69,13 @@ export function RegisterPaymentDialog({ open, onOpenChange, obligation }: Props)
             )}
 
             <div className="rounded-md bg-muted p-3 space-y-1">
-              <div className="text-sm text-muted-foreground">Concepto</div>
+              <div className="text-sm text-muted-foreground">{t('paymentDialog.concept')}</div>
               <div className="font-medium">{obligation.concept}</div>
               <div className="text-lg font-bold">{formatCurrency(obligation.amount)}</div>
             </div>
 
             <div className="space-y-2">
-              <Label>Metodo de Pago</Label>
+              <Label>{t('paymentDialog.method')}</Label>
               <Select value={method} onChange={(e) => setMethod(e.target.value as typeof method)}>
                 <option value="spei">SPEI</option>
                 <option value="transferencia">Transferencia Bancaria</option>
@@ -83,16 +85,16 @@ export function RegisterPaymentDialog({ open, onOpenChange, obligation }: Props)
             </div>
 
             <div className="space-y-2">
-              <Label>Referencia / Folio (opcional)</Label>
+              <Label>{t('paymentDialog.reference')}</Label>
               <Input
                 value={reference}
                 onChange={(e) => setReference(e.target.value)}
-                placeholder="Ej: SPEI-123456, recibo #42"
+                placeholder={t('paymentDialog.referencePlaceholder')}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Fecha de Pago</Label>
+              <Label>{t('paymentDialog.date')}</Label>
               <Input
                 type="date"
                 value={date}
@@ -102,26 +104,26 @@ export function RegisterPaymentDialog({ open, onOpenChange, obligation }: Props)
             </div>
 
             <div className="space-y-2">
-              <Label>Notas (opcional)</Label>
+              <Label>{t('paymentDialog.notes')}</Label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Notas adicionales sobre el pago"
+                placeholder={t('paymentDialog.notesPlaceholder')}
                 rows={2}
               />
             </div>
 
             <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-              Al registrar el pago se creara automaticamente una transaccion de ingreso vinculada a esta obligacion.
+              {t('paymentDialog.info')}
             </div>
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => { reset(); onOpenChange(false) }}>
-              Cancelar
+              {t('paymentDialog.cancel')}
             </Button>
             <Button type="submit" disabled={markPaid.isPending}>
-              {markPaid.isPending ? 'Registrando...' : 'Confirmar Pago'}
+              {markPaid.isPending ? t('paymentDialog.registering') : t('paymentDialog.confirm')}
             </Button>
           </DialogFooter>
         </form>

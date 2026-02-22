@@ -2,8 +2,10 @@ import { useParams, Link } from 'react-router-dom'
 import { ProposalDetail } from '@/core/governance/components/ProposalDetail'
 import { Button } from '@/shared/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function ProposalDetailPage() {
+  const { t } = useI18n()
   const { proposalId: id } = useParams<{ proposalId: string }>()
 
   return (
@@ -12,16 +14,16 @@ export function ProposalDetailPage() {
         <Link to="/governance">
           <Button variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
+            {t('proposalDetail.back')}
           </Button>
         </Link>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Detalle de Propuesta</h1>
+        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('proposalDetail.title')}</h1>
       </div>
 
       {id ? (
         <ProposalDetail proposalId={id} />
       ) : (
-        <p className="text-muted-foreground">Propuesta no encontrada.</p>
+        <p className="text-muted-foreground">{t('proposalDetail.notFound')}</p>
       )}
     </div>
   )

@@ -18,6 +18,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { verifyTransaction } from '../services/receipt.service'
 import type { Transaction } from '../types'
 import type { FundType } from '@/shared/types/rules'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 const MD_BREAKPOINT = 768
 function useIsMobile() {
@@ -33,6 +34,7 @@ function useIsMobile() {
 }
 
 export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
+  const { t } = useI18n()
   const [type, setType] = useState<string>('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -52,9 +54,9 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
       verifyTransaction(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
-      toast.success('Estado de verificacion actualizado')
+      toast.success(t('transactions.toast.verified'))
     },
-    onError: () => toast.error('Error al verificar transaccion'),
+    onError: () => toast.error(t('transactions.toast.verifyError')),
   })
 
   const { data: categories } = useQuery({
@@ -96,25 +98,25 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
       setEditingId(null)
       setEditValues({})
     } catch {
-      toast.error('Error al actualizar transacción')
+      toast.error(t('transactions.toast.updateError'))
     }
   }
 
   const handleDelete = (id: string) => {
-    if (confirm('¿Estás seguro de eliminar esta transacción?')) {
+    if (confirm(t('transactions.confirmDelete'))) {
       deleteTx.mutate(id, {
-        onSuccess: () => toast.success('Transacción eliminada'),
-        onError: () => toast.error('Error al eliminar transacción'),
+        onSuccess: () => toast.success(t('transactions.toast.deleted')),
+        onError: () => toast.error(t('transactions.toast.deleteError')),
       })
     }
   }
 
   const exportData = (transactions ?? []).map(tx => ({
-    Fecha: tx.date,
-    Tipo: tx.type === 'income' ? 'Ingreso' : 'Egreso',
-    Monto: tx.amount,
-    Categoria: tx.category_name || '',
-    Descripcion: tx.description || '',
+    [t('transactions.table.date')]: tx.date,
+    [t('transactions.table.type')]: tx.type === 'income' ? t('transactions.badge.income') : t('transactions.badge.expense'),
+    [t('transactions.table.amount')]: tx.amount,
+    [t('transactions.table.category')]: tx.category_name || '',
+    [t('transactions.table.description')]: tx.description || '',
     Referencia: tx.external_ref || '',
   }))
 
@@ -123,13 +125,13 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Select value={type} onChange={(e) => setType(e.target.value)} className="w-full sm:w-40">
-            <option value="">Todos los tipos</option>
-            <option value="income">Ingresos</option>
-            <option value="expense">Egresos</option>
+            <option value="">{t('transactions.filter.allTypes')}</option>
+            <option value="income">{t('transactions.filter.income')}</option>
+            <option value="expense">{t('transactions.filter.expense')}</option>
           </Select>
           <div className="flex gap-2">
-            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="flex-1 sm:w-40" placeholder="Desde" />
-            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="flex-1 sm:w-40" placeholder="Hasta" />
+            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="flex-1 sm:w-40" placeholder={t('transactions.filter.from')} />
+            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="flex-1 sm:w-40" placeholder={t('transactions.filter.to')} />
           </div>
         </div>
         {(transactions?.length ?? 0) > 0 && (
@@ -150,24 +152,25 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead className="hidden sm:table-cell">Categoría</TableHead>
-              <TableHead className="hidden sm:table-cell">Tipo</TableHead>
-              <TableHead className="hidden md:table-cell">Verificacion</TableHead>
-              <TableHead className="text-right">Monto</TableHead>
-              {canManageTreasury && <TableHead className="w-28">Acciones</TableHead>}
+              <TableHead>{t('transactions.table.date')}</TableHead>
+              <TableHead>{t('transactions.table.description')}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('transactions.table.category')}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('transactions.table.type')}</TableHead>
+              <TableHead className="hidden lg:table-cell">{t('transactions.table.origin')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('transactions.table.verification')}</TableHead>
+              <TableHead className="text-right">{t('transactions.table.amount')}</TableHead>
+              {canManageTreasury && <TableHead className="w-28">{t('transactions.table.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={canManageTreasury ? 7 : 6} className="text-center text-muted-foreground">Cargando...</TableCell>
+                <TableCell colSpan={canManageTreasury ? 8 : 7} className="text-center text-muted-foreground">{t('transactions.table.loading')}</TableCell>
               </TableRow>
             ) : transactions?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canManageTreasury ? 7 : 6} className="text-center text-muted-foreground">
-                  Sin transacciones. Importa datos para comenzar.
+                <TableCell colSpan={canManageTreasury ? 8 : 7} className="text-center text-muted-foreground">
+                  {t('transactions.table.empty')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -199,7 +202,7 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                           onChange={(e) => setEditValues({ ...editValues, category_id: e.target.value || null })}
                           className="w-36"
                         >
-                          <option value="">Sin categoría</option>
+                          <option value="">{t('transactions.edit.noCategory')}</option>
                           {categories?.filter((c) => c.type === editValues.type).map((c) => (
                             <option key={c.id} value={c.id}>{c.name}</option>
                           ))}
@@ -211,10 +214,11 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                           onChange={(e) => setEditValues({ ...editValues, type: e.target.value as any })}
                           className="w-28"
                         >
-                          <option value="income">Ingreso</option>
-                          <option value="expense">Egreso</option>
+                          <option value="income">{t('transactions.badge.income')}</option>
+                          <option value="expense">{t('transactions.badge.expense')}</option>
                         </Select>
                       </TableCell>
+                      <TableCell className="hidden lg:table-cell" />
                       <TableCell className="hidden md:table-cell" />
                       <TableCell>
                         <Input
@@ -228,10 +232,10 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button size="icon" variant="ghost" onClick={saveEdit} disabled={updateTx.isPending} aria-label="Guardar">
+                          <Button size="icon" variant="ghost" onClick={saveEdit} disabled={updateTx.isPending} aria-label={t('transactions.edit.save')}>
                             <Check className="h-4 w-4 text-green-600" />
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={cancelEdit} aria-label="Cancelar">
+                          <Button size="icon" variant="ghost" onClick={cancelEdit} aria-label={t('transactions.edit.cancel')}>
                             <X className="h-4 w-4 text-muted-foreground" />
                           </Button>
                         </div>
@@ -253,15 +257,26 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                     </TableCell>
                     <TableCell className="hidden sm:table-cell">
                       <Badge variant={tx.type === 'income' ? 'success' : 'destructive'}>
-                        {tx.type === 'income' ? 'Ingreso' : 'Egreso'}
+                        {tx.type === 'income' ? t('transactions.badge.income') : t('transactions.badge.expense')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <Badge variant="outline">
+                        {((tx as any).origin ?? 'manual') === 'rail'
+                          ? t('transactions.origin.rail')
+                          : ((tx as any).origin ?? 'manual') === 'import'
+                            ? t('transactions.origin.import')
+                            : ((tx as any).origin ?? 'manual') === 'system'
+                              ? t('transactions.origin.system')
+                              : t('transactions.origin.manual')}
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       {(() => {
                         const vs = (tx as any).verification_status || 'reported'
-                        if (vs === 'verified') return <Badge variant="success" className="gap-1"><ShieldCheck className="h-3 w-3" />Verificada</Badge>
-                        if (vs === 'disputed') return <Badge variant="destructive" className="gap-1"><ShieldAlert className="h-3 w-3" />Disputada</Badge>
-                        return <Badge variant="secondary" className="gap-1"><ShieldQuestion className="h-3 w-3" />Reportada</Badge>
+                        if (vs === 'verified') return <Badge variant="success" className="gap-1"><ShieldCheck className="h-3 w-3" />{t('transactions.verification.verified')}</Badge>
+                        if (vs === 'disputed') return <Badge variant="destructive" className="gap-1"><ShieldAlert className="h-3 w-3" />{t('transactions.verification.disputed')}</Badge>
+                        return <Badge variant="secondary" className="gap-1"><ShieldQuestion className="h-3 w-3" />{t('transactions.verification.reported')}</Badge>
                       })()}
                     </TableCell>
                     <TableCell className={`text-right font-medium ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
@@ -276,16 +291,16 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                               variant="ghost"
                               onClick={() => verifyMut.mutate({ id: tx.id, status: 'verified' })}
                               disabled={verifyMut.isPending}
-                              aria-label="Verificar"
-                              title="Verificar transaccion"
+                              aria-label={t('transactions.action.verify')}
+                              title={t('transactions.action.verify')}
                             >
                               <ShieldCheck className="h-4 w-4 text-green-600" />
                             </Button>
                           )}
-                          <Button size="icon" variant="ghost" onClick={() => startEdit(tx)} aria-label="Editar">
+                          <Button size="icon" variant="ghost" onClick={() => startEdit(tx)} aria-label={t('transactions.action.edit')}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => handleDelete(tx.id)} disabled={deleteTx.isPending} aria-label="Eliminar">
+                          <Button size="icon" variant="ghost" onClick={() => handleDelete(tx.id)} disabled={deleteTx.isPending} aria-label={t('transactions.action.delete')}>
                             <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>
                         </div>
@@ -304,11 +319,11 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
         <Dialog open={!!editingId} onOpenChange={(open) => !open && cancelEdit()}>
           <DialogContent className="max-w-sm sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Editar transacción</DialogTitle>
+              <DialogTitle>{t('transactions.modal.title')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
-                <Label>Fecha</Label>
+                <Label>{t('transactions.table.date')}</Label>
                 <Input
                   type="date"
                   value={editValues.date || ''}
@@ -316,37 +331,37 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Descripción</Label>
+                <Label>{t('transactions.table.description')}</Label>
                 <Input
                   value={editValues.description || ''}
                   onChange={(e) => setEditValues({ ...editValues, description: e.target.value })}
-                  placeholder="Descripción"
+                  placeholder={t('transactions.table.description')}
                 />
               </div>
               <div className="space-y-2">
-                <Label>Tipo</Label>
+                <Label>{t('transactions.table.type')}</Label>
                 <Select
                   value={editValues.type || ''}
                   onChange={(e) => setEditValues({ ...editValues, type: e.target.value as any })}
                 >
-                  <option value="income">Ingreso</option>
-                  <option value="expense">Egreso</option>
+                  <option value="income">{t('transactions.badge.income')}</option>
+                  <option value="expense">{t('transactions.badge.expense')}</option>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Categoría</Label>
+                <Label>{t('transactions.table.category')}</Label>
                 <Select
                   value={editValues.category_id || ''}
                   onChange={(e) => setEditValues({ ...editValues, category_id: e.target.value || null })}
                 >
-                  <option value="">Sin categoría</option>
+                  <option value="">{t('transactions.edit.noCategory')}</option>
                   {categories?.filter((c) => c.type === editValues.type).map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Monto</Label>
+                <Label>{t('transactions.table.amount')}</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -358,9 +373,9 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={cancelEdit}>Cancelar</Button>
+              <Button variant="outline" onClick={cancelEdit}>{t('transactions.edit.cancel')}</Button>
               <Button onClick={saveEdit} disabled={updateTx.isPending}>
-                {updateTx.isPending ? 'Guardando...' : 'Guardar'}
+                {updateTx.isPending ? `${t('transactions.edit.save')}...` : t('transactions.edit.save')}
               </Button>
             </DialogFooter>
           </DialogContent>

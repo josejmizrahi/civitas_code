@@ -7,6 +7,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Select } from '@/shared/components/ui/select'
 import { Search, Plus } from 'lucide-react'
 import { Badge } from '@/shared/components/ui/badge'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export interface EntityPickerValue {
   entityId: string | null
@@ -24,10 +25,13 @@ interface EntityPickerProps {
 export function EntityPicker({
   value,
   onChange,
-  placeholder = 'Buscar proveedor o beneficiario...',
-  label = 'Beneficiario',
+  placeholder,
+  label,
   onError,
 }: EntityPickerProps) {
+  const { t } = useI18n()
+  const resolvedPlaceholder = placeholder ?? t('entityPicker.placeholder')
+  const resolvedLabel = label ?? t('entityPicker.label')
   const { data: entities } = useEntities({ status: 'active' })
   const createEntityMut = useCreateEntity()
   const [entitySearch, setEntitySearch] = useState('')
@@ -54,7 +58,7 @@ export function EntityPicker({
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label>{resolvedLabel}</Label>
       {!showNewEntityForm ? (
         <div className="relative" ref={entityDropdownRef}>
           <div className="relative">
@@ -67,7 +71,7 @@ export function EntityPicker({
                 setShowEntityDropdown(true)
               }}
               onFocus={() => setShowEntityDropdown(true)}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               className="pl-9"
             />
           </div>
@@ -94,7 +98,11 @@ export function EntityPicker({
                   >
                     <span className="font-medium">{entity.name}</span>
                     <Badge variant="secondary" className="text-[10px] ml-auto">
-                      {entity.type === 'proveedor' ? 'Proveedor' : entity.type === 'contratista' ? 'Contratista' : entity.type}
+                      {entity.type === 'proveedor'
+                        ? t('entityPicker.type.provider')
+                        : entity.type === 'contratista'
+                          ? t('entityPicker.type.contractor')
+                          : entity.type}
                     </Badge>
                   </button>
                 ))}
@@ -108,7 +116,7 @@ export function EntityPicker({
                 }}
               >
                 <Plus className="h-4 w-4" />
-                <span>Crear nuevo proveedor{entitySearch ? `: "${entitySearch}"` : ''}</span>
+                <span>{t('entityPicker.createNew')}{entitySearch ? `: "${entitySearch}"` : ''}</span>
               </button>
             </div>
           )}
@@ -116,7 +124,7 @@ export function EntityPicker({
       ) : (
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Nuevo proveedor</span>
+            <span className="text-sm font-medium">{t('entityPicker.newProvider')}</span>
             <Button
               type="button"
               variant="ghost"
@@ -124,27 +132,27 @@ export function EntityPicker({
               onClick={() => setShowNewEntityForm(false)}
               className="h-6 text-xs"
             >
-              Cancelar
+              {t('entityPicker.cancel')}
             </Button>
           </div>
           <div className="space-y-2">
             <Input
               value={newEntityName}
               onChange={(e) => setNewEntityName(e.target.value)}
-              placeholder="Nombre del proveedor"
+              placeholder={t('entityPicker.namePlaceholder')}
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Select value={newEntityType} onChange={(e) => setNewEntityType(e.target.value)}>
-              <option value="proveedor">Proveedor</option>
-              <option value="contratista">Contratista</option>
-              <option value="socio_comercial">Socio Comercial</option>
-              <option value="otro">Otro</option>
+              <option value="proveedor">{t('entityPicker.type.provider')}</option>
+              <option value="contratista">{t('entityPicker.type.contractor')}</option>
+              <option value="socio_comercial">{t('entityPicker.type.partner')}</option>
+              <option value="otro">{t('entityPicker.type.other')}</option>
             </Select>
             <Input
               value={newEntityPhone}
               onChange={(e) => setNewEntityPhone(e.target.value)}
-              placeholder="Teléfono (opcional)"
+              placeholder={t('entityPicker.phonePlaceholder')}
             />
           </div>
           <Button
@@ -172,11 +180,11 @@ export function EntityPicker({
                 setNewEntityName('')
                 setNewEntityPhone('')
               } catch {
-                onError?.('Error al crear el proveedor')
+                onError?.(t('entityPicker.errorCreate'))
               }
             }}
           >
-            {createEntityMut.isPending ? 'Creando...' : 'Crear y seleccionar'}
+            {createEntityMut.isPending ? t('entityPicker.creating') : t('entityPicker.createAndSelect')}
           </Button>
         </div>
       )}

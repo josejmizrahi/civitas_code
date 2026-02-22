@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
 import { getCategories } from '@/core/treasury/services/treasury.service'
@@ -7,19 +7,19 @@ import { CategoryPicker, type CategoryPickerValue } from './CategoryPicker'
 import { SearchableSelect } from './SearchableSelect'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
-
-const PERIODO_OPTIONS = [
-  { value: 'mensual', label: 'Mensual' },
-  { value: 'trimestral', label: 'Trimestral' },
-  { value: 'anual', label: 'Anual' },
-]
-
-const FONDO_OPTIONS = [
-  { value: 'mantenimiento', label: 'Fondo de mantenimiento' },
-  { value: 'reserva', label: 'Fondo de reserva' },
-]
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function PresupuestoFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
+  const { t } = useI18n()
+  const PERIODO_OPTIONS = useMemo(() => [
+    { value: 'mensual', label: t('presupuestoFields.period.monthly') },
+    { value: 'trimestral', label: t('presupuestoFields.period.quarterly') },
+    { value: 'anual', label: t('presupuestoFields.period.yearly') },
+  ], [t])
+  const FONDO_OPTIONS = useMemo(() => [
+    { value: 'mantenimiento', label: t('presupuestoFields.fund.maintenance') },
+    { value: 'reserva', label: t('presupuestoFields.fund.reserve') },
+  ], [t])
   const { communityId } = useCommunityContext()
   const [category, setCategory] = useState<CategoryPickerValue>(() => {
     const id = (initialData?.financialInstruction?.category_id as string) ?? ''
@@ -47,13 +47,15 @@ export function PresupuestoFields({ rules, onFieldsChange, initialData }: Templa
   useEffect(() => {
     const title =
       categoryName && monto
-        ? `Presupuesto ${periodo}: ${categoryName} - ${rules.treasury.currency} ${monto}`
+        ? `${t('presupuestoFields.titlePrefix')} ${periodo}: ${categoryName} - ${rules.treasury.currency} ${monto}`
         : initialData?.title ?? ''
+    const periodLabel = PERIODO_OPTIONS.find((p) => p.value === periodo)?.label ?? periodo
+    const fundLabel = FONDO_OPTIONS.find((f) => f.value === fondo)?.label ?? fondo
     const description = [
-      categoryName && `Categoría: ${categoryName}`,
-      monto && `Monto solicitado: ${rules.treasury.currency} ${monto}`,
-      `Periodo: ${PERIODO_OPTIONS.find((p) => p.value === periodo)?.label ?? periodo}`,
-      `Fondo: ${FONDO_OPTIONS.find((f) => f.value === fondo)?.label ?? fondo}`,
+      categoryName && t('presupuestoFields.desc.category').replace('{value}', categoryName),
+      monto && t('presupuestoFields.desc.amount').replace('{currency}', rules.treasury.currency).replace('{value}', monto),
+      t('presupuestoFields.desc.period').replace('{value}', periodLabel),
+      t('presupuestoFields.desc.fund').replace('{value}', fundLabel),
     ]
       .filter(Boolean)
       .join('\n')
@@ -75,18 +77,18 @@ export function PresupuestoFields({ rules, onFieldsChange, initialData }: Templa
         fondo,
       },
     })
-  }, [categoryId, categoryName, monto, periodo, fondo, categories, rules.treasury.currency, onFieldsChange, initialData])
+  }, [categoryId, categoryName, monto, periodo, fondo, categories, rules.treasury.currency, onFieldsChange, initialData, t, PERIODO_OPTIONS, FONDO_OPTIONS])
 
   return (
     <div className="space-y-4">
       <CategoryPicker
         value={category}
         onChange={setCategory}
-        label="Categoría"
-        placeholder="Buscar categoría..."
+        label={t('presupuestoFields.categoryLabel')}
+        placeholder={t('presupuestoFields.categoryPlaceholder')}
       />
       <div className="space-y-2">
-        <Label>Monto solicitado ({rules.treasury.currency})</Label>
+        <Label>{t('presupuestoFields.amountLabel')} ({rules.treasury.currency})</Label>
         <Input
           type="number"
           min="0"
@@ -97,18 +99,18 @@ export function PresupuestoFields({ rules, onFieldsChange, initialData }: Templa
         />
       </div>
       <SearchableSelect
-        label="Periodo"
+        label={t('presupuestoFields.periodLabel')}
         value={periodo}
         onChange={setPeriodo}
         options={PERIODO_OPTIONS}
-        placeholder="Buscar periodo..."
+        placeholder={t('presupuestoFields.periodPlaceholder')}
       />
       <SearchableSelect
-        label="Fondo"
+        label={t('presupuestoFields.fundLabel')}
         value={fondo}
         onChange={(v) => setFondo(v as 'mantenimiento' | 'reserva')}
         options={FONDO_OPTIONS}
-        placeholder="Buscar fondo..."
+        placeholder={t('presupuestoFields.fundPlaceholder')}
       />
     </div>
   )

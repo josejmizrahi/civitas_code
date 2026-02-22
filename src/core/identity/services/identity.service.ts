@@ -1,7 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { logger } from '@/shared/lib/logger'
 import { sendEmail } from '@/shared/services/email.service'
-import type { Role } from '@/shared/types'
 import type { Member, Invitation, Community } from '../types'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -84,7 +83,7 @@ export async function getMemberProfile(memberId: string): Promise<Member> {
 
 export async function updateMemberRole(
   memberId: string,
-  role: Role,
+  role: string,
 ): Promise<Member> {
   const { data, error } = await supabase
     .from('members')
@@ -104,7 +103,7 @@ export async function updateMemberRole(
 export async function createInvitation(
   communityId: string,
   email: string,
-  role: Role,
+  role: string,
   userId: string,
 ): Promise<Invitation> {
   const { data, error } = await supabase
@@ -246,7 +245,7 @@ export async function getUserCommunities(
 export async function joinCommunity(
   communityId: string,
   userId: string,
-  role: Role,
+  role: string,
 ): Promise<Member> {
   const { data, error } = await supabase
     .from('members')

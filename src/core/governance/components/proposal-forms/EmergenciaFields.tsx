@@ -5,8 +5,10 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { AlertTriangle } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function EmergenciaFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
+  const { t } = useI18n()
   const [beneficiario, setBeneficiario] = useState<EntityPickerValue>({
     entityId: null,
     recipientName: (initialData?.financialInstruction?.recipient_name as string) ?? '',
@@ -23,14 +25,14 @@ export function EmergenciaFields({ rules, onFieldsChange, initialData }: Templat
 
   useEffect(() => {
     const title = monto
-      ? `Gasto de emergencia: ${rules.treasury.currency} ${monto}`
+      ? `${t('emergenciaFields.titlePrefix')}: ${rules.treasury.currency} ${monto}`
       : initialData?.title ?? ''
     const description = [
-      'Propuesta de gasto por emergencia.',
-      beneficiario.recipientName && `Beneficiario: ${beneficiario.recipientName}`,
-      monto && `Monto estimado: ${rules.treasury.currency} ${monto}`,
-      evidencia && `Evidencia (fotos/URLs):\n${evidencia}`,
-      justificacion && `Justificación de la emergencia:\n${justificacion}`,
+      t('emergenciaFields.desc.intro'),
+      beneficiario.recipientName && t('emergenciaFields.desc.beneficiary').replace('{value}', beneficiario.recipientName),
+      monto && t('emergenciaFields.desc.amount').replace('{currency}', rules.treasury.currency).replace('{value}', monto),
+      evidencia && t('emergenciaFields.desc.evidence').replace('{value}', evidencia),
+      justificacion && t('emergenciaFields.desc.justification').replace('{value}', justificacion),
     ]
       .filter(Boolean)
       .join('\n\n')
@@ -53,24 +55,24 @@ export function EmergenciaFields({ rules, onFieldsChange, initialData }: Templat
         justificacion: justificacion || undefined,
       },
     })
-  }, [beneficiario, monto, evidencia, justificacion, rules.treasury.currency, onFieldsChange, initialData])
+  }, [beneficiario, monto, evidencia, justificacion, rules.treasury.currency, onFieldsChange, initialData, t])
 
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 p-3">
         <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
         <p className="text-sm text-amber-800">
-          Esta propuesta es para un gasto de urgencia. Incluya evidencia y justificación.
+          {t('emergenciaFields.alert')}
         </p>
       </div>
       <EntityPicker
         value={beneficiario}
         onChange={setBeneficiario}
-        label="Beneficiario / Proveedor"
-        placeholder="Buscar proveedor o beneficiario..."
+        label={t('emergenciaFields.beneficiaryLabel')}
+        placeholder={t('emergenciaFields.beneficiaryPlaceholder')}
       />
       <div className="space-y-2">
-        <Label>Monto estimado ({rules.treasury.currency})</Label>
+        <Label>{t('emergenciaFields.amountLabel')} ({rules.treasury.currency})</Label>
         <Input
           type="number"
           min="0"
@@ -81,20 +83,20 @@ export function EmergenciaFields({ rules, onFieldsChange, initialData }: Templat
         />
       </div>
       <div className="space-y-2">
-        <Label>Evidencia (fotos o URLs)</Label>
+        <Label>{t('emergenciaFields.evidenceLabel')}</Label>
         <Textarea
           value={evidencia}
           onChange={(e) => setEvidencia(e.target.value)}
-          placeholder="Enlaces a fotos, reportes o documentos que respalden la emergencia"
+          placeholder={t('emergenciaFields.evidencePlaceholder')}
           rows={2}
         />
       </div>
       <div className="space-y-2">
-        <Label>Justificación de la emergencia</Label>
+        <Label>{t('emergenciaFields.justificationLabel')}</Label>
         <Textarea
           value={justificacion}
           onChange={(e) => setJustificacion(e.target.value)}
-          placeholder="Por qué se considera urgente y no puede esperar al proceso ordinario"
+          placeholder={t('emergenciaFields.justificationPlaceholder')}
           rows={3}
         />
       </div>

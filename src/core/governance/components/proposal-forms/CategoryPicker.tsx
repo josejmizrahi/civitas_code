@@ -5,6 +5,7 @@ import { getCategories } from '@/core/treasury/services/treasury.service'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Search } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export interface CategoryPickerValue {
   categoryId: string | null
@@ -21,9 +22,12 @@ interface CategoryPickerProps {
 export function CategoryPicker({
   value,
   onChange,
-  label = 'Categoría',
-  placeholder = 'Buscar categoría...',
+  label,
+  placeholder,
 }: CategoryPickerProps) {
+  const { t } = useI18n()
+  const resolvedLabel = label ?? t('categoryPicker.label')
+  const resolvedPlaceholder = placeholder ?? t('categoryPicker.placeholder')
   const { communityId } = useCommunityContext()
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
@@ -56,7 +60,7 @@ export function CategoryPicker({
 
   return (
     <div className="space-y-2" ref={ref}>
-      <Label>{label}</Label>
+      <Label>{resolvedLabel}</Label>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -67,14 +71,14 @@ export function CategoryPicker({
             setOpen(true)
           }}
           onFocus={() => setOpen(true)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className="pl-9"
         />
         {open && (
           <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-48 overflow-y-auto">
             {filtered.length === 0 ? (
               <div className="px-3 py-4 text-sm text-muted-foreground text-center">
-                {categories?.length ? 'Sin resultados' : 'Cargando...'}
+                {categories?.length ? t('categoryPicker.noResults') : t('categoryPicker.loading')}
               </div>
             ) : (
               filtered.slice(0, 20).map((c) => (

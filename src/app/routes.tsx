@@ -6,7 +6,7 @@ import { AuthLayout } from '@/layouts/AuthLayout'
 const LandingPage = lazy(() => import('@/pages/landing/LandingPage').then(m => ({ default: m.LandingPage })))
 const WhitepaperPage = lazy(() => import('@/pages/whitepaper/WhitepaperPage').then(m => ({ default: m.WhitepaperPage })))
 import { useCommunityContext } from './providers'
-import { hasPermission, type Role } from '@/shared/types'
+import { hasPermission, type CommunityType, type Role } from '@/shared/types'
 import type { ReactNode } from 'react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 
@@ -86,6 +86,15 @@ function RoleGuard({ requiredRole, children }: { requiredRole: Role; children: R
   return <>{children}</>
 }
 
+function CommunityTypeGuard({ requiredType, children }: { requiredType: CommunityType; children: ReactNode }) {
+  const { community, communityLoading } = useCommunityContext()
+  if (communityLoading) return <LoadingSpinner message="Cargando..." className="py-20" />
+  if (!community || community.type !== requiredType) {
+    return <Navigate to="/dashboard" replace />
+  }
+  return <>{children}</>
+}
+
 /**
  * Catch-all for unauthenticated users.
  * Renders the landing page for "/" or the 404 page for everything else.
@@ -141,7 +150,10 @@ export function AppRouter() {
           <Route path="/members" element={<LazyPage><MembersPage /></LazyPage>} />
           <Route path="/members/:memberId" element={<LazyPage><MemberDetailPage /></LazyPage>} />
           <Route path="/treasury" element={<LazyPage><TreasuryPage /></LazyPage>} />
-          <Route path="/residential" element={<LazyPage><ResidentialPage /></LazyPage>} />
+          <Route
+            path="/residential"
+            element={<CommunityTypeGuard requiredType="residential"><LazyPage><ResidentialPage /></LazyPage></CommunityTypeGuard>}
+          />
           <Route path="/ingestion" element={<RoleGuard requiredRole="tesorero"><LazyPage><IngestionPage /></LazyPage></RoleGuard>} />
           <Route path="/governance" element={<LazyPage><GovernancePage /></LazyPage>} />
           <Route path="/governance/assemblies/:assemblyId" element={<LazyPage><AssemblyDetailPage /></LazyPage>} />

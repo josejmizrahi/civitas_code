@@ -4,6 +4,7 @@ import { Download } from 'lucide-react'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { exportToExcel } from '@/shared/services/export.service'
 import { formatDate } from '@/shared/lib/utils'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 const roleLabels: Record<string, string> = {
   platform_admin: 'Admin Plataforma',
@@ -15,6 +16,7 @@ const roleLabels: Record<string, string> = {
 }
 
 export function MembersPage() {
+  const { t } = useI18n()
   const { data: members } = useMembers()
 
   const handleExport = () => {
@@ -32,12 +34,12 @@ export function MembersPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Miembros</h1>
-          <p className="text-sm text-muted-foreground">Directorio de miembros de la comunidad</p>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('members.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('members.subtitle')}</p>
         </div>
         <Button variant="outline" size="sm" onClick={handleExport} disabled={!members?.length}>
           <Download className="mr-1 h-4 w-4" />
-          Exportar
+          {t('members.export')}
         </Button>
       </div>
       <MemberDirectory />

@@ -33,16 +33,17 @@ import { NotificationBell } from '@/shared/components/NotificationBell'
 import { cn } from '@/shared/lib/utils'
 import { PrivacyGate } from '@/core/privacy/components/PrivacyGate'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { useI18n } from '@/shared/hooks/useI18n'
 const coreNavigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
-  { name: 'Tesoreria', href: '/treasury', icon: Wallet, minRole: 'observador' as Role },
-  { name: 'Gobernanza', href: '/governance', icon: Vote, minRole: 'observador' as Role },
-  { name: 'Reglamento', href: '/rules', icon: BookOpen, minRole: 'observador' as Role },
-  { name: 'Miembros', href: '/members', icon: Users, minRole: 'observador' as Role },
-  { name: 'Partes Relacionadas', href: '/entities', icon: Building2, minRole: 'observador' as Role },
-  { name: 'Documentos', href: '/documents', icon: FileText, minRole: 'observador' as Role },
-  { name: 'Censo', href: '/census', icon: BarChart3, minRole: 'observador' as Role },
-  { name: 'Importar Datos', href: '/ingestion', icon: Upload, minRole: 'tesorero' as Role },
+  { key: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
+  { key: 'nav.treasury', href: '/treasury', icon: Wallet, minRole: 'observador' as Role },
+  { key: 'nav.governance', href: '/governance', icon: Vote, minRole: 'observador' as Role },
+  { key: 'nav.rules', href: '/rules', icon: BookOpen, minRole: 'observador' as Role },
+  { key: 'nav.members', href: '/members', icon: Users, minRole: 'observador' as Role },
+  { key: 'nav.entities', href: '/entities', icon: Building2, minRole: 'observador' as Role },
+  { key: 'nav.documents', href: '/documents', icon: FileText, minRole: 'observador' as Role },
+  { key: 'nav.census', href: '/census', icon: BarChart3, minRole: 'observador' as Role },
+  { key: 'nav.import', href: '/ingestion', icon: Upload, minRole: 'tesorero' as Role },
 ]
 
 /* Bottom nav shows the 4 most important items + a "More" toggle */
@@ -100,10 +101,15 @@ export function AppLayout() {
 
   const userRole = (currentMember?.role ?? 'observador') as Role
   const { resolvedTheme, setTheme } = useTheme()
+  const { t } = useI18n()
 
   // Build navigation: core items filtered by role + vertical items
+  const localizedCoreNavigation = coreNavigation.map((item) => ({
+    ...item,
+    name: t(item.key as any),
+  }))
   const navigation = [
-    ...coreNavigation.filter((item) => hasPermission(userRole, item.minRole)),
+    ...localizedCoreNavigation.filter((item) => hasPermission(userRole, item.minRole)),
   ]
 
   // Add vertical-specific nav items
@@ -112,7 +118,9 @@ export function AppLayout() {
     if (vertical?.navItems) {
       navigation.push(
         ...vertical.navItems.map((item) => ({
+          key: item.href,
           ...item,
+          name: item.name,
           minRole: 'observador' as Role,
         })),
       )
@@ -271,7 +279,7 @@ export function AppLayout() {
           {(hasPermission(userRole, 'admin') || userRole === 'comite_vigilancia') && (
             <>
               <div className="my-3 border-t" />
-              <p className="mb-1 px-3 text-xs font-medium text-muted-foreground">Administracion</p>
+              <p className="mb-1 px-3 text-xs font-medium text-muted-foreground">{t('common.settings')}</p>
               <div className="flex flex-col gap-0.5">
                 {hasPermission(userRole, 'admin') && (
                   <NavLink
@@ -326,7 +334,7 @@ export function AppLayout() {
             >
               {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Cerrar sesion" className="shrink-0">
+            <Button variant="ghost" size="icon" onClick={handleSignOut} title={t('common.logout')} className="shrink-0">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -379,7 +387,7 @@ export function AppLayout() {
             className="flex flex-1 flex-col items-center gap-0.5 py-2 px-1"
           >
             <Ellipsis className="h-5 w-5 text-muted-foreground" />
-            <span className="text-[10px] leading-tight text-muted-foreground">Mas</span>
+            <span className="text-[10px] leading-tight text-muted-foreground">{t('nav.more')}</span>
           </button>
         </div>
       </nav>

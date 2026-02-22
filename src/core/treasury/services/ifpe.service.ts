@@ -19,6 +19,23 @@ export interface IfpeWebhookEvent {
   created_at: string
 }
 
+export function validateIfpeConfiguration(config: {
+  clabe: string | null
+  beneficiary_name: string | null
+  mode: string
+}): { valid: boolean; errors: string[] } {
+  const errors: string[] = []
+  const requires = config.mode === 'fintech_rail' || config.mode === 'hybrid'
+  if (!requires) return { valid: true, errors }
+  if (!config.clabe || !/^\d{18}$/.test(config.clabe)) {
+    errors.push('CLABE inválida: debe tener 18 dígitos')
+  }
+  if (!config.beneficiary_name?.trim()) {
+    errors.push('Beneficiario requerido en modo IFPE/híbrido')
+  }
+  return { valid: errors.length === 0, errors }
+}
+
 export async function getWebhookEvents(
   communityId: string,
   status?: string
@@ -47,6 +64,9 @@ export async function manualReconcile(
   if (eventErr) throw eventErr
 
   const evt = event as IfpeWebhookEvent
+  if (evt.reconciliation_status === 'matched' || evt.reconciliation_status === 'manual') {
+    return
+  }
 
   const { data: tx, error: txErr } = await supabase.from('transactions')
     .insert({

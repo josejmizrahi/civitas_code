@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import type { FinancialInstruction } from '@/shared/types/rules'
 import type { ProposalType, VotingModel } from '@/shared/types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 const TEMPLATE_ICONS: Record<string, typeof Banknote> = {
   Banknote,
@@ -51,6 +52,7 @@ interface Props {
 }
 
 export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, initialRuleId, onCreated }: Props) {
+  const { t } = useI18n()
   const createProposal = useCreateProposal()
   const { rules, canPropose } = useRulesEngine()
 
@@ -143,7 +145,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
     setError('')
 
     if (!canPropose.allowed) {
-      setError(canPropose.reason || 'No tienes permiso para crear propuestas')
+      setError(canPropose.reason || t('proposalDialog.error.noPermission'))
       return
     }
 
@@ -151,36 +153,36 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
     const description = templateFormData.description ?? ''
 
     // Client-side validation
-    if (!title.trim()) { setError('El título es obligatorio'); return }
-    if (!description.trim()) { setError('La descripción es obligatoria'); return }
-    if (!type) { setError('Selecciona un tipo de propuesta'); return }
+    if (!title.trim()) { setError(t('proposalDialog.error.titleRequired')); return }
+    if (!description.trim()) { setError(t('proposalDialog.error.descriptionRequired')); return }
+    if (!type) { setError(t('proposalDialog.error.typeRequired')); return }
     if (!resolvedQuorum || resolvedQuorum <= 0 || resolvedQuorum > 1) {
-      setError('Error en quórum. Contacta al administrador.'); return
+      setError(t('proposalDialog.error.quorum')); return
     }
     if (!resolvedMajority || resolvedMajority <= 0 || resolvedMajority > 1) {
-      setError('Error en mayoría. Contacta al administrador.'); return
+      setError(t('proposalDialog.error.majority')); return
     }
     if (votingEnd) {
       const endDate = new Date(votingEnd)
       if (endDate <= new Date()) {
-        setError('La fecha de fin de votación debe ser en el futuro'); return
+        setError(t('proposalDialog.error.endFuture')); return
       }
     }
     if (votingStart && votingEnd && new Date(votingStart) >= new Date(votingEnd)) {
-      setError('La fecha de inicio debe ser anterior a la fecha de fin'); return
+      setError(t('proposalDialog.error.startBeforeEnd')); return
     }
     if (votingModel === 'multiple_choice') {
       const validOptions = multipleChoiceOptions.filter((opt) => opt.trim())
       if (validOptions.length < 2) {
-        setError('Debes agregar al menos 2 opciones para votación de opción múltiple'); return
+        setError(t('proposalDialog.error.multipleChoiceMin')); return
       }
     }
     const fi = templateFormData.financialInstruction
     if (fi?.amount != null && (Number.isNaN(Number(fi.amount)) || Number(fi.amount) < 0)) {
-      setError('El monto de la instrucción financiera debe ser mayor o igual a cero'); return
+      setError(t('proposalDialog.error.fiAmount')); return
     }
     if (fi?.new_amount != null && (Number.isNaN(Number(fi.new_amount)) || Number(fi.new_amount) < 0)) {
-      setError('El nuevo monto (cuota) debe ser mayor o igual a cero'); return
+      setError(t('proposalDialog.error.fiNewAmount')); return
     }
 
     try {
@@ -224,7 +226,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
           ? err.message
           : (err && typeof err === 'object' && 'message' in err)
             ? String((err as { message: unknown }).message)
-            : 'Error al crear propuesta'
+            : t('proposalDialog.error.create')
       setError(message)
     }
   }
@@ -239,7 +241,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
       <DialogContent onClose={handleClose} className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {selectedTemplate ? `Nueva Propuesta: ${selectedTemplate.name}` : 'Nueva Propuesta'}
+            {selectedTemplate ? `${t('proposalDialog.titleWithTemplate')}: ${selectedTemplate.name}` : t('proposalDialog.title')}
           </DialogTitle>
         </DialogHeader>
 
@@ -247,7 +249,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
           <div className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 p-4 my-4">
             <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
             <div>
-              <p className="font-medium text-amber-800">No puedes crear propuestas</p>
+              <p className="font-medium text-amber-800">{t('proposalDialog.noPermissionTitle')}</p>
               <p className="text-sm text-amber-700 mt-1">{canPropose.reason}</p>
             </div>
           </div>
@@ -255,7 +257,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
           /* Step 1: Template Selection */
           <div className="py-4">
             <p className="text-sm text-muted-foreground mb-4">
-              Selecciona el tipo de propuesta que quieres crear:
+              {t('proposalDialog.selectTemplate')}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PROPOSAL_TEMPLATES.map((template) => {
@@ -303,13 +305,13 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
               />
 
               <div className="space-y-2">
-                <Label>Tipo</Label>
+                <Label>{t('proposalDialog.type')}</Label>
                 <Select value={type} onChange={(e) => setType(e.target.value)}>
-                  <option value="ordinary">Ordinaria</option>
-                  <option value="extraordinary">Extraordinaria</option>
-                  <option value="budget">Presupuesto</option>
-                  <option value="election">Elección</option>
-                  <option value="amendment">Enmienda</option>
+                  <option value="ordinary">{t('proposals.type.ordinary')}</option>
+                  <option value="extraordinary">{t('proposals.type.extraordinary')}</option>
+                  <option value="budget">{t('proposals.type.budget')}</option>
+                  <option value="election">{t('proposals.type.election')}</option>
+                  <option value="amendment">{t('proposals.type.amendment')}</option>
                 </Select>
               </div>
 
@@ -317,8 +319,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                 <div className="flex items-start gap-2 rounded-md bg-blue-50 border border-blue-200 p-3">
                   <AlertTriangle className="h-4 w-4 text-blue-600 mt-0.5 shrink-0" />
                   <p className="text-sm text-blue-800">
-                    Nota: Los miembros morosos no pueden ser electos para cargos de administración (Art. 2 LPCI).
-                    Verifica el estado de pago de los candidatos.
+                    {t('proposalDialog.note.election')}
                   </p>
                 </div>
               )}
@@ -326,15 +327,15 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
               {/* Quórum y mayoría — definidos por las reglas de la comunidad */}
               <div className="flex items-center gap-4 rounded-lg bg-muted/50 border border-dashed px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Quórum:</span>
+                  <span className="text-sm text-muted-foreground">{t('proposalDialog.quorum')}:</span>
                   <Badge variant="secondary">{Math.round(resolvedQuorum * 100)}%</Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Mayoría:</span>
+                  <span className="text-sm text-muted-foreground">{t('proposalDialog.majority')}:</span>
                   <Badge variant="secondary">{Math.round(resolvedMajority * 100)}%</Badge>
                 </div>
                 <span className="text-[10px] text-muted-foreground ml-auto">
-                  Definido por las reglas de tu comunidad
+                  {t('proposalDialog.rulesDefined')}
                 </span>
               </div>
 
@@ -343,24 +344,24 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm">
                     <PieChart className="h-4 w-4" />
-                    Modelo de Votación
+                    {t('proposalDialog.votingModel')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Select value={votingModel} onChange={(e) => setVotingModel(e.target.value as VotingModel)}>
-                    <option value="simple">Simple (A favor / En contra / Abstención)</option>
-                    <option value="consensus">Consenso (Acuerdo / Desacuerdo / Abstención / Bloqueo)</option>
-                    <option value="multiple_choice">Opción Múltiple</option>
+                    <option value="simple">{t('proposalDialog.voting.simple')}</option>
+                    <option value="consensus">{t('proposalDialog.voting.consensus')}</option>
+                    <option value="multiple_choice">{t('proposalDialog.voting.multiple')}</option>
                   </Select>
                   {votingModel === 'consensus' && (
                     <p className="text-xs text-muted-foreground">
-                      En modelo de consenso, cualquier miembro puede bloquear una propuesta con una razón obligatoria.
+                      {t('proposalDialog.voting.consensusHelp')}
                     </p>
                   )}
                   {votingModel === 'multiple_choice' && (
                     <div className="space-y-2">
                       <p className="text-xs text-muted-foreground">
-                        Agrega las opciones entre las que los miembros podrán elegir:
+                        {t('proposalDialog.voting.multipleHelp')}
                       </p>
                       {multipleChoiceOptions.map((opt, idx) => (
                         <div key={idx} className="flex items-center gap-2">
@@ -372,7 +373,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                               updated[idx] = e.target.value
                               setMultipleChoiceOptions(updated)
                             }}
-                            placeholder={`Opción ${idx + 1}`}
+                            placeholder={`${t('proposalDialog.voting.option')} ${idx + 1}`}
                             className="flex-1"
                           />
                           {multipleChoiceOptions.length > 2 && (
@@ -396,7 +397,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                           onClick={() => setMultipleChoiceOptions([...multipleChoiceOptions, ''])}
                           className="text-xs"
                         >
-                          + Agregar opción
+                          + {t('proposalDialog.voting.addOption')}
                         </Button>
                       )}
                     </div>
@@ -409,7 +410,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-sm">
                     <MessageSquare className="h-4 w-4" />
-                    Periodo de Discusión
+                    {t('proposalDialog.discussion.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -422,16 +423,16 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                       className="h-4 w-4 rounded border-gray-300"
                     />
                     <span className="text-sm">
-                      Incluir periodo de discusión antes de votar
+                      {t('proposalDialog.discussion.include')}
                       {rules.governance.mandatory_discussion_enabled && (
-                        <Badge variant="secondary" className="ml-2 text-[10px]">Obligatorio</Badge>
+                        <Badge variant="secondary" className="ml-2 text-[10px]">{t('proposalDialog.discussion.required')}</Badge>
                       )}
                     </span>
                   </label>
 
                   {includeDiscussion && (
                     <div className="space-y-2 pl-7">
-                      <Label>Duración de la discusión (horas)</Label>
+                      <Label>{t('proposalDialog.discussion.duration')}</Label>
                       <Input
                         type="number"
                         min="1"
@@ -440,7 +441,7 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
                         onChange={(e) => setDiscussionHours(e.target.value)}
                       />
                       <p className="text-xs text-muted-foreground">
-                        La votación no podrá abrirse hasta que termine el periodo de discusión.
+                        {t('proposalDialog.discussion.help')}
                       </p>
                     </div>
                   )}
@@ -451,11 +452,11 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
               {!includeDiscussion && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Inicio de votación</Label>
+                    <Label>{t('proposalDialog.votingStart')}</Label>
                     <Input type="datetime-local" value={votingStart} onChange={(e) => setVotingStart(e.target.value)} />
                   </div>
                   <div className="space-y-2">
-                    <Label>Fin de votación</Label>
+                    <Label>{t('proposalDialog.votingEnd')}</Label>
                     <Input type="datetime-local" value={votingEnd} onChange={(e) => setVotingEnd(e.target.value)} />
                   </div>
                 </div>
@@ -463,14 +464,14 @@ export function CreateProposalDialog({ open, onOpenChange, initialTemplateId, in
 
               {selectedTemplate.hasFinancialInstruction && rules.governance.auto_execution_enabled && (
                 <p className="text-xs text-blue-600 bg-blue-50 rounded p-2">
-                  Auto-ejecución activa: si la propuesta se aprueba, la instrucción financiera se ejecutará automáticamente tras {rules.governance.cool_down_hours}h de enfriamiento.
+                  {t('proposalDialog.autoExecution').replace('{hours}', String(rules.governance.cool_down_hours))}
                 </p>
               )}
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleBack}>Atrás</Button>
+              <Button type="button" variant="outline" onClick={handleBack}>{t('proposalDialog.back')}</Button>
               <Button type="submit" disabled={createProposal.isPending}>
-                {createProposal.isPending ? 'Creando...' : 'Crear Propuesta'}
+                {createProposal.isPending ? t('proposalDialog.creating') : t('proposalDialog.create')}
               </Button>
             </DialogFooter>
           </form>

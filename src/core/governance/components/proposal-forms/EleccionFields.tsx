@@ -1,18 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { TemplateFieldsProps } from './types'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Button } from '@/shared/components/ui/button'
 import { SearchableSelect } from './SearchableSelect'
 import { Plus, Trash2 } from 'lucide-react'
-
-const CARGOS = [
-  { value: 'admin', label: 'Administrador' },
-  { value: 'comite_vigilancia', label: 'Comité de vigilancia' },
-  { value: 'tesorero', label: 'Tesorero' },
-]
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsProps) {
+  const { t } = useI18n()
+  const CARGOS = useMemo(() => [
+    { value: 'admin', label: t('eleccionFields.role.admin') },
+    { value: 'comite_vigilancia', label: t('eleccionFields.role.vigilance') },
+    { value: 'tesorero', label: t('eleccionFields.role.treasurer') },
+  ], [t])
   const [cargo, setCargo] = useState(
     (initialData?.metadata?.cargo as string) ?? 'admin'
   )
@@ -38,13 +39,13 @@ export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsPr
 
   useEffect(() => {
     const cargoLabel = CARGOS.find((c) => c.value === cargo)?.label ?? cargo
-    const title = cargoLabel ? `Elección: ${cargoLabel}` : (initialData?.title ?? '')
+    const title = cargoLabel ? `${t('eleccionFields.titlePrefix')}: ${cargoLabel}` : (initialData?.title ?? '')
     const list = candidatos.filter(Boolean)
     const description = [
-      `Cargo: ${cargoLabel}`,
-      periodo && `Periodo: ${periodo}`,
-      list.length > 0 && `Candidatos: ${list.join(', ')}`,
-      avisoMorosos && 'Aviso: Los miembros morosos no son elegibles según el reglamento.',
+      t('eleccionFields.desc.role').replace('{value}', cargoLabel),
+      periodo && t('eleccionFields.desc.period').replace('{value}', periodo),
+      list.length > 0 && t('eleccionFields.desc.candidates').replace('{value}', list.join(', ')),
+      avisoMorosos && t('eleccionFields.desc.warning'),
     ]
       .filter(Boolean)
       .join('\n')
@@ -59,23 +60,23 @@ export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsPr
         avisoMorosos,
       },
     })
-  }, [cargo, candidatos, periodo, avisoMorosos, onFieldsChange, initialData])
+  }, [cargo, candidatos, periodo, avisoMorosos, onFieldsChange, initialData, t, CARGOS])
 
   return (
     <div className="space-y-4">
       <SearchableSelect
-        label="Cargo a elegir"
+        label={t('eleccionFields.roleLabel')}
         value={cargo}
         onChange={setCargo}
         options={CARGOS}
-        placeholder="Buscar cargo..."
+        placeholder={t('eleccionFields.rolePlaceholder')}
       />
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label>Candidatos</Label>
+          <Label>{t('eleccionFields.candidatesLabel')}</Label>
           <Button type="button" variant="outline" size="sm" onClick={addCandidato} className="gap-1">
             <Plus className="h-3.5 w-3.5" />
-            Añadir
+            {t('eleccionFields.add')}
           </Button>
         </div>
         <div className="space-y-2">
@@ -84,7 +85,7 @@ export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsPr
               <Input
                 value={name}
                 onChange={(e) => setCandidatoAt(i, e.target.value)}
-                placeholder={`Candidato ${i + 1}`}
+                  placeholder={t('eleccionFields.candidatePlaceholder').replace('{index}', String(i + 1))}
               />
               <Button
                 type="button"
@@ -92,7 +93,7 @@ export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsPr
                 size="icon"
                 onClick={() => removeCandidato(i)}
                 disabled={candidatos.length <= 1}
-                aria-label="Quitar candidato"
+                aria-label={t('eleccionFields.removeCandidate')}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -101,11 +102,11 @@ export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsPr
         </div>
       </div>
       <div className="space-y-2">
-        <Label>Periodo del cargo</Label>
+        <Label>{t('eleccionFields.periodLabel')}</Label>
         <Input
           value={periodo}
           onChange={(e) => setPeriodo(e.target.value)}
-          placeholder="Ej: 2025-2026, 12 meses"
+          placeholder={t('eleccionFields.periodPlaceholder')}
         />
       </div>
       <label className="flex items-center gap-2">
@@ -115,7 +116,7 @@ export function EleccionFields({ onFieldsChange, initialData }: TemplateFieldsPr
           onChange={(e) => setAvisoMorosos(e.target.checked)}
           className="rounded border-input"
         />
-        <span className="text-sm">Incluir aviso: morosos no elegibles</span>
+        <span className="text-sm">{t('eleccionFields.includeWarning')}</span>
       </label>
     </div>
   )

@@ -5,16 +5,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { formatDate } from '@/shared/lib/utils'
 import { Link } from 'react-router-dom'
 import { EndorsementBar } from './EndorsementBar'
-
-const STATUS_LABELS: Record<string, string> = {
-  draft: 'Borrador',
-  discussion: 'En Discusión',
-  active: 'Activa',
-  closed: 'Cerrada',
-  approved: 'Aprobada',
-  rejected: 'Rechazada',
-  executed: 'Ejecutada',
-}
+import { useI18n } from '@/shared/hooks/useI18n'
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
   draft: 'secondary',
@@ -26,25 +17,34 @@ const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'w
   executed: 'success',
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  ordinary: 'Ordinaria',
-  extraordinary: 'Extraordinaria',
-  budget: 'Presupuesto',
-  election: 'Elección',
-  amendment: 'Enmienda',
-}
-
 interface Props {
   statusFilter?: string
 }
 
 export function ProposalList({ statusFilter }: Props) {
+  const { t } = useI18n()
   const { data: proposals, isLoading } = useProposals(statusFilter)
+  const STATUS_LABELS: Record<string, string> = {
+    draft: t('proposals.status.draft'),
+    discussion: t('proposals.status.discussion'),
+    active: t('proposals.status.active'),
+    closed: t('proposals.status.closed'),
+    approved: t('proposals.status.approved'),
+    rejected: t('proposals.status.rejected'),
+    executed: t('proposals.status.executed'),
+  }
+  const TYPE_LABELS: Record<string, string> = {
+    ordinary: t('proposals.type.ordinary'),
+    extraordinary: t('proposals.type.extraordinary'),
+    budget: t('proposals.type.budget'),
+    election: t('proposals.type.election'),
+    amendment: t('proposals.type.amendment'),
+  }
 
-  if (isLoading) return <LoadingSpinner message="Cargando propuestas..." className="py-8" />
+  if (isLoading) return <LoadingSpinner message={t('proposals.loading')} className="py-8" />
 
   if (!proposals || proposals.length === 0) {
-    return <p className="text-muted-foreground">No hay propuestas.</p>
+    return <p className="text-muted-foreground">{t('proposals.empty')}</p>
   }
 
   return (
@@ -71,9 +71,9 @@ export function ProposalList({ statusFilter }: Props) {
                 </div>
               )}
               <div className="flex gap-4 text-xs text-muted-foreground">
-                <span>Creada: {formatDate(p.created_at)}</span>
-                {p.voting_start && <span>Votación: {formatDate(p.voting_start)}</span>}
-                {p.voting_end && <span>Cierre: {formatDate(p.voting_end)}</span>}
+                <span>{t('proposals.meta.created')}: {formatDate(p.created_at)}</span>
+                {p.voting_start && <span>{t('proposals.meta.voting')}: {formatDate(p.voting_start)}</span>}
+                {p.voting_end && <span>{t('proposals.meta.close')}: {formatDate(p.voting_end)}</span>}
               </div>
             </CardContent>
           </Card>

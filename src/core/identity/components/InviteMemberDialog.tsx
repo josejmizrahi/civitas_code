@@ -6,7 +6,7 @@ import { Label } from '@/shared/components/ui/label'
 import { Select } from '@/shared/components/ui/select'
 import { Button } from '@/shared/components/ui/button'
 import { Copy, Mail } from 'lucide-react'
-import type { Role } from '@/shared/types'
+import { useRoles } from '@/core/identity/hooks/useRoles'
 
 interface InviteMemberDialogProps {
   open: boolean
@@ -15,8 +15,9 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogProps) {
   const inviteMember = useInviteMember()
+  const { data: roles } = useRoles()
   const [email, setEmail] = useState('')
-  const [role, setRole] = useState<Role>('miembro')
+  const [role, setRole] = useState('miembro')
   const [error, setError] = useState('')
   const [createdToken, setCreatedToken] = useState<string | null>(null)
 
@@ -131,13 +132,11 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
                   <Select
                     id="invite-role"
                     value={role}
-                    onChange={(e) => setRole(e.target.value as Role)}
+                    onChange={(e) => setRole(e.target.value)}
                   >
-                    <option value="miembro">Miembro</option>
-                    <option value="tesorero">Tesorero</option>
-                    <option value="comite_vigilancia">Comité de Vigilancia</option>
-                    <option value="observador">Observador</option>
-                    <option value="admin">Administrador</option>
+                    {(roles ?? []).map((r) => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
                   </Select>
                 </div>
               </div>

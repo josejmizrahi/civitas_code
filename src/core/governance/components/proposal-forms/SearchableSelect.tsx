@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Search } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export interface SearchableSelectOption {
   value: string
@@ -22,9 +23,12 @@ export function SearchableSelect({
   onChange,
   options,
   label,
-  placeholder = 'Buscar o seleccionar...',
-  emptyMessage = 'Sin resultados',
+  placeholder,
+  emptyMessage,
 }: SearchableSelectProps) {
+  const { t } = useI18n()
+  const resolvedPlaceholder = placeholder ?? t('searchableSelect.placeholder')
+  const resolvedEmptyMessage = emptyMessage ?? t('searchableSelect.empty')
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -56,14 +60,14 @@ export function SearchableSelect({
             setOpen(true)
           }}
           onFocus={() => setOpen(true)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className="pl-9"
         />
         {open && (
           <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-48 overflow-y-auto">
             {filtered.length === 0 ? (
               <div className="px-3 py-4 text-sm text-muted-foreground text-center">
-                {emptyMessage}
+                {resolvedEmptyMessage}
               </div>
             ) : (
               filtered.map((opt) => (

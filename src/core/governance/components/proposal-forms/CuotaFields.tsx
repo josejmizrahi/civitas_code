@@ -6,13 +6,14 @@ import type { TemplateFieldsProps } from './types'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { SearchableSelect } from './SearchableSelect'
-
-const APLICA_A_OPTIONS = [
-  { value: 'ordinaria', label: 'Cuota ordinaria' },
-  { value: 'extraordinaria', label: 'Cuota extraordinaria' },
-]
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function CuotaFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
+  const { t } = useI18n()
+  const APLICA_A_OPTIONS = [
+    { value: 'ordinaria', label: t('cuotaFields.type.ordinary') },
+    { value: 'extraordinaria', label: t('cuotaFields.type.extraordinary') },
+  ]
   const { communityId } = useCommunityContext()
   const [montoActual, setMontoActual] = useState(
     (initialData?.metadata?.montoActual as string) ?? ''
@@ -47,15 +48,19 @@ export function CuotaFields({ rules, onFieldsChange, initialData }: TemplateFiel
     : null
 
   useEffect(() => {
+    const appliesLabel = aplicaA === 'ordinaria' ? t('cuotaFields.type.ordinary') : t('cuotaFields.type.extraordinary')
     const title = nuevoMonto && aplicaA
-      ? `Cambio de cuota ${aplicaA}: ${rules.treasury.currency} ${nuevoMonto}`
+      ? `${t('cuotaFields.titlePrefix')} ${appliesLabel}: ${rules.treasury.currency} ${nuevoMonto}`
       : initialData?.title ?? ''
     const description = [
-      montoActual && `Monto actual (referencia): ${rules.treasury.currency} ${montoActual}`,
-      `Nuevo monto propuesto: ${rules.treasury.currency} ${nuevoMonto || '[indicar]'}`,
-      fechaVigor && `Entrada en vigor: ${fechaVigor}`,
-      aplicaA && `Aplica a: ${aplicaA === 'ordinaria' ? 'Cuota ordinaria' : 'Cuota extraordinaria'}`,
-      impacto != null && `Impacto estimado (${activeMembers} miembros): ${rules.treasury.currency} ${impacto.toLocaleString()} mensual`,
+      montoActual && t('cuotaFields.desc.current').replace('{currency}', rules.treasury.currency).replace('{value}', montoActual),
+      t('cuotaFields.desc.new').replace('{currency}', rules.treasury.currency).replace('{value}', nuevoMonto || t('cuotaFields.desc.indicate')),
+      fechaVigor && t('cuotaFields.desc.effective').replace('{value}', fechaVigor),
+      aplicaA && t('cuotaFields.desc.applies').replace('{value}', appliesLabel),
+      impacto != null && t('cuotaFields.desc.impact')
+        .replace('{count}', String(activeMembers))
+        .replace('{currency}', rules.treasury.currency)
+        .replace('{value}', impacto.toLocaleString()),
     ]
       .filter(Boolean)
       .join('\n')
@@ -77,20 +82,20 @@ export function CuotaFields({ rules, onFieldsChange, initialData }: TemplateFiel
         aplicaA,
       },
     })
-  }, [montoActual, nuevoMonto, fechaVigor, aplicaA, impacto, activeMembers, rules.treasury.currency, onFieldsChange, initialData])
+  }, [montoActual, nuevoMonto, fechaVigor, aplicaA, impacto, activeMembers, rules.treasury.currency, onFieldsChange, initialData, t])
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Monto actual (referencia) ({rules.treasury.currency})</Label>
+        <Label>{t('cuotaFields.currentAmountLabel')} ({rules.treasury.currency})</Label>
         <Input
           value={montoActual}
           onChange={(e) => setMontoActual(e.target.value)}
-          placeholder="Opcional — monto vigente para referencia"
+          placeholder={t('cuotaFields.currentAmountPlaceholder')}
         />
       </div>
       <div className="space-y-2">
-        <Label>Nuevo monto ({rules.treasury.currency})</Label>
+        <Label>{t('cuotaFields.newAmountLabel')} ({rules.treasury.currency})</Label>
         <Input
           type="number"
           min="0"
@@ -101,7 +106,7 @@ export function CuotaFields({ rules, onFieldsChange, initialData }: TemplateFiel
         />
       </div>
       <div className="space-y-2">
-        <Label>Fecha de entrada en vigor</Label>
+        <Label>{t('cuotaFields.effectiveDateLabel')}</Label>
         <Input
           type="date"
           value={fechaVigor}
@@ -109,17 +114,17 @@ export function CuotaFields({ rules, onFieldsChange, initialData }: TemplateFiel
         />
       </div>
       <SearchableSelect
-        label="Aplica a"
+        label={t('cuotaFields.appliesToLabel')}
         value={aplicaA}
         onChange={(v) => setAplicaA(v as 'ordinaria' | 'extraordinaria')}
         options={APLICA_A_OPTIONS}
-        placeholder="Buscar tipo de cuota..."
+        placeholder={t('cuotaFields.appliesToPlaceholder')}
       />
       {impacto != null && (
         <div className="rounded-lg border bg-muted/30 p-3">
-          <p className="text-sm font-medium text-muted-foreground">Impacto estimado</p>
+          <p className="text-sm font-medium text-muted-foreground">{t('cuotaFields.impactTitle')}</p>
           <p className="text-lg font-semibold">
-            {activeMembers} miembros × {rules.treasury.currency} {Number(nuevoMonto).toLocaleString()} = {rules.treasury.currency} {impacto.toLocaleString()} / periodo
+            {activeMembers} {t('assemblyDetail.memberFallback').toLowerCase()}s × {rules.treasury.currency} {Number(nuevoMonto).toLocaleString()} = {rules.treasury.currency} {impacto.toLocaleString()} / {t('cuotaFields.impactPeriod')}
           </p>
         </div>
       )}

@@ -12,6 +12,7 @@ import { InviteMemberDialog } from './InviteMemberDialog'
 import { formatDate } from '@/shared/lib/utils'
 import { useToast } from '@/shared/components/ui/toast'
 import { hasPermission, type Role } from '@/shared/types'
+import { useRoles } from '@/core/identity/hooks/useRoles'
 import { UserPlus, UserMinus, UserCheck, Search } from 'lucide-react'
 
 const roleBadgeVariant: Record<string, 'default' | 'secondary' | 'outline' | 'success'> = {
@@ -32,6 +33,7 @@ const roleLabels: Record<string, string> = {
 
 export function MemberDirectory() {
   const navigate = useNavigate()
+  const { data: roles } = useRoles()
   const { data: members, isLoading } = useMembers()
   const updateRole = useUpdateMemberRole()
   const deactivate = useDeactivateMember()
@@ -76,8 +78,8 @@ export function MemberDirectory() {
           </div>
           <Select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="w-full sm:w-40">
             <option value="">Todos los roles</option>
-            {Object.entries(roleLabels).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+            {(roles ?? []).map((r) => (
+              <option key={r.id} value={r.id}>{r.name}</option>
             ))}
           </Select>
           <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-36">
@@ -127,7 +129,7 @@ export function MemberDirectory() {
                     <Select
                       value={member.role}
                       onChange={(e) => {
-                        updateRole.mutate({ memberId: member.id, role: e.target.value as Role }, {
+                        updateRole.mutate({ memberId: member.id, role: e.target.value }, {
                           onSuccess: () => toast.success('Rol actualizado'),
                           onError: () => toast.error('Error al actualizar rol'),
                         })
@@ -137,11 +139,9 @@ export function MemberDirectory() {
                       onClick={(e) => e.stopPropagation()}
                       className="w-36"
                     >
-                      <option value="admin">Administrador</option>
-                      <option value="tesorero">Tesorero</option>
-                      <option value="comite_vigilancia">Comité de Vigilancia</option>
-                      <option value="miembro">Miembro</option>
-                      <option value="observador">Observador</option>
+                      {(roles ?? []).map((r) => (
+                        <option key={r.id} value={r.id}>{r.name}</option>
+                      ))}
                     </Select>
                   ) : (
                     <Badge

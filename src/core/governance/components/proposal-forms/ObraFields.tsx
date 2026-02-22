@@ -6,6 +6,7 @@ import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { Button } from '@/shared/components/ui/button'
 import { Plus, Trash2 } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export interface CronogramaRow {
   fase: string
@@ -16,6 +17,7 @@ export interface CronogramaRow {
 const COTIZACIONES_MIN = 3
 
 export function ObraFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
+  const { t } = useI18n()
   const [contratista, setContratista] = useState<EntityPickerValue>({
     entityId: (initialData?.metadata?.contratistaId as string) ?? null,
     recipientName: (initialData?.metadata?.contratistaName as string) ?? '',
@@ -51,18 +53,18 @@ export function ObraFields({ rules, onFieldsChange, initialData }: TemplateField
   useEffect(() => {
     const title =
       contratista.recipientName && montoTotal
-        ? `Obra: ${contratista.recipientName} - ${rules.treasury.currency} ${montoTotal}`
+        ? `${t('obraFields.titlePrefix')}: ${contratista.recipientName} - ${rules.treasury.currency} ${montoTotal}`
         : initialData?.title ?? ''
     const cronogramaText = cronograma
       .filter((r) => r.fase || r.monto || r.fecha)
-      .map((r) => `${r.fase || '—'}: ${rules.treasury.currency} ${r.monto || '—'} (${r.fecha || '—'})`)
+      .map((r) => `${r.fase || t('obraFields.desc.noValue')}: ${rules.treasury.currency} ${r.monto || t('obraFields.desc.noValue')} (${r.fecha || t('obraFields.desc.noValue')})`)
       .join('\n')
     const description = [
-      contratista.recipientName && `Contratista: ${contratista.recipientName}`,
-      montoTotal && `Monto total: ${rules.treasury.currency} ${montoTotal}`,
-      duracion && `Duración estimada: ${duracion}`,
-      cronogramaText && `Cronograma de pagos:\n${cronogramaText}`,
-      cotizaciones && `Cotizaciones (mín. ${COTIZACIONES_MIN}):\n${cotizaciones}`,
+      contratista.recipientName && t('obraFields.desc.contractor').replace('{value}', contratista.recipientName),
+      montoTotal && t('obraFields.desc.total').replace('{currency}', rules.treasury.currency).replace('{value}', montoTotal),
+      duracion && t('obraFields.desc.duration').replace('{value}', duracion),
+      cronogramaText && t('obraFields.desc.schedule').replace('{value}', cronogramaText),
+      cotizaciones && t('obraFields.desc.quotes').replace('{min}', String(COTIZACIONES_MIN)).replace('{value}', cotizaciones),
     ]
       .filter(Boolean)
       .join('\n\n')
@@ -72,7 +74,7 @@ export function ObraFields({ rules, onFieldsChange, initialData }: TemplateField
             type: 'disbursement' as const,
             amount: Number(montoTotal),
             recipient_name: contratista.recipientName,
-            description: `Obra - ${duracion || 'Ver cronograma'}`,
+            description: `${t('obraFields.titlePrefix')} - ${duracion || t('obraFields.desc.scheduleFallback')}`,
           }
         : undefined
     onFieldsChange({
@@ -89,18 +91,18 @@ export function ObraFields({ rules, onFieldsChange, initialData }: TemplateField
         duracion: duracion || undefined,
       },
     })
-  }, [contratista, montoTotal, cronograma, cotizaciones, duracion, rules.treasury.currency, onFieldsChange, initialData])
+  }, [contratista, montoTotal, cronograma, cotizaciones, duracion, rules.treasury.currency, onFieldsChange, initialData, t])
 
   return (
     <div className="space-y-4">
       <EntityPicker
         value={contratista}
         onChange={setContratista}
-        label="Contratista"
-        placeholder="Buscar contratista..."
+        label={t('obraFields.contractorLabel')}
+        placeholder={t('obraFields.contractorPlaceholder')}
       />
       <div className="space-y-2">
-        <Label>Monto total ({rules.treasury.currency})</Label>
+        <Label>{t('obraFields.totalLabel')} ({rules.treasury.currency})</Label>
         <Input
           type="number"
           min="0"
@@ -111,19 +113,19 @@ export function ObraFields({ rules, onFieldsChange, initialData }: TemplateField
         />
       </div>
       <div className="space-y-2">
-        <Label>Duración estimada</Label>
+        <Label>{t('obraFields.durationLabel')}</Label>
         <Input
           value={duracion}
           onChange={(e) => setDuracion(e.target.value)}
-          placeholder="Ej: 3 meses, 90 días"
+          placeholder={t('obraFields.durationPlaceholder')}
         />
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label>Cronograma de pagos</Label>
+          <Label>{t('obraFields.scheduleLabel')}</Label>
           <Button type="button" variant="outline" size="sm" onClick={addCronogramaRow} className="gap-1">
             <Plus className="h-3.5 w-3.5" />
-            Fase
+            {t('obraFields.phase')}
           </Button>
         </div>
         <div className="space-y-2 rounded-md border p-3">
@@ -132,7 +134,7 @@ export function ObraFields({ rules, onFieldsChange, initialData }: TemplateField
               <Input
                 value={row.fase}
                 onChange={(e) => setCronogramaRow(i, 'fase', e.target.value)}
-                placeholder="Fase / concepto"
+                  placeholder={t('obraFields.phasePlaceholder')}
               />
               <Input
                 type="number"
@@ -140,13 +142,13 @@ export function ObraFields({ rules, onFieldsChange, initialData }: TemplateField
                 step="0.01"
                 value={row.monto}
                 onChange={(e) => setCronogramaRow(i, 'monto', e.target.value)}
-                placeholder="Monto"
+                placeholder={t('obraFields.amountPlaceholder')}
               />
               <Input
                 type="date"
                 value={row.fecha}
                 onChange={(e) => setCronogramaRow(i, 'fecha', e.target.value)}
-                placeholder="Fecha"
+                placeholder={t('obraFields.datePlaceholder')}
               />
               <Button
                 type="button"
@@ -154,7 +156,7 @@ export function ObraFields({ rules, onFieldsChange, initialData }: TemplateField
                 size="icon"
                 onClick={() => removeCronogramaRow(i)}
                 disabled={cronograma.length <= 1}
-                aria-label="Quitar fila"
+                aria-label={t('obraFields.removeRow')}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -163,16 +165,16 @@ export function ObraFields({ rules, onFieldsChange, initialData }: TemplateField
         </div>
       </div>
       <div className="space-y-2">
-        <Label>Cotizaciones (mínimo {COTIZACIONES_MIN})</Label>
+        <Label>{t('obraFields.quotesLabel').replace('{min}', String(COTIZACIONES_MIN))}</Label>
         <Textarea
           value={cotizaciones}
           onChange={(e) => setCotizaciones(e.target.value)}
-          placeholder="Una por línea o separadas por coma"
+          placeholder={t('obraFields.quotesPlaceholder')}
           rows={3}
         />
         {!cotizacionesOk && cotizaciones.trim() !== '' && (
           <p className="text-xs text-amber-600">
-            Se recomienda al menos {COTIZACIONES_MIN} cotizaciones. Actual: {cotizacionesCount}.
+            {t('obraFields.quotesWarning').replace('{min}', String(COTIZACIONES_MIN)).replace('{count}', String(cotizacionesCount))}
           </p>
         )}
       </div>

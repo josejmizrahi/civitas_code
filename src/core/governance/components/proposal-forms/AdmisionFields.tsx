@@ -1,16 +1,24 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { TemplateFieldsProps } from './types'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 const DOCS_CHECKLIST = [
-  { id: 'identificacion', label: 'Identificación oficial' },
-  { id: 'comprobante_domicilio', label: 'Comprobante de domicilio' },
-  { id: 'solicitud_firmada', label: 'Solicitud de admisión firmada' },
-  { id: 'otros', label: 'Otros documentos' },
+  { id: 'identificacion' },
+  { id: 'comprobante_domicilio' },
+  { id: 'solicitud_firmada' },
+  { id: 'otros' },
 ] as const
 
 export function AdmisionFields({ onFieldsChange, initialData }: TemplateFieldsProps) {
+  const { t } = useI18n()
+  const docsChecklist = useMemo(() => [
+    { id: 'identificacion', label: t('admisionFields.doc.id') },
+    { id: 'comprobante_domicilio', label: t('admisionFields.doc.address') },
+    { id: 'solicitud_firmada', label: t('admisionFields.doc.signedRequest') },
+    { id: 'otros', label: t('admisionFields.doc.others') },
+  ] as const, [t])
   const [candidato, setCandidato] = useState(
     (initialData?.metadata?.candidato as string) ?? ''
   )
@@ -26,13 +34,15 @@ export function AdmisionFields({ onFieldsChange, initialData }: TemplateFieldsPr
   })
 
   useEffect(() => {
-    const title = candidato ? `Admisión: ${candidato}` : initialData?.title ?? ''
+    const title = candidato ? `${t('admisionFields.titlePrefix')}: ${candidato}` : initialData?.title ?? ''
     const description = [
-      candidato && `Candidato: ${candidato}`,
-      email && `Email (invitación): ${email}`,
-      unidad && `Unidad / Departamento: ${unidad}`,
-      'Documentación presentada:',
-      ...DOCS_CHECKLIST.map((d) => `- ${d.label}: ${docsPresentados[d.id] ? 'Sí' : 'No'}`),
+      candidato && t('admisionFields.desc.candidate').replace('{value}', candidato),
+      email && t('admisionFields.desc.email').replace('{value}', email),
+      unidad && t('admisionFields.desc.unit').replace('{value}', unidad),
+      t('admisionFields.desc.docs'),
+      ...docsChecklist.map((d) => t('admisionFields.desc.docLine')
+        .replace('{label}', d.label)
+        .replace('{value}', docsPresentados[d.id] ? t('admisionFields.yes') : t('admisionFields.no'))),
     ]
       .filter(Boolean)
       .join('\n')
@@ -47,39 +57,39 @@ export function AdmisionFields({ onFieldsChange, initialData }: TemplateFieldsPr
         docsPresentados,
       },
     })
-  }, [candidato, email, unidad, docsPresentados, onFieldsChange, initialData])
+  }, [candidato, email, unidad, docsPresentados, onFieldsChange, initialData, t, docsChecklist])
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Nombre del candidato</Label>
+        <Label>{t('admisionFields.candidateLabel')}</Label>
         <Input
           value={candidato}
           onChange={(e) => setCandidato(e.target.value)}
-          placeholder="Nombre completo"
+          placeholder={t('admisionFields.candidatePlaceholder')}
         />
       </div>
       <div className="space-y-2">
-        <Label>Email (para invitación)</Label>
+        <Label>{t('admisionFields.emailLabel')}</Label>
         <Input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="correo@ejemplo.com"
+          placeholder={t('admisionFields.emailPlaceholder')}
         />
       </div>
       <div className="space-y-2">
-        <Label>Unidad / Departamento</Label>
+        <Label>{t('admisionFields.unitLabel')}</Label>
         <Input
           value={unidad}
           onChange={(e) => setUnidad(e.target.value)}
-          placeholder="Opcional"
+          placeholder={t('admisionFields.unitPlaceholder')}
         />
       </div>
       <div className="space-y-2">
-        <Label>Documentación presentada</Label>
+        <Label>{t('admisionFields.docsLabel')}</Label>
         <div className="space-y-2 rounded-md border p-3">
-          {DOCS_CHECKLIST.map((d) => (
+          {docsChecklist.map((d) => (
             <label key={d.id} className="flex items-center gap-2">
               <input
                 type="checkbox"

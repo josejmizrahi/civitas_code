@@ -12,8 +12,10 @@ import { useProposals } from '@/core/governance/hooks/useProposals'
 import { exportToExcel } from '@/shared/services/export.service'
 import { formatDate } from '@/shared/lib/utils'
 import { Plus, Download, CheckCircle2 } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function GovernancePage() {
+  const { t } = useI18n()
   const location = useLocation()
   const navigate = useNavigate()
   const [tab, setTab] = useState('active')
@@ -78,26 +80,26 @@ export function GovernancePage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Gobernanza</h1>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('governance.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            {isAssemblyTab ? 'Asambleas y convocatorias' : 'Propuestas y votaciones'}
+            {isAssemblyTab ? t('governance.subtitle.assemblies') : t('governance.subtitle.proposals')}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={handleExport} disabled={!allProposals?.length}>
             <Download className="mr-1 h-4 w-4" />
-            Exportar
+            {t('governance.export')}
           </Button>
           {isAssemblyTab && isAdmin && (
             <Button onClick={() => setShowCreateAssembly(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Nueva Asamblea
+              {t('governance.newAssembly')}
             </Button>
           )}
           {!isAssemblyTab && canCreateProposals && (
             <Button onClick={() => setShowCreate(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Nueva Propuesta
+              {t('governance.newProposal')}
             </Button>
           )}
         </div>
@@ -117,12 +119,12 @@ export function GovernancePage() {
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList className="gap-1">
-          <TabsTrigger value="active">Activas</TabsTrigger>
-          <TabsTrigger value="discussion">En Discusión</TabsTrigger>
-          <TabsTrigger value="draft">Borradores</TabsTrigger>
-          <TabsTrigger value="closed">Cerradas</TabsTrigger>
-          <TabsTrigger value="all">Todas</TabsTrigger>
-          <TabsTrigger value="assemblies">Asambleas</TabsTrigger>
+          <TabsTrigger value="active">{t('governance.tab.active')}</TabsTrigger>
+          <TabsTrigger value="discussion">{t('governance.tab.discussion')}</TabsTrigger>
+          <TabsTrigger value="draft">{t('governance.tab.draft')}</TabsTrigger>
+          <TabsTrigger value="closed">{t('governance.tab.closed')}</TabsTrigger>
+          <TabsTrigger value="all">{t('governance.tab.all')}</TabsTrigger>
+          <TabsTrigger value="assemblies">{t('governance.tab.assemblies')}</TabsTrigger>
         </TabsList>
         <TabsContent value="active">
           <ProposalList statusFilter="active" />

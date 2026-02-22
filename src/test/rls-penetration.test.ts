@@ -48,6 +48,8 @@ skipIfNoKey('RLS Penetration Tests', () => {
   let adminClient: SupabaseClient | undefined
   let otherClient: SupabaseClient | undefined
   let anonClient: SupabaseClient
+  let memberCommunityId: string | null = null
+  let otherCommunityId: string | null = null
 
   beforeAll(async () => {
     anonClient = createAnonClient()
@@ -66,6 +68,22 @@ skipIfNoKey('RLS Penetration Tests', () => {
     memberClient = await createAuthenticatedClient(MEMBER_EMAIL, MEMBER_PASSWORD)
     adminClient = await createAuthenticatedClient(ADMIN_EMAIL, ADMIN_PASSWORD)
     otherClient = await createAuthenticatedClient(OTHER_COMMUNITY_MEMBER_EMAIL, OTHER_COMMUNITY_MEMBER_PASSWORD)
+
+    const [{ data: memberRows }, { data: otherRows }] = await Promise.all([
+      memberClient.from('members').select('community_id').limit(1),
+      otherClient.from('members').select('community_id').limit(1),
+    ])
+    memberCommunityId = memberRows?.[0]?.community_id ?? null
+    otherCommunityId = otherRows?.[0]?.community_id ?? null
+
+    if (REQUIRED_AUTH) {
+      if (!memberCommunityId || !otherCommunityId) {
+        throw new Error('RLS test setup failed: missing community_id for member or other account')
+      }
+      if (memberCommunityId === otherCommunityId) {
+        throw new Error('RLS test setup failed: test accounts must belong to different communities')
+      }
+    }
   })
 
   function requireAuth(): void {
@@ -78,6 +96,16 @@ skipIfNoKey('RLS Penetration Tests', () => {
 
   function requireOther(): void {
     if (!otherClient && REQUIRED_AUTH) throw new Error('RLS test setup failed: otherClient required')
+  }
+
+  function requireCrossTenantFixture(): void {
+    if (!REQUIRED_AUTH) return
+    if (!memberCommunityId || !otherCommunityId) {
+      throw new Error('RLS test setup failed: cross-tenant fixture not initialized')
+    }
+    if (memberCommunityId === otherCommunityId) {
+      throw new Error('RLS test setup failed: member and other must be different communities')
+    }
   }
 
   // =========================================================================
@@ -147,6 +175,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     it('member should only see their own community members', async () => {
       requireAuth()
       requireOther()
+      requireCrossTenantFixture()
       if (!memberClient || !otherClient) return
 
       const { data: memberData } = await memberClient.from('members').select('community_id')
@@ -158,7 +187,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
       const otherCommunities = new Set(otherData.map((m: any) => m.community_id))
 
       const overlap = [...memberCommunities].filter((c) => otherCommunities.has(c))
-      expect(overlap.length).toBeLessThanOrEqual(1)
+      expect(overlap.length).toBe(0)
     })
 
     it('member should not see transactions from other communities', async () => {
@@ -303,6 +332,7 @@ skipIfNoKey('RLS Penetration Tests', () => {
     it('member from community A should not insert into community B tables', async () => {
       requireAuth()
       requireOther()
+      requireCrossTenantFixture()
       if (!memberClient || !otherClient) return
 
       const { data: myMembers } = await memberClient.from('members').select('community_id').limit(1)

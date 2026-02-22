@@ -39,6 +39,7 @@ vi.mock('@/core/treasury/hooks/useTransactions', () => ({
 }))
 vi.mock('react-router-dom', () => ({
   useNavigate: () => vi.fn(),
+  useLocation: () => ({ state: null }),
 }))
 vi.mock('@/shared/services/export.service', () => ({
   exportToPDF: vi.fn(),
@@ -52,16 +53,16 @@ describe('TreasuryPage', () => {
 
   it('renders treasury title and main sections', () => {
     render(<TreasuryPage />, { wrapper: Wrapper })
-    expect(screen.getByRole('heading', { name: /Tesorería/i })).toBeInTheDocument()
-    expect(screen.getByText(/Resumen, cobro y movimientos/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Tesorería|Treasury/i })).toBeInTheDocument()
+    expect(screen.getByText(/Resumen, cobro y movimientos|Summary, collection/i)).toBeInTheDocument()
   })
 
   it('shows Resumen section by default when user can manage treasury', () => {
     render(<TreasuryPage />, { wrapper: Wrapper })
-    expect(screen.getByRole('button', { name: /Resumen/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Cobro/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Programación/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Datos e informes/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Resumen|Summary/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Cobro|Collection/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Programación|Scheduling/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Datos e informes|Data and reports/i })).toBeInTheDocument()
   })
 
   it('shows export PDF and Excel buttons', () => {

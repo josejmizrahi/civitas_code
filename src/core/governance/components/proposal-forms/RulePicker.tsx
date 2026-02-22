@@ -9,6 +9,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Badge } from '@/shared/components/ui/badge'
 import { Search, BookOpen, Scale } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface RulePickerProps {
   rules: CommunityRules
@@ -22,9 +23,12 @@ export function RulePicker({
   rules,
   value: selectedRuleId,
   onChange,
-  label = 'Regla a modificar',
-  placeholder = 'Buscar regla que quieres cambiar...',
+  label,
+  placeholder,
 }: RulePickerProps) {
+  const { t } = useI18n()
+  const resolvedLabel = label ?? t('cambioReglaFields.ruleLabel')
+  const resolvedPlaceholder = placeholder ?? t('cambioReglaFields.rulePlaceholder')
   const [ruleSearch, setRuleSearch] = useState('')
   const [showRulePicker, setShowRulePicker] = useState(false)
   const rulePickerRef = useRef<HTMLDivElement>(null)
@@ -43,7 +47,7 @@ export function RulePicker({
     <div className="space-y-2">
       <Label className="flex items-center gap-1.5">
         <BookOpen className="h-4 w-4" />
-        {label}
+        {resolvedLabel}
       </Label>
       <div className="relative" ref={rulePickerRef}>
         <div className="relative">
@@ -56,7 +60,7 @@ export function RulePicker({
               setShowRulePicker(true)
             }}
             onFocus={() => setShowRulePicker(true)}
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             className="pl-9"
           />
         </div>
@@ -106,7 +110,7 @@ export function RulePicker({
                 r.description.toLowerCase().includes(ruleSearch.toLowerCase())
             ).length === 0 && (
               <div className="px-3 py-4 text-sm text-muted-foreground text-center">
-                No se encontraron reglas
+                {t('rulePicker.noResults')}
               </div>
             )}
           </div>
@@ -125,7 +129,7 @@ export function RulePicker({
             </div>
             <p className="text-xs text-muted-foreground">{rule.description}</p>
             <div className="flex items-center gap-2 pt-1">
-              <span className="text-xs text-muted-foreground">Valor actual:</span>
+              <span className="text-xs text-muted-foreground">{t('rulePicker.currentValue')}</span>
               <Badge variant="outline" className="font-mono text-xs">
                 {rule.format(rules)}
               </Badge>

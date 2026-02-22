@@ -5,8 +5,10 @@ import { RulePicker } from './RulePicker'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 export function CambioReglaFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
+  const { t } = useI18n()
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(
     (initialData?.metadata?.ruleId as string) ?? null
   )
@@ -28,14 +30,16 @@ export function CambioReglaFields({ rules, onFieldsChange, initialData }: Templa
       })
       return
     }
-    const title = `Cambio de regla: ${rule.label}`
+    const title = `${t('cambioReglaFields.titlePrefix')}: ${rule.label}`
     const description = [
-      `Propongo cambiar la regla "${rule.label}".`,
+      t('cambioReglaFields.description.propose').replace('{label}', rule.label),
       '',
-      `Valor actual: ${rule.format(rules)}`,
-      `Nuevo valor propuesto: ${nuevoValor || '[completar]'}`,
+      t('cambioReglaFields.description.current').replace('{value}', rule.format(rules)),
+      t('cambioReglaFields.description.new').replace('{value}', nuevoValor || t('cambioReglaFields.description.complete')),
       '',
-      justificacion ? `Justificación: ${justificacion}` : 'Justificación: [explicar por qué es necesario el cambio]',
+      justificacion
+        ? t('cambioReglaFields.description.justification').replace('{value}', justificacion)
+        : t('cambioReglaFields.description.justificationPlaceholder'),
     ].join('\n')
     onFieldsChange({
       title,
@@ -55,23 +59,25 @@ export function CambioReglaFields({ rules, onFieldsChange, initialData }: Templa
         rules={rules}
         value={selectedRuleId}
         onChange={setSelectedRuleId}
+        label={t('cambioReglaFields.ruleLabel')}
+        placeholder={t('cambioReglaFields.rulePlaceholder')}
       />
       {rule && (
         <>
           <div className="space-y-2">
-            <Label>Nuevo valor propuesto</Label>
+            <Label>{t('cambioReglaFields.newValueLabel')}</Label>
             <Input
               value={nuevoValor}
               onChange={(e) => setNuevoValor(e.target.value)}
-              placeholder={`Ej: ${rule.format(rules)} → nuevo valor`}
+              placeholder={t('cambioReglaFields.newValuePlaceholder').replace('{current}', rule.format(rules))}
             />
           </div>
           <div className="space-y-2">
-            <Label>Justificación legal / motivo del cambio</Label>
+            <Label>{t('cambioReglaFields.justificationLabel')}</Label>
             <Textarea
               value={justificacion}
               onChange={(e) => setJustificacion(e.target.value)}
-              placeholder="Explicar por qué es necesario el cambio y, si aplica, referencia normativa."
+              placeholder={t('cambioReglaFields.justificationPlaceholder')}
               rows={3}
             />
           </div>

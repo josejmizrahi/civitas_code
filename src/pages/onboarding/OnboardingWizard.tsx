@@ -14,6 +14,9 @@ import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { Badge } from '@/shared/components/ui/badge'
 import { cn } from '@/shared/lib/utils'
+import { isValidCurrencyCode, isValidLocaleCode, normalizeCurrencyCode, normalizeLocaleCode } from '@/shared/lib/locale'
+import { getCompliancePreset } from '@/shared/config/compliance-presets'
+import { useI18n } from '@/shared/hooks/useI18n'
 import {
   Building2,
   Church,
@@ -172,11 +175,13 @@ const RULE_PRESETS: Record<string, Partial<CommunityRules>> = {
 
 function getRulesForType(type: CommunityType): CommunityRules {
   const preset = RULE_PRESETS[type]
+  const compliancePreset = type === 'residential' ? getCompliancePreset('mx') : getCompliancePreset('custom')
   if (!preset) return { ...DEFAULT_RULES }
   return {
     governance: { ...DEFAULT_RULES.governance, ...(preset.governance || {}) },
     treasury: { ...DEFAULT_RULES.treasury, ...(preset.treasury || {}) },
     identity: { ...DEFAULT_RULES.identity, ...(preset.identity || {}) },
+    compliance: compliancePreset,
   }
 }
 
@@ -184,56 +189,51 @@ function getRulesForType(type: CommunityType): CommunityRules {
 // Step indicator
 // ---------------------------------------------------------------------------
 
-const STEPS = [
-  { number: 1, label: 'Tipo' },
-  { number: 2, label: 'Datos' },
-  { number: 3, label: 'Reglas' },
-  { number: 4, label: 'Confirmar' },
-]
-
-function StepIndicator({ currentStep }: { currentStep: number }) {
+function StepIndicator({ currentStep, labels }: { currentStep: number; labels: string[] }) {
   return (
     <div className="flex items-center justify-center gap-0">
-      {STEPS.map((step, idx) => (
-        <div key={step.number} className="flex items-center">
+      {labels.map((label, idx) => {
+        const step = idx + 1
+        return (
+        <div key={step} className="flex items-center">
           <div className="flex flex-col items-center">
             <div
               className={cn(
                 'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors',
-                currentStep > step.number
+                currentStep > step
                   ? 'border-primary bg-primary text-primary-foreground'
-                  : currentStep === step.number
+                  : currentStep === step
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-muted-foreground/30 text-muted-foreground'
               )}
             >
-              {currentStep > step.number ? (
+              {currentStep > step ? (
                 <Check className="h-4 w-4" />
               ) : (
-                step.number
+                step
               )}
             </div>
             <span
               className={cn(
                 'mt-1 text-xs font-medium',
-                currentStep >= step.number
+                currentStep >= step
                   ? 'text-primary'
                   : 'text-muted-foreground'
               )}
             >
-              {step.label}
+              {label}
             </span>
           </div>
-          {idx < STEPS.length - 1 && (
+          {idx < labels.length - 1 && (
             <div
               className={cn(
                 'mx-2 mb-5 h-0.5 w-10 sm:w-16 transition-colors',
-                currentStep > step.number ? 'bg-primary' : 'bg-muted-foreground/20'
+                currentStep > step ? 'bg-primary' : 'bg-muted-foreground/20'
               )}
             />
           )}
         </div>
-      ))}
+      )})}
     </div>
   )
 }
@@ -463,6 +463,13 @@ function StepRulesConfig({
     })
   }
 
+  const updateCompliance = (key: string, value: unknown) => {
+    onRulesChange({
+      ...rules,
+      compliance: { ...rules.compliance, [key]: value },
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -505,6 +512,41 @@ function StepRulesConfig({
         </CardContent>
       </Card>
 
+      {/* Compliance */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Cumplimiento legal</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label className="text-sm">Jurisdicción</Label>
+            <select
+              value={rules.compliance.jurisdiction}
+              onChange={(e) => updateCompliance('jurisdiction', e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="mx">México</option>
+              <option value="us">Estados Unidos</option>
+              <option value="eu">Unión Europea</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Privacidad</Label>
+            <select
+              value={rules.compliance.privacy_framework}
+              onChange={(e) => updateCompliance('privacy_framework', e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="lfpdppp">LFPDPPP (MX)</option>
+              <option value="ccpa">CCPA (US)</option>
+              <option value="gdpr">GDPR (EU)</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Treasury */}
       <Card>
         <CardHeader className="pb-3">
@@ -512,14 +554,29 @@ function StepRulesConfig({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
+            <Label className="text-sm">Locale</Label>
+            <Input
+              value={rules.treasury.locale}
+              onChange={(e) => updateTreasury('locale', normalizeLocaleCode(e.target.value))}
+              placeholder="es-MX"
+              className="w-32"
+            />
+            {!isValidLocaleCode(rules.treasury.locale) && (
+              <p className="text-xs text-destructive">Usa un locale válido, por ejemplo: `es-MX`, `en-US`, `pt-BR`.</p>
+            )}
+          </div>
+          <div className="space-y-2">
             <Label className="text-sm">Moneda</Label>
             <Input
               value={rules.treasury.currency}
-              onChange={(e) => updateTreasury('currency', e.target.value.toUpperCase())}
+              onChange={(e) => updateTreasury('currency', normalizeCurrencyCode(e.target.value))}
               placeholder="MXN"
               maxLength={3}
               className="w-24"
             />
+            {!isValidCurrencyCode(rules.treasury.currency) && (
+              <p className="text-xs text-destructive">Usa un código ISO 4217 válido, por ejemplo: `MXN`, `USD`, `EUR`.</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label className="text-sm">
@@ -652,7 +709,7 @@ function StepConfirmation({
                   Límite admin
                 </p>
                 <p className="text-lg font-semibold">
-                  ${rules.treasury.admin_spending_limit.toLocaleString('es-MX')}{' '}
+                  ${rules.treasury.admin_spending_limit.toLocaleString(rules.treasury.locale)}{' '}
                   {rules.treasury.currency}
                 </p>
               </div>
@@ -673,6 +730,14 @@ function StepConfirmation({
                   {rules.identity.grace_period_months === 1 ? 'mes' : 'meses'}
                 </p>
               </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Jurisdicción
+                </p>
+                <p className="text-lg font-semibold uppercase">
+                  {rules.compliance.jurisdiction}
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -690,6 +755,13 @@ export function OnboardingWizard() {
   const { setCommunityId, refreshCommunities } = useCommunityContext()
   const navigate = useNavigate()
   const toast = useToast()
+  const { t } = useI18n()
+  const stepLabels = [
+    t('onboarding.step.type'),
+    t('onboarding.step.data'),
+    t('onboarding.step.rules'),
+    t('onboarding.step.confirm'),
+  ]
 
   const [step, setStep] = useState(1)
   const [communityType, setCommunityType] = useState<CommunityType | null>(null)
@@ -711,7 +783,7 @@ export function OnboardingWizard() {
       case 2:
         return name.trim().length >= 3
       case 3:
-        return true
+        return isValidCurrencyCode(rules.treasury.currency) && isValidLocaleCode(rules.treasury.locale)
       case 4:
         return true
       default:
@@ -765,7 +837,7 @@ export function OnboardingWizard() {
             size="sm"
             onClick={() => navigate('/dashboard')}
           >
-            Cancelar
+            {t('onboarding.cancel')}
           </Button>
         </div>
       </header>
@@ -774,7 +846,7 @@ export function OnboardingWizard() {
       <div className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
         {/* Step indicator */}
         <div className="mb-8">
-          <StepIndicator currentStep={step} />
+          <StepIndicator currentStep={step} labels={stepLabels} />
         </div>
 
         {/* Step content */}
@@ -815,7 +887,7 @@ export function OnboardingWizard() {
             className="gap-2"
           >
             <ChevronLeft className="h-4 w-4" />
-            Atrás
+            {t('onboarding.back')}
           </Button>
 
           {step < 4 ? (
@@ -824,7 +896,7 @@ export function OnboardingWizard() {
               disabled={!canGoNext()}
               className="gap-2"
             >
-              Siguiente
+              {t('onboarding.next')}
               <ChevronRight className="h-4 w-4" />
             </Button>
           ) : (
@@ -836,12 +908,12 @@ export function OnboardingWizard() {
               {submitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Creando...
+                  {t('onboarding.creating')}
                 </>
               ) : (
                 <>
                   <Check className="h-4 w-4" />
-                  Crear Comunidad
+                  {t('onboarding.create')}
                 </>
               )}
             </Button>

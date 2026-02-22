@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useMorosoMembers, useComputeMorosoStatus, useNotifyMorosos } from '../hooks/useMoroso'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
@@ -87,6 +88,7 @@ function MorosoRow({ member }: { member: MorosoMember }) {
 // ---------------------------------------------------------------------------
 
 export function MorosoAdminPanel() {
+  const navigate = useNavigate()
   const { data: morosos, isLoading, error } = useMorosoMembers()
   const { rules } = useRulesEngine()
   const computeMutation = useComputeMorosoStatus()
@@ -138,6 +140,17 @@ export function MorosoAdminPanel() {
             >
               <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${computeMutation.isPending ? 'animate-spin' : ''}`} />
               Recalcular
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                navigate('/treasury', {
+                  state: { mainSection: 'programacion', programacionTab: 'payment-plans' },
+                })
+              }
+            >
+              Gestionar planes
             </Button>
             <Button
               variant="outline"

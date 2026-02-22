@@ -58,7 +58,6 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
       },
       treasury: {
         mode: 'import',
-        currency: 'MXN',
         admin_spending_limit: 50000,
         require_vote_above: 50000,
         reserva_fund_percentage: 5,
@@ -118,7 +117,6 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
       },
       treasury: {
         mode: 'import',
-        currency: 'MXN',
         admin_spending_limit: 20000,
         require_vote_above: 20000,
         reserva_fund_percentage: 10,
@@ -178,7 +176,6 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
       },
       treasury: {
         mode: 'import',
-        currency: 'MXN',
         admin_spending_limit: 25000,
         require_vote_above: 25000,
         reserva_fund_percentage: 0,
@@ -238,7 +235,6 @@ export const VERTICAL_PRESETS: VerticalPreset[] = [
       },
       treasury: {
         mode: 'import',
-        currency: 'MXN',
         admin_spending_limit: 30000,
         require_vote_above: 30000,
         reserva_fund_percentage: 0,

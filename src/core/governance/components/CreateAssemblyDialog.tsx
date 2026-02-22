@@ -17,6 +17,7 @@ import { useCommunityContext } from '@/app/providers'
 import { getCommunityRules } from '@/shared/services/rules.service'
 import { Plus, Trash2, AlertTriangle, GripVertical } from 'lucide-react'
 import type { AgendaItem } from '../types'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface Props {
   open: boolean
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
+  const { t } = useI18n()
   const { community } = useCommunityContext()
   const createAssembly = useCreateAssembly()
   const toast = useToast()
@@ -99,19 +101,19 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
     e.preventDefault()
 
     if (!title.trim()) {
-      toast.error('El titulo es requerido')
+      toast.error(t('assemblyDialog.error.titleRequired'))
       return
     }
     if (!scheduledDate) {
-      toast.error('La fecha es requerida')
+      toast.error(t('assemblyDialog.error.dateRequired'))
       return
     }
     if (!location.trim()) {
-      toast.error('La ubicacion es requerida')
+      toast.error(t('assemblyDialog.error.locationRequired'))
       return
     }
     if (agenda.some((item) => !item.topic.trim())) {
-      toast.error('Todos los puntos del orden del dia deben tener un tema')
+      toast.error(t('assemblyDialog.error.agendaTopicRequired'))
       return
     }
 
@@ -123,11 +125,11 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
         location: location.trim(),
         agenda,
       })
-      toast.success('Asamblea creada exitosamente. Se genero la convocatoria automaticamente.')
+      toast.success(t('assemblyDialog.success'))
       resetForm()
       onOpenChange(false)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al crear asamblea')
+      toast.error(err instanceof Error ? err.message : t('assemblyDialog.error.create'))
     }
   }
 
@@ -138,37 +140,37 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
         onClose={() => onOpenChange(false)}
       >
         <DialogHeader>
-          <DialogTitle>Nueva Asamblea</DialogTitle>
+          <DialogTitle>{t('assemblyDialog.title')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Type */}
           <div className="space-y-2">
-            <Label htmlFor="assembly-type">Tipo de Asamblea</Label>
+            <Label htmlFor="assembly-type">{t('assemblyDialog.type')}</Label>
             <Select
               id="assembly-type"
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
-              <option value="ordinary">Ordinaria</option>
-              <option value="extraordinary">Extraordinaria</option>
+              <option value="ordinary">{t('assemblyDialog.type.ordinary')}</option>
+              <option value="extraordinary">{t('assemblyDialog.type.extraordinary')}</option>
             </Select>
           </div>
 
           {/* Title */}
           <div className="space-y-2">
-            <Label htmlFor="assembly-title">Titulo</Label>
+            <Label htmlFor="assembly-title">{t('assemblyDialog.titleLabel')}</Label>
             <Input
               id="assembly-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ej: Asamblea Ordinaria Q1 2026"
+              placeholder={t('assemblyDialog.titlePlaceholder')}
             />
           </div>
 
           {/* Date */}
           <div className="space-y-2">
-            <Label htmlFor="assembly-date">Fecha y Hora</Label>
+            <Label htmlFor="assembly-date">{t('assemblyDialog.date')}</Label>
             <Input
               id="assembly-date"
               type="datetime-local"
@@ -179,9 +181,7 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
               <div className="flex items-center gap-2 text-sm text-yellow-600 bg-yellow-50 rounded-md px-3 py-2">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
                 <span>
-                  La convocatoria debe emitirse con al menos {minNoticeDays} dias
-                  de anticipacion (Art. 34 LPCI). La fecha seleccionada no cumple
-                  este requisito.
+                  {t('assemblyDialog.noticeWarning').replace('{days}', String(minNoticeDays))}
                 </span>
               </div>
             )}
@@ -189,19 +189,19 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
 
           {/* Location */}
           <div className="space-y-2">
-            <Label htmlFor="assembly-location">Ubicacion</Label>
+            <Label htmlFor="assembly-location">{t('assemblyDialog.location')}</Label>
             <Input
               id="assembly-location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="Ej: Salon de usos multiples, Piso 1"
+              placeholder={t('assemblyDialog.locationPlaceholder')}
             />
           </div>
 
           {/* Agenda */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Orden del Dia</Label>
+              <Label>{t('assemblyDialog.agenda')}</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -209,7 +209,7 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
                 onClick={addAgendaItem}
               >
                 <Plus className="mr-1 h-3.5 w-3.5" />
-                Agregar punto
+                {t('assemblyDialog.addItem')}
               </Button>
             </div>
 
@@ -242,14 +242,14 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
                   </span>
                   <div className="flex-1 space-y-2">
                     <Input
-                      placeholder="Tema"
+                      placeholder={t('assemblyDialog.topicPlaceholder')}
                       value={item.topic}
                       onChange={(e) =>
                         updateAgendaItem(index, 'topic', e.target.value)
                       }
                     />
                     <Textarea
-                      placeholder="Descripcion (opcional)"
+                      placeholder={t('assemblyDialog.descriptionPlaceholder')}
                       value={item.description}
                       onChange={(e) =>
                         updateAgendaItem(index, 'description', e.target.value)
@@ -279,10 +279,10 @@ export function CreateAssemblyDialog({ open, onOpenChange }: Props) {
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancelar
+              {t('assemblyDialog.cancel')}
             </Button>
             <Button type="submit" disabled={createAssembly.isPending}>
-              {createAssembly.isPending ? 'Creando...' : 'Crear Asamblea'}
+              {createAssembly.isPending ? t('assemblyDialog.creating') : t('assemblyDialog.create')}
             </Button>
           </DialogFooter>
         </form>

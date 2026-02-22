@@ -35,27 +35,41 @@ import {
   CalendarCheck,
   PieChart,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTransactions } from '@/core/treasury/hooks/useTransactions'
 import { exportToPDF, exportToExcel } from '@/shared/services/export.service'
 import type { TreasuryRules, FundType } from '@/shared/types/rules'
 import { cn } from '@/shared/lib/utils'
+import { useI18n } from '@/shared/hooks/useI18n'
+import type { I18nKey } from '@/shared/i18n/messages'
 
 type MainSection = 'resumen' | 'cobro' | 'programacion' | 'datos'
 
-const MAIN_SECTIONS: { id: MainSection; label: string; icon: typeof Wallet; description: string }[] = [
-  { id: 'resumen', label: 'Resumen', icon: BarChart3, description: 'Visión general' },
-  { id: 'cobro', label: 'Cobro', icon: Receipt, description: 'Obligaciones y pagos' },
-  { id: 'programacion', label: 'Programación', icon: CalendarCheck, description: 'Recurrentes y contratos' },
-  { id: 'datos', label: 'Datos e informes', icon: PieChart, description: 'Movimientos y reportes' },
+const MAIN_SECTIONS: { id: MainSection; labelKey: I18nKey; icon: typeof Wallet; descriptionKey: I18nKey }[] = [
+  { id: 'resumen', labelKey: 'treasury.section.resumen', icon: BarChart3, descriptionKey: 'treasury.section.resumen.desc' },
+  { id: 'cobro', labelKey: 'treasury.section.cobro', icon: Receipt, descriptionKey: 'treasury.section.cobro.desc' },
+  { id: 'programacion', labelKey: 'treasury.section.programacion', icon: CalendarCheck, descriptionKey: 'treasury.section.programacion.desc' },
+  { id: 'datos', labelKey: 'treasury.section.datos', icon: PieChart, descriptionKey: 'treasury.section.datos.desc' },
 ]
 
 export function TreasuryPage() {
+  const { t } = useI18n()
+  const location = useLocation()
+  const initialState = (location.state as {
+    mainSection?: MainSection
+    cobroTab?: string
+    programacionTab?: string
+    datosTab?: string
+  } | null) ?? null
   const { canManageTreasury, canImportData } = usePermissions()
-  const [mainSection, setMainSection] = useState<MainSection>(canManageTreasury ? 'resumen' : 'cobro')
-  const [cobroTab, setCobroTab] = useState(canManageTreasury ? 'obligations' : 'my-payments')
-  const [programacionTab, setProgramacionTab] = useState('recurring')
-  const [datosTab, setDatosTab] = useState('transactions')
+  const [mainSection, setMainSection] = useState<MainSection>(
+    initialState?.mainSection ?? (canManageTreasury ? 'resumen' : 'cobro')
+  )
+  const [cobroTab, setCobroTab] = useState(
+    initialState?.cobroTab ?? (canManageTreasury ? 'obligations' : 'my-payments')
+  )
+  const [programacionTab, setProgramacionTab] = useState(initialState?.programacionTab ?? 'recurring')
+  const [datosTab, setDatosTab] = useState(initialState?.datosTab ?? 'transactions')
   const [showForm, setShowForm] = useState(false)
   const [selectedFund, setSelectedFund] = useState<FundType>('mantenimiento')
   const refreshOverdue = useRefreshOverdueObligations()
@@ -99,10 +113,10 @@ export function TreasuryPage() {
   }, [])
 
   const modeLabel: Record<string, string> = {
-    import: 'Importación / Manual',
-    fintech_rail: 'Fintech Rail (SPEI)',
-    connector: 'Conector Bancario',
-    hybrid: 'Híbrido',
+    import: t('treasury.mode.import'),
+    fintech_rail: t('treasury.mode.fintech_rail'),
+    connector: t('treasury.mode.connector'),
+    hybrid: t('treasury.mode.hybrid'),
   }
 
   const showFundSelector =
@@ -114,9 +128,9 @@ export function TreasuryPage() {
       <header className="no-print space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">Tesorería</h1>
+            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">{t('treasury.title')}</h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              Resumen, cobro y movimientos de la comunidad
+              {t('treasury.subtitle')}
             </p>
             <div className="mt-2 flex items-center gap-2">
               <span
@@ -135,7 +149,7 @@ export function TreasuryPage() {
               variant="outline"
               size="sm"
               onClick={handleExportPDF}
-              title="Exporta la vista actual a PDF"
+              title={t('treasury.export.pdf.title')}
               className="gap-1.5"
             >
               <Download className="h-4 w-4" />
@@ -146,7 +160,7 @@ export function TreasuryPage() {
               size="sm"
               onClick={handleExportExcel}
               disabled={!transactions?.length}
-              title="Exporta el listado de transacciones a Excel"
+              title={t('treasury.export.excel.title')}
               className="gap-1.5"
             >
               <Download className="h-4 w-4" />
@@ -155,13 +169,13 @@ export function TreasuryPage() {
             {canImportData && (
               <Button variant="outline" size="sm" onClick={() => navigate('/ingestion')} className="gap-1.5">
                 <FileSpreadsheet className="h-4 w-4" />
-                Importar
+                {t('treasury.import')}
               </Button>
             )}
             {canManageTreasury && (
               <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
                 <Plus className="h-4 w-4" />
-                Captura manual
+                {t('treasury.manualCapture')}
               </Button>
             )}
           </div>
@@ -170,14 +184,14 @@ export function TreasuryPage() {
         {/* Banner modo actual (solo cuando no hay SPEI) */}
         {treasuryMode !== 'fintech_rail' && (
           <div className="rounded-lg border border-amber-200/80 bg-amber-50/80 px-4 py-2.5 text-sm text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-200">
-            Hoy: importación y registro manual. SPEI automático en Fase 2 con socio IFPE.
+            {t('treasury.banner.phase2')}
           </div>
         )}
 
         {/* Selector de fondo — solo donde aplica */}
         {showFundSelector && (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground">Fondo:</span>
+            <span className="text-sm text-muted-foreground">{t('treasury.fund')}:</span>
             <FundSelector value={selectedFund} onChange={setSelectedFund} />
           </div>
         )}
@@ -200,10 +214,10 @@ export function TreasuryPage() {
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
                 )}
-                title={section.description}
+                title={t(section.descriptionKey)}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="hidden sm:inline">{section.label}</span>
+                <span className="hidden sm:inline">{t(section.labelKey)}</span>
               </button>
             )
           })}
@@ -224,15 +238,15 @@ export function TreasuryPage() {
               <TabsList className="mb-4 h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
                 <TabsTrigger value="obligations" className="gap-1.5 text-xs sm:text-sm">
                   <Receipt className="h-3.5 w-3.5" />
-                  Obligaciones
+                  {t('treasury.cobro.obligations')}
                 </TabsTrigger>
                 <TabsTrigger value="collection" className="gap-1.5 text-xs sm:text-sm">
                   <Banknote className="h-3.5 w-3.5" />
-                  Cuenta y cobro
+                  {t('treasury.cobro.collection')}
                 </TabsTrigger>
                 <TabsTrigger value="my-payments" className="gap-1.5 text-xs sm:text-sm">
                   <User className="h-3.5 w-3.5" />
-                  Mis pagos
+                  {t('treasury.cobro.myPayments')}
                 </TabsTrigger>
               </TabsList>
             )}
@@ -251,15 +265,15 @@ export function TreasuryPage() {
             <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
               <TabsTrigger value="recurring" className="gap-1.5 text-xs sm:text-sm">
                 <RefreshCw className="h-3.5 w-3.5" />
-                Recurrentes
+                {t('treasury.programacion.recurring')}
               </TabsTrigger>
               <TabsTrigger value="contracts" className="gap-1.5 text-xs sm:text-sm">
                 <FileText className="h-3.5 w-3.5" />
-                Contratos
+                {t('treasury.programacion.contracts')}
               </TabsTrigger>
               <TabsTrigger value="payment-plans" className="gap-1.5 text-xs sm:text-sm">
                 <CalendarRange className="h-3.5 w-3.5" />
-                Planes de pago
+                {t('treasury.programacion.paymentPlans')}
               </TabsTrigger>
             </TabsList>
             <div className="mt-4">
@@ -277,15 +291,15 @@ export function TreasuryPage() {
             <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
               <TabsTrigger value="transactions" className="gap-1.5 text-xs sm:text-sm">
                 <ArrowRightLeft className="h-3.5 w-3.5" />
-                Transacciones
+                {t('treasury.datos.transactions')}
               </TabsTrigger>
               <TabsTrigger value="budgets" className="gap-1.5 text-xs sm:text-sm">
                 <PieChart className="h-3.5 w-3.5" />
-                Presupuestos
+                {t('treasury.datos.budgets')}
               </TabsTrigger>
               <TabsTrigger value="statements" className="gap-1.5 text-xs sm:text-sm">
                 <ClipboardList className="h-3.5 w-3.5" />
-                Estados financieros
+                {t('treasury.datos.statements')}
               </TabsTrigger>
             </TabsList>
             <div className="mt-4">

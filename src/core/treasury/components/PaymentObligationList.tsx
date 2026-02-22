@@ -11,13 +11,7 @@ import { Plus, CheckCircle, Link2 } from 'lucide-react'
 import { CreateObligationDialog } from './CreateObligationDialog'
 import { RegisterPaymentDialog } from './RegisterPaymentDialog'
 import type { PaymentObligation } from '../types'
-
-const statusLabels: Record<string, string> = {
-  pending: 'Pendiente',
-  paid: 'Pagado',
-  overdue: 'Vencido',
-  partial: 'Parcial',
-}
+import { useI18n } from '@/shared/hooks/useI18n'
 
 function statusVariant(status: string): 'warning' | 'success' | 'destructive' | 'secondary' {
   switch (status) {
@@ -29,7 +23,15 @@ function statusVariant(status: string): 'warning' | 'success' | 'destructive' | 
 }
 
 export function PaymentObligationList() {
+  const { t } = useI18n()
   const [statusFilter, setStatusFilter] = useState<string>('')
+  const statusLabels: Record<string, string> = {
+    pending: t('obligations.status.pending'),
+    paid: t('obligations.status.paid'),
+    overdue: t('obligations.status.overdue'),
+    partial: t('obligations.status.partial'),
+  }
+
   const [showCreate, setShowCreate] = useState(false)
   const [payObligation, setPayObligation] = useState<PaymentObligation | null>(null)
   const { data: obligations, isLoading } = usePaymentObligations()
@@ -60,31 +62,31 @@ export function PaymentObligationList() {
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-lg border bg-yellow-50 p-3">
-          <div className="text-sm text-yellow-700">Pendientes</div>
+          <div className="text-sm text-yellow-700">{t('obligations.summary.pending')}</div>
           <div className="text-xl font-bold text-yellow-800">{pendingCount}</div>
         </div>
         <div className="rounded-lg border bg-red-50 p-3">
-          <div className="text-sm text-red-700">Vencidas</div>
+          <div className="text-sm text-red-700">{t('obligations.summary.overdue')}</div>
           <div className="text-xl font-bold text-red-800">{overdueCount}</div>
         </div>
         <div className="rounded-lg border bg-green-50 p-3">
-          <div className="text-sm text-green-700">Pagadas</div>
+          <div className="text-sm text-green-700">{t('obligations.summary.paid')}</div>
           <div className="text-xl font-bold text-green-800">{paidCount}</div>
         </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-48">
-          <option value="">Todos los estados</option>
-          <option value="pending">Pendiente</option>
-          <option value="paid">Pagado</option>
-          <option value="overdue">Vencido</option>
-          <option value="partial">Parcial</option>
+          <option value="">{t('obligations.filter.allStatuses')}</option>
+          <option value="pending">{t('obligations.status.pending')}</option>
+          <option value="paid">{t('obligations.status.paid')}</option>
+          <option value="overdue">{t('obligations.status.overdue')}</option>
+          <option value="partial">{t('obligations.status.partial')}</option>
         </Select>
         {canManageTreasury && (
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Nueva Obligacion
+            {t('obligations.new')}
           </Button>
         )}
       </div>
@@ -93,26 +95,26 @@ export function PaymentObligationList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Miembro</TableHead>
-              <TableHead className="hidden md:table-cell">Concepto</TableHead>
-              <TableHead className="text-right">Monto</TableHead>
-              <TableHead className="hidden sm:table-cell">Vencimiento</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="hidden lg:table-cell">Vinculo</TableHead>
-              {canManageTreasury && <TableHead>Acciones</TableHead>}
+              <TableHead>{t('obligations.table.member')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('obligations.table.concept')}</TableHead>
+              <TableHead className="text-right">{t('obligations.table.amount')}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('obligations.table.dueDate')}</TableHead>
+              <TableHead>{t('obligations.table.status')}</TableHead>
+              <TableHead className="hidden lg:table-cell">{t('obligations.table.link')}</TableHead>
+              {canManageTreasury && <TableHead>{t('obligations.table.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={canManageTreasury ? 7 : 6} className="text-center text-muted-foreground">
-                  Cargando...
+                  {t('obligations.table.loading')}
                 </TableCell>
               </TableRow>
             ) : !filtered || filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={canManageTreasury ? 7 : 6} className="text-center text-muted-foreground">
-                  Sin obligaciones de pago registradas.
+                  {t('obligations.table.empty')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -130,7 +132,7 @@ export function PaymentObligationList() {
                   <TableCell className="hidden lg:table-cell">
                     {ob.payment_transaction_id ? (
                       <span className="inline-flex items-center gap-1 text-xs text-green-600">
-                        <Link2 className="h-3 w-3" /> Tx vinculada
+                        <Link2 className="h-3 w-3" /> {t('obligations.linkedTx')}
                       </span>
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
@@ -147,7 +149,7 @@ export function PaymentObligationList() {
                             className="text-xs"
                           >
                             <CheckCircle className="mr-1 h-3 w-3" />
-                            Registrar Pago
+                            {t('obligations.registerPayment')}
                           </Button>
                         )}
                         {ob.status !== 'paid' && (
@@ -156,10 +158,10 @@ export function PaymentObligationList() {
                             onChange={(e) => handleStatusChange(ob, e.target.value)}
                             className="w-28 text-xs"
                           >
-                            <option value="pending">Pendiente</option>
-                            <option value="paid">Pagado</option>
-                            <option value="overdue">Vencido</option>
-                            <option value="partial">Parcial</option>
+                            <option value="pending">{t('obligations.status.pending')}</option>
+                            <option value="paid">{t('obligations.status.paid')}</option>
+                            <option value="overdue">{t('obligations.status.overdue')}</option>
+                            <option value="partial">{t('obligations.status.partial')}</option>
                           </Select>
                         )}
                       </div>

@@ -9,7 +9,6 @@ import {
   deactivateMember,
   reactivateMember,
 } from '../services/identity.service'
-import type { Role } from '@/shared/types'
 
 // ---------------------------------------------------------------------------
 // Query keys
@@ -53,7 +52,7 @@ export function useUpdateMemberRole() {
   const { communityId } = useCommunityContext()
 
   return useMutation({
-    mutationFn: ({ memberId, role }: { memberId: string; role: Role }) =>
+    mutationFn: ({ memberId, role }: { memberId: string; role: string }) =>
       updateMemberRole(memberId, role),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: memberKeys.list(communityId!) })
@@ -94,7 +93,7 @@ export function useInviteMember() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: ({ email, role }: { email: string; role: Role }) =>
+    mutationFn: ({ email, role }: { email: string; role: string }) =>
       createInvitation(communityId!, email, role, user!.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: memberKeys.list(communityId!) })

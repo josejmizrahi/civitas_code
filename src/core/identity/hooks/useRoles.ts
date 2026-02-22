@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { useCommunityContext } from '@/app/providers'
+import { supabase } from '@/shared/lib/supabase'
 // ---------------------------------------------------------------------------
 // Static role definitions — Role is a string union, not a DB entity
 // ---------------------------------------------------------------------------
@@ -23,9 +25,24 @@ const STATIC_ROLES: RoleEntry[] = [
 // ---------------------------------------------------------------------------
 
 export function useRoles() {
+  const { communityId } = useCommunityContext()
   return useQuery({
-    queryKey: ['roles', 'static'],
-    queryFn: () => STATIC_ROLES,
-    staleTime: Infinity,
+    queryKey: ['roles', communityId ?? 'static'],
+    queryFn: async () => {
+      if (!communityId) return STATIC_ROLES
+      const { data, error } = await supabase
+        .from('roles')
+        .select('id, name, permissions')
+        .eq('community_id', communityId)
+        .order('name', { ascending: true })
+      if (error || !data || data.length === 0) return STATIC_ROLES
+      return data.map((r) => ({
+        // members.role stores role key/name, so we use name as canonical id
+        id: r.name,
+        name: r.name,
+        permissions: (r.permissions as Record<string, boolean> | null) ?? {},
+      }))
+    },
+    staleTime: 60_000,
   })
 }
