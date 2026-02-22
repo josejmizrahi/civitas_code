@@ -63,6 +63,8 @@ export function AdminTreasuryView() {
   const treasuryMode = rules?.treasury?.mode || 'import'
   const collectionConfig = getCollectionConfig(rules)
   const hasClabe = !!collectionConfig?.clabe
+  const ifpeStatus = (community as { ifpe_status?: string } | null)?.ifpe_status
+  const showBroxelBanner = treasuryMode === 'import' && ifpeStatus !== 'active' && ifpeStatus !== 'pending_kyb'
 
   const { data: stats, isLoading: statsLoading } = useDashboard()
   const { data: movimientosStats } = useDashboard(adminTab === 'movimientos' ? movimientosFund : undefined)
@@ -156,6 +158,26 @@ export function AdminTreasuryView() {
           </div>
         </div>
       </header>
+
+      {/* CTA BROXEL: visible cuando modo manual y sin acceso activo/pendiente */}
+      {showBroxelBanner && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 text-sm text-emerald-900">
+            <Building2 className="h-4 w-4 shrink-0" />
+            <span>
+              Solicita acceso a BROXEL para recibir pagos SPEI, conciliar cuotas automáticamente y dispersar pagos con gobernanza.
+            </span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-emerald-300 text-emerald-800 hover:bg-emerald-100 shrink-0"
+            onClick={() => navigate(`/c/${community?.slug}/settings?tab=rules&broxel=1`)}
+          >
+            Solicitar acceso BROXEL
+          </Button>
+        </div>
+      )}
 
       {/* Quick metrics — 4 cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

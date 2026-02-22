@@ -12,8 +12,8 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Label } from '@/shared/components/ui/label'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
-import { Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote, Bell, BellOff, Loader2, ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote, Bell, BellOff, Loader2, ArrowLeft, Building2, CheckCircle2 } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { InviteMemberDialog } from '@/core/identity/components/InviteMemberDialog'
 import { formatDate } from '@/shared/lib/utils'
 import { isValidCurrencyCode, isValidLocaleCode, normalizeCurrencyCode, normalizeLocaleCode } from '@/shared/lib/locale'
@@ -24,13 +24,19 @@ import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { BroxelSubscriptionWizard } from '@/core/treasury/components/BroxelSubscriptionWizard'
 
 export function SettingsPage() {
   const { communityId, community, currentMember } = useCommunityContext()
   const { isAdmin } = usePermissions()
   const queryClient = useQueryClient()
-  const [tab, setTab] = useState('general')
+  const [searchParams] = useSearchParams()
+  const tabFromUrl = searchParams.get('tab')
+  const [tab, setTab] = useState<'general' | 'categories' | 'invitations' | 'rules' | 'privacy' | 'terminos'>(
+    (tabFromUrl === 'rules' || tabFromUrl === 'categories' || tabFromUrl === 'invitations' || tabFromUrl === 'privacy' || tabFromUrl === 'terminos') ? tabFromUrl : 'general'
+  )
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
+  const [showBroxelWizard, setShowBroxelWizard] = useState(false)
 
   // Push notification state
   const [pushSubscribed, setPushSubscribed] = useState<boolean | null>(null)
@@ -68,6 +74,10 @@ export function SettingsPage() {
       setRules(getCommunityRules(null, (community as any)?.rules))
     }
   }, [community])
+
+  useEffect(() => {
+    if (searchParams.get('broxel') === '1') setShowBroxelWizard(true)
+  }, [searchParams])
 
   const navigate = useNavigate()
 
@@ -202,7 +212,7 @@ export function SettingsPage() {
         </div>
       </div>
 
-      <Tabs value={tab} onValueChange={setTab}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
         <TabsList className="gap-1">
           <TabsTrigger value="general" className="shrink-0 whitespace-nowrap">{t('settings.tab.general')}</TabsTrigger>
           <TabsTrigger value="categories" className="shrink-0 whitespace-nowrap">{t('settings.tab.categories')}</TabsTrigger>
@@ -677,6 +687,35 @@ export function SettingsPage() {
                   </div>
                 </div>
 
+                {/* BROXEL / Pagos electrónicos — visible desde el inicio; acceso por suscripción + documentación */}
+                <div className="rounded-md border border-emerald-200 bg-emerald-50/40 p-4 space-y-3">
+                  <p className="text-sm font-medium text-emerald-900 flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Pagos electrónicos con BROXEL
+                  </p>
+                  <p className="text-xs text-emerald-800/90">
+                    Recibe SPEI, concilia cuotas automáticamente y dispersa pagos con gobernanza. Debes suscribirte y subir documentación para obtener acceso.
+                  </p>
+                  {(community as any)?.ifpe_status === 'active' ? (
+                    <div className="flex items-center gap-2 text-sm text-emerald-800">
+                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                      <span>Acceso BROXEL activo. CLABE y opciones en Tesorería.</span>
+                    </div>
+                  ) : (community as any)?.ifpe_status === 'pending_kyb' ? (
+                    <p className="text-sm text-amber-800">Solicitud en revisión. Te notificaremos cuando esté lista.</p>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="default"
+                      size="sm"
+                      className="bg-emerald-700 hover:bg-emerald-800"
+                      onClick={() => setShowBroxelWizard(true)}
+                    >
+                      Solicitar acceso a BROXEL
+                    </Button>
+                  )}
+                </div>
+
                 {/* Currency */}
                 <div className="space-y-2">
                   <Label htmlFor="locale">Locale</Label>
@@ -797,6 +836,12 @@ export function SettingsPage() {
                       />
                       <span className="text-sm">Auto-conciliación de SPEI</span>
                     </label>
+                  </div>
+                )}
+
+                {showBroxelWizard && (
+                  <div className="mt-4">
+                    <BroxelSubscriptionWizard onClose={() => setShowBroxelWizard(false)} />
                   </div>
                 )}
               </CardContent>
