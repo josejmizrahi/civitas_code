@@ -59,6 +59,15 @@ export type I18nKey =
   | 'treasury.datos.transactions'
   | 'treasury.datos.budgets'
   | 'treasury.datos.statements'
+  | 'treasury.member.subtitle'
+  | 'treasury.member.loading'
+  | 'treasury.member.totalPendiente'
+  | 'treasury.member.totalPagado'
+  | 'treasury.member.estadoFinanciero'
+  | 'treasury.member.status.moroso'
+  | 'treasury.member.status.pendiente'
+  | 'treasury.member.status.alCorriente'
+  | 'treasury.member.resumenComunidad'
   | 'governance.title'
   | 'governance.subtitle.proposals'
   | 'governance.subtitle.assemblies'
@@ -815,6 +824,15 @@ const es: Dictionary = {
   'treasury.datos.transactions': 'Transacciones',
   'treasury.datos.budgets': 'Presupuestos',
   'treasury.datos.statements': 'Estados financieros',
+  'treasury.member.subtitle': 'Tus pagos e instrucciones',
+  'treasury.member.loading': 'Cargando tus pagos…',
+  'treasury.member.totalPendiente': 'Total pendiente',
+  'treasury.member.totalPagado': 'Total pagado',
+  'treasury.member.estadoFinanciero': 'Estado financiero',
+  'treasury.member.status.moroso': 'Moroso',
+  'treasury.member.status.pendiente': 'Pendiente',
+  'treasury.member.status.alCorriente': 'Al corriente',
+  'treasury.member.resumenComunidad': 'Resumen de la comunidad',
   'governance.title': 'Gobernanza',
   'governance.subtitle.proposals': 'Propuestas y votaciones',
   'governance.subtitle.assemblies': 'Asambleas y convocatorias',
@@ -1566,6 +1584,15 @@ const en: Dictionary = {
   'treasury.datos.transactions': 'Transactions',
   'treasury.datos.budgets': 'Budgets',
   'treasury.datos.statements': 'Financial statements',
+  'treasury.member.subtitle': 'Your payments and instructions',
+  'treasury.member.loading': 'Loading your payments…',
+  'treasury.member.totalPendiente': 'Total pending',
+  'treasury.member.totalPagado': 'Total paid',
+  'treasury.member.estadoFinanciero': 'Financial status',
+  'treasury.member.status.moroso': 'Delinquent',
+  'treasury.member.status.pendiente': 'Pending',
+  'treasury.member.status.alCorriente': 'In good standing',
+  'treasury.member.resumenComunidad': 'Community summary',
   'governance.title': 'Governance',
   'governance.subtitle.proposals': 'Proposals and voting',
   'governance.subtitle.assemblies': 'Assemblies and calls',
