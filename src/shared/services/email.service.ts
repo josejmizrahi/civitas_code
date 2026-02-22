@@ -43,6 +43,7 @@ export async function sendEmailToMembers(
   data: Record<string, unknown>,
 ): Promise<void> {
   try {
+    const payload = { ...data, community_id: communityId }
     const { data: members, error } = await supabase
       .from('members')
       .select('user_id')
@@ -68,14 +69,14 @@ export async function sendEmailToMembers(
         .filter(Boolean) as string[]
 
       for (const email of emails) {
-        sendEmail(email, type, data)
+        sendEmail(email, type, payload)
       }
       return
     }
 
     for (const profile of profiles as { email: string }[]) {
       if (profile.email) {
-        sendEmail(profile.email, type, data)
+        sendEmail(profile.email, type, payload)
       }
     }
   } catch (err) {

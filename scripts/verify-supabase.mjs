@@ -85,6 +85,7 @@ const EXPECTED_FUNCTIONS = [
   'generate_recurring_obligations',
   'process_recurring_schedules',
   'update_contract_compliance',
+  'get_community_by_clabe',
 ]
 
 let passed = 0

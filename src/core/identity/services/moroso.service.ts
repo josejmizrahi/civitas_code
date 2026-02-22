@@ -214,6 +214,7 @@ export async function createMorosoNotice(
     const email = (profile as { email?: string } | null)?.email
     if (email) {
       sendEmail(email, 'moroso_notice', {
+        community_id: communityId,
         overdue_count: opts?.obligations?.length ?? 1,
         total_debt: outstandingAmount,
         currency: 'MXN',

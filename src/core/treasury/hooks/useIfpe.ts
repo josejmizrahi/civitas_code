@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCommunityContext } from '@/app/providers'
+import { useCommunityContext, useAuth } from '@/app/providers'
 import {
   getWebhookEvents,
   manualReconcile,
@@ -30,10 +30,11 @@ export function useReconciliationStats() {
 export function useManualReconcile() {
   const queryClient = useQueryClient()
   const { communityId } = useCommunityContext()
+  const { user } = useAuth()
 
   return useMutation({
     mutationFn: ({ eventId, obligationId }: { eventId: string; obligationId: string }) =>
-      manualReconcile(eventId, obligationId, communityId!),
+      manualReconcile(eventId, obligationId, communityId!, user!.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ifpe-events'] })
       queryClient.invalidateQueries({ queryKey: ['ifpe-stats'] })

@@ -1,4 +1,5 @@
 import { serve } from 'https://deno.land/std@0.220.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Required in Supabase: Edge Functions → send-email → Secrets
 // - RESEND_API_KEY: API key from https://resend.com (re_...)
@@ -7,6 +8,18 @@ import { serve } from 'https://deno.land/std@0.220.0/http/server.ts'
 //   Cuando verifiques un dominio, pon ej. notificaciones@tudominio.com
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'onboarding@resend.dev'
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+/** Types that require community_id and admin/tesorero/comite authz. */
+const COMMUNITY_SCOPED_TYPES = new Set([
+  'proposal_new', 'proposal_approved', 'payment_overdue', 'pre_execution', 'moroso_notice',
+  'convocatoria', 'voting_opened', 'voting_closing_soon', 'payment_reminder', 'invitation',
+])
+
+/** Max emails per user per minute (rate limit). */
+const RATE_LIMIT_PER_MIN = 30
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
 interface EmailRequest {
   to: string
@@ -175,6 +188,72 @@ function renderTemplate(type: string, data: Record<string, unknown>): { subject:
   return { subject, html }
 }
 
+function getUserIdFromJwt(authHeader: string | null): string | null {
+  if (!authHeader?.startsWith('Bearer ')) return null
+  const token = authHeader.slice(7)
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const payload = JSON.parse(atob(parts[1]))
+    return payload.sub ?? null
+  } catch {
+    return null
+  }
+}
+
+async function assertSendEmailAuthz(
+  userId: string | null,
+  type: string,
+  data: Record<string, unknown>,
+): Promise<{ ok: true } | { ok: false; status: number; body: string }> {
+  if (type === 'password_reset') {
+    return { ok: true }
+  }
+  if (!userId) {
+    return { ok: false, status: 401, body: JSON.stringify({ error: 'Unauthorized' }) }
+  }
+  if (!COMMUNITY_SCOPED_TYPES.has(type)) {
+    return { ok: true }
+  }
+  const communityId = data?.community_id as string | undefined
+  if (!communityId) {
+    return { ok: false, status: 400, body: JSON.stringify({ error: 'community_id required for this email type' }) }
+  }
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+  const { data: member, error } = await supabase
+    .from('members')
+    .select('role')
+    .eq('community_id', communityId)
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .maybeSingle()
+  if (error || !member) {
+    return { ok: false, status: 403, body: JSON.stringify({ error: 'Forbidden' }) }
+  }
+  const role = (member as { role: string }).role
+  if (!['admin', 'tesorero', 'comite_vigilancia'].includes(role)) {
+    return { ok: false, status: 403, body: JSON.stringify({ error: 'Forbidden' }) }
+  }
+  return { ok: true }
+}
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now()
+  const windowMs = 60_000
+  let entry = rateLimitMap.get(userId)
+  if (!entry) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + windowMs })
+    return true
+  }
+  if (now >= entry.resetAt) {
+    entry.count = 1
+    entry.resetAt = now + windowMs
+    return true
+  }
+  entry.count += 1
+  return entry.count <= RATE_LIMIT_PER_MIN
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -187,10 +266,25 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization')
+    const userId = getUserIdFromJwt(authHeader)
+
     const { to, type, data } = (await req.json()) as EmailRequest
 
     if (!to || !type) {
       return new Response(JSON.stringify({ error: 'Missing to or type' }), { status: 400 })
+    }
+
+    const authz = await assertSendEmailAuthz(userId, type, data || {})
+    if (!authz.ok) {
+      return new Response(authz.body, { status: authz.status, headers: { 'Content-Type': 'application/json' } })
+    }
+
+    if (userId && !checkRateLimit(userId)) {
+      return new Response(
+        JSON.stringify({ error: 'Rate limit exceeded' }),
+        { status: 429, headers: { 'Content-Type': 'application/json' } },
+      )
     }
 
     const rendered = renderTemplate(type, data || {})

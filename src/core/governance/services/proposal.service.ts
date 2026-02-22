@@ -1,6 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
 import { logger } from '@/shared/lib/logger'
 import { AppError } from '@/shared/lib/errors'
+import { assertCanPerformAction } from '@/shared/services/permission.service'
 import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
 import { sendEmailToMembers } from '@/shared/services/email.service'
 import type { Proposal } from '../types'
@@ -56,6 +57,8 @@ export async function createProposal(
     voting_options?: { id: string; label: string }[]
   }
 ): Promise<Proposal> {
+  await assertCanPerformAction(communityId, proposal.created_by, 'create_proposal')
+
   const { data: community } = await supabase
     .from('communities')
     .select('config, rules')
@@ -123,6 +126,10 @@ export async function createProposal(
 }
 
 export async function startDiscussion(proposalId: string, communityId: string, discussionHours: number): Promise<Proposal> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new AppError('Debes iniciar sesión', 'UNAUTHORIZED')
+  await assertCanPerformAction(communityId, user.id, 'start_discussion')
+
   const proposal = await getProposal(proposalId)
   if (proposal.status !== 'draft') throw new AppError('Solo se puede iniciar discusión desde el estado borrador', 'VALIDATION')
 
@@ -150,6 +157,10 @@ export async function startDiscussion(proposalId: string, communityId: string, d
 }
 
 export async function openVotingFromDiscussion(proposalId: string, communityId: string, votingEnd: string | null): Promise<Proposal> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new AppError('Debes iniciar sesión', 'UNAUTHORIZED')
+  await assertCanPerformAction(communityId, user.id, 'open_voting')
+
   const proposal = await getProposal(proposalId)
   if (proposal.status !== 'discussion') throw new AppError('Solo se puede abrir votación desde discusión', 'VALIDATION')
 
@@ -222,6 +233,8 @@ export async function updateProposalStatus(proposalId: string, status: string, e
 }
 
 export async function closeProposal(proposalId: string, communityId: string, closedByUserId: string): Promise<Proposal> {
+  await assertCanPerformAction(communityId, closedByUserId, 'close_proposal')
+
   const proposal = await getProposal(proposalId)
   const summary = await getVoteSummary(proposalId, communityId, proposal.quorum_required, proposal.majority_required)
 
@@ -287,6 +300,8 @@ export async function processAutoExecutions(): Promise<number> {
 }
 
 export async function executeProposal(proposalId: string, communityId: string, executedByUserId: string): Promise<Proposal> {
+  await assertCanPerformAction(communityId, executedByUserId, 'execute_proposal')
+
   const proposal = await getProposal(proposalId)
   if (proposal.status !== 'approved') throw new AppError('Solo se pueden ejecutar propuestas aprobadas', 'VALIDATION')
   if (!proposal.financial_instruction) throw new AppError('Esta propuesta no tiene instrucción financiera', 'VALIDATION')

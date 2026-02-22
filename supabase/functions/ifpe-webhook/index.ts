@@ -109,17 +109,28 @@ serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
   try {
-    // Find the community by CLABE
-    const { data: communities } = await supabase
-      .from('communities')
-      .select('id, rules')
+    // Idempotency: reject duplicate clave_rastreo before any insert
+    const { data: existing } = await supabase
+      .from('ifpe_webhook_events')
+      .select('id')
+      .eq('clave_rastreo', payload.clave_rastreo)
+      .limit(1)
+      .maybeSingle()
 
-    const matchedCommunity = (communities || []).find((c: { id: string; rules?: { treasury?: { clabe?: string } } }) => {
-      const clabe = c.rules?.treasury?.clabe
-      return clabe && clabe === payload.clabe_destino
-    })
+    if (existing) {
+      log('info', 'duplicate_event', { clave_rastreo: payload.clave_rastreo })
+      return new Response(JSON.stringify({ status: 'duplicate', clave_rastreo: payload.clave_rastreo }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
 
-    if (!matchedCommunity) {
+    // Lookup community by CLABE only (RPC — no full table scan, single row)
+    const { data: communityRows, error: communityErr } = await supabase
+      .rpc('get_community_by_clabe', { p_clabe: payload.clabe_destino })
+
+    const matchedCommunity = Array.isArray(communityRows) && communityRows.length > 0 ? communityRows[0] : null
+    if (communityErr || !matchedCommunity) {
       log('warn', 'community_not_found', { clabe_destino: payload.clabe_destino })
       return new Response(
         JSON.stringify({ error: 'No community found for CLABE', clabe: payload.clabe_destino }),
@@ -131,7 +142,7 @@ serve(async (req) => {
     const { data: event, error: insertErr } = await supabase
       .from('ifpe_webhook_events')
       .insert({
-        community_id: matchedCommunity.id,
+        community_id: communityId,
         event_type: payload.event_type,
         clabe_destino: payload.clabe_destino,
         clabe_origen: payload.clabe_origen || null,
@@ -149,8 +160,11 @@ serve(async (req) => {
 
     if (insertErr) {
       if (insertErr.code === '23505') {
-        log('info', 'duplicate_event', { clave_rastreo: payload.clave_rastreo })
-        return new Response(JSON.stringify({ status: 'duplicate', clave_rastreo: payload.clave_rastreo }), { status: 200 })
+        log('info', 'duplicate_event_constraint', { clave_rastreo: payload.clave_rastreo })
+        return new Response(JSON.stringify({ status: 'duplicate', clave_rastreo: payload.clave_rastreo }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
       }
       throw insertErr
     }

@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { AppError } from '@/shared/lib/errors'
+import { assertCanPerformAction } from '@/shared/services/permission.service'
 import type { Vote, VoteSummary } from '../types'
 import { getProposal } from './proposal.service'
 
@@ -19,6 +20,10 @@ export async function castVote(vote: {
   block_reason?: string
 }): Promise<Vote> {
   const proposal = await getProposal(vote.proposal_id)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new AppError('Debes iniciar sesión para votar', 'UNAUTHORIZED')
+  await assertCanPerformAction(proposal.community_id, user.id, 'cast_vote', { memberId: vote.member_id })
+
   if (proposal.status !== 'active') throw new AppError('La propuesta no está activa para votación', 'VALIDATION')
   if (proposal.voting_end && new Date(proposal.voting_end) < new Date()) throw new AppError('El periodo de votación ha terminado', 'VALIDATION')
 

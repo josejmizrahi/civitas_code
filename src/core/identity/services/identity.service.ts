@@ -139,6 +139,7 @@ export async function createInvitation(
   }
 
   sendEmail(email, 'invitation', {
+    community_id: communityId,
     invite_link: inviteLink,
     community_name: communityName,
     role,

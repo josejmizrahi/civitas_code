@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { assertCanPerformAction } from '@/shared/services/permission.service'
 
 export interface IfpeWebhookEvent {
   id: string
@@ -55,8 +56,11 @@ export async function getWebhookEvents(
 export async function manualReconcile(
   eventId: string,
   obligationId: string,
-  communityId: string
+  communityId: string,
+  userId: string
 ): Promise<void> {
+  await assertCanPerformAction(communityId, userId, 'reconcile_payment')
+
   const { data: event, error: eventErr } = await supabase.from('ifpe_webhook_events')
     .select('*')
     .eq('id', eventId)
