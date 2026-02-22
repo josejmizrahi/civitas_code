@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCommunityContext, useAuth } from '@/app/providers'
-import { getTransactions, createTransaction, updateTransaction, deleteTransaction } from '../services/treasury.service'
+import { getTransactions, createTransaction } from '../services/treasury.service'
 
 const txKeys = {
   all: ['transactions'] as const,
@@ -23,26 +23,10 @@ export function useCreateTransaction() {
   const { user } = useAuth()
 
   return useMutation({
-    mutationFn: (tx: { type: string; amount: number; category_id?: string; description: string; date: string }) =>
+    mutationFn: (tx: { type: string; amount: number; category_id?: string; description: string; date: string; emergency?: boolean }) =>
       createTransaction(communityId!, { ...tx, created_by: user!.id }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: txKeys.all })
     },
-  })
-}
-
-export function useUpdateTransaction() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => updateTransaction(id, updates),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: txKeys.all }) },
-  })
-}
-
-export function useDeleteTransaction() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) => deleteTransaction(id),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: txKeys.all }) },
   })
 }

@@ -1,6 +1,10 @@
 import { supabase } from '@/shared/lib/supabase'
 import { logger } from '@/shared/lib/logger'
 import { sendEmail } from '@/shared/services/email.service'
+import { getCommunityConfigPreset, mergeCommunityConfig } from '@/shared/config/community-config'
+import { DEFAULT_RULES } from '@/shared/types/rules'
+import { getPresetForType } from '@/shared/config/vertical-presets'
+import type { CommunityType } from '@/shared/types'
 import type { Member, Invitation, Community } from '../types'
 
 const ROLE_LABELS: Record<string, string> = {
@@ -176,11 +180,73 @@ function slugify(text: string): string {
     .replace(/-+/g, '-')
 }
 
+function resolveCommunityType(type?: string): CommunityType {
+  if (type === 'residential' || type === 'religious' || type === 'manufacturing' || type === 'cooperative' || type === 'other') {
+    return type
+  }
+  return 'residential'
+}
+
+function hasNonEmptyObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && Object.keys(value as Record<string, unknown>).length > 0)
+}
+
+function getDefaultRulesForType(type: CommunityType): Record<string, unknown> {
+  const preset = getPresetForType(type)
+  return {
+    ...DEFAULT_RULES,
+    governance: { ...DEFAULT_RULES.governance, ...(preset?.rules.governance ?? {}) },
+    treasury: { ...DEFAULT_RULES.treasury, ...(preset?.rules.treasury ?? {}) },
+    identity: { ...DEFAULT_RULES.identity, ...(preset?.rules.identity ?? {}) },
+  } as unknown as Record<string, unknown>
+}
+
+async function seedCommunityDefaults(communityId: string, type: CommunityType): Promise<void> {
+  const { data: existing, error: existingError } = await supabase
+    .from('communities')
+    .select('config, rules')
+    .eq('id', communityId)
+    .single()
+
+  if (existingError) {
+    logger.warn('Could not read community defaults after creation:', existingError.message)
+    return
+  }
+
+  const updates: Record<string, unknown> = {}
+  const existingConfig = existing?.config as unknown
+  const existingRules = existing?.rules as unknown
+
+  if (!hasNonEmptyObject(existingConfig)) {
+    const configPreset = getCommunityConfigPreset(type)
+    updates.config = mergeCommunityConfig(configPreset, type)
+  }
+
+  if (!hasNonEmptyObject(existingRules)) {
+    updates.rules = getDefaultRulesForType(type)
+  }
+
+  if (Object.keys(updates).length === 0) return
+
+  const { error: updateError } = await supabase
+    .from('communities')
+    .update(updates)
+    .eq('id', communityId)
+
+  if (updateError) {
+    logger.warn('Could not seed community defaults after creation:', updateError.message)
+  }
+}
+
 export async function createCommunity(
   userId: string,
-  data: { name: string; type?: string; description?: string },
+  data: { name: string; type?: string; description?: string; slug?: string },
 ): Promise<Community> {
-  const slug = `${slugify(data.name)}-${crypto.randomUUID().slice(0, 6)}`
+  const communityType = resolveCommunityType(data.type)
+  const baseSlug = slugify((data.slug ?? '').trim() || data.name)
+  const slug = (data.slug ?? '').trim().length > 0
+    ? baseSlug || `comunidad-${crypto.randomUUID().slice(0, 6)}`
+    : `${baseSlug || 'comunidad'}-${crypto.randomUUID().slice(0, 6)}`
 
   // Use RPC to atomically create community + admin member in one transaction.
   // This avoids the RLS race condition where .select() after INSERT fails
@@ -189,7 +255,7 @@ export async function createCommunity(
     p_user_id: userId,
     p_name: data.name,
     p_slug: slug,
-    p_type: data.type ?? 'residential',
+    p_type: communityType,
     p_description: data.description ?? null,
   })
 
@@ -201,7 +267,7 @@ export async function createCommunity(
       .insert({
         name: data.name,
         slug,
-        type: data.type ?? 'residential',
+        type: communityType,
         ...(data.description ? { description: data.description } : {}),
       })
       .select()
@@ -209,10 +275,13 @@ export async function createCommunity(
 
     if (communityError) throw communityError
     await joinCommunity(community.id, userId, 'admin')
+    await seedCommunityDefaults(community.id, communityType)
     return community as Community
   }
 
-  return result as Community
+  const community = result as Community
+  await seedCommunityDefaults(community.id, communityType)
+  return community
 }
 
 export async function getUserCommunities(
@@ -275,6 +344,47 @@ export async function getCommunity(communityId: string): Promise<Community> {
 
   if (error) throw error
   return data as Community
+}
+
+export async function updateCommunityConfig(
+  communityId: string,
+  config: Record<string, unknown>,
+): Promise<void> {
+  const { error } = await supabase
+    .from('communities')
+    .update({ config })
+    .eq('id', communityId)
+
+  if (error) throw error
+}
+
+export async function seedCommunityCategories(
+  communityId: string,
+  categories: { income: string[]; expense: string[] },
+): Promise<void> {
+  const { count, error: countError } = await supabase
+    .from('categories')
+    .select('id', { count: 'exact', head: true })
+    .eq('community_id', communityId)
+
+  if (countError) throw countError
+  if ((count ?? 0) > 0) return
+
+  const unique = <T extends string>(arr: T[]) => [...new Set(arr)]
+  const income = unique(categories.income.map((n) => n.trim()).filter(Boolean))
+  const expense = unique(categories.expense.map((n) => n.trim()).filter(Boolean))
+
+  const rows = [
+    ...income.map((name) => ({ community_id: communityId, name, type: 'income', is_system: true })),
+    ...expense.map((name) => ({ community_id: communityId, name, type: 'expense', is_system: true })),
+  ]
+  if (rows.length === 0) return
+
+  const { error } = await supabase
+    .from('categories')
+    .insert(rows as unknown as Record<string, unknown>[])
+
+  if (error) throw error
 }
 
 export async function getCurrentMember(

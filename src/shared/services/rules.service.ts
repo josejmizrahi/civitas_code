@@ -2,6 +2,7 @@ import { supabase } from '@/shared/lib/supabase'
 import type { CommunityRules, FinancialStanding } from '@/shared/types/rules'
 import { DEFAULT_RULES } from '@/shared/types/rules'
 import type { Role } from '@/shared/types'
+import { AppError } from '@/shared/lib/errors'
 
 export function getCommunityRules(config: Record<string, unknown> | null, rules?: Record<string, unknown> | null): CommunityRules {
   const raw = rules || config?.rules as Record<string, unknown> | undefined
@@ -105,4 +106,84 @@ export function canPerformAction(
   }
 
   return { allowed: true }
+}
+
+export type ProtectedAction =
+  | 'create_proposal'
+  | 'cast_vote'
+  | 'delegate_vote'
+  | 'open_voting'
+  | 'close_proposal'
+  | 'execute_proposal'
+  | 'register_transaction'
+  | 'approve_discretionary'
+  | 'reconcile_payment'
+
+function hasRole(memberRole: Role, allowed: Role[]): boolean {
+  return allowed.includes(memberRole)
+}
+
+function mapProtectedActionToRuleAction(action: ProtectedAction): 'vote' | 'propose' | 'delegate' | null {
+  if (action === 'create_proposal') return 'propose'
+  if (action === 'cast_vote') return 'vote'
+  if (action === 'delegate_vote') return 'delegate'
+  return null
+}
+
+export async function assertCanPerformAction(
+  communityId: string,
+  memberId: string,
+  action: ProtectedAction,
+): Promise<void> {
+  const [{ data: member, error: memberError }, { data: community, error: communityError }] = await Promise.all([
+    supabase
+      .from('members')
+      .select('id, community_id, role, status, financial_standing')
+      .eq('id', memberId)
+      .eq('community_id', communityId)
+      .single(),
+    supabase
+      .from('communities')
+      .select('id, config, rules')
+      .eq('id', communityId)
+      .single(),
+  ])
+
+  if (memberError || !member) {
+    throw new AppError('Miembro no encontrado en la comunidad activa.', 'NOT_FOUND')
+  }
+  if (communityError || !community) {
+    throw new AppError('Comunidad no encontrada.', 'NOT_FOUND')
+  }
+  if (member.status !== 'active') {
+    throw new AppError('Solo miembros activos pueden realizar esta acción.', 'FORBIDDEN')
+  }
+
+  const role = member.role as Role
+  const rules = getCommunityRules(
+    (community.config ?? null) as Record<string, unknown> | null,
+    (community.rules ?? null) as Record<string, unknown> | null,
+  )
+
+  const roleGuards: Partial<Record<ProtectedAction, Role[]>> = {
+    open_voting: ['admin', 'platform_admin'],
+    close_proposal: ['admin', 'platform_admin'],
+    execute_proposal: ['admin', 'platform_admin'],
+    register_transaction: ['admin', 'platform_admin', 'tesorero'],
+    approve_discretionary: ['admin', 'platform_admin', 'comite_vigilancia'],
+    reconcile_payment: ['admin', 'platform_admin', 'tesorero'],
+  }
+
+  const allowedRoles = roleGuards[action]
+  if (allowedRoles && !hasRole(role, allowedRoles)) {
+    throw new AppError('Tu rol no tiene permiso para realizar esta acción.', 'FORBIDDEN')
+  }
+
+  const mappedAction = mapProtectedActionToRuleAction(action)
+  if (!mappedAction) return
+
+  const check = canPerformAction(mappedAction, role, member.financial_standing as FinancialStanding, rules)
+  if (!check.allowed) {
+    throw new AppError(check.reason ?? 'No autorizado por reglas de la comunidad.', 'FORBIDDEN')
+  }
 }

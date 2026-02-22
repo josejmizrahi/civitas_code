@@ -98,3 +98,31 @@ export async function isPushSubscribed(): Promise<boolean> {
     return false
   }
 }
+
+/**
+ * Fire-and-forget push dispatch through an optional Edge Function.
+ * If the function is not deployed, it fails silently (logs warning only).
+ */
+export async function sendPushToMembers(
+  memberIds: string[],
+  title: string,
+  body: string,
+  data?: Record<string, unknown>,
+): Promise<void> {
+  if (!memberIds.length) return
+  try {
+    const { error } = await supabase.functions.invoke('send-push', {
+      body: {
+        member_ids: memberIds,
+        title,
+        body,
+        data: data ?? {},
+      },
+    })
+    if (error) {
+      logger.warn('[push] send-push Edge Function unavailable or failed:', error.message)
+    }
+  } catch (err) {
+    logger.warn('[push] send-push invocation failed:', err)
+  }
+}

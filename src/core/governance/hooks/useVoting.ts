@@ -4,6 +4,7 @@ import {
   getVotes,
   castVote,
   castVoteWithDelegations,
+  getMemberVoteWeight,
   getVoteSummary,
   closeProposal,
   approveMinutes,
@@ -29,6 +30,15 @@ export function useVoteSummary(
     queryKey: ['vote-summary', proposalId, quorumRequired, majorityRequired],
     queryFn: () => getVoteSummary(proposalId!, communityId!, quorumRequired, majorityRequired),
     enabled: !!proposalId && !!communityId,
+  })
+}
+
+export function useMemberVoteWeight(memberId: string | undefined) {
+  const { communityId } = useCommunityContext()
+  return useQuery({
+    queryKey: ['member-vote-weight', communityId, memberId],
+    queryFn: () => getMemberVoteWeight(memberId!, communityId!),
+    enabled: !!communityId && !!memberId,
   })
 }
 

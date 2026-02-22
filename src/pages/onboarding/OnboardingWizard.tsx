@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useCommunityContext } from '@/app/providers'
-import { createCommunity } from '@/core/identity/services/identity.service'
+import { createCommunity, seedCommunityCategories, updateCommunityConfig } from '@/core/identity/services/identity.service'
 import { updateCommunityRules } from '@/shared/services/rules.service'
 import { DEFAULT_RULES } from '@/shared/types/rules'
 import type { CommunityRules } from '@/shared/types/rules'
 import type { CommunityType } from '@/shared/types'
+import {
+  getCommunityConfigPreset,
+  type CommunityConfigShape,
+  type MembershipAttributeSchemaItem,
+} from '@/shared/config/community-config'
 import { useToast } from '@/shared/components/ui/toast'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -185,6 +190,15 @@ function getRulesForType(type: CommunityType): CommunityRules {
   }
 }
 
+function sanitizeSlug(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+}
+
 // ---------------------------------------------------------------------------
 // Step indicator
 // ---------------------------------------------------------------------------
@@ -303,13 +317,17 @@ function StepCommunityType({
 
 function StepCommunityData({
   name,
+  slug,
   description,
   onNameChange,
+  onSlugChange,
   onDescriptionChange,
 }: {
   name: string
+  slug: string
   description: string
   onNameChange: (v: string) => void
+  onSlugChange: (v: string) => void
   onDescriptionChange: (v: string) => void
 }) {
   return (
@@ -339,6 +357,26 @@ function StepCommunityData({
           )}
         </div>
         <div className="space-y-2">
+          <Label htmlFor="community-slug">
+            Slug de la comunidad <span className="text-destructive">*</span>
+          </Label>
+          <Input
+            id="community-slug"
+            value={slug}
+            onChange={(e) => onSlugChange(e.target.value)}
+            placeholder="residencial-las-palmas"
+            required
+          />
+          <p className="text-xs text-muted-foreground">
+            URL de acceso: /c/{slug || 'tu-comunidad'}
+          </p>
+          {slug.length > 0 && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && (
+            <p className="text-sm text-destructive">
+              Usa solo minúsculas, números y guiones (sin espacios).
+            </p>
+          )}
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="community-description">
             Descripción <span className="text-muted-foreground text-xs">(opcional)</span>
           </Label>
@@ -356,7 +394,275 @@ function StepCommunityData({
 }
 
 // ---------------------------------------------------------------------------
-// Step 3: Rules Configuration
+// Step 3: Member Structure
+// ---------------------------------------------------------------------------
+
+function StepMemberStructure({
+  config,
+  onConfigChange,
+}: {
+  config: CommunityConfigShape
+  onConfigChange: (next: CommunityConfigShape) => void
+}) {
+  const addAttribute = () => {
+    const next: MembershipAttributeSchemaItem = {
+      key: `custom_${config.membership_attributes.length + 1}`,
+      label: `Campo ${config.membership_attributes.length + 1}`,
+      type: 'text',
+    }
+    onConfigChange({
+      ...config,
+      membership_attributes: [...config.membership_attributes, next],
+    })
+  }
+
+  const removeAttribute = (idx: number) => {
+    const nextAttributes = config.membership_attributes.filter((_, i) => i !== idx)
+    const selectedSource = config.voting_weight.source_field
+    const hasSelectedSource = selectedSource
+      ? nextAttributes.some((a) => `custom_attributes.${a.key}` === selectedSource)
+      : true
+
+    onConfigChange({
+      ...config,
+      membership_attributes: nextAttributes,
+      voting_weight: {
+        ...config.voting_weight,
+        source_field: hasSelectedSource ? selectedSource : null,
+      },
+    })
+  }
+
+  const updateAttribute = (idx: number, patch: Partial<MembershipAttributeSchemaItem>) => {
+    onConfigChange({
+      ...config,
+      membership_attributes: config.membership_attributes.map((attr, i) =>
+        i === idx ? { ...attr, ...patch } : attr
+      ),
+    })
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold">Estructura de Miembros</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Define atributos personalizados y la fuente para el peso de voto
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Labels de comunidad</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="space-y-2">
+            <Label>Label de miembro</Label>
+            <Input
+              value={config.member_label}
+              onChange={(e) => onConfigChange({ ...config, member_label: e.target.value })}
+              placeholder="Miembro"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Label de entidad</Label>
+            <Input
+              value={config.entity_label}
+              onChange={(e) => onConfigChange({ ...config, entity_label: e.target.value })}
+              placeholder="Entidad"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Label de contribución</Label>
+            <Input
+              value={config.contribution_label}
+              onChange={(e) => onConfigChange({ ...config, contribution_label: e.target.value })}
+              placeholder="Contribución"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Atributos personalizados</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {config.membership_attributes.map((attr, idx) => (
+            <div key={`${attr.key}-${idx}`} className="grid grid-cols-1 gap-2 rounded-lg border p-3 sm:grid-cols-[1fr_1fr_140px_auto]">
+              <Input
+                value={attr.key}
+                onChange={(e) => updateAttribute(idx, { key: e.target.value.trim().replace(/\s+/g, '_') })}
+                placeholder="clave_interna"
+              />
+              <Input
+                value={attr.label}
+                onChange={(e) => updateAttribute(idx, { label: e.target.value })}
+                placeholder="Nombre visible"
+              />
+              <select
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                value={attr.type}
+                onChange={(e) => updateAttribute(idx, { type: e.target.value as MembershipAttributeSchemaItem['type'] })}
+              >
+                <option value="text">Texto</option>
+                <option value="number">Número</option>
+                <option value="decimal">Decimal</option>
+                <option value="date">Fecha</option>
+                <option value="enum">Lista</option>
+              </select>
+              <Button type="button" variant="outline" onClick={() => removeAttribute(idx)}>
+                Quitar
+              </Button>
+            </div>
+          ))}
+
+          <Button type="button" variant="outline" onClick={addAttribute}>
+            Agregar atributo
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Peso de voto</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="space-y-2">
+            <Label>Fórmula</Label>
+            <select
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              value={config.voting_weight.formula}
+              onChange={(e) =>
+                onConfigChange({
+                  ...config,
+                  voting_weight: {
+                    ...config.voting_weight,
+                    formula: e.target.value as CommunityConfigShape['voting_weight']['formula'],
+                    source_field: e.target.value === 'one_person_one_vote' ? null : config.voting_weight.source_field,
+                  },
+                })
+              }
+            >
+              <option value="one_person_one_vote">Una persona = un voto</option>
+              <option value="custom_attribute">Por atributo personalizado</option>
+            </select>
+          </div>
+          {config.voting_weight.formula === 'custom_attribute' && (
+            <div className="space-y-2">
+              <Label>Atributo fuente del peso</Label>
+              <select
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                value={config.voting_weight.source_field ?? ''}
+                onChange={(e) =>
+                  onConfigChange({
+                    ...config,
+                    voting_weight: {
+                      ...config.voting_weight,
+                      source_field: e.target.value || null,
+                    },
+                  })
+                }
+              >
+                <option value="">Selecciona un atributo</option>
+                {config.membership_attributes.map((attr) => (
+                  <option key={attr.key} value={`custom_attributes.${attr.key}`}>
+                    {attr.label} ({attr.key})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Step 4: Financial categories
+// ---------------------------------------------------------------------------
+
+function StepFinancialCategories({
+  config,
+  onConfigChange,
+}: {
+  config: CommunityConfigShape
+  onConfigChange: (next: CommunityConfigShape) => void
+}) {
+  const updateCategory = (kind: 'income' | 'expense', idx: number, value: string) => {
+    const next = [...config.financial_categories[kind]]
+    next[idx] = value
+    onConfigChange({
+      ...config,
+      financial_categories: {
+        ...config.financial_categories,
+        [kind]: next,
+      },
+    })
+  }
+
+  const addCategory = (kind: 'income' | 'expense') => {
+    onConfigChange({
+      ...config,
+      financial_categories: {
+        ...config.financial_categories,
+        [kind]: [...config.financial_categories[kind], ''],
+      },
+    })
+  }
+
+  const removeCategory = (kind: 'income' | 'expense', idx: number) => {
+    onConfigChange({
+      ...config,
+      financial_categories: {
+        ...config.financial_categories,
+        [kind]: config.financial_categories[kind].filter((_, i) => i !== idx),
+      },
+    })
+  }
+
+  const renderCategoryEditor = (kind: 'income' | 'expense', title: string) => (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {config.financial_categories[kind].map((item, idx) => (
+          <div key={`${kind}-${idx}`} className="flex items-center gap-2">
+            <Input
+              value={item}
+              onChange={(e) => updateCategory(kind, idx, e.target.value)}
+              placeholder="Nombre de categoría"
+            />
+            <Button type="button" variant="outline" onClick={() => removeCategory(kind, idx)}>
+              Quitar
+            </Button>
+          </div>
+        ))}
+        <Button type="button" variant="outline" onClick={() => addCategory(kind)}>
+          Agregar categoría
+        </Button>
+      </CardContent>
+    </Card>
+  )
+
+  return (
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-xl font-semibold">Categorías Financieras</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Ajusta categorías de ingreso y egreso para tu comunidad
+        </p>
+      </div>
+      {renderCategoryEditor('income', 'Categorías de ingreso')}
+      {renderCategoryEditor('expense', 'Categorías de egreso')}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Step 5: Rules Configuration
 // ---------------------------------------------------------------------------
 
 function SliderField({
@@ -633,18 +939,22 @@ function StepRulesConfig({
 }
 
 // ---------------------------------------------------------------------------
-// Step 4: Confirmation
+// Step 6: Confirmation
 // ---------------------------------------------------------------------------
 
 function StepConfirmation({
   communityType,
   name,
+  slug,
   description,
+  config,
   rules,
 }: {
   communityType: CommunityType
   name: string
+  slug: string
   description: string
+  config: CommunityConfigShape
   rules: CommunityRules
 }) {
   const typeOption = COMMUNITY_TYPES.find((ct) => ct.value === communityType)
@@ -670,6 +980,7 @@ function StepConfirmation({
               <h3 className="text-lg font-semibold">{name}</h3>
               <div className="flex items-center gap-2 mt-0.5">
                 <Badge variant="secondary">{typeOption?.label}</Badge>
+                <Badge variant="outline">/c/{slug || 'tu-comunidad'}</Badge>
               </div>
               {description && (
                 <p className="mt-2 text-sm text-muted-foreground">{description}</p>
@@ -702,6 +1013,54 @@ function StepConfirmation({
                 <p className="text-xs font-medium text-muted-foreground">Delegación</p>
                 <p className="text-lg font-semibold">
                   {rules.governance.delegation_enabled ? 'Habilitada' : 'Deshabilitada'}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Label miembro
+                </p>
+                <p className="text-lg font-semibold">
+                  {config.member_label}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Label entidad
+                </p>
+                <p className="text-lg font-semibold">
+                  {config.entity_label}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Label contribución
+                </p>
+                <p className="text-lg font-semibold">
+                  {config.contribution_label}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Atributos de miembro
+                </p>
+                <p className="text-lg font-semibold">
+                  {config.membership_attributes.length}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Categorías ingreso
+                </p>
+                <p className="text-lg font-semibold">
+                  {config.financial_categories.income.length}
+                </p>
+              </div>
+              <div className="rounded-lg bg-muted/50 p-3">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Categorías egreso
+                </p>
+                <p className="text-lg font-semibold">
+                  {config.financial_categories.expense.length}
                 </p>
               </div>
               <div className="rounded-lg bg-muted/50 p-3">
@@ -759,6 +1118,8 @@ export function OnboardingWizard() {
   const stepLabels = [
     t('onboarding.step.type'),
     t('onboarding.step.data'),
+    'Estructura',
+    'Categorías',
     t('onboarding.step.rules'),
     t('onboarding.step.confirm'),
   ]
@@ -766,7 +1127,10 @@ export function OnboardingWizard() {
   const [step, setStep] = useState(1)
   const [communityType, setCommunityType] = useState<CommunityType | null>(null)
   const [name, setName] = useState('')
+  const [slug, setSlug] = useState('')
+  const [slugEdited, setSlugEdited] = useState(false)
   const [description, setDescription] = useState('')
+  const [communityConfig, setCommunityConfig] = useState<CommunityConfigShape>(getCommunityConfigPreset('other'))
   const [rules, setRules] = useState<CommunityRules>({ ...DEFAULT_RULES })
   const [submitting, setSubmitting] = useState(false)
 
@@ -774,17 +1138,39 @@ export function OnboardingWizard() {
   const handleTypeSelect = (type: CommunityType) => {
     setCommunityType(type)
     setRules(getRulesForType(type))
+    setCommunityConfig(getCommunityConfigPreset(type))
   }
+
+  const handleNameChange = (value: string) => {
+    setName(value)
+    if (!slugEdited) {
+      setSlug(sanitizeSlug(value))
+    }
+  }
+
+  const handleSlugChange = (value: string) => {
+    setSlugEdited(true)
+    setSlug(sanitizeSlug(value))
+  }
+
+  const isValidSlug = (value: string): boolean =>
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)
 
   const canGoNext = (): boolean => {
     switch (step) {
       case 1:
         return communityType !== null
       case 2:
-        return name.trim().length >= 3
+        return name.trim().length >= 3 && isValidSlug(slug)
       case 3:
-        return isValidCurrencyCode(rules.treasury.currency) && isValidLocaleCode(rules.treasury.locale)
+        return communityConfig.voting_weight.formula !== 'custom_attribute' ||
+          Boolean(communityConfig.voting_weight.source_field)
       case 4:
+        return communityConfig.financial_categories.income.some((c) => c.trim().length > 0) &&
+          communityConfig.financial_categories.expense.some((c) => c.trim().length > 0)
+      case 5:
+        return isValidCurrencyCode(rules.treasury.currency) && isValidLocaleCode(rules.treasury.locale)
+      case 6:
         return true
       default:
         return false
@@ -792,7 +1178,7 @@ export function OnboardingWizard() {
   }
 
   const handleNext = () => {
-    if (step < 4 && canGoNext()) {
+    if (step < 6 && canGoNext()) {
       setStep(step + 1)
     }
   }
@@ -807,11 +1193,43 @@ export function OnboardingWizard() {
     if (!user || !communityType || !name.trim()) return
     setSubmitting(true)
     try {
+      const normalizedConfig: CommunityConfigShape = {
+        ...communityConfig,
+        member_label: communityConfig.member_label.trim() || 'Miembro',
+        entity_label: communityConfig.entity_label.trim() || 'Entidad',
+        contribution_label: communityConfig.contribution_label.trim() || 'Contribución',
+        membership_attributes: communityConfig.membership_attributes
+          .map((attr) => ({
+            ...attr,
+            key: sanitizeSlug(attr.key).replace(/-/g, '_'),
+            label: attr.label.trim(),
+          }))
+          .filter((attr) => attr.key.length > 0 && attr.label.length > 0),
+        financial_categories: {
+          income: communityConfig.financial_categories.income.map((c) => c.trim()).filter(Boolean),
+          expense: communityConfig.financial_categories.expense.map((c) => c.trim()).filter(Boolean),
+        },
+      }
+      if (
+        normalizedConfig.voting_weight.formula === 'custom_attribute' &&
+        normalizedConfig.voting_weight.source_field
+      ) {
+        const validSources = new Set(
+          normalizedConfig.membership_attributes.map((attr) => `custom_attributes.${attr.key}`)
+        )
+        if (!validSources.has(normalizedConfig.voting_weight.source_field)) {
+          normalizedConfig.voting_weight = { ...normalizedConfig.voting_weight, source_field: null }
+        }
+      }
+
       const community = await createCommunity(user.id, {
         name: name.trim(),
+        slug: slug.trim(),
         type: communityType,
         description: description.trim() || undefined,
       })
+      await updateCommunityConfig(community.id, normalizedConfig as unknown as Record<string, unknown>)
+      await seedCommunityCategories(community.id, normalizedConfig.financial_categories)
       await updateCommunityRules(community.id, rules)
       setCommunityId(community.id)
       refreshCommunities()
@@ -860,19 +1278,35 @@ export function OnboardingWizard() {
           {step === 2 && (
             <StepCommunityData
               name={name}
+              slug={slug}
               description={description}
-              onNameChange={setName}
+              onNameChange={handleNameChange}
+              onSlugChange={handleSlugChange}
               onDescriptionChange={setDescription}
             />
           )}
           {step === 3 && (
+            <StepMemberStructure
+              config={communityConfig}
+              onConfigChange={setCommunityConfig}
+            />
+          )}
+          {step === 4 && (
+            <StepFinancialCategories
+              config={communityConfig}
+              onConfigChange={setCommunityConfig}
+            />
+          )}
+          {step === 5 && (
             <StepRulesConfig rules={rules} onRulesChange={setRules} />
           )}
-          {step === 4 && communityType && (
+          {step === 6 && communityType && (
             <StepConfirmation
               communityType={communityType}
               name={name}
+              slug={slug}
               description={description}
+              config={communityConfig}
               rules={rules}
             />
           )}
@@ -890,7 +1324,7 @@ export function OnboardingWizard() {
             {t('onboarding.back')}
           </Button>
 
-          {step < 4 ? (
+          {step < 6 ? (
             <Button
               onClick={handleNext}
               disabled={!canGoNext()}

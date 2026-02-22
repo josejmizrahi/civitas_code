@@ -34,6 +34,15 @@ const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, u
       <a href="${d.app_url}/governance/${d.proposal_id}">Ver Resultado</a>
     `,
   },
+  proposal_closed: {
+    subject: 'Propuesta cerrada: {title}',
+    body: (d) => `
+      <h2>Resultado de propuesta</h2>
+      <p>La propuesta <strong>${d.title}</strong> ha sido cerrada.</p>
+      <p>Resultado: ${d.result_text || d.result || 'Cerrada'}.</p>
+      <a href="${d.app_url}/governance/${d.proposal_id}">Ver resultado</a>
+    `,
+  },
   payment_overdue: {
     subject: 'Pago vencido - {concept}',
     body: (d) => `
@@ -136,6 +145,57 @@ const TEMPLATES: Record<string, { subject: string; body: (data: Record<string, u
       <p style="font-size: 13px; color: #666;">Si no esperabas esta invitación, puedes ignorar este correo.</p>
       <p style="font-size: 13px; color: #666;">Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:</p>
       <p style="font-size: 12px; color: #999; word-break: break-all;">${d.invite_link}</p>
+    `,
+  },
+  discretionary_request: {
+    subject: 'Nueva solicitud discrecional pendiente',
+    body: (d) => `
+      <h2>Solicitud discrecional pendiente</h2>
+      <p>Se registró una solicitud por <strong>$${d.amount} ${d.currency || 'MXN'}</strong>.</p>
+      <p>${d.description || ''}</p>
+      <p style="text-align: center; margin: 24px 0;">
+        <a href="${d.app_url || ''}/treasury"
+           style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          Revisar solicitud
+        </a>
+      </p>
+    `,
+  },
+  discretionary_decision: {
+    subject: 'Solicitud discrecional {decision}',
+    body: (d) => `
+      <h2>Actualización de solicitud discrecional</h2>
+      <p>La solicitud por <strong>$${d.amount} ${d.currency || 'MXN'}</strong> fue <strong>${d.decision}</strong>.</p>
+      <p>${d.description || ''}</p>
+      <p style="text-align: center; margin: 24px 0;">
+        <a href="${d.app_url || ''}/treasury"
+           style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          Ver tesorería
+        </a>
+      </p>
+    `,
+  },
+  assembly_scheduled: {
+    subject: 'Nueva asamblea programada: {title}',
+    body: (d) => `
+      <h2>Nueva asamblea programada</h2>
+      <p><strong>${d.title}</strong></p>
+      <p>Fecha: ${d.date}</p>
+      <p>Ubicación: ${d.location || 'Por definir'}</p>
+      <p><a href="${d.app_url}/governance/assemblies/${d.assembly_id}">Ver detalles</a></p>
+    `,
+  },
+  monthly_statement_ready: {
+    subject: 'Estado financiero mensual disponible ({period})',
+    body: (d) => `
+      <h2>Estado financiero generado</h2>
+      <p>Ya está disponible el estado financiero de <strong>${d.period}</strong> para el fondo <strong>${d.fund_type}</strong>.</p>
+      <p style="text-align: center; margin: 24px 0;">
+        <a href="${d.app_url || ''}/treasury"
+           style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+          Ver estados financieros
+        </a>
+      </p>
     `,
   },
 }

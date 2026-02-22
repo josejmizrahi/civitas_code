@@ -6,9 +6,11 @@ import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { SearchableSelect } from './SearchableSelect'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityConfig } from '@/shared/hooks/useCommunityConfig'
 
 export function GastoFields({ rules, onFieldsChange, initialData }: TemplateFieldsProps) {
   const { t } = useI18n()
+  const { entityLabel } = useCommunityConfig()
   const FONDO_OPTIONS = [
     { value: 'mantenimiento', label: t('gastoFields.fund.maintenance') },
     { value: 'reserva', label: t('gastoFields.fund.reserve') },
@@ -67,7 +69,7 @@ export function GastoFields({ rules, onFieldsChange, initialData }: TemplateFiel
       <EntityPicker
         value={entity}
         onChange={setEntity}
-        label={t('gastoFields.entityLabel')}
+        label={`${entityLabel} / Proveedor`}
         placeholder={t('gastoFields.entityPlaceholder')}
       />
       <div className="space-y-2">

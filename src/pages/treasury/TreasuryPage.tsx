@@ -10,6 +10,7 @@ import { MyPayments } from '@/core/treasury/components/MyPayments'
 import { RecurringScheduleList } from '@/core/treasury/components/RecurringScheduleList'
 import { ContractList } from '@/core/treasury/components/ContractList'
 import { PaymentPlanManager } from '@/core/treasury/components/PaymentPlanManager'
+import { DiscretionaryApprovalsPanel } from '@/core/treasury/components/DiscretionaryApprovalsPanel'
 import { ExpenseForm } from '@/core/treasury/components/ExpenseForm'
 import { FundSelector } from '@/core/treasury/components/FundSelector'
 import { StatementList } from '@/core/treasury/components/StatementList'
@@ -248,12 +249,17 @@ export function TreasuryPage() {
                   <User className="h-3.5 w-3.5" />
                   {t('treasury.cobro.myPayments')}
                 </TabsTrigger>
+                <TabsTrigger value="discretionary" className="gap-1.5 text-xs sm:text-sm">
+                  <ClipboardList className="h-3.5 w-3.5" />
+                  Discrecional
+                </TabsTrigger>
               </TabsList>
             )}
             <div className={canManageTreasury ? undefined : 'mt-0'}>
               {cobroTab === 'obligations' && <PaymentObligationList />}
               {cobroTab === 'collection' && <CollectionView onGoToObligations={() => setCobroTab('obligations')} />}
               {cobroTab === 'my-payments' && <MyPayments />}
+              {cobroTab === 'discretionary' && canManageTreasury && <DiscretionaryApprovalsPanel />}
             </div>
           </Tabs>
         </section>
@@ -311,7 +317,19 @@ export function TreasuryPage() {
         </section>
       )}
 
-      <ExpenseForm open={showForm} onOpenChange={setShowForm} />
+      <ExpenseForm
+        open={showForm}
+        onOpenChange={setShowForm}
+        onRequireDiscretionary={() => {
+          setShowForm(false)
+          setMainSection('cobro')
+          setCobroTab('discretionary')
+        }}
+        onRequireAssembly={() => {
+          setShowForm(false)
+          navigate('/governance')
+        }}
+      />
     </div>
   )
 }

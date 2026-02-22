@@ -6,6 +6,7 @@ import { Shield, FileText, DollarSign, CalendarClock } from 'lucide-react'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { FinancialReviewPanel } from '@/core/governance/components/FinancialReviewPanel'
+import { DiscretionaryApprovalsPanel } from '@/core/treasury/components/DiscretionaryApprovalsPanel'
 
 export function VigilanciaPage() {
   const { communityId: _communityId } = useCommunityContext()
@@ -47,6 +48,10 @@ export function VigilanciaPage() {
             <DollarSign className="h-3.5 w-3.5" />
             Revision Financiera
           </TabsTrigger>
+          <TabsTrigger value="discrecional" className="flex items-center gap-1.5">
+            <DollarSign className="h-3.5 w-3.5" />
+            Discrecional
+          </TabsTrigger>
           <TabsTrigger value="terminos" className="flex items-center gap-1.5">
             <CalendarClock className="h-3.5 w-3.5" />
             Terminos
@@ -59,6 +64,10 @@ export function VigilanciaPage() {
 
         <TabsContent value="revision" className="mt-4">
           <FinancialReviewPanel />
+        </TabsContent>
+
+        <TabsContent value="discrecional" className="mt-4">
+          <DiscretionaryApprovalsPanel />
         </TabsContent>
 
         <TabsContent value="terminos" className="mt-4">

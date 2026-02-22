@@ -1,11 +1,22 @@
 import { supabase } from '@/shared/lib/supabase'
 import { logger } from '@/shared/lib/logger'
 import { AppError } from '@/shared/lib/errors'
-import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
+import { assertCanPerformAction, getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
 import { sendEmailToMembers } from '@/shared/services/email.service'
+import { sendPushToMembers } from '@/shared/services/push-notification.service'
 import type { Proposal } from '../types'
 import { getEndorsements } from './endorsement.service'
 import { getVotes, getVoteSummary } from './vote.service'
+
+async function getActiveMemberIds(communityId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('members')
+    .select('id')
+    .eq('community_id', communityId)
+    .eq('status', 'active')
+  if (error || !data) return []
+  return (data as Array<{ id: string }>).map((m) => m.id)
+}
 
 export async function getProposals(communityId: string, status?: string): Promise<Proposal[]> {
   let query = supabase
@@ -67,12 +78,18 @@ export async function createProposal(
 
   const { data: creatorMember } = await supabase
     .from('members')
-    .select('role')
+    .select('id, role')
     .eq('community_id', communityId)
     .eq('user_id', proposal.created_by)
     .single()
 
-  const creatorRole = (creatorMember as { role?: string } | null)?.role ?? 'miembro'
+  const creator = creatorMember as { id?: string; role?: string } | null
+  if (!creator?.id) {
+    throw new AppError('No se encontró al miembro creador en la comunidad activa.', 'NOT_FOUND')
+  }
+  await assertCanPerformAction(communityId, creator.id, 'create_proposal')
+
+  const creatorRole = creator.role ?? 'miembro'
   const bypassRoles = rules.governance.endorsement_bypass_roles ?? ['admin', 'tesorero']
   const canBypass = bypassRoles.includes(creatorRole)
   const minEndorsements = rules.governance.min_endorsements ?? 0
@@ -108,6 +125,27 @@ export async function createProposal(
   const created = data as unknown as Proposal
 
   if (endorsementsRequired === 0) {
+    void import('@/shared/services/notification.service')
+      .then(({ notifyCommunity }) =>
+        notifyCommunity(
+          communityId,
+          'proposal_new',
+          `Nueva propuesta: ${created.title}`,
+          created.description || 'Se creó una propuesta nueva.',
+          { proposal_id: created.id },
+        ),
+      )
+      .catch(() => {})
+    void getActiveMemberIds(communityId)
+      .then((memberIds) =>
+        sendPushToMembers(
+          memberIds,
+          `Nueva propuesta: ${created.title}`,
+          'Hay una nueva propuesta disponible para revisión.',
+          { proposal_id: created.id },
+        ),
+      )
+      .catch(() => {})
     sendEmailToMembers(communityId, 'proposal_new', {
       title: created.title,
       description: created.description,
@@ -170,6 +208,13 @@ export async function openVotingFromDiscussion(proposalId: string, communityId: 
   try {
     const { notifyCommunity } = await import('@/shared/services/notification.service')
     await notifyCommunity(communityId, 'proposal_opened', `Votación abierta: ${proposal.title}`, votingEnd ? `La votación cierra el ${new Date(votingEnd).toLocaleDateString('es-MX')}` : 'Votación sin fecha límite', { proposal_id: proposalId })
+    const memberIds = await getActiveMemberIds(communityId)
+    void sendPushToMembers(
+      memberIds,
+      `Votación abierta: ${proposal.title}`,
+      votingEnd ? `La votación cierra el ${new Date(votingEnd).toLocaleDateString('es-MX')}.` : 'La votación ya está abierta.',
+      { proposal_id: proposalId },
+    )
     const { sendEmailToMembers } = await import('@/shared/services/email.service')
     const appUrl = typeof window !== 'undefined' ? window.location.origin : ''
     sendEmailToMembers(communityId, 'voting_opened', {
@@ -269,7 +314,25 @@ export async function closeProposal(proposalId: string, communityId: string, clo
 
   if (resultStatus === 'approved') {
     sendEmailToMembers(communityId, 'proposal_approved', { title: proposal.title, proposal_id: proposalId, votes_for: summary.yes, votes_against: summary.no, community_name: communityId, app_url: window.location.origin }).catch(() => {})
+  } else {
+    sendEmailToMembers(communityId, 'proposal_closed', {
+      title: proposal.title,
+      proposal_id: proposalId,
+      result: resultStatus,
+      result_text: resultText,
+      app_url: window.location.origin,
+    }).catch(() => {})
   }
+  void getActiveMemberIds(communityId)
+    .then((memberIds) =>
+      sendPushToMembers(
+        memberIds,
+        `Propuesta ${resultStatus === 'approved' ? 'aprobada' : 'rechazada'}: ${proposal.title}`,
+        resultText,
+        { proposal_id: proposalId, result: resultStatus },
+      ),
+    )
+    .catch(() => {})
 
   return data as unknown as Proposal
 }

@@ -1,4 +1,4 @@
-import { useCastVoteWithDelegations } from '../hooks/useVoting'
+import { useCastVoteWithDelegations, useMemberVoteWeight } from '../hooks/useVoting'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { useToast } from '@/shared/components/ui/toast'
 import { Button } from '@/shared/components/ui/button'
@@ -22,6 +22,7 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
   const { canVote } = useRulesEngine()
   const toast = useToast()
   const myVote = existingVotes.find((v) => v.member_id === memberId && !v.delegated_from)
+  const { data: myWeight } = useMemberVoteWeight(memberId)
 
   const handleVote = (value: string) => {
     castVote.mutate({ proposalId, memberId, value }, {
@@ -66,6 +67,9 @@ export function VotingPanel({ proposalId, memberId, voteSummary, existingVotes, 
             {t('votingPanel.alreadyVoted')} <strong>{myVote.value === 'yes' ? t('votingPanel.yes') : myVote.value === 'no' ? t('votingPanel.no') : t('votingPanel.abstain')}</strong>. {t('votingPanel.canChange')}
           </p>
         ) : null}
+        <p className="text-xs text-muted-foreground">
+          Peso de voto: <strong>{(myVote?.weight ?? myWeight ?? 1).toFixed(2)}</strong>
+        </p>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <Button

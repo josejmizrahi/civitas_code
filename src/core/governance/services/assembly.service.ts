@@ -1,6 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
 import { getCommunityRules } from '@/shared/services/rules.service'
 import { sendEmailToMembers } from '@/shared/services/email.service'
+import { sendPushToMembers } from '@/shared/services/push-notification.service'
 import type { GovernanceRules } from '@/shared/types/rules'
 import type {
   Assembly,
@@ -10,6 +11,16 @@ import type {
   Convocatoria,
   DeliveryRecord,
 } from '../types'
+
+async function getActiveMemberIds(communityId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('members')
+    .select('id')
+    .eq('community_id', communityId)
+    .eq('status', 'active')
+  if (error || !data) return []
+  return (data as Array<{ id: string }>).map((m) => m.id)
+}
 
 // ---------------------------------------------------------------------------
 // Assemblies — CRUD
@@ -141,6 +152,20 @@ export async function createAssembly(
       `Programada para ${new Date(data.scheduled_date).toLocaleDateString('es-MX')}. Ubicación: ${data.location}`,
       { assembly_id: assemblyRow.id }
     )
+    sendEmailToMembers(communityId, 'assembly_scheduled', {
+      title: data.title,
+      date: new Date(data.scheduled_date).toLocaleDateString('es-MX'),
+      location: data.location,
+      assembly_id: assemblyRow.id,
+      app_url: window.location.origin,
+    }).catch(() => {})
+    const memberIds = await getActiveMemberIds(communityId)
+    void sendPushToMembers(
+      memberIds,
+      `Nueva asamblea: ${data.title}`,
+      `Programada para ${new Date(data.scheduled_date).toLocaleDateString('es-MX')}.`,
+      { assembly_id: assemblyRow.id },
+    )
   } catch { /* notifications are best-effort */ }
 
   return assembly as unknown as Assembly
@@ -255,6 +280,16 @@ export async function createConvocatoria(
     community_name: communityId,
     app_url: window.location.origin,
   }).catch(() => {})
+  void getActiveMemberIds(communityId)
+    .then((memberIds) =>
+      sendPushToMembers(
+        memberIds,
+        `Convocatoria ${data.call_number}ª llamada`,
+        `${data.type} - ${new Date(data.scheduled_date).toLocaleDateString('es-MX')}`,
+        { assembly_id: data.assembly_id, call_number: data.call_number },
+      ),
+    )
+    .catch(() => {})
 
   return created
 }

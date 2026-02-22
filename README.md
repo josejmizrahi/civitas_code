@@ -30,6 +30,9 @@ Variables de entorno (crear `.env` a partir de `.env.example` si existe):
 - `VITE_SUPABASE_URL` — URL del proyecto Supabase
 - `VITE_SUPABASE_ANON_KEY` — Clave anónima de Supabase
 - `VITE_VAPID_PUBLIC_KEY` — (opcional) Clave pública VAPID para notificaciones push
+- `SUPABASE_SERVICE_ROLE_KEY` — (scripts/verificación) clave service role para pruebas de Edge Functions
+- `SEND_PUSH_TEST_MEMBER_IDS` — (opcional para script) CSV de `member_id` para prueba push
+- `SEND_EMAIL_TEST_TO` — (opcional para script) correo destino para prueba de email
 
 ## Scripts
 
@@ -43,6 +46,8 @@ Variables de entorno (crear `.env` a partir de `.env.example` si existe):
 | `npm run test:watch` | Tests en modo watch |
 | `npm run test:coverage` | Cobertura de tests |
 | `npm run test:e2e` | Tests E2E (Playwright) |
+| `npm run verify:send-push` | Verifica Edge Function `send-push` |
+| `npm run verify:send-email` | Verifica Edge Function `send-email` |
 
 ## Arquitectura
 

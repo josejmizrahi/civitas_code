@@ -1,6 +1,158 @@
 import { supabase } from '@/shared/lib/supabase'
-import { handleServiceError } from '@/shared/lib/errors'
-import type { Transaction, Category, Budget, PaymentObligation, DashboardStats, CollectionConfig } from '../types'
+import { AppError, handleServiceError } from '@/shared/lib/errors'
+import { assertCanPerformAction, getCommunityRules } from '@/shared/services/rules.service'
+import { notifyCommunity, notifyMember } from '@/shared/services/notification.service'
+import { sendEmailToMembers } from '@/shared/services/email.service'
+import { sendPushToMembers } from '@/shared/services/push-notification.service'
+import type { TreasuryRules } from '@/shared/types/rules'
+import type {
+  Transaction,
+  Category,
+  Budget,
+  PaymentObligation,
+  DashboardStats,
+  CollectionConfig,
+  DiscretionaryApproval,
+} from '../types'
+
+async function getMemberIdByUserId(communityId: string, userId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('members')
+    .select('id')
+    .eq('community_id', communityId)
+    .eq('user_id', userId)
+    .single()
+
+  if (error || !data) return null
+  return (data as { id: string }).id
+}
+
+async function getNotificationRecipients(
+  communityId: string,
+  roles: string[],
+): Promise<Array<{ id: string; role: string }>> {
+  const { data, error } = await supabase
+    .from('members')
+    .select('id, role')
+    .eq('community_id', communityId)
+    .eq('status', 'active')
+    .in('role', roles)
+  if (error || !data) return []
+  return data as Array<{ id: string; role: string }>
+}
+
+function getMonthBounds(date: string): { start: string; end: string; period: string } {
+  const [year, month] = date.split('-').map(Number)
+  if (!year || !month) {
+    throw new AppError('La fecha de la transacción es inválida.', 'VALIDATION')
+  }
+  const start = new Date(Date.UTC(year, month - 1, 1))
+  const end = new Date(Date.UTC(year, month, 0))
+  const toIsoDate = (d: Date) => d.toISOString().split('T')[0]
+  return {
+    start: toIsoDate(start),
+    end: toIsoDate(end),
+    period: `${year}-${String(month).padStart(2, '0')}`,
+  }
+}
+
+async function getTreasuryRulesForCommunity(communityId: string): Promise<TreasuryRules> {
+  const { data: community, error } = await supabase
+    .from('communities')
+    .select('config, rules')
+    .eq('id', communityId)
+    .single()
+  if (error || !community) {
+    throw new AppError('No se pudo cargar la configuración de tesorería.', 'NOT_FOUND')
+  }
+  const resolved = getCommunityRules(
+    (community.config ?? null) as Record<string, unknown> | null,
+    (community.rules ?? null) as Record<string, unknown> | null,
+  )
+  return resolved.treasury
+}
+
+async function validateExpenseAgainstBudget(
+  communityId: string,
+  amount: number,
+  categoryId: string,
+  date: string,
+): Promise<void> {
+  const { start, end, period } = getMonthBounds(date)
+
+  const { data: budget, error: budgetError } = await supabase
+    .from('budgets')
+    .select('id, amount')
+    .eq('community_id', communityId)
+    .eq('category_id', categoryId)
+    .eq('period', period)
+    .maybeSingle()
+  if (budgetError) throw budgetError
+  if (!budget) {
+    throw new AppError(
+      `No existe presupuesto aprobado para esta categoría en el periodo ${period}.`,
+      'FORBIDDEN',
+    )
+  }
+
+  const { data: expenses, error: expensesError } = await supabase
+    .from('transactions')
+    .select('amount')
+    .eq('community_id', communityId)
+    .eq('type', 'expense')
+    .eq('category_id', categoryId)
+    .gte('date', start)
+    .lte('date', end)
+  if (expensesError) throw expensesError
+
+  const spent = (expenses ?? []).reduce((acc, row) => acc + Number(row.amount ?? 0), 0)
+  const budgetAmount = Number((budget as { amount: number }).amount ?? 0)
+  const available = budgetAmount - spent
+  if (amount > available) {
+    throw new AppError(
+      `Presupuesto insuficiente. Disponible: ${available.toLocaleString('es-MX')}, solicitado: ${amount.toLocaleString('es-MX')}.`,
+      'FORBIDDEN',
+    )
+  }
+}
+
+async function createEmergencyRatificationProposal(
+  communityId: string,
+  createdByUserId: string,
+  amount: number,
+  expenseDescription: string,
+  transactionId: string,
+): Promise<void> {
+  const now = new Date()
+  const end = new Date(now.getTime() + 72 * 60 * 60 * 1000)
+  // Ratificación extraordinaria por emergencia: quórum/majority conservadores.
+  const quorum = 0.75
+  const majority = 0.66
+
+  const { error } = await supabase
+    .from('proposals')
+    .insert({
+      community_id: communityId,
+      title: `Ratificación de gasto de emergencia (${amount.toLocaleString('es-MX')})`,
+      description: `Ratificación obligatoria del gasto de emergencia registrado. Transacción: ${transactionId}. Concepto: ${expenseDescription || 'Sin descripción'}.`,
+      type: 'extraordinary',
+      status: 'active',
+      quorum_required: quorum,
+      majority_required: majority,
+      voting_start: now.toISOString(),
+      voting_end: end.toISOString(),
+      created_by: createdByUserId,
+    })
+  if (error) throw error
+
+  await notifyCommunity(
+    communityId,
+    'proposal_opened',
+    'Votación abierta: ratificación de gasto de emergencia',
+    'Se abrió una votación extraordinaria (72h) para ratificar un gasto de emergencia.',
+    { transaction_id: transactionId, amount },
+  )
+}
 
 /**
  * List transactions for a community with optional filters (date range, category, type, fund).
@@ -140,39 +292,101 @@ export async function createTransaction(
     date: string
     created_by: string
     origin?: string
+    emergency?: boolean
   }
 ): Promise<Transaction> {
+  const treasuryRules = await getTreasuryRulesForCommunity(communityId)
+  const adminLimit = Number(treasuryRules.admin_spending_limit ?? 50000)
+  const assemblyThreshold = Number(treasuryRules.require_vote_above ?? adminLimit)
+  const isExpense = transaction.type === 'expense'
+
+  const memberId = await getMemberIdByUserId(communityId, transaction.created_by)
+  if (memberId) {
+    await assertCanPerformAction(communityId, memberId, 'register_transaction')
+  }
+
+  if (isExpense && !transaction.emergency) {
+    if (transaction.amount > adminLimit && transaction.amount <= assemblyThreshold) {
+      throw new AppError(
+        'Este egreso requiere aprobación discrecional (Nivel 2) antes de registrarse.',
+        'FORBIDDEN',
+      )
+    }
+    if (transaction.amount > assemblyThreshold) {
+      throw new AppError(
+        'Este egreso requiere propuesta y votación de asamblea (Nivel 3) o marcarse como emergencia (Nivel 4).',
+        'FORBIDDEN',
+      )
+    }
+    if (!transaction.category_id) {
+      throw new AppError('Los egresos deben incluir categoría para validar presupuesto.', 'VALIDATION')
+    }
+    await validateExpenseAgainstBudget(
+      communityId,
+      Number(transaction.amount),
+      transaction.category_id,
+      transaction.date,
+    )
+  }
+
+  if (isExpense && transaction.emergency) {
+    if (transaction.amount <= assemblyThreshold) {
+      throw new AppError(
+        'Solo los egresos por encima del umbral de asamblea pueden registrarse como emergencia.',
+        'VALIDATION',
+      )
+    }
+    if (!memberId) {
+      throw new AppError('No se pudo resolver al miembro que registra el gasto de emergencia.', 'NOT_FOUND')
+    }
+    await assertCanPerformAction(communityId, memberId, 'create_proposal')
+  }
+
+  const { emergency, ...payload } = transaction
   const { data, error } = await supabase
     .from('transactions')
     .insert({
       community_id: communityId,
-      origin: transaction.origin ?? 'manual',
-      ...transaction,
+      origin: payload.origin ?? 'manual',
+      ...payload,
     })
     .select()
     .single()
 
   if (error) throw error
+
+  if (isExpense && emergency) {
+    try {
+      await createEmergencyRatificationProposal(
+        communityId,
+        payload.created_by,
+        Number(payload.amount),
+        payload.description,
+        (data as { id: string }).id,
+      )
+    } catch {
+      await notifyCommunity(
+        communityId,
+        'proposal_new',
+        'Atención: falta ratificación de emergencia',
+        'Se registró un gasto de emergencia, pero la propuesta de ratificación no se creó automáticamente. Debe crearse manualmente.',
+        { transaction_id: (data as { id: string }).id },
+      )
+    }
+  }
+
   return data as Transaction
 }
 
 export async function updateTransaction(transactionId: string, updates: Partial<Pick<Transaction, 'type' | 'amount' | 'category_id' | 'description' | 'date'>>): Promise<Transaction> {
-  const { data, error } = await supabase
-    .from('transactions')
-    .update(updates)
-    .eq('id', transactionId)
-    .select('*, categories(name)')
-    .single()
-  if (error) throw error
-  return { ...data, category_name: data.categories?.name, categories: undefined } as Transaction
+  void transactionId
+  void updates
+  throw new AppError('Las transacciones son inmutables. Registra una transacción de corrección en su lugar.', 'FORBIDDEN')
 }
 
 export async function deleteTransaction(transactionId: string): Promise<void> {
-  const { error } = await supabase
-    .from('transactions')
-    .delete()
-    .eq('id', transactionId)
-  if (error) throw error
+  void transactionId
+  throw new AppError('Las transacciones no se pueden eliminar. Usa una corrección contable.', 'FORBIDDEN')
 }
 
 export async function createBudget(communityId: string, budget: { category_id: string; period: string; amount: number }): Promise<Budget> {
@@ -269,6 +483,11 @@ export async function markObligationAsPaid(
     created_by: string
   }
 ): Promise<{ transaction: Transaction; obligation: PaymentObligation }> {
+  const memberId = await getMemberIdByUserId(obligation.community_id, paymentDetails.created_by)
+  if (memberId) {
+    await assertCanPerformAction(obligation.community_id, memberId, 'reconcile_payment')
+  }
+
   const description = `Pago: ${obligation.concept}${paymentDetails.reference ? ` (Ref: ${paymentDetails.reference})` : ''}${paymentDetails.notes ? ` — ${paymentDetails.notes}` : ''}`
 
   const txData = {
@@ -380,4 +599,176 @@ export function generatePaymentReference(prefix: string | null, obligationId: st
   const p = prefix || 'CIV'
   const shortId = obligationId.replace(/-/g, '').substring(0, 8).toUpperCase()
   return `${p}-${shortId}`
+}
+
+// ==================== DISCRETIONARY APPROVALS (LEVEL 2) ====================
+
+export async function getDiscretionaryApprovals(
+  communityId: string,
+  status?: DiscretionaryApproval['status'],
+): Promise<DiscretionaryApproval[]> {
+  let query = supabase
+    .from('discretionary_approvals')
+    .select('*')
+    .eq('community_id', communityId)
+    .order('created_at', { ascending: false })
+
+  if (status) query = query.eq('status', status)
+
+  const { data, error } = await query
+  if (error) throw error
+  return (data ?? []) as DiscretionaryApproval[]
+}
+
+export async function createDiscretionaryApproval(
+  communityId: string,
+  payload: {
+    requested_by_member_id: string
+    amount: number
+    description: string
+    category_id?: string | null
+    beneficiary_entity_id?: string | null
+  },
+): Promise<DiscretionaryApproval> {
+  await assertCanPerformAction(communityId, payload.requested_by_member_id, 'register_transaction')
+
+  const { data, error } = await supabase
+    .from('discretionary_approvals')
+    .insert({
+      community_id: communityId,
+      requested_by: payload.requested_by_member_id,
+      amount: payload.amount,
+      description: payload.description,
+      category_id: payload.category_id ?? null,
+      beneficiary_entity_id: payload.beneficiary_entity_id ?? null,
+      status: 'pending',
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  const recipients = await getNotificationRecipients(communityId, ['comite_vigilancia', 'admin', 'platform_admin'])
+  await Promise.all(
+    recipients.map((recipient) =>
+      notifyMember(
+        communityId,
+        recipient.id,
+        'discretionary_request',
+        'Nueva solicitud discrecional pendiente',
+        `Se solicitó una aprobación discrecional por ${payload.amount.toLocaleString('es-MX')}.`,
+        { approval_id: data.id, amount: payload.amount },
+      ),
+    ),
+  )
+  void sendPushToMembers(
+    recipients.map((recipient) => recipient.id),
+    'Nueva solicitud discrecional pendiente',
+    `Se solicitó una aprobación discrecional por ${payload.amount.toLocaleString('es-MX')}.`,
+    { approval_id: data.id, amount: payload.amount },
+  )
+  void sendEmailToMembers(communityId, 'discretionary_request', {
+    amount: payload.amount,
+    description: payload.description,
+    approval_id: data.id,
+    app_url: typeof window !== 'undefined' ? window.location.origin : '',
+  })
+  return data as DiscretionaryApproval
+}
+
+export async function respondDiscretionaryApproval(
+  approvalId: string,
+  responderMemberId: string,
+  decision: 'approved' | 'rejected',
+  responseNote?: string,
+): Promise<DiscretionaryApproval> {
+  const { data: approval, error: approvalError } = await supabase
+    .from('discretionary_approvals')
+    .select('*')
+    .eq('id', approvalId)
+    .single()
+
+  if (approvalError || !approval) throw approvalError ?? new Error('Solicitud discrecional no encontrada')
+  await assertCanPerformAction(approval.community_id, responderMemberId, 'approve_discretionary')
+  if (approval.status !== 'pending') throw new Error('Esta solicitud ya fue atendida')
+
+  let transactionId: string | null = null
+  if (decision === 'approved') {
+    const { data: requesterMember, error: requesterError } = await supabase
+      .from('members')
+      .select('user_id')
+      .eq('id', approval.requested_by)
+      .single()
+    if (requesterError || !requesterMember?.user_id) throw requesterError ?? new Error('No se pudo resolver el solicitante')
+
+    const { data: tx, error: txError } = await supabase
+      .from('transactions')
+      .insert({
+        community_id: approval.community_id,
+        type: 'expense',
+        amount: approval.amount,
+        category_id: approval.category_id,
+        description: `[Nivel 2] ${approval.description}`,
+        date: new Date().toISOString().split('T')[0],
+        created_by: requesterMember.user_id,
+        origin: 'system',
+      })
+      .select('id')
+      .single()
+    if (txError) throw txError
+    transactionId = tx.id as string
+  }
+
+  const { data, error } = await supabase
+    .from('discretionary_approvals')
+    .update({
+      status: decision,
+      approved_by: responderMemberId,
+      response_note: responseNote ?? null,
+      transaction_id: transactionId,
+      responded_at: new Date().toISOString(),
+    })
+    .eq('id', approvalId)
+    .select()
+    .single()
+
+  if (error) throw error
+  const decisionLabel = decision === 'approved' ? 'aprobada' : 'rechazada'
+  await notifyMember(
+    approval.community_id,
+    approval.requested_by,
+    'discretionary_decision',
+    `Tu solicitud discrecional fue ${decisionLabel}`,
+    `La solicitud por ${approval.amount.toLocaleString('es-MX')} fue ${decisionLabel}.`,
+    { approval_id: approval.id, decision, transaction_id: transactionId },
+  )
+  const committee = await getNotificationRecipients(approval.community_id, ['comite_vigilancia', 'admin', 'platform_admin'])
+  await Promise.all(
+    committee
+      .filter((member) => member.id !== approval.requested_by)
+      .map((recipient) =>
+        notifyMember(
+          approval.community_id,
+          recipient.id,
+          'discretionary_decision',
+          `Solicitud discrecional ${decisionLabel}`,
+          `La solicitud por ${approval.amount.toLocaleString('es-MX')} fue ${decisionLabel}.`,
+          { approval_id: approval.id, decision, transaction_id: transactionId },
+        ),
+      ),
+  )
+  void sendPushToMembers(
+    [approval.requested_by],
+    `Tu solicitud discrecional fue ${decisionLabel}`,
+    `La solicitud por ${approval.amount.toLocaleString('es-MX')} fue ${decisionLabel}.`,
+    { approval_id: approval.id, decision, transaction_id: transactionId },
+  )
+  void sendEmailToMembers(approval.community_id, 'discretionary_decision', {
+    decision,
+    amount: approval.amount,
+    description: approval.description,
+    approval_id: approval.id,
+    transaction_id: transactionId,
+    app_url: typeof window !== 'undefined' ? window.location.origin : '',
+  })
+  return data as DiscretionaryApproval
 }

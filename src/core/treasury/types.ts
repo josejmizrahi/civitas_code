@@ -64,6 +64,22 @@ export interface PaymentObligation {
   member_name?: string
 }
 
+export interface DiscretionaryApproval {
+  id: string
+  community_id: string
+  requested_by: string
+  amount: number
+  description: string
+  category_id: string | null
+  beneficiary_entity_id: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  approved_by: string | null
+  response_note: string | null
+  transaction_id: string | null
+  responded_at: string | null
+  created_at: string
+}
+
 export type TreasuryMode = 'import' | 'connector' | 'fintech_rail' | 'hybrid'
 
 export interface CollectionConfig {

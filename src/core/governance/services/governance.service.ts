@@ -31,6 +31,7 @@ export {
   getVotes,
   castVote,
   castVoteWithDelegations,
+  getMemberVoteWeight,
   computeVoteSummary,
   getVoteSummary,
 } from './vote.service'

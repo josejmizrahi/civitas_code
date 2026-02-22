@@ -25,30 +25,47 @@ import {
 } from '@/shared/hooks/useNotifications'
 
 const typeConfig: Record<string, { icon: typeof Bell; colorClass: string }> = {
+  proposal_new: { icon: Vote, colorClass: 'text-indigo-500' },
   proposal_opened: { icon: Vote, colorClass: 'text-blue-500' },
   proposal_closing_soon: { icon: Clock, colorClass: 'text-orange-500' },
   proposal_closed: { icon: XCircle, colorClass: 'text-gray-500' },
   proposal_approved: { icon: CheckCircle, colorClass: 'text-green-500' },
   pre_execution: { icon: AlertTriangle, colorClass: 'text-amber-500' },
+  discretionary_request: { icon: Receipt, colorClass: 'text-orange-500' },
+  discretionary_decision: { icon: CheckCircle, colorClass: 'text-green-500' },
+  assembly_scheduled: { icon: Clock, colorClass: 'text-blue-500' },
+  convocatoria: { icon: Clock, colorClass: 'text-blue-500' },
+  monthly_statement_ready: { icon: Receipt, colorClass: 'text-purple-500' },
   payment_due: { icon: DollarSign, colorClass: 'text-yellow-500' },
+  payment_reminder: { icon: DollarSign, colorClass: 'text-yellow-500' },
   payment_overdue: { icon: AlertTriangle, colorClass: 'text-red-500' },
   obligation_created: { icon: Receipt, colorClass: 'text-blue-500' },
   member_joined: { icon: UserPlus, colorClass: 'text-green-500' },
   execution_completed: { icon: Zap, colorClass: 'text-purple-500' },
 }
 
-function getNotificationRoute(notification: Notification): string | null {
+export function getNotificationRoute(notification: Notification): string | null {
   const meta = notification.metadata
+  const proposalId = (meta?.proposal_id ?? meta?.proposalId) as string | undefined
+  const assemblyId = (meta?.assembly_id ?? meta?.assemblyId) as string | undefined
   switch (notification.type) {
+    case 'proposal_new':
     case 'proposal_opened':
     case 'proposal_closing_soon':
     case 'proposal_closed':
     case 'proposal_approved':
     case 'pre_execution':
-      return meta?.proposalId ? `/governance/${meta.proposalId}` : '/governance'
+      return proposalId ? `/governance/${proposalId}` : '/governance'
+    case 'assembly_scheduled':
+    case 'convocatoria':
+      return assemblyId ? `/governance/assemblies/${assemblyId}` : '/governance'
+    case 'monthly_statement_ready':
     case 'payment_due':
+    case 'payment_reminder':
     case 'payment_overdue':
     case 'obligation_created':
+    case 'discretionary_request':
+    case 'discretionary_decision':
       return '/treasury'
     case 'member_joined':
       return '/members'

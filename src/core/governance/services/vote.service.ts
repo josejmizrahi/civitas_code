@@ -1,7 +1,34 @@
 import { supabase } from '@/shared/lib/supabase'
 import { AppError } from '@/shared/lib/errors'
+import { assertCanPerformAction } from '@/shared/services/rules.service'
 import type { Vote, VoteSummary } from '../types'
 import { getProposal } from './proposal.service'
+
+async function calculateVoteWeight(memberId: string, communityId: string): Promise<number> {
+  const { data, error } = await (supabase as any).rpc('calculate_vote_weight', {
+    p_member_id: memberId,
+    p_community_id: communityId,
+  })
+
+  if (!error && data != null) {
+    const value = Number(data)
+    if (Number.isFinite(value) && value > 0) return value
+  }
+
+  // Backward-compatible fallback while all environments migrate.
+  const { data: member, error: memberErr } = await supabase
+    .from('members')
+    .select('voting_weight')
+    .eq('id', memberId)
+    .single()
+  if (memberErr) return 1
+  const fallbackWeight = Number((member as { voting_weight?: unknown })?.voting_weight) || 1
+  return fallbackWeight > 0 ? fallbackWeight : 1
+}
+
+export async function getMemberVoteWeight(memberId: string, communityId: string): Promise<number> {
+  return calculateVoteWeight(memberId, communityId)
+}
 
 export async function getVotes(proposalId: string): Promise<Vote[]> {
   const { data, error } = await supabase
@@ -21,19 +48,14 @@ export async function castVote(vote: {
   const proposal = await getProposal(vote.proposal_id)
   if (proposal.status !== 'active') throw new AppError('La propuesta no está activa para votación', 'VALIDATION')
   if (proposal.voting_end && new Date(proposal.voting_end) < new Date()) throw new AppError('El periodo de votación ha terminado', 'VALIDATION')
+  await assertCanPerformAction(proposal.community_id, vote.member_id, 'cast_vote')
 
   const model = proposal.voting_model || 'simple'
   const validValues = getValidVoteValues(model, proposal.voting_options)
   if (!validValues.includes(vote.value)) throw new AppError(`Valor de voto "${vote.value}" no válido para modelo ${model}`, 'VALIDATION')
   if (model === 'consensus' && vote.value === 'block' && !vote.block_reason?.trim()) throw new AppError('El bloqueo requiere una razón obligatoria', 'VALIDATION')
 
-  const { data: member, error: memberErr } = await supabase
-    .from('members')
-    .select('voting_weight')
-    .eq('id', vote.member_id)
-    .single()
-  if (memberErr) throw memberErr
-  const weight = Number((member as { voting_weight?: unknown })?.voting_weight) || 1
+  const weight = await calculateVoteWeight(vote.member_id, proposal.community_id)
 
   const upsertData: Record<string, unknown> = {
     proposal_id: vote.proposal_id, member_id: vote.member_id, value: vote.value,
@@ -75,11 +97,13 @@ export async function castVoteWithDelegations(
   if (eligible.length === 0) return results
 
   const delegatorIds = eligible.map((d) => d.from_member_id)
-  const { data: delegatorMembers } = await supabase.from('members').select('id, voting_weight').in('id', delegatorIds)
   const weightMap = new Map<string, number>()
-  for (const m of (delegatorMembers ?? []) as { id: string; voting_weight?: number }[]) {
-    weightMap.set(m.id, Number(m.voting_weight) || 1)
-  }
+  await Promise.all(
+    delegatorIds.map(async (delegatorId) => {
+      const weight = await calculateVoteWeight(delegatorId, communityId)
+      weightMap.set(delegatorId, weight)
+    }),
+  )
 
   for (const delegation of eligible) {
     const weight = weightMap.get(delegation.from_member_id) ?? 1
@@ -140,13 +164,17 @@ export async function getVoteSummary(
   const model = proposal.voting_model || 'simple'
 
   const { data: members } = await supabase.from('members')
-    .select('voting_weight, financial_standing')
+    .select('id, financial_standing')
     .eq('community_id', communityId).eq('status', 'active')
 
-  type MemberWeightRow = { financial_standing?: string; voting_weight?: unknown }
-  const totalAvailableWeight = ((members ?? []) as MemberWeightRow[])
+  type MemberWeightRow = { id: string; financial_standing?: string }
+  const eligibleMembers = ((members ?? []) as MemberWeightRow[])
     .filter((m) => m.financial_standing !== 'moroso')
-    .reduce((sum: number, m) => sum + (Number(m.voting_weight) || 1), 0)
+
+  const weights = await Promise.all(
+    eligibleMembers.map((member) => calculateVoteWeight(member.id, communityId)),
+  )
+  const totalAvailableWeight = weights.reduce((sum, weight) => sum + weight, 0)
 
   return computeVoteSummary(votes, model, totalAvailableWeight, quorumRequired, majorityRequired)
 }
