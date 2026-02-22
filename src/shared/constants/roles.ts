@@ -1,5 +1,3 @@
-import type { Role } from '@/shared/types'
-
 export const ROLE_LABELS: Record<string, string> = {
   platform_admin: 'Admin Plataforma',
   admin: 'Administrador',
