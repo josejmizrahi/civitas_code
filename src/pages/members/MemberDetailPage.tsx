@@ -21,36 +21,8 @@ import {
   ArrowLeft, Wallet, Vote, Activity, Shield,
   UserMinus, UserCheck, AlertCircle, CheckCircle, Clock,
 } from 'lucide-react'
-
-const roleLabels: Record<string, string> = {
-  platform_admin: 'Admin Plataforma',
-  admin: 'Administrador',
-  tesorero: 'Tesorero',
-  comite_vigilancia: 'Comité de Vigilancia',
-  miembro: 'Miembro',
-  observador: 'Observador',
-}
-
-const roleBadgeVariant: Record<string, 'default' | 'secondary' | 'outline' | 'success'> = {
-  admin: 'default',
-  tesorero: 'success',
-  miembro: 'secondary',
-  observador: 'outline',
-}
-
-const standingLabels: Record<string, string> = {
-  good_standing: 'Al día',
-  grace_period: 'Período de gracia',
-  delinquent: 'Moroso',
-  moroso: 'Moroso',
-}
-
-const standingVariant: Record<string, 'success' | 'warning' | 'destructive'> = {
-  good_standing: 'success',
-  grace_period: 'warning',
-  delinquent: 'destructive',
-  moroso: 'destructive',
-}
+import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 
 interface PaymentObligation {
   id: string
@@ -93,6 +65,7 @@ export function MemberDetailPage() {
   const [editingRole, setEditingRole] = useState(false)
 
   const { error: toastError, success: toastSuccess } = useToast()
+  const confirm = useConfirm()
   const memberQuery = useMember(memberId)
   const obligationsQuery = usePaymentObligations(memberId)
   const votesQuery = useQuery({
@@ -150,7 +123,13 @@ export function MemberDetailPage() {
   }
 
   const handleDeactivate = async () => {
-    if (!confirm(`¿Desactivar a ${member.full_name || member.email}?`)) return
+    const ok = await confirm({
+      title: 'Desactivar miembro',
+      description: `¿Estás seguro de desactivar a ${member.full_name || member.email}? Ya no podrá acceder a la comunidad.`,
+      confirmLabel: 'Desactivar',
+      variant: 'destructive',
+    })
+    if (!ok) return
     try {
       await deactivate.mutateAsync(member.id)
       toastSuccess('Miembro desactivado')
@@ -203,18 +182,18 @@ export function MemberDetailPage() {
                 </Select>
               ) : (
                 <Badge
-                  variant={roleBadgeVariant[member.role] || 'secondary'}
+                  variant={ROLE_BADGE_VARIANT[member.role] || 'secondary'}
                   className={canManageMembers ? 'cursor-pointer text-sm' : 'text-sm'}
                   onClick={() => canManageMembers && setEditingRole(true)}
                 >
-                  {roleLabels[member.role] || member.role}
+                  {ROLE_LABELS[member.role] || member.role}
                 </Badge>
               )}
               <Badge variant={member.status === 'active' ? 'success' : 'outline'}>
                 {member.status === 'active' ? 'Activo' : 'Inactivo'}
               </Badge>
-              <Badge variant={standingVariant[member.financial_standing] || 'success'}>
-                {standingLabels[member.financial_standing] || member.financial_standing || 'Al día'}
+              <Badge variant={STANDING_BADGE_VARIANT[member.financial_standing] || 'success'}>
+                {STANDING_LABELS[member.financial_standing] || member.financial_standing || 'Al corriente'}
               </Badge>
             </div>
           </div>

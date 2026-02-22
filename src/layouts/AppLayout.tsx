@@ -47,12 +47,12 @@ const coreNavigation = [
 ]
 
 /* Bottom nav shows the 4 most important items + a "More" toggle */
-const BOTTOM_NAV_ITEMS = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Tesoreria', href: '/treasury', icon: Wallet },
-  { name: 'Gobernanza', href: '/governance', icon: Vote },
-  { name: 'Miembros', href: '/members', icon: Users },
-]
+const BOTTOM_NAV_KEYS = [
+  { key: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { key: 'nav.treasury', href: '/treasury', icon: Wallet },
+  { key: 'nav.governance', href: '/governance', icon: Vote },
+  { key: 'nav.members', href: '/members', icon: Users },
+] as const
 
 export function AppLayout() {
   const { user, signOut } = useAuth()
@@ -291,7 +291,7 @@ export function AppLayout() {
                     Admin Comunidad
                   </NavLink>
                 )}
-                {(userRole === 'admin' || userRole === 'comite_vigilancia') && community?.type === 'residential' && (
+                {(userRole === 'admin' || userRole === 'comite_vigilancia') && (
                   <NavLink
                     to="/governance/vigilancia"
                     className={navLinkClassName}
@@ -357,7 +357,7 @@ export function AppLayout() {
       {/* ============ MOBILE BOTTOM NAVIGATION ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur-sm pb-safe lg:hidden">
         <div className="flex items-stretch justify-around">
-          {BOTTOM_NAV_ITEMS.map((item) => {
+          {BOTTOM_NAV_KEYS.map((item) => {
             const active = isBottomNavActive(item.href)
             return (
               <NavLink
@@ -377,7 +377,7 @@ export function AppLayout() {
                     active ? 'font-semibold text-primary' : 'text-muted-foreground'
                   )}
                 >
-                  {item.name}
+                  {t(item.key as any)}
                 </span>
               </NavLink>
             )

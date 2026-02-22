@@ -332,6 +332,17 @@ export async function joinCommunity(
 
 
 // ---------------------------------------------------------------------------
+export async function isSlugAvailable(slug: string): Promise<boolean> {
+  const { count, error } = await supabase
+    .from('communities')
+    .select('id', { count: 'exact', head: true })
+    .eq('slug', slug)
+
+  if (error) return true
+  return (count ?? 0) === 0
+}
+
+// ---------------------------------------------------------------------------
 // Community fetching (for enriched context)
 // ---------------------------------------------------------------------------
 

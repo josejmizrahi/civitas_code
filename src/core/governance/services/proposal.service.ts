@@ -95,6 +95,12 @@ export async function createProposal(
   const minEndorsements = rules.governance.min_endorsements ?? 0
   const endorsementsRequired = (canBypass || minEndorsements === 0) ? 0 : minEndorsements
 
+  const proposalType = proposal.type as import('@/shared/types').ProposalType
+  const quorumByType = rules.governance.quorum_by_type?.[proposalType]
+  const majorityByType = rules.governance.majority_by_type?.[proposalType]
+  const finalQuorum = proposal.quorum_required || quorumByType || rules.governance.default_quorum
+  const finalMajority = proposal.majority_required || majorityByType || rules.governance.default_majority
+
   const { financial_instruction, template_id, discussion_min_hours, voting_model, voting_options, ...rest } = proposal
   const insertData: Record<string, unknown> = {
     community_id: communityId,
@@ -102,6 +108,8 @@ export async function createProposal(
     endorsements_required: endorsementsRequired,
     endorsements_met: endorsementsRequired === 0,
     ...rest,
+    quorum_required: finalQuorum,
+    majority_required: finalMajority,
   }
   if (financial_instruction && financial_instruction.type !== 'none') {
     insertData.financial_instruction = financial_instruction

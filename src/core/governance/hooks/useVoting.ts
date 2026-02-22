@@ -78,7 +78,7 @@ export function useCloseProposal() {
       closeProposal(proposalId, communityId!, userId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['proposal', variables.proposalId] })
-      queryClient.invalidateQueries({ queryKey: ['proposals'] })
+      queryClient.invalidateQueries({ queryKey: ['proposals', communityId] })
       queryClient.invalidateQueries({ queryKey: ['vote-summary', variables.proposalId] })
     },
   })
@@ -117,8 +117,9 @@ export function useExecuteProposal() {
       executeProposal(proposalId, communityId!, userId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['proposal', variables.proposalId] })
-      queryClient.invalidateQueries({ queryKey: ['proposals'] })
+      queryClient.invalidateQueries({ queryKey: ['proposals', communityId] })
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['budgets', communityId] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })

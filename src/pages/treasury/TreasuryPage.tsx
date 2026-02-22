@@ -19,6 +19,7 @@ import { useProcessRecurringSchedules } from '@/core/treasury/hooks/useRecurring
 import { useRefreshOverdueInstallments } from '@/core/treasury/hooks/useContracts'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityContext } from '@/app/providers'
+import { useToast } from '@/shared/components/ui/toast'
 import {
   Plus,
   FileSpreadsheet,
@@ -78,6 +79,7 @@ export function TreasuryPage() {
   const refreshInstallments = useRefreshOverdueInstallments()
   const { community } = useCommunityContext()
   const navigate = useNavigate()
+  const toast = useToast()
   const hasRun = useRef(false)
 
   const { data: transactions } = useTransactions()
@@ -108,9 +110,13 @@ export function TreasuryPage() {
   useEffect(() => {
     if (hasRun.current) return
     hasRun.current = true
-    refreshOverdue.mutate(undefined, { onError: () => {} })
-    processRecurring.mutate(undefined, { onError: () => {} })
-    refreshInstallments.mutate(undefined, { onError: () => {} })
+    const onError = (label: string) => (err: unknown) => {
+      console.error(`[Treasury] ${label}:`, err)
+      toast.error(`Error al sincronizar: ${label}`)
+    }
+    refreshOverdue.mutate(undefined, { onError: onError('obligaciones vencidas') })
+    processRecurring.mutate(undefined, { onError: onError('cobros recurrentes') })
+    refreshInstallments.mutate(undefined, { onError: onError('parcialidades vencidas') })
   }, [])
 
   const modeLabel: Record<string, string> = {

@@ -1,14 +1,8 @@
 import { Avatar } from '@/shared/components/ui/avatar'
 import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/shared/components/ui/card'
+import { ROLE_LABELS } from '@/shared/constants/roles'
 import type { Member } from '../types'
-
-const roleLabels: Record<string, string> = {
-  admin: 'Administrador',
-  tesorero: 'Tesorero',
-  miembro: 'Miembro',
-  observador: 'Observador',
-}
 
 interface ProfileCardProps {
   member: Member
@@ -26,7 +20,7 @@ export function ProfileCard({ member }: ProfileCardProps) {
       </CardHeader>
       <CardContent>
         <div className="flex gap-2">
-          <Badge>{roleLabels[member.role] || member.role}</Badge>
+          <Badge>{ROLE_LABELS[member.role] || member.role}</Badge>
           <Badge variant={member.status === 'active' ? 'success' : 'outline'}>
             {member.status === 'active' ? 'Activo' : member.status}
           </Badge>

@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useCommunityContext } from '@/app/providers'
-import { createCommunity, seedCommunityCategories, updateCommunityConfig } from '@/core/identity/services/identity.service'
+import { createCommunity, seedCommunityCategories, updateCommunityConfig, isSlugAvailable } from '@/core/identity/services/identity.service'
 import { updateCommunityRules } from '@/shared/services/rules.service'
 import { DEFAULT_RULES } from '@/shared/types/rules'
 import type { CommunityRules } from '@/shared/types/rules'
@@ -319,6 +319,7 @@ function StepCommunityData({
   name,
   slug,
   description,
+  slugError,
   onNameChange,
   onSlugChange,
   onDescriptionChange,
@@ -326,6 +327,7 @@ function StepCommunityData({
   name: string
   slug: string
   description: string
+  slugError: string
   onNameChange: (v: string) => void
   onSlugChange: (v: string) => void
   onDescriptionChange: (v: string) => void
@@ -358,7 +360,7 @@ function StepCommunityData({
         </div>
         <div className="space-y-2">
           <Label htmlFor="community-slug">
-            Slug de la comunidad <span className="text-destructive">*</span>
+            Identificador único <span className="text-destructive">*</span>
           </Label>
           <Input
             id="community-slug"
@@ -368,12 +370,15 @@ function StepCommunityData({
             required
           />
           <p className="text-xs text-muted-foreground">
-            URL de acceso: /c/{slug || 'tu-comunidad'}
+            Identificador interno de tu comunidad. Usa solo minúsculas, números y guiones.
           </p>
           {slug.length > 0 && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) && (
             <p className="text-sm text-destructive">
               Usa solo minúsculas, números y guiones (sin espacios).
             </p>
+          )}
+          {slugError && (
+            <p className="text-sm text-destructive">{slugError}</p>
           )}
         </div>
         <div className="space-y-2">
@@ -934,6 +939,65 @@ function StepRulesConfig({
           </div>
         </CardContent>
       </Card>
+
+      {/* Advanced governance */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Gobernanza avanzada</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ToggleField
+            label="Discusión obligatoria antes de votar"
+            description="Las propuestas pasan por una fase de discusión antes de abrir la votación"
+            checked={rules.governance.mandatory_discussion_enabled}
+            onChange={(v) => updateGovernance('mandatory_discussion_enabled', v)}
+          />
+          {rules.governance.mandatory_discussion_enabled && (
+            <div className="space-y-2">
+              <Label className="text-sm">Horas mínimas de discusión</Label>
+              <Input
+                type="number"
+                value={rules.governance.default_discussion_hours}
+                onChange={(e) => updateGovernance('default_discussion_hours', Number(e.target.value))}
+                min={1}
+                max={720}
+                className="w-24"
+              />
+            </div>
+          )}
+          <SliderField
+            label="Avales mínimos para propuesta"
+            value={rules.governance.min_endorsements}
+            min={0}
+            max={10}
+            step={1}
+            format={(v) => v === 0 ? 'Deshabilitado' : `${v}`}
+            onChange={(v) => updateGovernance('min_endorsements', v)}
+          />
+          <div className="space-y-2">
+            <Label className="text-sm">Periodo de enfriamiento (horas)</Label>
+            <Input
+              type="number"
+              value={rules.governance.cool_down_hours}
+              onChange={(e) => updateGovernance('cool_down_hours', Number(e.target.value))}
+              min={0}
+              max={168}
+              className="w-24"
+            />
+            <p className="text-xs text-muted-foreground">
+              Horas entre aprobación y ejecución de una propuesta
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300">
+        <p className="font-medium">Configuración adicional disponible</p>
+        <p className="mt-1 text-xs opacity-80">
+          Quórum diferenciado por tipo de propuesta, restricciones de morosos, términos administrativos,
+          y configuración de asambleas se pueden ajustar después en Administración → Reglas.
+        </p>
+      </div>
     </div>
   )
 }
@@ -980,7 +1044,7 @@ function StepConfirmation({
               <h3 className="text-lg font-semibold">{name}</h3>
               <div className="flex items-center gap-2 mt-0.5">
                 <Badge variant="secondary">{typeOption?.label}</Badge>
-                <Badge variant="outline">/c/{slug || 'tu-comunidad'}</Badge>
+                <Badge variant="outline">{slug}</Badge>
               </div>
               {description && (
                 <p className="mt-2 text-sm text-muted-foreground">{description}</p>
@@ -1111,15 +1175,16 @@ function StepConfirmation({
 
 export function OnboardingWizard() {
   const { user } = useAuth()
-  const { setCommunityId, refreshCommunities } = useCommunityContext()
+  const { setCommunityId, refreshCommunities, userCommunities } = useCommunityContext()
   const navigate = useNavigate()
   const toast = useToast()
   const { t } = useI18n()
+  const hasCommunities = userCommunities.length > 0
   const stepLabels = [
     t('onboarding.step.type'),
     t('onboarding.step.data'),
-    'Estructura',
-    'Categorías',
+    t('onboarding.step.structure'),
+    t('onboarding.step.categories'),
     t('onboarding.step.rules'),
     t('onboarding.step.confirm'),
   ]
@@ -1129,28 +1194,47 @@ export function OnboardingWizard() {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugEdited, setSlugEdited] = useState(false)
+  const [slugError, setSlugError] = useState('')
   const [description, setDescription] = useState('')
   const [communityConfig, setCommunityConfig] = useState<CommunityConfigShape>(getCommunityConfigPreset('other'))
   const [rules, setRules] = useState<CommunityRules>({ ...DEFAULT_RULES })
   const [submitting, setSubmitting] = useState(false)
 
-  // When community type changes, update rules preset
+  const slugCheckTimer = useRef<ReturnType<typeof setTimeout>>()
+
   const handleTypeSelect = (type: CommunityType) => {
     setCommunityType(type)
     setRules(getRulesForType(type))
     setCommunityConfig(getCommunityConfigPreset(type))
   }
 
+  const checkSlug = useCallback((value: string) => {
+    if (slugCheckTimer.current) clearTimeout(slugCheckTimer.current)
+    if (!value || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) return
+    setSlugError('')
+    slugCheckTimer.current = setTimeout(async () => {
+      const available = await isSlugAvailable(value)
+      if (!available) {
+        setSlugError('Este identificador ya está en uso. Elige otro.')
+      }
+    }, 500)
+  }, [])
+
   const handleNameChange = (value: string) => {
     setName(value)
     if (!slugEdited) {
-      setSlug(sanitizeSlug(value))
+      const newSlug = sanitizeSlug(value)
+      setSlug(newSlug)
+      checkSlug(newSlug)
     }
   }
 
   const handleSlugChange = (value: string) => {
     setSlugEdited(true)
-    setSlug(sanitizeSlug(value))
+    const newSlug = sanitizeSlug(value)
+    setSlug(newSlug)
+    setSlugError('')
+    checkSlug(newSlug)
   }
 
   const isValidSlug = (value: string): boolean =>
@@ -1161,7 +1245,7 @@ export function OnboardingWizard() {
       case 1:
         return communityType !== null
       case 2:
-        return name.trim().length >= 3 && isValidSlug(slug)
+        return name.trim().length >= 3 && isValidSlug(slug) && !slugError
       case 3:
         return communityConfig.voting_weight.formula !== 'custom_attribute' ||
           Boolean(communityConfig.voting_weight.source_field)
@@ -1189,9 +1273,18 @@ export function OnboardingWizard() {
     }
   }
 
+  const handleCancel = () => {
+    if (hasCommunities) {
+      navigate('/dashboard')
+    } else {
+      navigate('/')
+    }
+  }
+
   const handleSubmit = async () => {
     if (!user || !communityType || !name.trim()) return
     setSubmitting(true)
+    let createdCommunityId: string | null = null
     try {
       const normalizedConfig: CommunityConfigShape = {
         ...communityConfig,
@@ -1228,17 +1321,43 @@ export function OnboardingWizard() {
         type: communityType,
         description: description.trim() || undefined,
       })
-      await updateCommunityConfig(community.id, normalizedConfig as unknown as Record<string, unknown>)
-      await seedCommunityCategories(community.id, normalizedConfig.financial_categories)
-      await updateCommunityRules(community.id, rules)
+      createdCommunityId = community.id
+
+      const postCreateSteps = [
+        () => updateCommunityConfig(community.id, normalizedConfig as unknown as Record<string, unknown>),
+        () => seedCommunityCategories(community.id, normalizedConfig.financial_categories),
+        () => updateCommunityRules(community.id, rules),
+      ]
+
+      const errors: string[] = []
+      for (const stepFn of postCreateSteps) {
+        try {
+          await stepFn()
+        } catch (err) {
+          errors.push(err instanceof Error ? err.message : 'Error desconocido')
+        }
+      }
+
       setCommunityId(community.id)
       refreshCommunities()
-      toast.success('Comunidad creada exitosamente')
+
+      if (errors.length > 0) {
+        toast.success('Comunidad creada. Algunas configuraciones se pueden ajustar en Administración.')
+      } else {
+        toast.success('Comunidad creada exitosamente')
+      }
       navigate('/dashboard')
     } catch (err: unknown) {
-      toast.error(
-        err instanceof Error ? err.message : 'Error al crear la comunidad'
-      )
+      if (!createdCommunityId) {
+        toast.error(
+          err instanceof Error ? err.message : 'Error al crear la comunidad'
+        )
+      } else {
+        setCommunityId(createdCommunityId)
+        refreshCommunities()
+        toast.error('Error al configurar la comunidad. Puedes ajustarla en Administración.')
+        navigate('/dashboard')
+      }
     } finally {
       setSubmitting(false)
     }
@@ -1253,7 +1372,7 @@ export function OnboardingWizard() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/dashboard')}
+            onClick={handleCancel}
           >
             {t('onboarding.cancel')}
           </Button>
@@ -1280,6 +1399,7 @@ export function OnboardingWizard() {
               name={name}
               slug={slug}
               description={description}
+              slugError={slugError}
               onNameChange={handleNameChange}
               onSlugChange={handleSlugChange}
               onDescriptionChange={setDescription}

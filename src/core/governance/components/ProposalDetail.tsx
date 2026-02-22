@@ -422,8 +422,8 @@ export function ProposalDetail({ proposalId }: Props) {
               </div>
             )}
 
-            {/* Draft → Active (skip discussion) */}
-            {proposal.status === 'draft' && isAdmin && endorsementsOk && (
+            {/* Draft → Active (skip discussion, only when discussion is not mandatory) */}
+            {proposal.status === 'draft' && isAdmin && endorsementsOk && !rules.governance.mandatory_discussion_enabled && (
               <Button onClick={handleOpenVoting} disabled={updateStatus.isPending}>
                 {t('proposalDetail.openDirectVoting')}
               </Button>
