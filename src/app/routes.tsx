@@ -20,7 +20,6 @@ const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage').
 const ResetPasswordPage = lazy(() => import('@/pages/auth/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })))
 const InviteAcceptPage = lazy(() => import('@/pages/auth/InviteAcceptPage').then(m => ({ default: m.InviteAcceptPage })))
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage').then(m => ({ default: m.DashboardPage })))
-const MembersPage = lazy(() => import('@/pages/members/MembersPage').then(m => ({ default: m.MembersPage })))
 const MemberDetailPage = lazy(() => import('@/pages/members/MemberDetailPage').then(m => ({ default: m.MemberDetailPage })))
 const TreasuryPage = lazy(() => import('@/pages/treasury/TreasuryPage').then(m => ({ default: m.TreasuryPage })))
 const SpendRequestsPage = lazy(() => import('@/pages/treasury/SpendRequestsPage').then(m => ({ default: m.SpendRequestsPage })))
