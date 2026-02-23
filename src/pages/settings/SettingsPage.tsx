@@ -26,6 +26,7 @@ import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { BroxelSubscriptionWizard } from '@/core/treasury/components/BroxelSubscriptionWizard'
+import { AuditLog } from '@/shared/components/AuditLog'
 
 export function SettingsPage() {
   const { communityId, community, currentMember } = useCommunityContext()
@@ -34,8 +35,10 @@ export function SettingsPage() {
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
   const tabFromUrl = searchParams.get('tab')
-  const [tab, setTab] = useState<'general' | 'categories' | 'invitations' | 'rules' | 'privacy' | 'terminos'>(
-    (tabFromUrl === 'rules' || tabFromUrl === 'categories' || tabFromUrl === 'invitations' || tabFromUrl === 'privacy' || tabFromUrl === 'terminos') ? tabFromUrl : 'general'
+  type SettingsTab = 'general' | 'categories' | 'invitations' | 'rules' | 'notifications' | 'audit' | 'privacy' | 'terminos'
+  const validTabs: SettingsTab[] = ['general', 'categories', 'invitations', 'rules', 'notifications', 'audit', 'privacy', 'terminos']
+  const [tab, setTab] = useState<SettingsTab>(
+    validTabs.includes(tabFromUrl as SettingsTab) ? (tabFromUrl as SettingsTab) : 'general'
   )
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
   const [showBroxelWizard, setShowBroxelWizard] = useState(false)
@@ -235,6 +238,10 @@ export function SettingsPage() {
           <TabsTrigger value="notifications" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <Bell className="h-3.5 w-3.5" />
             Notificaciones
+          </TabsTrigger>
+          <TabsTrigger value="audit" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
+            <Shield className="h-3.5 w-3.5" />
+            Auditoría
           </TabsTrigger>
         </TabsList>
 
@@ -1125,6 +1132,13 @@ export function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        {/* Auditoría Tab */}
+        <TabsContent value="audit">
+          <div className="space-y-6 rounded-lg border p-6">
+            <AuditLog />
           </div>
         </TabsContent>
       </Tabs>

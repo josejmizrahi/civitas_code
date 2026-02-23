@@ -82,12 +82,16 @@ export type I18nKey =
   | 'governance.export'
   | 'governance.newAssembly'
   | 'governance.newProposal'
+  | 'governance.tab.proposals'
   | 'governance.tab.active'
   | 'governance.tab.discussion'
   | 'governance.tab.draft'
   | 'governance.tab.closed'
   | 'governance.tab.all'
   | 'governance.tab.assemblies'
+  | 'governance.tab.delegations'
+  | 'governance.tab.minutes'
+  | 'governance.tab.rules'
   | 'members.title'
   | 'members.subtitle'
   | 'members.export'
@@ -855,12 +859,16 @@ const es: Dictionary = {
   'governance.export': 'Exportar',
   'governance.newAssembly': 'Nueva Asamblea',
   'governance.newProposal': 'Nueva Propuesta',
+  'governance.tab.proposals': 'Propuestas',
   'governance.tab.active': 'Activas',
   'governance.tab.discussion': 'En Discusion',
   'governance.tab.draft': 'Borradores',
   'governance.tab.closed': 'Cerradas',
   'governance.tab.all': 'Todas',
   'governance.tab.assemblies': 'Asambleas',
+  'governance.tab.delegations': 'Delegaciones',
+  'governance.tab.minutes': 'Actas',
+  'governance.tab.rules': 'Reglas',
   'members.title': 'Miembros',
   'members.subtitle': 'Directorio de miembros de la comunidad',
   'members.export': 'Exportar',
@@ -1623,12 +1631,16 @@ const en: Dictionary = {
   'governance.export': 'Export',
   'governance.newAssembly': 'New Assembly',
   'governance.newProposal': 'New Proposal',
+  'governance.tab.proposals': 'Proposals',
   'governance.tab.active': 'Active',
   'governance.tab.discussion': 'In Discussion',
   'governance.tab.draft': 'Drafts',
   'governance.tab.closed': 'Closed',
   'governance.tab.all': 'All',
   'governance.tab.assemblies': 'Assemblies',
+  'governance.tab.delegations': 'Delegations',
+  'governance.tab.minutes': 'Minutes',
+  'governance.tab.rules': 'Rules',
   'members.title': 'Members',
   'members.subtitle': 'Community members directory',
   'members.export': 'Export',
