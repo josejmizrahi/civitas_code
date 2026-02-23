@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/tabs'
 import { Button } from '@/shared/components/ui/button'
 import { MemberDirectory } from '@/core/identity/components/MemberDirectory'
+import { EntityList } from '@/core/entities/components/EntityList'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { exportToExcel } from '@/shared/services/export.service'
 import { formatDate } from '@/shared/lib/utils'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { ROLE_LABELS } from '@/shared/constants/roles'
-import { Download, Users, Contact, Activity } from 'lucide-react'
+import { Download, Users, Contact, Activity, Building2 } from 'lucide-react'
 import { CommunityDirectoryTab } from './CommunityDirectoryTab'
 import { CommunityActivityTab } from './CommunityActivityTab'
 
@@ -52,6 +53,10 @@ export function CommunityPage() {
             <Contact className="h-3.5 w-3.5" />
             {t('community.tabs.directory')}
           </TabsTrigger>
+          <TabsTrigger value="providers" className="flex items-center gap-1.5">
+            <Building2 className="h-3.5 w-3.5" />
+            Proveedores
+          </TabsTrigger>
           <TabsTrigger value="activity" className="flex items-center gap-1.5">
             <Activity className="h-3.5 w-3.5" />
             {t('community.tabs.activity')}
@@ -64,6 +69,10 @@ export function CommunityPage() {
 
         <TabsContent value="directory">
           <CommunityDirectoryTab />
+        </TabsContent>
+
+        <TabsContent value="providers">
+          <EntityList />
         </TabsContent>
 
         <TabsContent value="activity">

@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
@@ -48,9 +48,7 @@ import {
 } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 
-const EntitiesPage = lazy(() => import('@/pages/entities/EntitiesPage').then(m => ({ default: m.EntitiesPage })))
-
-type TreasuryTab = 'dashboard' | 'requests' | 'transactions' | 'budgets' | 'obligations' | 'providers' | 'ifpe'
+type TreasuryTab = 'dashboard' | 'requests' | 'transactions' | 'budgets' | 'obligations' | 'ifpe'
 
 export function AdminTreasuryView() {
   const { t } = useI18n()
@@ -245,10 +243,6 @@ export function AdminTreasuryView() {
             <Receipt className="h-3.5 w-3.5" />
             Obligaciones
           </TabsTrigger>
-          <TabsTrigger value="providers" className="gap-1.5 text-xs sm:text-sm">
-            <Building2 className="h-3.5 w-3.5" />
-            Proveedores
-          </TabsTrigger>
           {showIfpeTab && (
             <TabsTrigger value="ifpe" className="gap-1.5 text-xs sm:text-sm">
               <Banknote className="h-3.5 w-3.5" />
@@ -341,13 +335,6 @@ export function AdminTreasuryView() {
               {obligationsSubTab === 'discretionary' && canManageTreasury && <DiscretionaryApprovalsPanel />}
             </div>
           </Tabs>
-        </TabsContent>
-
-        {/* Tab: Proveedores */}
-        <TabsContent value="providers" className="mt-4">
-          <Suspense fallback={<LoadingSpinner className="py-8" />}>
-            <EntitiesPage embedded />
-          </Suspense>
         </TabsContent>
 
         {/* Tab: IFPE */}
