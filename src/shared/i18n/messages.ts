@@ -13,6 +13,7 @@ export type I18nKey =
   | 'nav.documents'
   | 'nav.census'
   | 'nav.import'
+  | 'nav.payments'
   | 'nav.more'
   | 'community.tabs.members'
   | 'community.tabs.directory'
@@ -792,6 +793,7 @@ const es: Dictionary = {
   'nav.documents': 'Documentos',
   'nav.census': 'Censo',
   'nav.import': 'Importar Datos',
+  'nav.payments': 'Pagos',
   'nav.more': 'Mas',
   'community.tabs.members': 'Miembros',
   'community.tabs.directory': 'Directorio',
@@ -1566,6 +1568,7 @@ const en: Dictionary = {
   'nav.documents': 'Documents',
   'nav.census': 'Census',
   'nav.import': 'Import Data',
+  'nav.payments': 'Payments',
   'nav.more': 'More',
   'community.tabs.members': 'Members',
   'community.tabs.directory': 'Directory',

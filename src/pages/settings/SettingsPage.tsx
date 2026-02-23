@@ -25,7 +25,6 @@ import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
-import { FintechOnboarding } from '@/core/fintech/components/FintechOnboarding'
 import { AuditLog } from '@/shared/components/AuditLog'
 
 export function SettingsPage() {
@@ -41,7 +40,6 @@ export function SettingsPage() {
     validTabs.includes(tabFromUrl as SettingsTab) ? (tabFromUrl as SettingsTab) : 'general'
   )
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
-  const [showPaymentSetup, setShowPaymentSetup] = useState(false)
   const [, setNotifPrefsVersion] = useState(0)
 
   // Push notification state
@@ -80,10 +78,6 @@ export function SettingsPage() {
       setRules(getCommunityRules(null, (community as any)?.rules))
     }
   }, [community])
-
-  useEffect(() => {
-    if (searchParams.get('payments') === '1') setShowPaymentSetup(true)
-  }, [searchParams])
 
   const navigate = useNavigate()
 
@@ -690,7 +684,7 @@ export function SettingsPage() {
                   {(community as any)?.fintoc_status === 'active' ? (
                     <div className="flex items-center gap-2 text-sm text-emerald-800">
                       <CheckCircle2 className="h-4 w-4 shrink-0" />
-                      <span>Integración activa. CLABE y opciones disponibles en Tesorería.</span>
+                      <span>Integración activa. Gestiona desde la sección de Pagos.</span>
                     </div>
                   ) : (community as any)?.fintoc_status === 'pending' ? (
                     <p className="text-sm text-amber-800">Solicitud en revisión. Te notificaremos cuando esté lista.</p>
@@ -700,7 +694,7 @@ export function SettingsPage() {
                       variant="default"
                       size="sm"
                       className="bg-emerald-700 hover:bg-emerald-800"
-                      onClick={() => setShowPaymentSetup(true)}
+                      onClick={() => navigate(path('payments'))}
                     >
                       Configurar pagos
                     </Button>
@@ -768,11 +762,6 @@ export function SettingsPage() {
                   </p>
                 </div>
 
-                {showPaymentSetup && (
-                  <div className="mt-4">
-                    <FintechOnboarding />
-                  </div>
-                )}
               </CardContent>
             </Card>
 

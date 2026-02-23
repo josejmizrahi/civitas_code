@@ -25,6 +25,7 @@ import {
   Search,
   Megaphone,
   Calendar,
+  CreditCard,
 } from 'lucide-react'
 import { Avatar } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
@@ -40,6 +41,7 @@ const coreNavigation = [
   { key: 'nav.dashboard', path: 'dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
   { key: 'nav.community', path: 'community', icon: Users, minRole: 'observador' as Role },
   { key: 'nav.treasury', path: 'treasury', icon: Wallet, minRole: 'observador' as Role },
+  { key: 'nav.payments', path: 'payments', icon: CreditCard, minRole: 'admin' as Role },
   { key: 'nav.governance', path: 'governance', icon: Vote, minRole: 'observador' as Role },
   { key: 'nav.announcements', path: 'announcements', icon: Megaphone, minRole: 'observador' as Role },
   { key: 'nav.calendar', path: 'calendar', icon: Calendar, minRole: 'observador' as Role },

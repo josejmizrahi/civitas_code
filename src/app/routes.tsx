@@ -47,6 +47,7 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ defa
 const CommunitiesPage = lazy(() => import('@/pages/communities/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })))
 const CommunityPage = lazy(() => import('@/pages/community/CommunityPage').then(m => ({ default: m.CommunityPage })))
 const MyPaymentsPage = lazy(() => import('@/pages/treasury/MyPaymentsPage').then(m => ({ default: m.MyPaymentsPage })))
+const PaymentsPage = lazy(() => import('@/pages/payments/PaymentsPage').then(m => ({ default: m.PaymentsPage })))
 const AnnouncementsPage = lazy(() => import('@/pages/announcements/AnnouncementsPage').then(m => ({ default: m.AnnouncementsPage })))
 const CalendarPage = lazy(() => import('@/pages/calendar/CalendarPage').then(m => ({ default: m.CalendarPage })))
 
@@ -217,6 +218,9 @@ export function AppRouter() {
               path="residential"
               element={<CommunityTypeGuard requiredType="residential"><LazyPage><ResidentialPage /></LazyPage></CommunityTypeGuard>}
             />
+
+            {/* Pagos (fintech integration, reconciliación, dispersiones) */}
+            <Route path="payments" element={<RoleGuard requiredRole="admin"><LazyPage><PaymentsPage /></LazyPage></RoleGuard>} />
 
             {/* Mi estado de cuenta (acceso directo) */}
             <Route path="my-payments" element={<LazyPage><MyPaymentsPage /></LazyPage>} />

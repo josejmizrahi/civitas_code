@@ -46,11 +46,8 @@ import {
   Copy,
 } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-import { FintechOnboarding } from '@/core/fintech/components/FintechOnboarding'
-import { PaymentReconciliation } from '@/core/fintech/components/PaymentReconciliation'
-import { TransferPanel } from '@/core/fintech/components/TransferPanel'
 
-type TreasuryTab = 'dashboard' | 'requests' | 'transactions' | 'budgets' | 'obligations' | 'payments'
+type TreasuryTab = 'dashboard' | 'requests' | 'transactions' | 'budgets' | 'obligations'
 
 export function AdminTreasuryView() {
   const { t } = useI18n()
@@ -150,7 +147,7 @@ export function AdminTreasuryView() {
               <Banknote className="h-4 w-4 shrink-0" />
               <span>Conecta la integración financiera para recibir pagos SPEI automáticamente, conciliar cuotas y dispersar pagos a proveedores.</span>
             </div>
-            <Button variant="outline" size="sm" className="border-blue-300 text-blue-800 hover:bg-blue-100 shrink-0" onClick={() => setActiveTab('payments')}>
+            <Button variant="outline" size="sm" className="border-blue-300 text-blue-800 hover:bg-blue-100 shrink-0" onClick={() => navigate(path('payments'))}>
               Configurar pagos
             </Button>
           </div>
@@ -237,10 +234,6 @@ export function AdminTreasuryView() {
           <TabsTrigger value="obligations" className="gap-1.5 text-xs sm:text-sm">
             <Receipt className="h-3.5 w-3.5" />
             Obligaciones
-          </TabsTrigger>
-          <TabsTrigger value="payments" className="gap-1.5 text-xs sm:text-sm">
-            <Banknote className="h-3.5 w-3.5" />
-            Pagos
           </TabsTrigger>
         </TabsList>
 
@@ -330,12 +323,6 @@ export function AdminTreasuryView() {
           </Tabs>
         </TabsContent>
 
-        {/* Tab: Pagos */}
-        <TabsContent value="payments" className="mt-4">
-          <Suspense fallback={<LoadingSpinner className="py-8" />}>
-            <PaymentsTab />
-          </Suspense>
-        </TabsContent>
       </Tabs>
 
       <ExpenseForm
@@ -415,20 +402,3 @@ function SpendRequestsInline() {
   )
 }
 
-function PaymentsTab() {
-  const [paymentsSubTab, setPaymentsSubTab] = useState('setup')
-
-  return (
-    <Tabs value={paymentsSubTab} onValueChange={setPaymentsSubTab}>
-      <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
-        <TabsTrigger value="setup" className="gap-1 text-xs sm:text-sm">Configuración</TabsTrigger>
-        <TabsTrigger value="reconciliation" className="gap-1 text-xs sm:text-sm">Conciliación</TabsTrigger>
-        <TabsTrigger value="transfers" className="gap-1 text-xs sm:text-sm">Dispersiones</TabsTrigger>
-      </TabsList>
-
-      {paymentsSubTab === 'setup' && <div className="mt-4"><FintechOnboarding /></div>}
-      {paymentsSubTab === 'reconciliation' && <div className="mt-4"><PaymentReconciliation /></div>}
-      {paymentsSubTab === 'transfers' && <div className="mt-4"><TransferPanel /></div>}
-    </Tabs>
-  )
-}
