@@ -10,6 +10,7 @@ import { AlertTriangle, CheckCircle2, Clock, Building2, Copy } from 'lucide-reac
 import { Button } from '@/shared/components/ui/button'
 import { useState } from 'react'
 import type { TreasuryRules } from '@/shared/types/rules'
+import { FintocPaymentButton } from '@/core/fintoc/components/FintocPaymentButton'
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendiente',
@@ -106,22 +107,17 @@ export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boo
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {hasClabe ? (
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Realiza una transferencia SPEI al siguiente numero de cuenta. Usa tu referencia de pago para identificar tu obligacion.
-                </p>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Puedes pagar tus obligaciones directamente con transferencia SPEI a través de Fintoc.
+                Haz clic en "Pagar con SPEI" en la tabla de abajo, o realiza una transferencia manual a la CLABE indicada.
+              </p>
+              {hasClabe && (
                 <div className="rounded-lg bg-muted p-4 space-y-2">
                   <div>
-                    <div className="text-xs text-muted-foreground">CLABE</div>
+                    <div className="text-xs text-muted-foreground">CLABE para transferencia manual</div>
                     <code className="text-sm sm:text-lg font-mono font-bold tracking-wider break-all">{collectionConfig.clabe}</code>
                   </div>
-                  {collectionConfig.bank_name && (
-                    <div>
-                      <div className="text-xs text-muted-foreground">Banco</div>
-                      <div className="font-medium">{collectionConfig.bank_name}</div>
-                    </div>
-                  )}
                   {collectionConfig.beneficiary_name && (
                     <div>
                       <div className="text-xs text-muted-foreground">Beneficiario</div>
@@ -129,18 +125,8 @@ export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boo
                     </div>
                   )}
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  Contacta al tesorero de tu comunidad para conocer la forma de pago aceptada.
-                  Una vez realizado el pago, el tesorero lo registrara en el sistema.
-                </p>
-                <div className="rounded-md bg-blue-50 p-3 text-sm text-blue-800">
-                  Proximamente se habilitara el pago directo via SPEI con reconciliacion automatica.
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </CardContent>
         </Card>
       )}
@@ -165,6 +151,7 @@ export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boo
                   <TableHead className="text-right">Monto</TableHead>
                   <TableHead className="hidden sm:table-cell">Vencimiento</TableHead>
                   {hasClabe && <TableHead className="hidden sm:table-cell">Referencia</TableHead>}
+                  <TableHead className="text-right">Acción</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -201,6 +188,15 @@ export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boo
                           )}
                         </TableCell>
                       )}
+                      <TableCell className="text-right">
+                        {(ob.status === 'pending' || ob.status === 'overdue') && (
+                          <FintocPaymentButton
+                            obligationId={ob.id}
+                            amount={ob.amount}
+                            concept={ob.concept}
+                          />
+                        )}
+                      </TableCell>
                     </TableRow>
                   )
                 })}

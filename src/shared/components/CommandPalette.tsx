@@ -7,7 +7,7 @@ import { useProposals } from '@/core/governance/hooks/useProposals'
 import { hasPermission, type Role } from '@/shared/types'
 import {
   LayoutDashboard, Users, Wallet, Vote, FileText, Settings, Shield,
-  Search, BarChart3, Building2, Home, BookOpen, Upload, User, ChevronRight,
+  Search, BarChart3, Building2, Home, BookOpen, User, ChevronRight,
   Receipt, Megaphone, Calendar,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
@@ -80,7 +80,6 @@ export function CommandPalette() {
       nav.push(
         { id: 'nav-settings', label: 'Configuración', section: 'Administración', icon: Settings, path: path('settings'), keywords: 'ajustes reglas categorias' },
         { id: 'nav-vigilancia', label: 'Vigilancia', section: 'Administración', icon: Shield, path: path('vigilancia'), keywords: 'comite supervision auditoria' },
-        { id: 'nav-ingestion', label: 'Importar Datos', section: 'Administración', icon: Upload, path: path('ingestion'), keywords: 'csv excel importar subir' },
       )
     }
 

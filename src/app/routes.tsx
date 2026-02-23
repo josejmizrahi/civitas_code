@@ -25,7 +25,7 @@ const TreasuryPage = lazy(() => import('@/pages/treasury/TreasuryPage').then(m =
 const SpendRequestsPage = lazy(() => import('@/pages/treasury/SpendRequestsPage').then(m => ({ default: m.SpendRequestsPage })))
 const SpendRequestNewPage = lazy(() => import('@/pages/treasury/SpendRequestNewPage').then(m => ({ default: m.SpendRequestNewPage })))
 const SpendRequestDetailPage = lazy(() => import('@/pages/treasury/SpendRequestDetailPage').then(m => ({ default: m.SpendRequestDetailPage })))
-const IngestionPage = lazy(() => import('@/pages/ingestion/IngestionPage').then(m => ({ default: m.IngestionPage })))
+
 const GovernancePage = lazy(() => import('@/pages/governance/GovernancePage').then(m => ({ default: m.GovernancePage })))
 const ProposalDetailPage = lazy(() => import('@/pages/governance/ProposalDetailPage').then(m => ({ default: m.ProposalDetailPage })))
 const AssemblyDetailPage = lazy(() => import('@/pages/governance/AssemblyDetailPage').then(m => ({ default: m.AssemblyDetailPage })))
@@ -195,7 +195,6 @@ export function AppRouter() {
             <Route path="treasury/requests/:id" element={<LazyPage><SpendRequestDetailPage /></LazyPage>} />
             <Route path="entities" element={<LazyPage><EntitiesPage /></LazyPage>} />
             <Route path="entities/:entityId" element={<LazyPage><EntityDetailPage /></LazyPage>} />
-            <Route path="ingestion" element={<RoleGuard requiredRole="tesorero"><LazyPage><IngestionPage /></LazyPage></RoleGuard>} />
 
             {/* Gobernanza */}
             <Route path="governance" element={<LazyPage><GovernancePage /></LazyPage>} />

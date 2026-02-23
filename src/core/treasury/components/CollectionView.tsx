@@ -3,7 +3,7 @@ import { getCollectionConfig } from '../services/treasury.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { PaymentPlanManager } from './PaymentPlanManager'
-import { IfpeReconciliationPanel } from './IfpeReconciliationPanel'
+import { FintocReconciliation } from '@/core/fintoc/components/FintocReconciliation'
 import { AlertTriangle, CheckCircle2, Building2, Copy } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { useState } from 'react'
@@ -101,8 +101,8 @@ export function CollectionView({ onGoToObligations: _onGoToObligations }: { onGo
       {canManageTreasury && <ClabeDisplay config={collectionConfig} />}
 
       {/* IFPE Reconciliation — visible when fintech_rail or hybrid */}
-      {canManageTreasury && (treasuryMode === 'fintech_rail' || treasuryMode === 'hybrid') && (
-        <IfpeReconciliationPanel />
+      {canManageTreasury && (
+        <FintocReconciliation />
       )}
 
       {/* Payment Plans */}

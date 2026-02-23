@@ -25,7 +25,7 @@ import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
-import { BroxelSubscriptionWizard } from '@/core/treasury/components/BroxelSubscriptionWizard'
+import { FintocSetup } from '@/core/fintoc/components/FintocSetup'
 import { AuditLog } from '@/shared/components/AuditLog'
 
 export function SettingsPage() {
@@ -41,7 +41,7 @@ export function SettingsPage() {
     validTabs.includes(tabFromUrl as SettingsTab) ? (tabFromUrl as SettingsTab) : 'general'
   )
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
-  const [showBroxelWizard, setShowBroxelWizard] = useState(false)
+  const [showFintocSetup, setShowFintocSetup] = useState(false)
   const [, setNotifPrefsVersion] = useState(0)
 
   // Push notification state
@@ -82,7 +82,7 @@ export function SettingsPage() {
   }, [community])
 
   useEffect(() => {
-    if (searchParams.get('broxel') === '1') setShowBroxelWizard(true)
+    if (searchParams.get('fintoc') === '1') setShowFintocSetup(true)
   }, [searchParams])
 
   const navigate = useNavigate()
@@ -723,9 +723,9 @@ export function SettingsPage() {
                       variant="default"
                       size="sm"
                       className="bg-emerald-700 hover:bg-emerald-800"
-                      onClick={() => setShowBroxelWizard(true)}
+                      onClick={() => setShowFintocSetup(true)}
                     >
-                      Solicitar acceso a BROXEL
+                      Configurar Fintoc
                     </Button>
                   )}
                 </div>
@@ -853,9 +853,9 @@ export function SettingsPage() {
                   </div>
                 )}
 
-                {showBroxelWizard && (
+                {showFintocSetup && (
                   <div className="mt-4">
-                    <BroxelSubscriptionWizard onClose={() => setShowBroxelWizard(false)} />
+                    <FintocSetup />
                   </div>
                 )}
               </CardContent>

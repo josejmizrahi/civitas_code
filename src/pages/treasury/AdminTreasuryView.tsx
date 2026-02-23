@@ -32,7 +32,6 @@ import type { TreasuryRules, FundType } from '@/shared/types/rules'
 import { cn } from '@/shared/lib/utils'
 import {
   Plus,
-  FileSpreadsheet,
   Download,
   Wallet,
   AlertTriangle,
@@ -47,15 +46,18 @@ import {
   Copy,
 } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { FintocSetup } from '@/core/fintoc/components/FintocSetup'
+import { FintocReconciliation } from '@/core/fintoc/components/FintocReconciliation'
+import { FintocTransferPanel } from '@/core/fintoc/components/FintocTransferPanel'
 
-type TreasuryTab = 'dashboard' | 'requests' | 'transactions' | 'budgets' | 'obligations' | 'ifpe'
+type TreasuryTab = 'dashboard' | 'requests' | 'transactions' | 'budgets' | 'obligations' | 'fintoc'
 
 export function AdminTreasuryView() {
   const { t } = useI18n()
   const navigate = useNavigate()
   const path = useCommunityPath()
   const { community } = useCommunityContext()
-  const { canManageTreasury, canImportData } = usePermissions()
+  const { canManageTreasury } = usePermissions()
   const [activeTab, setActiveTab] = useState<TreasuryTab>('dashboard')
   const [selectedFund, setSelectedFund] = useState<FundType>('mantenimiento')
   const [showForm, setShowForm] = useState(false)
@@ -66,9 +68,7 @@ export function AdminTreasuryView() {
   const treasuryMode = rules?.treasury?.mode || 'import'
   const collectionConfig = getCollectionConfig(rules)
   const hasClabe = !!collectionConfig?.clabe
-  const ifpeStatus = (community as { ifpe_status?: string } | null)?.ifpe_status
-  const showBroxelBanner = treasuryMode === 'import' && ifpeStatus !== 'active' && ifpeStatus !== 'pending_kyb'
-  const showIfpeTab = treasuryMode === 'fintech_rail' || treasuryMode === 'hybrid' || ifpeStatus === 'active'
+  const fintocStatus = (community as { fintoc_status?: string } | null)?.fintoc_status
 
   const { data: stats, isLoading: statsLoading } = useDashboard()
   const { data: collStats } = useCollectionStats()
@@ -136,11 +136,6 @@ export function AdminTreasuryView() {
             <Button variant="outline" size="sm" onClick={handleExportExcel} disabled={!transactions?.length} title={t('treasury.export.excel.title')} className="gap-1.5">
               <Download className="h-4 w-4" /> Excel
             </Button>
-            {canImportData && (
-              <Button variant="outline" size="sm" onClick={() => navigate(path('ingestion'))} className="gap-1.5">
-                <FileSpreadsheet className="h-4 w-4" /> {t('treasury.import')}
-              </Button>
-            )}
             {canManageTreasury && (
               <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
                 <Plus className="h-4 w-4" /> {t('treasury.manualCapture')}
@@ -149,14 +144,14 @@ export function AdminTreasuryView() {
           </div>
         </div>
 
-        {showBroxelBanner && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-sm text-emerald-900">
-              <Building2 className="h-4 w-4 shrink-0" />
-              <span>Solicita acceso a BROXEL para recibir pagos SPEI, conciliar cuotas automáticamente y dispersar pagos con gobernanza.</span>
+        {fintocStatus !== 'active' && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-sm text-blue-900">
+              <Banknote className="h-4 w-4 shrink-0" />
+              <span>Conecta Fintoc para recibir pagos SPEI automáticamente, conciliar cuotas y dispersar pagos a proveedores.</span>
             </div>
-            <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-800 hover:bg-emerald-100 shrink-0" onClick={() => navigate(`/c/${community?.slug}/settings?tab=rules&broxel=1`)}>
-              Solicitar acceso BROXEL
+            <Button variant="outline" size="sm" className="border-blue-300 text-blue-800 hover:bg-blue-100 shrink-0" onClick={() => setActiveTab('fintoc')}>
+              Configurar Fintoc
             </Button>
           </div>
         )}
@@ -243,12 +238,10 @@ export function AdminTreasuryView() {
             <Receipt className="h-3.5 w-3.5" />
             Obligaciones
           </TabsTrigger>
-          {showIfpeTab && (
-            <TabsTrigger value="ifpe" className="gap-1.5 text-xs sm:text-sm">
-              <Banknote className="h-3.5 w-3.5" />
-              IFPE
-            </TabsTrigger>
-          )}
+          <TabsTrigger value="fintoc" className="gap-1.5 text-xs sm:text-sm">
+            <Banknote className="h-3.5 w-3.5" />
+            Fintoc
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab: Dashboard */}
@@ -337,22 +330,12 @@ export function AdminTreasuryView() {
           </Tabs>
         </TabsContent>
 
-        {/* Tab: IFPE */}
-        {showIfpeTab && (
-          <TabsContent value="ifpe" className="mt-4">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Integración IFPE / BROXEL</CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  <p>Módulo de conciliación, dispersiones y rendimientos.</p>
-                  <p className="mt-2">Estado: <span className="font-medium text-foreground">{ifpeStatus || 'No configurado'}</span></p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        )}
+        {/* Tab: Fintoc */}
+        <TabsContent value="fintoc" className="mt-4">
+          <Suspense fallback={<LoadingSpinner className="py-8" />}>
+            <FintocTab />
+          </Suspense>
+        </TabsContent>
       </Tabs>
 
       <ExpenseForm
@@ -429,5 +412,23 @@ function SpendRequestsInline() {
         </TableBody>
       </Table>
     </div>
+  )
+}
+
+function FintocTab() {
+  const [fintocSubTab, setFintocSubTab] = useState('setup')
+
+  return (
+    <Tabs value={fintocSubTab} onValueChange={setFintocSubTab}>
+      <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
+        <TabsTrigger value="setup" className="gap-1 text-xs sm:text-sm">Configuración</TabsTrigger>
+        <TabsTrigger value="reconciliation" className="gap-1 text-xs sm:text-sm">Conciliación</TabsTrigger>
+        <TabsTrigger value="transfers" className="gap-1 text-xs sm:text-sm">Dispersiones</TabsTrigger>
+      </TabsList>
+
+      {fintocSubTab === 'setup' && <div className="mt-4"><FintocSetup /></div>}
+      {fintocSubTab === 'reconciliation' && <div className="mt-4"><FintocReconciliation /></div>}
+      {fintocSubTab === 'transfers' && <div className="mt-4"><FintocTransferPanel /></div>}
+    </Tabs>
   )
 }
