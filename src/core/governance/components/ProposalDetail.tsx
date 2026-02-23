@@ -40,6 +40,7 @@ import {
 import { useToast } from '@/shared/components/ui/toast'
 import { Link } from 'react-router-dom'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import type { I18nKey } from '@/shared/i18n/messages'
 
 interface Props {
@@ -119,6 +120,7 @@ function CountdownTimer({
 
 export function ProposalDetail({ proposalId }: Props) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { user } = useAuth()
   const { communityId: _communityId } = useCommunityContext()
   const { isAdmin } = usePermissions()
@@ -176,7 +178,7 @@ export function ProposalDetail({ proposalId }: Props) {
       <Card>
         <CardContent className="flex flex-col items-center justify-center gap-4 py-12 text-center">
           <p className="text-muted-foreground">{t('proposalDetail.notFoundAccess')}</p>
-          <Link to="/governance">
+          <Link to={path('governance')}>
             <Button variant="outline" size="sm">
               <ArrowRight className="mr-2 h-4 w-4 rotate-180" />
               {t('proposalDetail.backToGovernance')}
@@ -422,8 +424,8 @@ export function ProposalDetail({ proposalId }: Props) {
               </div>
             )}
 
-            {/* Draft → Active (skip discussion) */}
-            {proposal.status === 'draft' && isAdmin && endorsementsOk && (
+            {/* Draft → Active (skip discussion, only when discussion is not mandatory) */}
+            {proposal.status === 'draft' && isAdmin && endorsementsOk && !rules.governance.mandatory_discussion_enabled && (
               <Button onClick={handleOpenVoting} disabled={updateStatus.isPending}>
                 {t('proposalDetail.openDirectVoting')}
               </Button>

@@ -36,7 +36,7 @@ function statusVariant(status: string): 'warning' | 'success' | 'destructive' | 
   }
 }
 
-export function MyPayments() {
+export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boolean }) {
   const { currentMember, community } = useCommunityContext()
   const { data: obligations, isLoading } = usePaymentObligations(currentMember?.id)
   const [copiedRef, setCopiedRef] = useState<string | null>(null)
@@ -60,7 +60,8 @@ export function MyPayments() {
 
   return (
     <div className="space-y-6">
-      {/* Summary */}
+      {/* Summary — optional when embedded in MemberTreasuryView */}
+      {showSummaryCards && (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
@@ -93,6 +94,7 @@ export function MyPayments() {
           </CardContent>
         </Card>
       </div>
+      )}
 
       {/* Payment instructions */}
       {pendingObs.length > 0 && (

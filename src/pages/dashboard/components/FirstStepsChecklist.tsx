@@ -1,17 +1,19 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useCommunityContext } from '@/app/providers'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { useProposals } from '@/core/governance/hooks/useProposals'
 import { getCategories } from '@/core/treasury/services/treasury.service'
 import { getRecurringSchedules } from '@/core/treasury/services/recurring.service'
 import { supabase } from '@/shared/lib/supabase'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { CheckCircle, Circle, Building2, Users, Wallet, Vote, Layers } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card'
+import { CheckCircle, Circle, Building2, Users, Wallet, Vote, Layers, ChevronRight } from 'lucide-react'
 
 interface Step {
   id: string
   label: string
+  description: string
   href: string
   done: boolean
   icon: typeof Users
@@ -19,6 +21,7 @@ interface Step {
 
 export function FirstStepsChecklist() {
   const { communityId, community } = useCommunityContext()
+  const path = useCommunityPath()
   const { data: members } = useMembers()
   const { data: allProposals } = useProposals(undefined)
   const { data: categories } = useQuery({
@@ -50,28 +53,32 @@ export function FirstStepsChecklist() {
     {
       id: 'invite',
       label: 'Invitar miembros',
-      href: '/settings',
+      description: 'Envía invitaciones por correo',
+      href: path('members'),
       done: (members?.length ?? 0) > 1,
       icon: Users,
     },
     {
       id: 'categories',
-      label: 'Configurar categorías de ingreso y egreso',
-      href: '/settings',
+      label: 'Verificar categorías financieras',
+      description: 'Ajusta ingresos y egresos',
+      href: path('settings'),
       done: (categories?.length ?? 0) > 0,
       icon: Layers,
     },
     {
       id: 'recurring',
       label: 'Crear primer cobro recurrente',
-      href: '/treasury',
+      description: 'Define cuotas periódicas',
+      href: path('treasury'),
       done: (recurringSchedules?.length ?? 0) > 0,
       icon: Wallet,
     },
     {
       id: 'proposal',
       label: 'Crear primera propuesta',
-      href: '/governance',
+      description: 'Pon algo a votación',
+      href: path('governance'),
       done: (allProposals?.length ?? 0) > 0,
       icon: Vote,
     },
@@ -81,7 +88,8 @@ export function FirstStepsChecklist() {
     steps.push({
       id: 'units',
       label: 'Registrar unidades',
-      href: '/residential',
+      description: 'Alta de departamentos o casas',
+      href: path('residential'),
       done: (units?.length ?? 0) > 0,
       icon: Building2,
     })
@@ -90,10 +98,15 @@ export function FirstStepsChecklist() {
   const allDone = steps.every((s) => s.done)
   if (allDone) return null
 
+  const doneCount = steps.filter((s) => s.done).length
+
   return (
     <Card className="border-primary/30 bg-primary/5">
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle className="text-base">Primeros pasos</CardTitle>
+        <CardDescription>
+          {doneCount} de {steps.length} completados — configura tu comunidad para sacarle el máximo provecho
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
         {steps.map((step) => {
@@ -110,9 +123,15 @@ export function FirstStepsChecklist() {
                 <Circle className="h-5 w-5 shrink-0 text-muted-foreground" />
               )}
               <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <span className={step.done ? 'text-muted-foreground line-through' : 'font-medium'}>
-                {step.label}
-              </span>
+              <div className="flex-1 min-w-0">
+                <span className={step.done ? 'text-muted-foreground line-through text-sm' : 'font-medium text-sm'}>
+                  {step.label}
+                </span>
+                {!step.done && (
+                  <p className="text-xs text-muted-foreground truncate">{step.description}</p>
+                )}
+              </div>
+              {!step.done && <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
             </Link>
           )
         })}

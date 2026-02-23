@@ -10,13 +10,16 @@ export function usePermissions() {
   const hasDynamic = (permission: string) => Boolean(dynamic?.permissions?.[permission])
   const staticRole = role as Role
 
+  const isAdmin = hasDynamic('manage_community') || role === 'admin' || role === 'platform_admin'
+
   return {
     canManageMembers: hasDynamic('manage_members') || hasPermission(staticRole, 'admin'),
     canManageTreasury: hasDynamic('manage_treasury') || hasPermission(staticRole, 'tesorero'),
     canCreateProposals: hasDynamic('create_proposals') || hasPermission(staticRole, 'miembro'),
     canVote: hasDynamic('vote') || hasPermission(staticRole, 'miembro'),
     canImportData: hasDynamic('import_data') || hasDynamic('manage_treasury') || hasPermission(staticRole, 'tesorero'),
-    isAdmin: hasDynamic('manage_community') || role === 'admin' || role === 'platform_admin',
+    canRespondDiscretionary: hasDynamic('respond_discretionary') || role === 'comite_vigilancia' || isAdmin,
+    isAdmin,
     isPlatformAdmin: role === 'platform_admin' || hasDynamic('manage_platform'),
     role,
   }

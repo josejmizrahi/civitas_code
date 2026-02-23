@@ -20,30 +20,30 @@ function buildNotification(
 }
 
 describe('NotificationBell route resolution', () => {
-  it('resuelve proposal_id en snake_case', () => {
+  it('resuelve proposal_id en snake_case (segment bajo /c/:slug/)', () => {
     const route = getNotificationRoute(
       buildNotification('proposal_opened', { proposal_id: 'p-1' }),
     )
-    expect(route).toBe('/governance/p-1')
+    expect(route).toBe('governance/p-1')
   })
 
   it('resuelve proposalId en camelCase', () => {
     const route = getNotificationRoute(
       buildNotification('proposal_opened', { proposalId: 'p-2' }),
     )
-    expect(route).toBe('/governance/p-2')
+    expect(route).toBe('governance/p-2')
   })
 
   it('resuelve assembly_id para convocatoria', () => {
     const route = getNotificationRoute(
       buildNotification('convocatoria', { assembly_id: 'a-1' }),
     )
-    expect(route).toBe('/governance/assemblies/a-1')
+    expect(route).toBe('governance/assemblies/a-1')
   })
 
   it('envia notificaciones financieras a tesoreria', () => {
-    expect(getNotificationRoute(buildNotification('monthly_statement_ready'))).toBe('/treasury')
-    expect(getNotificationRoute(buildNotification('discretionary_request'))).toBe('/treasury')
-    expect(getNotificationRoute(buildNotification('payment_reminder'))).toBe('/treasury')
+    expect(getNotificationRoute(buildNotification('monthly_statement_ready'))).toBe('treasury')
+    expect(getNotificationRoute(buildNotification('discretionary_request'))).toBe('treasury')
+    expect(getNotificationRoute(buildNotification('payment_reminder'))).toBe('treasury')
   })
 })

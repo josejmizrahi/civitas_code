@@ -13,6 +13,7 @@ import { exportToExcel } from '@/shared/services/export.service'
 import { formatDate } from '@/shared/lib/utils'
 import { Plus, Download, CheckCircle2 } from 'lucide-react'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useToast } from '@/shared/components/ui/toast'
 
 export function GovernancePage() {
   const { t } = useI18n()
@@ -26,6 +27,7 @@ export function GovernancePage() {
   const [successBanner, setSuccessBanner] = useState<{ message: string; detail?: string } | null>(null)
   const processedRpcRef = useRef(false)
   const { canCreateProposals, isAdmin } = usePermissions()
+  const toast = useToast()
   const { data: allProposals } = useProposals()
 
   // Consume location.state from Settings "Cambiar Regla via Propuesta" or Reglamento "Proponer cambio"
@@ -44,8 +46,14 @@ export function GovernancePage() {
   useEffect(() => {
     if (processedRpcRef.current) return
     processedRpcRef.current = true
-    processExpiredProposals().catch(() => {})
-    processAutoExecutions().catch(() => {})
+    processExpiredProposals().catch((err) => {
+      console.error('[Governance] processExpiredProposals:', err)
+      toast.error('Error al sincronizar propuestas vencidas')
+    })
+    processAutoExecutions().catch((err) => {
+      console.error('[Governance] processAutoExecutions:', err)
+      toast.error('Error al sincronizar auto-ejecuciones')
+    })
   }, [])
 
   const handleProposalCreated = (info: { endorsementsRequired: number }) => {

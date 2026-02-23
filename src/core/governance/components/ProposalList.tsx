@@ -6,6 +6,7 @@ import { formatDate } from '@/shared/lib/utils'
 import { Link } from 'react-router-dom'
 import { EndorsementBar } from './EndorsementBar'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
   draft: 'secondary',
@@ -23,6 +24,7 @@ interface Props {
 
 export function ProposalList({ statusFilter }: Props) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { data: proposals, isLoading } = useProposals(statusFilter)
   const STATUS_LABELS: Record<string, string> = {
     draft: t('proposals.status.draft'),
@@ -50,7 +52,7 @@ export function ProposalList({ statusFilter }: Props) {
   return (
     <div className="grid gap-4">
       {proposals.map((p) => (
-        <Link key={p.id} to={`/governance/${p.id}`} className="block">
+        <Link key={p.id} to={path(`governance/${p.id}`)} className="block">
           <Card className="transition-colors hover:bg-muted/50">
             <CardHeader className="pb-2">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

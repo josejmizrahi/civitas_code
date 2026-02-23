@@ -59,6 +59,15 @@ export type I18nKey =
   | 'treasury.datos.transactions'
   | 'treasury.datos.budgets'
   | 'treasury.datos.statements'
+  | 'treasury.member.subtitle'
+  | 'treasury.member.loading'
+  | 'treasury.member.totalPendiente'
+  | 'treasury.member.totalPagado'
+  | 'treasury.member.estadoFinanciero'
+  | 'treasury.member.status.moroso'
+  | 'treasury.member.status.pendiente'
+  | 'treasury.member.status.alCorriente'
+  | 'treasury.member.resumenComunidad'
   | 'governance.title'
   | 'governance.subtitle.proposals'
   | 'governance.subtitle.assemblies'
@@ -709,6 +718,48 @@ export type I18nKey =
   | 'context.periodN'
   | 'context.electionLegal'
   | 'context.viewAdminTerms'
+  | 'invite.title'
+  | 'invite.description'
+  | 'invite.sent'
+  | 'invite.sentDescription'
+  | 'invite.emailSent'
+  | 'invite.linkLabel'
+  | 'invite.copyLink'
+  | 'invite.close'
+  | 'invite.emailLabel'
+  | 'invite.roleLabel'
+  | 'invite.emailRequired'
+  | 'invite.emailInvalid'
+  | 'invite.errorGeneric'
+  | 'invite.cancel'
+  | 'invite.send'
+  | 'invite.sending'
+  | 'memberDir.searchPlaceholder'
+  | 'memberDir.allRoles'
+  | 'memberDir.allStatuses'
+  | 'memberDir.statusActive'
+  | 'memberDir.statusInactive'
+  | 'memberDir.statusPending'
+  | 'memberDir.invite'
+  | 'memberDir.loading'
+  | 'memberDir.empty'
+  | 'memberDir.col.member'
+  | 'memberDir.col.email'
+  | 'memberDir.col.role'
+  | 'memberDir.col.status'
+  | 'memberDir.col.standing'
+  | 'memberDir.col.since'
+  | 'memberDir.col.actions'
+  | 'memberDir.noName'
+  | 'memberDir.active'
+  | 'memberDir.deactivate'
+  | 'memberDir.reactivate'
+  | 'memberDir.roleUpdated'
+  | 'memberDir.roleError'
+  | 'memberDir.deactivated'
+  | 'memberDir.deactivateError'
+  | 'memberDir.reactivated'
+  | 'memberDir.reactivateError'
 
 type Dictionary = Record<I18nKey, string>
 
@@ -773,6 +824,15 @@ const es: Dictionary = {
   'treasury.datos.transactions': 'Transacciones',
   'treasury.datos.budgets': 'Presupuestos',
   'treasury.datos.statements': 'Estados financieros',
+  'treasury.member.subtitle': 'Tus pagos e instrucciones',
+  'treasury.member.loading': 'Cargando tus pagos…',
+  'treasury.member.totalPendiente': 'Total pendiente',
+  'treasury.member.totalPagado': 'Total pagado',
+  'treasury.member.estadoFinanciero': 'Estado financiero',
+  'treasury.member.status.moroso': 'Moroso',
+  'treasury.member.status.pendiente': 'Pendiente',
+  'treasury.member.status.alCorriente': 'Al corriente',
+  'treasury.member.resumenComunidad': 'Resumen de la comunidad',
   'governance.title': 'Gobernanza',
   'governance.subtitle.proposals': 'Propuestas y votaciones',
   'governance.subtitle.assemblies': 'Asambleas y convocatorias',
@@ -1419,6 +1479,48 @@ const es: Dictionary = {
   'context.periodN': 'Periodo #{n}',
   'context.electionLegal': 'Art. 42-46 LPCI CDMX — Los morosos no pueden ser electos para cargos administrativos.',
   'context.viewAdminTerms': 'Ver Terminos Administrativos',
+  'invite.title': 'Invitar Miembro',
+  'invite.description': 'Envia una invitacion por correo electronico para unirse a la comunidad.',
+  'invite.sent': 'Invitacion enviada',
+  'invite.sentDescription': 'Se envio un correo de invitacion a',
+  'invite.emailSent': 'Correo de invitacion enviado',
+  'invite.linkLabel': 'Enlace de invitacion',
+  'invite.copyLink': 'Copiar enlace',
+  'invite.close': 'Cerrar',
+  'invite.emailLabel': 'Correo electronico',
+  'invite.roleLabel': 'Rol',
+  'invite.emailRequired': 'El correo electronico es obligatorio',
+  'invite.emailInvalid': 'Introduce un correo electronico valido',
+  'invite.errorGeneric': 'Error al enviar invitacion',
+  'invite.cancel': 'Cancelar',
+  'invite.send': 'Enviar Invitacion',
+  'invite.sending': 'Enviando...',
+  'memberDir.searchPlaceholder': 'Buscar por nombre, correo o rol...',
+  'memberDir.allRoles': 'Todos los roles',
+  'memberDir.allStatuses': 'Todos los estados',
+  'memberDir.statusActive': 'Activo',
+  'memberDir.statusInactive': 'Inactivo',
+  'memberDir.statusPending': 'Pendiente',
+  'memberDir.invite': 'Invitar Miembro',
+  'memberDir.loading': 'Cargando miembros...',
+  'memberDir.empty': 'No hay miembros registrados',
+  'memberDir.col.member': 'Miembro',
+  'memberDir.col.email': 'Correo',
+  'memberDir.col.role': 'Rol',
+  'memberDir.col.status': 'Estado',
+  'memberDir.col.standing': 'Standing',
+  'memberDir.col.since': 'Desde',
+  'memberDir.col.actions': 'Acciones',
+  'memberDir.noName': 'Sin nombre',
+  'memberDir.active': 'Activo',
+  'memberDir.deactivate': 'Desactivar miembro',
+  'memberDir.reactivate': 'Reactivar miembro',
+  'memberDir.roleUpdated': 'Rol actualizado',
+  'memberDir.roleError': 'Error al actualizar rol',
+  'memberDir.deactivated': 'Miembro desactivado',
+  'memberDir.deactivateError': 'Error al desactivar miembro',
+  'memberDir.reactivated': 'Miembro reactivado',
+  'memberDir.reactivateError': 'Error al reactivar miembro',
 }
 
 const en: Dictionary = {
@@ -1482,6 +1584,15 @@ const en: Dictionary = {
   'treasury.datos.transactions': 'Transactions',
   'treasury.datos.budgets': 'Budgets',
   'treasury.datos.statements': 'Financial statements',
+  'treasury.member.subtitle': 'Your payments and instructions',
+  'treasury.member.loading': 'Loading your payments…',
+  'treasury.member.totalPendiente': 'Total pending',
+  'treasury.member.totalPagado': 'Total paid',
+  'treasury.member.estadoFinanciero': 'Financial status',
+  'treasury.member.status.moroso': 'Delinquent',
+  'treasury.member.status.pendiente': 'Pending',
+  'treasury.member.status.alCorriente': 'In good standing',
+  'treasury.member.resumenComunidad': 'Community summary',
   'governance.title': 'Governance',
   'governance.subtitle.proposals': 'Proposals and voting',
   'governance.subtitle.assemblies': 'Assemblies and calls',
@@ -2128,6 +2239,48 @@ const en: Dictionary = {
   'context.periodN': 'Term #{n}',
   'context.electionLegal': 'Art. 42-46 LPCI CDMX — delinquent members cannot be elected to administrative roles.',
   'context.viewAdminTerms': 'View Administrative Terms',
+  'invite.title': 'Invite Member',
+  'invite.description': 'Send an email invitation to join the community.',
+  'invite.sent': 'Invitation sent',
+  'invite.sentDescription': 'An invitation email was sent to',
+  'invite.emailSent': 'Invitation email sent',
+  'invite.linkLabel': 'Invitation link',
+  'invite.copyLink': 'Copy link',
+  'invite.close': 'Close',
+  'invite.emailLabel': 'Email',
+  'invite.roleLabel': 'Role',
+  'invite.emailRequired': 'Email is required',
+  'invite.emailInvalid': 'Enter a valid email address',
+  'invite.errorGeneric': 'Error sending invitation',
+  'invite.cancel': 'Cancel',
+  'invite.send': 'Send Invitation',
+  'invite.sending': 'Sending...',
+  'memberDir.searchPlaceholder': 'Search by name, email or role...',
+  'memberDir.allRoles': 'All roles',
+  'memberDir.allStatuses': 'All statuses',
+  'memberDir.statusActive': 'Active',
+  'memberDir.statusInactive': 'Inactive',
+  'memberDir.statusPending': 'Pending',
+  'memberDir.invite': 'Invite Member',
+  'memberDir.loading': 'Loading members...',
+  'memberDir.empty': 'No members registered',
+  'memberDir.col.member': 'Member',
+  'memberDir.col.email': 'Email',
+  'memberDir.col.role': 'Role',
+  'memberDir.col.status': 'Status',
+  'memberDir.col.standing': 'Standing',
+  'memberDir.col.since': 'Since',
+  'memberDir.col.actions': 'Actions',
+  'memberDir.noName': 'No name',
+  'memberDir.active': 'Active',
+  'memberDir.deactivate': 'Deactivate member',
+  'memberDir.reactivate': 'Reactivate member',
+  'memberDir.roleUpdated': 'Role updated',
+  'memberDir.roleError': 'Error updating role',
+  'memberDir.deactivated': 'Member deactivated',
+  'memberDir.deactivateError': 'Error deactivating member',
+  'memberDir.reactivated': 'Member reactivated',
+  'memberDir.reactivateError': 'Error reactivating member',
 }
 
 export const MESSAGES: Record<string, Dictionary> = {

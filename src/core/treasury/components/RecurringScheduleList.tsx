@@ -20,6 +20,7 @@ import { Card, CardContent } from '@/shared/components/ui/card'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
 import { Plus, Play, Pause, Trash2, RefreshCw, CalendarClock } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 
 const FREQ_LABELS: Record<string, string> = {
   weekly: 'Semanal',
@@ -41,6 +42,7 @@ export function RecurringScheduleList() {
   const deleteSchedule = useDeleteRecurringSchedule()
   const processAll = useProcessRecurringSchedules()
   const toast = useToast()
+  const confirm = useConfirm()
 
   const [showCreate, setShowCreate] = useState(false)
   const [form, setForm] = useState({
@@ -98,13 +100,18 @@ export function RecurringScheduleList() {
     })
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('Eliminar este cobro/pago recurrente?')) {
-      deleteSchedule.mutate(id, {
-        onSuccess: () => toast.success('Recurrente eliminado'),
-        onError: () => toast.error('Error al eliminar recurrente'),
-      })
-    }
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Eliminar recurrente',
+      description: '¿Eliminar este cobro/pago recurrente? No se eliminarán las obligaciones ya generadas.',
+      confirmLabel: 'Eliminar',
+      variant: 'destructive',
+    })
+    if (!ok) return
+    deleteSchedule.mutate(id, {
+      onSuccess: () => toast.success('Recurrente eliminado'),
+      onError: () => toast.error('Error al eliminar recurrente'),
+    })
   }
 
   const activeCount = schedules?.filter(s => s.is_active).length ?? 0

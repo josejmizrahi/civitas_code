@@ -6,6 +6,7 @@ import { formatDateTime } from '@/shared/lib/utils'
 import { Link } from 'react-router-dom'
 import { Calendar, MapPin, Users } from 'lucide-react'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
   scheduled: 'secondary',
@@ -29,6 +30,7 @@ interface Props {
 
 export function AssemblyList({ statusFilter }: Props) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { data: assemblies, isLoading } = useAssemblies(statusFilter)
   const STATUS_LABELS: Record<string, string> = {
     scheduled: t('assemblies.status.scheduled'),
@@ -63,7 +65,7 @@ export function AssemblyList({ statusFilter }: Props) {
         const totalCount = (a.attendance || []).length
 
         return (
-          <Link key={a.id} to={`/governance/assemblies/${a.id}`} className="block">
+          <Link key={a.id} to={path(`governance/assemblies/${a.id}`)} className="block">
             <Card className="transition-colors hover:bg-muted/50">
               <CardHeader className="pb-2">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">

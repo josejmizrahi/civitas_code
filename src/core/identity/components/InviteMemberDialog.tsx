@@ -7,6 +7,7 @@ import { Select } from '@/shared/components/ui/select'
 import { Button } from '@/shared/components/ui/button'
 import { Copy, Mail } from 'lucide-react'
 import { useRoles } from '@/core/identity/hooks/useRoles'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface InviteMemberDialogProps {
   open: boolean
@@ -16,6 +17,7 @@ interface InviteMemberDialogProps {
 export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogProps) {
   const inviteMember = useInviteMember()
   const { data: roles } = useRoles()
+  const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('miembro')
   const [error, setError] = useState('')
@@ -27,18 +29,18 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
     const emailTrimmed = email.trim()
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailTrimmed) {
-      setError('El correo electrónico es obligatorio')
+      setError(t('invite.emailRequired'))
       return
     }
     if (!emailRegex.test(emailTrimmed)) {
-      setError('Introduce un correo electrónico válido')
+      setError(t('invite.emailInvalid'))
       return
     }
     try {
       const result = await inviteMember.mutateAsync({ email: emailTrimmed, role })
       setCreatedToken(result.token)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al enviar invitación')
+      setError(err instanceof Error ? err.message : t('invite.errorGeneric'))
     }
   }
 
@@ -65,18 +67,18 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
         {createdToken ? (
           <>
             <DialogHeader>
-              <DialogTitle>Invitación enviada</DialogTitle>
+              <DialogTitle>{t('invite.sent')}</DialogTitle>
               <DialogDescription>
-                Se envió un correo de invitación a <strong>{email}</strong>. También puedes compartir el enlace directamente.
+                {t('invite.sentDescription')} <strong>{email}</strong>.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex items-center gap-2 rounded-md bg-green-50 p-4 text-green-800 dark:bg-green-950 dark:text-green-200">
                 <Mail className="h-5 w-5" />
-                <span className="font-medium">Correo de invitación enviado</span>
+                <span className="font-medium">{t('invite.emailSent')}</span>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="invite-link">Enlace de invitación</Label>
+                <Label htmlFor="invite-link">{t('invite.linkLabel')}</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="invite-link"
@@ -90,7 +92,7 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
                     variant="outline"
                     size="icon"
                     onClick={handleCopyLink}
-                    title="Copiar enlace"
+                    title={t('invite.copyLink')}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
@@ -99,16 +101,16 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
             </div>
             <DialogFooter>
               <Button type="button" onClick={handleClose}>
-                Cerrar
+                {t('invite.close')}
               </Button>
             </DialogFooter>
           </>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Invitar Miembro</DialogTitle>
+              <DialogTitle>{t('invite.title')}</DialogTitle>
               <DialogDescription>
-                Envía una invitación por correo electrónico para unirse a la comunidad.
+                {t('invite.description')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
@@ -117,7 +119,7 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
                   <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
                 )}
                 <div className="space-y-2">
-                  <Label htmlFor="invite-email">Correo electrónico</Label>
+                  <Label htmlFor="invite-email">{t('invite.emailLabel')}</Label>
                   <Input
                     id="invite-email"
                     type="email"
@@ -128,7 +130,7 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="invite-role">Rol</Label>
+                  <Label htmlFor="invite-role">{t('invite.roleLabel')}</Label>
                   <Select
                     id="invite-role"
                     value={role}
@@ -142,10 +144,10 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={handleClose}>
-                  Cancelar
+                  {t('invite.cancel')}
                 </Button>
                 <Button type="submit" disabled={inviteMember.isPending}>
-                  {inviteMember.isPending ? 'Enviando...' : 'Enviar Invitación'}
+                  {inviteMember.isPending ? t('invite.sending') : t('invite.send')}
                 </Button>
               </DialogFooter>
             </form>

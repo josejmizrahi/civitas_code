@@ -42,7 +42,7 @@ export function RegisterPage() {
     if (user && inviteToken) {
       navigate(`/invite/${inviteToken}`, { replace: true })
     } else if (user) {
-      navigate('/dashboard', { replace: true })
+      navigate('/communities', { replace: true })
     }
   }, [user, inviteToken, navigate])
 

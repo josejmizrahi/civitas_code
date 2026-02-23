@@ -13,6 +13,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { Plus, Pencil, Check, X, Trash2 } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 
 async function createCategory(communityId: string, name: string, type: CategoryType): Promise<Category> {
   const { data, error } = await supabase.from('categories')
@@ -44,6 +45,7 @@ export function CategoryManager() {
   const { communityId } = useCommunityContext()
   const queryClient = useQueryClient()
   const toast = useToast()
+  const confirm = useConfirm()
   const [newName, setNewName] = useState('')
   const [newType, setNewType] = useState<CategoryType>('expense')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -166,8 +168,15 @@ export function CategoryManager() {
                       <Button
                         size="icon"
                         variant="ghost"
-                        onClick={() => {
-                          if (confirm('¿Eliminar esta categoría?')) deleteMut.mutate(cat.id, {
+                        onClick={async () => {
+                          const ok = await confirm({
+                            title: 'Eliminar categoría',
+                            description: '¿Eliminar esta categoría? Las transacciones existentes conservarán su historial.',
+                            confirmLabel: 'Eliminar',
+                            variant: 'destructive',
+                          })
+                          if (!ok) return
+                          deleteMut.mutate(cat.id, {
                             onSuccess: () => toast.success('Categoría eliminada'),
                             onError: () => toast.error('Error al eliminar categoría'),
                           })

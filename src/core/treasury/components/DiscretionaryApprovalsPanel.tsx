@@ -99,13 +99,13 @@ function DiscretionaryApprovalCard({
 
 export function DiscretionaryApprovalsPanel() {
   const { currentMember } = useCommunityContext()
-  const { role, canManageTreasury, isAdmin } = usePermissions()
+  const { canManageTreasury, canRespondDiscretionary } = usePermissions()
   const { data: approvals, isLoading } = useDiscretionaryApprovals()
   const createMut = useCreateDiscretionaryApproval()
   const respondMut = useRespondDiscretionaryApproval()
 
   const canRequest = canManageTreasury
-  const canRespond = role === 'comite_vigilancia' || isAdmin
+  const canRespond = canRespondDiscretionary
 
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')

@@ -16,6 +16,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { formatCurrency } from '@/shared/lib/utils'
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 import type { Budget } from '../types'
 import type { FundType } from '@/shared/types/rules'
 
@@ -28,6 +29,7 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
   const updateBudget = useUpdateBudget()
   const deleteBudget = useDeleteBudget()
   const toast = useToast()
+  const confirm = useConfirm()
 
   const { data: categories } = useQuery({
     queryKey: ['categories', communityId],
@@ -102,13 +104,18 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
     }
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('Estas seguro de eliminar este presupuesto?')) {
-      deleteBudget.mutate(id, {
-        onSuccess: () => toast.success('Presupuesto eliminado'),
-        onError: () => toast.error('Error al eliminar presupuesto'),
-      })
-    }
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Eliminar presupuesto',
+      description: '¿Estás seguro de eliminar este presupuesto? Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+      variant: 'destructive',
+    })
+    if (!ok) return
+    deleteBudget.mutate(id, {
+      onSuccess: () => toast.success('Presupuesto eliminado'),
+      onError: () => toast.error('Error al eliminar presupuesto'),
+    })
   }
 
   if (isLoading) return <LoadingSpinner message="Cargando presupuestos..." className="py-8" />

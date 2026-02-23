@@ -1,6 +1,8 @@
 import type { Role, MemberStatus, InvitationStatus, CommunityType } from '@/shared/types'
 import type { CommunityRules, FinancialStanding } from '@/shared/types/rules'
 
+export type IfpeStatus = 'inactive' | 'pending_kyb' | 'active' | 'suspended'
+
 export interface Community {
   id: string
   name: string
@@ -11,6 +13,10 @@ export interface Community {
   rules: CommunityRules | null
   created_at: string
   updated_at: string
+  /** BROXEL/IFPE: acceso a pagos electrónicos (suscripción + KYB) */
+  ifpe_status?: IfpeStatus | null
+  ifpe_clabe?: string | null
+  ifpe_account_id?: string | null
 }
 
 export interface Member {

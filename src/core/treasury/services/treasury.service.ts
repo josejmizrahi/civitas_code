@@ -686,7 +686,7 @@ export async function getDiscretionaryApprovals(
   communityId: string,
   status?: DiscretionaryApproval['status'],
 ): Promise<DiscretionaryApproval[]> {
-  let query = supabase
+  let query = (supabase as any)
     .from('discretionary_approvals')
     .select('*')
     .eq('community_id', communityId)
@@ -711,7 +711,7 @@ export async function createDiscretionaryApproval(
 ): Promise<DiscretionaryApproval> {
   await assertCanPerformAction(communityId, payload.requested_by_member_id, 'register_transaction')
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('discretionary_approvals')
     .insert({
       community_id: communityId,
@@ -760,7 +760,7 @@ export async function respondDiscretionaryApproval(
   decision: 'approved' | 'rejected',
   responseNote?: string,
 ): Promise<DiscretionaryApproval> {
-  const { data: approvalRaw, error: approvalError } = await supabase
+  const { data: approvalRaw, error: approvalError } = await (supabase as any)
     .from('discretionary_approvals')
     .select('*')
     .eq('id', approvalId)
@@ -798,7 +798,7 @@ export async function respondDiscretionaryApproval(
     transactionId = tx.id as string
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('discretionary_approvals')
     .update({
       status: decision,

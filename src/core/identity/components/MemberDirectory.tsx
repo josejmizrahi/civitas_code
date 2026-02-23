@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMembers, useUpdateMemberRole, useDeactivateMember, useReactivateMember } from '../hooks/useMembers'
+import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityConfig } from '@/shared/hooks/useCommunityConfig'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
@@ -12,31 +13,20 @@ import { Select } from '@/shared/components/ui/select'
 import { InviteMemberDialog } from './InviteMemberDialog'
 import { formatDate } from '@/shared/lib/utils'
 import { useToast } from '@/shared/components/ui/toast'
-import { hasPermission, type Role } from '@/shared/types'
 import { useRoles } from '@/core/identity/hooks/useRoles'
+import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
+import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
 import { UserPlus, UserMinus, UserCheck, Search } from 'lucide-react'
-
-const roleBadgeVariant: Record<string, 'default' | 'secondary' | 'outline' | 'success'> = {
-  admin: 'default',
-  tesorero: 'success',
-  miembro: 'secondary',
-  observador: 'outline',
-}
-
-const roleLabels: Record<string, string> = {
-  platform_admin: 'Admin Plataforma',
-  admin: 'Administrador',
-  tesorero: 'Tesorero',
-  comite_vigilancia: 'Comité de Vigilancia',
-  miembro: 'Miembro',
-  observador: 'Observador',
-}
 
 export function MemberDirectory() {
   const navigate = useNavigate()
+  const path = useCommunityPath()
   const { data: roles } = useRoles()
   const { membershipAttributes } = useCommunityConfig()
   const { data: members, isLoading } = useMembers()
+  const { canManageMembers } = usePermissions()
+  const { t } = useI18n()
   const updateRole = useUpdateMemberRole()
   const deactivate = useDeactivateMember()
   const reactivate = useReactivateMember()
@@ -47,10 +37,6 @@ export function MemberDirectory() {
   const [roleFilter, setRoleFilter] = useState<string>('')
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [standingFilter, setStandingFilter] = useState<string>('')
-
-  // Determine current user's role for permission checks
-  const currentUserRole = members?.find((m) => m.is_current_user)?.role as Role | undefined
-  const canManageMembers = currentUserRole ? hasPermission(currentUserRole, 'admin') : false
 
   const filteredMembers = members?.filter((m) => {
     if (search) {
@@ -64,7 +50,7 @@ export function MemberDirectory() {
   }) ?? []
 
   if (isLoading) {
-    return <LoadingSpinner message="Cargando miembros..." className="py-8" />
+    return <LoadingSpinner message={t('memberDir.loading')} className="py-8" />
   }
 
   return (
@@ -74,23 +60,23 @@ export function MemberDirectory() {
           <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nombre, correo o rol..."
+              placeholder={t('memberDir.searchPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
           </div>
           <Select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="w-full sm:w-40">
-            <option value="">Todos los roles</option>
+            <option value="">{t('memberDir.allRoles')}</option>
             {(roles ?? []).map((r) => (
               <option key={r.id} value={r.id}>{r.name}</option>
             ))}
           </Select>
           <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-36">
-            <option value="">Todos los estados</option>
-            <option value="active">Activo</option>
-            <option value="inactive">Inactivo</option>
-            <option value="pending">Pendiente</option>
+            <option value="">{t('memberDir.allStatuses')}</option>
+            <option value="active">{t('memberDir.statusActive')}</option>
+            <option value="inactive">{t('memberDir.statusInactive')}</option>
+            <option value="pending">{t('memberDir.statusPending')}</option>
           </Select>
           <Select value={standingFilter} onChange={(e) => setStandingFilter(e.target.value)} className="w-full sm:w-40">
             <option value="">Todos los standing</option>
@@ -103,7 +89,7 @@ export function MemberDirectory() {
         {canManageMembers && (
           <Button onClick={() => setInviteOpen(true)} className="w-full sm:w-auto">
             <UserPlus className="mr-2 h-4 w-4" />
-            Invitar Miembro
+            {t('memberDir.invite')}
           </Button>
         )}
       </div>
@@ -112,16 +98,16 @@ export function MemberDirectory() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Miembro</TableHead>
-              <TableHead className="hidden md:table-cell">Correo</TableHead>
-              <TableHead>Rol</TableHead>
-              <TableHead className="hidden sm:table-cell">Estado</TableHead>
-              <TableHead>Standing</TableHead>
+              <TableHead>{t('memberDir.col.member')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('memberDir.col.email')}</TableHead>
+              <TableHead>{t('memberDir.col.role')}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('memberDir.col.status')}</TableHead>
+              <TableHead>{t('memberDir.col.standing')}</TableHead>
               {membershipAttributes.map((attr) => (
                 <TableHead key={attr.key} className="hidden lg:table-cell">{attr.label}</TableHead>
               ))}
-              <TableHead className="hidden sm:table-cell">Desde</TableHead>
-              {canManageMembers && <TableHead className="w-24">Acciones</TableHead>}
+              <TableHead className="hidden sm:table-cell">{t('memberDir.col.since')}</TableHead>
+              {canManageMembers && <TableHead className="w-24">{t('memberDir.col.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -129,12 +115,12 @@ export function MemberDirectory() {
               <TableRow
                 key={member.id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => navigate(`/members/${member.id}`)}
+                onClick={() => navigate(path(`members/${member.id}`))}
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar name={member.full_name || member.email || '?'} size="sm" />
-                    <span className="font-medium">{member.full_name || 'Sin nombre'}</span>
+                    <span className="font-medium">{member.full_name || t('memberDir.noName')}</span>
                   </div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-muted-foreground">{member.email}</TableCell>
@@ -144,8 +130,8 @@ export function MemberDirectory() {
                       value={member.role}
                       onChange={(e) => {
                         updateRole.mutate({ memberId: member.id, role: e.target.value }, {
-                          onSuccess: () => toast.success('Rol actualizado'),
-                          onError: () => toast.error('Error al actualizar rol'),
+                          onSuccess: () => toast.success(t('memberDir.roleUpdated')),
+                          onError: () => toast.error(t('memberDir.roleError')),
                         })
                         setEditingId(null)
                       }}
@@ -159,27 +145,22 @@ export function MemberDirectory() {
                     </Select>
                   ) : (
                     <Badge
-                      variant={roleBadgeVariant[member.role] || 'secondary'}
+                      variant={ROLE_BADGE_VARIANT[member.role] || 'secondary'}
                       className={canManageMembers ? 'cursor-pointer' : ''}
                       onClick={(e) => { e.stopPropagation(); if (canManageMembers) setEditingId(member.id) }}
                     >
-                      {roleLabels[member.role] || member.role}
+                      {ROLE_LABELS[member.role] || member.role}
                     </Badge>
                   )}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   <Badge variant={member.status === 'active' ? 'success' : 'outline'}>
-                    {member.status === 'active' ? 'Activo' : member.status}
+                    {member.status === 'active' ? t('memberDir.active') : member.status}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={
-                    member.financial_standing === 'good_standing' ? 'success' :
-                    member.financial_standing === 'delinquent' || member.financial_standing === 'moroso' ? 'destructive' : 'warning'
-                  }>
-                    {member.financial_standing === 'good_standing' ? 'Al corriente' :
-                     member.financial_standing === 'delinquent' || member.financial_standing === 'moroso' ? 'Moroso' :
-                     member.financial_standing === 'grace_period' ? 'Gracia' : '—'}
+                  <Badge variant={STANDING_BADGE_VARIANT[member.financial_standing] || 'success'}>
+                    {STANDING_LABELS[member.financial_standing] || '—'}
                   </Badge>
                 </TableCell>
                 {membershipAttributes.map((attr) => (
@@ -199,10 +180,10 @@ export function MemberDirectory() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          title="Desactivar miembro"
+                          title={t('memberDir.deactivate')}
                           onClick={(e) => { e.stopPropagation(); deactivate.mutate(member.id, {
-                            onSuccess: () => toast.success('Miembro desactivado'),
-                            onError: () => toast.error('Error al desactivar miembro'),
+                            onSuccess: () => toast.success(t('memberDir.deactivated')),
+                            onError: () => toast.error(t('memberDir.deactivateError')),
                           }) }}
                           disabled={deactivate.isPending}
                         >
@@ -212,10 +193,10 @@ export function MemberDirectory() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          title="Reactivar miembro"
+                          title={t('memberDir.reactivate')}
                           onClick={(e) => { e.stopPropagation(); reactivate.mutate(member.id, {
-                            onSuccess: () => toast.success('Miembro reactivado'),
-                            onError: () => toast.error('Error al reactivar miembro'),
+                            onSuccess: () => toast.success(t('memberDir.reactivated')),
+                            onError: () => toast.error(t('memberDir.reactivateError')),
                           }) }}
                           disabled={reactivate.isPending}
                         >
@@ -230,7 +211,7 @@ export function MemberDirectory() {
             {filteredMembers.length === 0 && (
               <TableRow>
                 <TableCell colSpan={canManageMembers ? 7 + membershipAttributes.length : 6 + membershipAttributes.length} className="text-center text-muted-foreground">
-                  No hay miembros registrados
+                  {t('memberDir.empty')}
                 </TableCell>
               </TableRow>
             )}

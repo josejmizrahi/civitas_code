@@ -12,35 +12,7 @@ import { formatDate } from '@/shared/lib/utils'
 import type { Member } from '@/core/identity/types'
 import { ARCORightsPanel } from '@/core/privacy/components/ARCORightsPanel'
 
-const roleBadgeVariant: Record<string, 'default' | 'secondary' | 'outline' | 'success'> = {
-  admin: 'default',
-  tesorero: 'success',
-  miembro: 'secondary',
-  observador: 'outline',
-}
-
-const roleLabels: Record<string, string> = {
-  platform_admin: 'Admin Plataforma',
-  admin: 'Administrador',
-  tesorero: 'Tesorero',
-  comite_vigilancia: 'Comité de Vigilancia',
-  miembro: 'Miembro',
-  observador: 'Observador',
-}
-
-const financialStandingLabels: Record<string, string> = {
-  good_standing: 'Al día',
-  grace_period: 'Período de gracia',
-  delinquent: 'Moroso',
-  moroso: 'Moroso',
-}
-
-const financialStandingVariant: Record<string, 'success' | 'warning' | 'destructive'> = {
-  good_standing: 'success',
-  grace_period: 'warning',
-  delinquent: 'destructive',
-  moroso: 'destructive',
-}
+import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
 
 export function ProfilePage() {
   const { user, updatePassword } = useAuth()
@@ -297,13 +269,13 @@ export function ProfilePage() {
                     </div>
                     <div className="flex items-center gap-2 shrink-0 flex-wrap">
                       {member && (
-                        <Badge variant={roleBadgeVariant[member.role] || 'secondary'}>
-                          {roleLabels[member.role] || member.role}
+                        <Badge variant={ROLE_BADGE_VARIANT[member.role] || 'secondary'}>
+                          {ROLE_LABELS[member.role] || member.role}
                         </Badge>
                       )}
                       {isCurrent && currentMember && (
-                        <Badge variant={financialStandingVariant[currentMember.financial_standing] || 'success'}>
-                          {financialStandingLabels[currentMember.financial_standing] || currentMember.financial_standing}
+                        <Badge variant={STANDING_BADGE_VARIANT[currentMember.financial_standing] || 'success'}>
+                          {STANDING_LABELS[currentMember.financial_standing] || currentMember.financial_standing}
                         </Badge>
                       )}
                       {!isCurrent && (
@@ -341,16 +313,16 @@ export function ProfilePage() {
               <div className="space-y-1">
                 <Label className="text-muted-foreground">Rol en la comunidad actual</Label>
                 <div>
-                  <Badge variant={roleBadgeVariant[currentMember.role] || 'secondary'}>
-                    {roleLabels[currentMember.role] || currentMember.role}
+                  <Badge variant={ROLE_BADGE_VARIANT[currentMember.role] || 'secondary'}>
+                    {ROLE_LABELS[currentMember.role] || currentMember.role}
                   </Badge>
                 </div>
               </div>
               <div className="space-y-1">
                 <Label className="text-muted-foreground">Estado financiero</Label>
                 <div>
-                  <Badge variant={financialStandingVariant[currentMember.financial_standing] || 'success'}>
-                    {financialStandingLabels[currentMember.financial_standing] || currentMember.financial_standing}
+                  <Badge variant={STANDING_BADGE_VARIANT[currentMember.financial_standing] || 'success'}>
+                    {STANDING_LABELS[currentMember.financial_standing] || currentMember.financial_standing}
                   </Badge>
                 </div>
               </div>

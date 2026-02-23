@@ -1,8 +1,11 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from './providers'
 import { AppLayout } from '@/layouts/AppLayout'
 import { AuthLayout } from '@/layouts/AuthLayout'
+import { CommunitySlugLayout } from './CommunitySlugLayout'
+import { DashboardRedirect } from './DashboardRedirect'
+import { MinimalAuthenticatedLayout } from '@/layouts/MinimalAuthenticatedLayout'
 const LandingPage = lazy(() => import('@/pages/landing/LandingPage').then(m => ({ default: m.LandingPage })))
 const WhitepaperPage = lazy(() => import('@/pages/whitepaper/WhitepaperPage').then(m => ({ default: m.WhitepaperPage })))
 import { useCommunityContext } from './providers'
@@ -42,6 +45,7 @@ const ResidentialPage = lazy(() => import('@/pages/residential/ResidentialPage')
 const OnboardingWizard = lazy(() => import('@/pages/onboarding/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })))
 const MultiCommunityPage = lazy(() => import('@/pages/admin/MultiCommunityPage').then(m => ({ default: m.MultiCommunityPage })))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
+const CommunitiesPage = lazy(() => import('@/pages/communities/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })))
 
 function LazyPage({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LoadingSpinner message="Cargando..." className="py-20" />}>{children}</Suspense>
@@ -60,7 +64,7 @@ function PublicRoute({ children }: { children: ReactNode }) {
   if (loading) return <LoadingSpinner message="Cargando..." fullPage />
   if (user) {
     const from = (location.state as { from?: string } | null)?.from
-    return <Navigate to={from ?? '/dashboard'} replace />
+    return <Navigate to={from ?? '/communities'} replace />
   }
   return <>{children}</>
 }
@@ -76,16 +80,18 @@ function ProtectedRouteWithReturnUrl({ children }: { children: ReactNode }) {
 function LandingRedirect() {
   const { user, loading } = useAuth()
   if (loading) return <LoadingSpinner message="Cargando..." fullPage />
-  if (user) return <Navigate to="/dashboard" replace />
+  if (user) return <Navigate to="/communities" replace />
   return <LazyPage><LandingPage /></LazyPage>
 }
 
 function RoleGuard({ requiredRole, children }: { requiredRole: Role; children: ReactNode }) {
-  const { currentMember, communityLoading } = useCommunityContext()
+  const { currentMember, community, communityLoading } = useCommunityContext()
   if (communityLoading) return <LoadingSpinner message="Cargando..." className="py-20" />
   const role = (currentMember?.role ?? 'observador') as Role
   if (!hasPermission(role, requiredRole as Role)) {
-    return <Navigate to="/dashboard" replace />
+    const slug = community?.slug
+    const to = slug ? `/c/${slug}/dashboard` : '/communities'
+    return <Navigate to={to} replace />
   }
   return <>{children}</>
 }
@@ -94,7 +100,8 @@ function CommunityTypeGuard({ requiredType, children }: { requiredType: Communit
   const { community, communityLoading } = useCommunityContext()
   if (communityLoading) return <LoadingSpinner message="Cargando..." className="py-20" />
   if (!community || community.type !== requiredType) {
-    return <Navigate to="/dashboard" replace />
+    const to = community?.slug ? `/c/${community.slug}/dashboard` : '/communities'
+    return <Navigate to={to} replace />
   }
   return <>{children}</>
 }
@@ -113,13 +120,23 @@ function UnauthenticatedCatchAll() {
   return <LazyPage><NotFoundPage /></LazyPage>
 }
 
-/** Protected 404: if user hit "/", send to dashboard instead of 404. */
+/** Protected 404: redirect /dashboard to slug dashboard; else show 404. */
 function ProtectedCatchAll() {
   const { pathname } = useLocation()
   if (pathname === '/' || pathname === '') {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/communities" replace />
+  }
+  if (pathname === '/dashboard') {
+    return <DashboardRedirect />
   }
   return <LazyPage><NotFoundPage /></LazyPage>
+}
+
+/** Inside /c/:slug: unknown path → redirect to community dashboard. */
+function SlugCatchAll() {
+  const { slug } = useParams<{ slug: string }>()
+  const to = slug ? `/c/${slug}/dashboard` : '/communities'
+  return <Navigate to={to} replace />
 }
 
 export function AppRouter() {
@@ -148,40 +165,51 @@ export function AppRouter() {
         {/* Onboarding wizard (standalone, no AppLayout) */}
         <Route path="/onboarding" element={<ProtectedRoute><LazyPage><OnboardingWizard /></LazyPage></ProtectedRoute>} />
 
-        {/* Protected routes */}
-        <Route element={<ProtectedRouteWithReturnUrl><AppLayout /></ProtectedRouteWithReturnUrl>}>
-          <Route path="/dashboard" element={<LazyPage><DashboardPage /></LazyPage>} />
-          <Route path="/members" element={<LazyPage><MembersPage /></LazyPage>} />
-          <Route path="/members/:memberId" element={<LazyPage><MemberDetailPage /></LazyPage>} />
-          <Route path="/treasury" element={<LazyPage><TreasuryPage /></LazyPage>} />
-          <Route path="/treasury/requests" element={<LazyPage><SpendRequestsPage /></LazyPage>} />
-          <Route path="/treasury/requests/new" element={<LazyPage><SpendRequestNewPage /></LazyPage>} />
-          <Route path="/treasury/requests/:id" element={<LazyPage><SpendRequestDetailPage /></LazyPage>} />
-          <Route
-            path="/residential"
-            element={<CommunityTypeGuard requiredType="residential"><LazyPage><ResidentialPage /></LazyPage></CommunityTypeGuard>}
-          />
-          <Route path="/ingestion" element={<RoleGuard requiredRole="tesorero"><LazyPage><IngestionPage /></LazyPage></RoleGuard>} />
-          <Route path="/governance" element={<LazyPage><GovernancePage /></LazyPage>} />
-          <Route path="/governance/assemblies/:assemblyId" element={<LazyPage><AssemblyDetailPage /></LazyPage>} />
-          <Route path="/governance/vigilancia" element={<RoleGuard requiredRole="comite_vigilancia"><LazyPage><VigilanciaPage /></LazyPage></RoleGuard>} />
-          <Route path="/governance/archive" element={<LazyPage><DecisionArchivePage /></LazyPage>} />
-          <Route path="/governance/:proposalId" element={<LazyPage><ProposalDetailPage /></LazyPage>} />
-          <Route path="/rules" element={<LazyPage><RulesPage /></LazyPage>} />
-
-          <Route path="/census" element={<LazyPage><CensusPage /></LazyPage>} />
-          <Route path="/documents" element={<LazyPage><DocumentsPage /></LazyPage>} />
-          <Route path="/entities" element={<LazyPage><EntitiesPage /></LazyPage>} />
-          <Route path="/entities/:entityId" element={<LazyPage><EntityDetailPage /></LazyPage>} />
+        {/* Protected: routes without community (profile, communities) */}
+        <Route element={<ProtectedRouteWithReturnUrl><MinimalAuthenticatedLayout /></ProtectedRouteWithReturnUrl>}>
           <Route path="/profile" element={<LazyPage><ProfilePage /></LazyPage>} />
-          <Route path="/settings" element={<RoleGuard requiredRole="admin"><LazyPage><SettingsPage /></LazyPage></RoleGuard>} />
-          <Route path="/settings/audit" element={<RoleGuard requiredRole="admin"><LazyPage><AuditLogPage /></LazyPage></RoleGuard>} />
-          <Route path="/admin/communities" element={<RoleGuard requiredRole="platform_admin"><LazyPage><MultiCommunityPage /></LazyPage></RoleGuard>} />
-          <Route path="/governance/assemblies" element={<Navigate to="/governance" replace />} />
-
-          {/* Authenticated 404 — never show 404 for "/" (redirect to dashboard) */}
-          <Route path="*" element={<ProtectedCatchAll />} />
+          <Route path="/communities" element={<LazyPage><CommunitiesPage /></LazyPage>} />
         </Route>
+
+        {/* Redirect /dashboard to /c/:slug/dashboard or /communities */}
+        <Route path="/dashboard" element={<ProtectedRouteWithReturnUrl><DashboardRedirect /></ProtectedRouteWithReturnUrl>} />
+
+        {/* Community-scoped routes: /c/:slug/... */}
+        <Route path="/c/:slug" element={<ProtectedRouteWithReturnUrl><CommunitySlugLayout /></ProtectedRouteWithReturnUrl>}>
+          <Route element={<AppLayout />}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<LazyPage><DashboardPage /></LazyPage>} />
+            <Route path="members" element={<LazyPage><MembersPage /></LazyPage>} />
+            <Route path="members/:memberId" element={<LazyPage><MemberDetailPage /></LazyPage>} />
+            <Route path="treasury" element={<LazyPage><TreasuryPage /></LazyPage>} />
+            <Route path="treasury/requests" element={<LazyPage><SpendRequestsPage /></LazyPage>} />
+            <Route path="treasury/requests/new" element={<LazyPage><SpendRequestNewPage /></LazyPage>} />
+            <Route path="treasury/requests/:id" element={<LazyPage><SpendRequestDetailPage /></LazyPage>} />
+            <Route
+              path="residential"
+              element={<CommunityTypeGuard requiredType="residential"><LazyPage><ResidentialPage /></LazyPage></CommunityTypeGuard>}
+            />
+            <Route path="ingestion" element={<RoleGuard requiredRole="tesorero"><LazyPage><IngestionPage /></LazyPage></RoleGuard>} />
+            <Route path="governance" element={<LazyPage><GovernancePage /></LazyPage>} />
+            <Route path="governance/assemblies/:assemblyId" element={<LazyPage><AssemblyDetailPage /></LazyPage>} />
+            <Route path="governance/vigilancia" element={<RoleGuard requiredRole="comite_vigilancia"><LazyPage><VigilanciaPage /></LazyPage></RoleGuard>} />
+            <Route path="governance/archive" element={<LazyPage><DecisionArchivePage /></LazyPage>} />
+            <Route path="governance/:proposalId" element={<LazyPage><ProposalDetailPage /></LazyPage>} />
+            <Route path="rules" element={<LazyPage><RulesPage /></LazyPage>} />
+            <Route path="census" element={<LazyPage><CensusPage /></LazyPage>} />
+            <Route path="documents" element={<LazyPage><DocumentsPage /></LazyPage>} />
+            <Route path="entities" element={<LazyPage><EntitiesPage /></LazyPage>} />
+            <Route path="entities/:entityId" element={<LazyPage><EntityDetailPage /></LazyPage>} />
+            <Route path="settings" element={<RoleGuard requiredRole="admin"><LazyPage><SettingsPage /></LazyPage></RoleGuard>} />
+            <Route path="settings/audit" element={<RoleGuard requiredRole="admin"><LazyPage><AuditLogPage /></LazyPage></RoleGuard>} />
+            <Route path="governance/assemblies" element={<Navigate to="governance" replace />} />
+            <Route path="admin/communities" element={<RoleGuard requiredRole="platform_admin"><LazyPage><MultiCommunityPage /></LazyPage></RoleGuard>} />
+            <Route path="*" element={<SlugCatchAll />} />
+          </Route>
+        </Route>
+
+        {/* Authenticated catch-all (e.g. /members, /treasury without slug) */}
+        <Route path="*" element={<ProtectedRouteWithReturnUrl><ProtectedCatchAll /></ProtectedRouteWithReturnUrl>} />
 
         {/* Unauthenticated catch-all — NOT wrapped in AuthLayout so the landing page renders full-width */}
         <Route path="*" element={<UnauthenticatedCatchAll />} />

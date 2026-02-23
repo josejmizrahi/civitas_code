@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { supabase } from '@/shared/lib/supabase'
 import { getRuleCatalogEntry } from '@/shared/config/rules-catalog'
@@ -63,6 +64,7 @@ export function ProposalContextPanel({ proposal }: Props) {
 
 function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { rules } = useRulesEngine()
   const configKey = fi?.config_key as string | undefined
   const newValue = fi?.config_value
@@ -121,7 +123,7 @@ function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: 
         ) : (
           <p className="text-sm text-muted-foreground">{t('context.noRuleDetail')}</p>
         )}
-        <Link to="/rules">
+        <Link to={path('rules')}>
           <Button variant="outline" size="sm" className="gap-1.5">
             <BookOpen className="h-3.5 w-3.5" />
             {t('context.viewRules')}
@@ -135,6 +137,7 @@ function RuleChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: 
 
 function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: Proposal; fi: FinancialInstruction | null; templateId: string }) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { communityId } = useCommunityContext()
   const amount = Number(fi?.amount) || 0
 
@@ -249,7 +252,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
               )}
             </div>
             {entity && (
-              <Link to={`/entities/${entity.id}`}>
+              <Link to={path(`entities/${entity.id}`)}>
                 <Button variant="ghost" size="sm" className="gap-1 text-xs">
                   {t('context.viewEntity')} <ArrowRight className="h-3 w-3" />
                 </Button>
@@ -258,7 +261,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
           </div>
         )}
 
-        <Link to="/treasury">
+        <Link to={path('treasury')}>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Wallet className="h-3.5 w-3.5" />
             {t('context.viewTreasury')}
@@ -272,6 +275,7 @@ function DisbursementPanel({ proposal: _proposal, fi, templateId }: { proposal: 
 
 function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { communityId } = useCommunityContext()
   const newAmount = Number(fi?.new_amount || fi?.amount) || 0
 
@@ -330,7 +334,7 @@ function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi:
           </p>
         </div>
 
-        <Link to="/treasury">
+        <Link to={path('treasury')}>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Wallet className="h-3.5 w-3.5" />
             {t('context.viewCollection')}
@@ -344,6 +348,7 @@ function QuotaChangePanel({ proposal: _proposal, fi }: { proposal: Proposal; fi:
 
 function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal; fi: FinancialInstruction | null }) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { communityId } = useCommunityContext()
   const amount = Number(fi?.amount) || 0
   const categoryId = fi?.category_id
@@ -386,7 +391,7 @@ function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal
           )}
         </div>
 
-        <Link to="/treasury">
+        <Link to={path('treasury')}>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Wallet className="h-3.5 w-3.5" />
             {t('context.viewBudgets')}
@@ -400,6 +405,7 @@ function BudgetAllocationPanel({ proposal: _proposal, fi }: { proposal: Proposal
 
 function MemberAdmissionPanel({ proposal: _proposal }: { proposal: Proposal }) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   return (
     <Card className="border-sky-200 bg-sky-50/30">
       <CardHeader className="pb-3">
@@ -415,7 +421,7 @@ function MemberAdmissionPanel({ proposal: _proposal }: { proposal: Proposal }) {
         <div className="rounded-lg bg-sky-50 border border-sky-200 p-3 text-sm text-sky-800">
           <p>{t('context.memberAdmissionWarning')}</p>
         </div>
-        <Link to="/members">
+        <Link to={path('members')}>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Users className="h-3.5 w-3.5" />
             {t('context.viewMembers')}
@@ -429,6 +435,7 @@ function MemberAdmissionPanel({ proposal: _proposal }: { proposal: Proposal }) {
 
 function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { communityId } = useCommunityContext()
 
   const { data: currentTerms } = useQuery({
@@ -478,7 +485,7 @@ function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
           </p>
         </div>
 
-        <Link to="/governance/vigilancia">
+        <Link to={path('governance/vigilancia')}>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Crown className="h-3.5 w-3.5" />
             {t('context.viewAdminTerms')}

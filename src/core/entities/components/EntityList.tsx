@@ -13,11 +13,13 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Plus, Trash2, Star, Building2, Phone, Mail, Search } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { ENTITY_TYPE_LABELS, ENTITY_STATUS_LABELS } from '../types'
 import type { EntityType, EntityStatus } from '@/shared/types'
 
 export function EntityList() {
   const navigate = useNavigate()
+  const path = useCommunityPath()
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -154,7 +156,7 @@ export function EntityList() {
               filteredEntities.map((entity) => {
                 const rating = ratingMap.get(entity.id)
                 return (
-                  <TableRow key={entity.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/entities/${entity.id}`)}>
+                  <TableRow key={entity.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(path(`entities/${entity.id}`))}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 text-muted-foreground" />

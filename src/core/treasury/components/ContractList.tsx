@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/utils'
 import { Plus, Trash2, FileText, CheckCircle, ArrowLeft, AlertTriangle, User, Building2, ClipboardCheck } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
 import type { Contract, ContractInstallment } from '../types'
 import type { ContractType } from '@/shared/types'
 
@@ -63,14 +64,19 @@ function InstallmentView({ contract }: { contract: Contract }) {
   const markPaid = useMarkInstallmentPaid()
   const { canManageTreasury } = usePermissions()
   const toast = useToast()
+  const confirm = useConfirm()
 
-  const handleMarkPaid = (inst: ContractInstallment) => {
-    if (confirm(`Registrar pago de parcialidad #${inst.installment_number} por ${formatCurrency(inst.amount)}?`)) {
-      markPaid.mutate({ installment: inst }, {
-        onSuccess: () => toast.success('Pago registrado'),
-        onError: () => toast.error('Error al registrar pago'),
-      })
-    }
+  const handleMarkPaid = async (inst: ContractInstallment) => {
+    const ok = await confirm({
+      title: 'Registrar pago',
+      description: `¿Registrar pago de parcialidad #${inst.installment_number} por ${formatCurrency(inst.amount)}?`,
+      confirmLabel: 'Registrar pago',
+    })
+    if (!ok) return
+    markPaid.mutate({ installment: inst }, {
+      onSuccess: () => toast.success('Pago registrado'),
+      onError: () => toast.error('Error al registrar pago'),
+    })
   }
 
   if (isLoading) return <div className="text-muted-foreground text-sm">Cargando parcialidades...</div>
@@ -135,6 +141,7 @@ export function ContractList() {
   const updateContract = useUpdateContract()
   const deleteContract = useDeleteContract()
   const toast = useToast()
+  const confirm = useConfirm()
 
   const [showCreate, setShowCreate] = useState(false)
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null)
@@ -178,14 +185,19 @@ export function ContractList() {
     }
   }
 
-  const handleDelete = (id: string) => {
-    if (confirm('Eliminar este contrato y sus parcialidades?')) {
-      deleteContract.mutate(id, {
-        onSuccess: () => toast.success('Contrato eliminado'),
-        onError: () => toast.error('Error al eliminar contrato'),
-      })
-      setSelectedContract(null)
-    }
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Eliminar contrato',
+      description: '¿Eliminar este contrato y todas sus parcialidades? Esta acción no se puede deshacer.',
+      confirmLabel: 'Eliminar',
+      variant: 'destructive',
+    })
+    if (!ok) return
+    deleteContract.mutate(id, {
+      onSuccess: () => toast.success('Contrato eliminado'),
+      onError: () => toast.error('Error al eliminar contrato'),
+    })
+    setSelectedContract(null)
   }
 
   const handleStatusChange = (id: string, status: string) => {

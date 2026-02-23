@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/shared/lib/supabase'
 import { getCommunityRules } from '@/shared/services/rules.service'
@@ -29,7 +31,6 @@ import {
   Search,
   Pencil,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import type { CommunityRules } from '@/shared/types/rules'
 
 interface RuleVersion {
@@ -182,6 +183,7 @@ function CategorySection({
 
 export function RulesPage() {
   const { communityId, community } = useCommunityContext()
+  const path = useCommunityPath()
   const { isAdmin } = usePermissions()
   const navigate = useNavigate()
 
@@ -209,7 +211,7 @@ export function RulesPage() {
   }
 
   const handleProposeChange = (rule: RuleCatalogEntry) => {
-    navigate('/governance', {
+    navigate(path('governance'), {
       state: {
         openProposal: true,
         template: 'cambio_regla',
@@ -240,7 +242,7 @@ export function RulesPage() {
           </p>
         </div>
         {isAdmin && (
-          <Button variant="outline" size="sm" onClick={() => navigate('/settings')}>
+          <Button variant="outline" size="sm" onClick={() => navigate(path('settings'))}>
             Configuración avanzada
           </Button>
         )}

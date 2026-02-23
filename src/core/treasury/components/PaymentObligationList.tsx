@@ -23,9 +23,11 @@ function statusVariant(status: string): 'warning' | 'success' | 'destructive' | 
 }
 
 export function PaymentObligationList({
+  hideSummaryCards = false,
   memberIdFilter = null,
   onClearMemberFilter,
 }: {
+  hideSummaryCards?: boolean
   memberIdFilter?: string | null
   onClearMemberFilter?: () => void
 } = {}) {
@@ -60,10 +62,6 @@ export function PaymentObligationList({
     updateStatus.mutate({ id: obligation.id, status: newStatus })
   }
 
-  const pendingCount = obligations?.filter(o => o.status === 'pending').length ?? 0
-  const overdueCount = obligations?.filter(o => o.status === 'overdue').length ?? 0
-  const paidCount = obligations?.filter(o => o.status === 'paid').length ?? 0
-
   return (
     <div className="space-y-4">
       {memberIdFilter && onClearMemberFilter && (
@@ -77,21 +75,27 @@ export function PaymentObligationList({
           </Button>
         </div>
       )}
-      {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-lg border bg-yellow-50 p-3">
-          <div className="text-sm text-yellow-700">{t('obligations.summary.pending')}</div>
-          <div className="text-xl font-bold text-yellow-800">{pendingCount}</div>
-        </div>
-        <div className="rounded-lg border bg-red-50 p-3">
-          <div className="text-sm text-red-700">{t('obligations.summary.overdue')}</div>
-          <div className="text-xl font-bold text-red-800">{overdueCount}</div>
-        </div>
-        <div className="rounded-lg border bg-green-50 p-3">
-          <div className="text-sm text-green-700">{t('obligations.summary.paid')}</div>
-          <div className="text-xl font-bold text-green-800">{paidCount}</div>
-        </div>
-      </div>
+      {!hideSummaryCards && (() => {
+        const pendingCount = obligations?.filter(o => o.status === 'pending').length ?? 0
+        const overdueCount = obligations?.filter(o => o.status === 'overdue').length ?? 0
+        const paidCount = obligations?.filter(o => o.status === 'paid').length ?? 0
+        return (
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-lg border bg-yellow-50 p-3">
+              <div className="text-sm text-yellow-700">{t('obligations.summary.pending')}</div>
+              <div className="text-xl font-bold text-yellow-800">{pendingCount}</div>
+            </div>
+            <div className="rounded-lg border bg-red-50 p-3">
+              <div className="text-sm text-red-700">{t('obligations.summary.overdue')}</div>
+              <div className="text-xl font-bold text-red-800">{overdueCount}</div>
+            </div>
+            <div className="rounded-lg border bg-green-50 p-3">
+              <div className="text-sm text-green-700">{t('obligations.summary.paid')}</div>
+              <div className="text-xl font-bold text-green-800">{paidCount}</div>
+            </div>
+          </div>
+        )
+      })()}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-48">

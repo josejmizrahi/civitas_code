@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { AppError } from '@/shared/lib/errors'
+import { assertCanPerformAction } from '@/shared/services/rules.service'
 import type { Delegation } from '../types'
 
 export async function getDelegations(communityId: string): Promise<Delegation[]> {
@@ -14,6 +15,12 @@ export async function getDelegations(communityId: string): Promise<Delegation[]>
 export async function createDelegation(delegation: {
   community_id: string; from_member_id: string; to_member_id: string; scope: string
 }): Promise<Delegation> {
+  await assertCanPerformAction(delegation.community_id, delegation.from_member_id, 'delegate_vote')
+
+  if (delegation.from_member_id === delegation.to_member_id) {
+    throw new AppError('No puedes delegarte a ti mismo', 'VALIDATION')
+  }
+
   const { data: existing } = await supabase
     .from('delegations')
     .select('id')
@@ -27,6 +34,7 @@ export async function createDelegation(delegation: {
       'VALIDATION',
     )
   }
+
   const { data, error } = await supabase.from('delegations')
     .insert({ ...delegation, active: true }).select().single()
   if (error) throw error

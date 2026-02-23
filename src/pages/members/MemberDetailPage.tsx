@@ -24,36 +24,9 @@ import {
   ArrowLeft, Wallet, Vote, Activity, Shield, FileText,
   UserMinus, UserCheck, AlertCircle, CheckCircle, Clock,
 } from 'lucide-react'
-
-const roleLabels: Record<string, string> = {
-  platform_admin: 'Admin Plataforma',
-  admin: 'Administrador',
-  tesorero: 'Tesorero',
-  comite_vigilancia: 'Comité de Vigilancia',
-  miembro: 'Miembro',
-  observador: 'Observador',
-}
-
-const roleBadgeVariant: Record<string, 'default' | 'secondary' | 'outline' | 'success'> = {
-  admin: 'default',
-  tesorero: 'success',
-  miembro: 'secondary',
-  observador: 'outline',
-}
-
-const standingLabels: Record<string, string> = {
-  good_standing: 'Al día',
-  grace_period: 'Período de gracia',
-  delinquent: 'Moroso',
-  moroso: 'Moroso',
-}
-
-const standingVariant: Record<string, 'success' | 'warning' | 'destructive'> = {
-  good_standing: 'success',
-  grace_period: 'warning',
-  delinquent: 'destructive',
-  moroso: 'destructive',
-}
+import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
+import { useConfirm } from '@/shared/components/ConfirmDialog'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 
 interface PaymentObligation {
   id: string
@@ -112,6 +85,7 @@ export function MemberDetailPage() {
   const [attrDraft, setAttrDraft] = useState<Record<string, unknown>>({})
 
   const { error: toastError, success: toastSuccess } = useToast()
+  const confirm = useConfirm()
   const memberQuery = useMember(memberId)
   const obligationsQuery = usePaymentObligations(memberId)
   const votesQuery = useQuery({
@@ -136,6 +110,7 @@ export function MemberDetailPage() {
     }
   }, [auditQuery.isError, auditQuery.error, toastError])
 
+  const path = useCommunityPath()
   const member = memberQuery.data
   const loading = memberQuery.isLoading
   const error = memberQuery.error ? (memberQuery.error as Error).message : null
@@ -149,7 +124,7 @@ export function MemberDetailPage() {
   if (error || !member) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => navigate('/members')}>
+        <Button variant="ghost" onClick={() => navigate(path('members'))}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Volver
         </Button>
         <div className="rounded-md bg-destructive/10 border border-destructive/20 p-4 flex items-center gap-2 text-destructive">
@@ -175,7 +150,13 @@ export function MemberDetailPage() {
   }
 
   const handleDeactivate = async () => {
-    if (!confirm(`¿Desactivar a ${member.full_name || member.email}?`)) return
+    const ok = await confirm({
+      title: 'Desactivar miembro',
+      description: `¿Estás seguro de desactivar a ${member.full_name || member.email}? Ya no podrá acceder a la comunidad.`,
+      confirmLabel: 'Desactivar',
+      variant: 'destructive',
+    })
+    if (!ok) return
     try {
       await deactivate.mutateAsync(member.id)
       toastSuccess('Miembro desactivado')
@@ -196,7 +177,7 @@ export function MemberDetailPage() {
   return (
     <div className="space-y-6">
       {/* Back button */}
-      <Button variant="ghost" onClick={() => navigate('/members')} className="gap-2">
+      <Button variant="ghost" onClick={() => navigate(path('members'))} className="gap-2">
         <ArrowLeft className="h-4 w-4" /> Volver a Miembros
       </Button>
 
@@ -228,18 +209,18 @@ export function MemberDetailPage() {
                 </Select>
               ) : (
                 <Badge
-                  variant={roleBadgeVariant[member.role] || 'secondary'}
+                  variant={ROLE_BADGE_VARIANT[member.role] || 'secondary'}
                   className={canManageMembers ? 'cursor-pointer text-sm' : 'text-sm'}
                   onClick={() => canManageMembers && setEditingRole(true)}
                 >
-                  {roleLabels[member.role] || member.role}
+                  {ROLE_LABELS[member.role] || member.role}
                 </Badge>
               )}
               <Badge variant={member.status === 'active' ? 'success' : 'outline'}>
                 {member.status === 'active' ? 'Activo' : 'Inactivo'}
               </Badge>
-              <Badge variant={standingVariant[member.financial_standing] || 'success'}>
-                {standingLabels[member.financial_standing] || member.financial_standing || 'Al día'}
+              <Badge variant={STANDING_BADGE_VARIANT[member.financial_standing] || 'success'}>
+                {STANDING_LABELS[member.financial_standing] || member.financial_standing || 'Al corriente'}
               </Badge>
             </div>
           </div>
@@ -281,7 +262,7 @@ export function MemberDetailPage() {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  navigate('/treasury', {
+                  navigate(path('treasury'), {
                     state: { mainSection: 'programacion', programacionTab: 'payment-plans' },
                   })
                 }
@@ -485,7 +466,7 @@ export function MemberDetailPage() {
                       <TableRow
                         key={p.id}
                         className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => navigate(`/governance/${p.id}`)}
+                        onClick={() => navigate(path(`governance/${p.id}`))}
                       >
                         <TableCell className="font-medium">{p.title || '—'}</TableCell>
                         <TableCell>
@@ -532,7 +513,7 @@ export function MemberDetailPage() {
                       <TableRow
                         key={v.id}
                         className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => navigate(`/governance/${v.proposal_id}`)}
+                        onClick={() => navigate(path(`governance/${v.proposal_id}`))}
                       >
                         <TableCell className="font-medium">{v.proposal_title}</TableCell>
                         <TableCell>

@@ -17,6 +17,7 @@ import { ArrowLeft, Calendar, MapPin, User, Play, SkipForward, CheckCircle, XCir
 import { formatDateTime } from '@/shared/lib/utils'
 import type { AssemblyStatus } from '@/core/governance/types'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
   scheduled: 'secondary',
@@ -31,6 +32,7 @@ const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'w
 
 export function AssemblyDetailPage() {
   const { t } = useI18n()
+  const path = useCommunityPath()
   const { assemblyId } = useParams<{ assemblyId: string }>()
   const navigate = useNavigate()
   const toast = useToast()
@@ -52,7 +54,7 @@ export function AssemblyDetailPage() {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">{t('assemblyDetail.notFound')}</p>
-        <Button variant="outline" className="mt-4" onClick={() => navigate('/governance')}>
+        <Button variant="outline" className="mt-4" onClick={() => navigate(path('governance'))}>
           {t('assemblyDetail.backToGovernance')}
         </Button>
       </div>
@@ -91,7 +93,7 @@ export function AssemblyDetailPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/governance')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate(path('governance'))}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">

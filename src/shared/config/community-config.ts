@@ -39,8 +39,8 @@ const DEFAULT_CONFIG: CommunityConfigShape = {
   },
   membership_attributes: [],
   financial_categories: {
-    income: [],
-    expense: [],
+    income: ['Cuotas', 'Donaciones', 'Otros ingresos'],
+    expense: ['Operación', 'Mantenimiento', 'Servicios', 'Otros egresos'],
   },
   separate_funds: false,
   funds: ['general'],

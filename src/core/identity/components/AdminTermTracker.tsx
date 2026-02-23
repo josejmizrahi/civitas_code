@@ -12,15 +12,7 @@ import { formatDate } from '@/shared/lib/utils'
 import { getCommunityRules } from '@/shared/services/rules.service'
 import { Shield, Clock, AlertTriangle, UserCheck, Play, Square } from 'lucide-react'
 import type { AdminTerm } from '../services/terms.service'
-
-const roleLabels: Record<string, string> = {
-  platform_admin: 'Admin Plataforma',
-  admin: 'Administrador',
-  comite_vigilancia: 'Comité de Vigilancia',
-  tesorero: 'Tesorero',
-  miembro: 'Miembro',
-  observador: 'Observador',
-}
+import { ROLE_LABELS } from '@/shared/constants/roles'
 
 function TermProgressBar({ term, termMonths }: { term: AdminTerm; termMonths: number }) {
   const { progress, isNearEnd } = useMemo(() => {
@@ -133,7 +125,7 @@ export function AdminTermTracker() {
                     <span className="font-medium">
                       {memberMap.get(term.member_id) ?? term.member_id}
                     </span>
-                    <Badge variant="outline">{roleLabels[term.role] ?? term.role}</Badge>
+                    <Badge variant="outline">{ROLE_LABELS[term.role] ?? term.role}</Badge>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm text-muted-foreground">
@@ -252,7 +244,7 @@ export function AdminTermTracker() {
                       <TableCell className="font-medium">
                         {memberMap.get(term.member_id) ?? term.member_id}
                       </TableCell>
-                      <TableCell>{roleLabels[term.role] ?? term.role}</TableCell>
+                      <TableCell>{ROLE_LABELS[term.role] ?? term.role}</TableCell>
                       <TableCell className="hidden sm:table-cell">{term.term_number}</TableCell>
                       <TableCell className="hidden sm:table-cell">{formatDate(term.term_start)}</TableCell>
                       <TableCell className="hidden sm:table-cell">{formatDate(term.term_end)}</TableCell>

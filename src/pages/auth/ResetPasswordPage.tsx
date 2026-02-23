@@ -93,7 +93,7 @@ export function ResetPasswordPage() {
     try {
       await updatePassword(password)
       setSuccess(true)
-      setTimeout(() => navigate('/dashboard'), 3000)
+      setTimeout(() => navigate('/communities'), 3000)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al actualizar la contraseña')
     } finally {

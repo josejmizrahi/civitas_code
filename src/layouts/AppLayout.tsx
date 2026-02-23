@@ -34,25 +34,27 @@ import { cn } from '@/shared/lib/utils'
 import { PrivacyGate } from '@/core/privacy/components/PrivacyGate'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { communityPath } from '@/shared/lib/communityRoutes'
+
 const coreNavigation = [
-  { key: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
-  { key: 'nav.treasury', href: '/treasury', icon: Wallet, minRole: 'observador' as Role },
-  { key: 'nav.governance', href: '/governance', icon: Vote, minRole: 'observador' as Role },
-  { key: 'nav.rules', href: '/rules', icon: BookOpen, minRole: 'observador' as Role },
-  { key: 'nav.members', href: '/members', icon: Users, minRole: 'observador' as Role },
-  { key: 'nav.entities', href: '/entities', icon: Building2, minRole: 'observador' as Role },
-  { key: 'nav.documents', href: '/documents', icon: FileText, minRole: 'observador' as Role },
-  { key: 'nav.census', href: '/census', icon: BarChart3, minRole: 'observador' as Role },
-  { key: 'nav.import', href: '/ingestion', icon: Upload, minRole: 'tesorero' as Role },
+  { key: 'nav.dashboard', path: 'dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
+  { key: 'nav.treasury', path: 'treasury', icon: Wallet, minRole: 'observador' as Role },
+  { key: 'nav.governance', path: 'governance', icon: Vote, minRole: 'observador' as Role },
+  { key: 'nav.rules', path: 'rules', icon: BookOpen, minRole: 'observador' as Role },
+  { key: 'nav.members', path: 'members', icon: Users, minRole: 'observador' as Role },
+  { key: 'nav.entities', path: 'entities', icon: Building2, minRole: 'observador' as Role },
+  { key: 'nav.documents', path: 'documents', icon: FileText, minRole: 'observador' as Role },
+  { key: 'nav.census', path: 'census', icon: BarChart3, minRole: 'observador' as Role },
+  { key: 'nav.import', path: 'ingestion', icon: Upload, minRole: 'tesorero' as Role },
 ]
 
 /* Bottom nav shows the 4 most important items + a "More" toggle */
-const BOTTOM_NAV_ITEMS = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Tesoreria', href: '/treasury', icon: Wallet },
-  { name: 'Gobernanza', href: '/governance', icon: Vote },
-  { name: 'Miembros', href: '/members', icon: Users },
-]
+const BOTTOM_NAV_KEYS = [
+  { key: 'nav.dashboard', path: 'dashboard', icon: LayoutDashboard },
+  { key: 'nav.treasury', path: 'treasury', icon: Wallet },
+  { key: 'nav.governance', path: 'governance', icon: Vote },
+  { key: 'nav.members', path: 'members', icon: Users },
+] as const
 
 export function AppLayout() {
   const { user, signOut } = useAuth()
@@ -94,9 +96,16 @@ export function AppLayout() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [switcherOpen])
 
+  const slug = community?.slug ?? ''
+
   const handleSwitchCommunity = (id: string) => {
-    setCommunityId(id)
+    const target = userCommunities.find((c) => c.id === id)
     setSwitcherOpen(false)
+    if (target && target.slug !== slug) {
+      navigate(communityPath(target.slug, 'dashboard'))
+    } else if (target) {
+      setCommunityId(id)
+    }
   }
 
   const userRole = (currentMember?.role ?? 'observador') as Role
@@ -112,15 +121,16 @@ export function AppLayout() {
     ...localizedCoreNavigation.filter((item) => hasPermission(userRole, item.minRole)),
   ]
 
-  // Add vertical-specific nav items
+  // Add vertical-specific nav items (path = href without leading slash)
   if (community?.type) {
     const vertical = VERTICALS[community.type]
     if (vertical?.navItems) {
       navigation.push(
         ...vertical.navItems.map((item) => ({
           key: item.href,
-          ...item,
+          path: item.href.replace(/^\//, ''),
           name: item.name,
+          icon: item.icon,
           minRole: 'observador' as Role,
         })),
       )
@@ -148,7 +158,11 @@ export function AppLayout() {
         : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
     )
 
-  const isBottomNavActive = (href: string) => location.pathname.startsWith(href)
+  const isBottomNavActive = (path: string) => {
+    if (!slug) return false
+    const full = communityPath(slug, path)
+    return location.pathname === full || location.pathname.startsWith(full + '/')
+  }
 
   return (
     <div className="flex h-dvh flex-col overflow-x-hidden lg:flex-row">
@@ -263,10 +277,10 @@ export function AppLayout() {
           <div className="flex flex-col gap-0.5">
             {navigation.map((item) => (
               <NavLink
-                key={item.href}
-                to={item.href}
+                key={item.path}
+                to={slug ? communityPath(slug, item.path) : '#'}
                 className={navLinkClassName}
-                end={item.href === '/dashboard'}
+                end={item.path === 'dashboard'}
                 onClick={closeMobileSidebar}
               >
                 <item.icon className="h-4 w-4 shrink-0" />
@@ -283,7 +297,7 @@ export function AppLayout() {
               <div className="flex flex-col gap-0.5">
                 {hasPermission(userRole, 'admin') && (
                   <NavLink
-                    to="/settings"
+                    to={slug ? communityPath(slug, 'settings') : '#'}
                     className={navLinkClassName}
                     onClick={closeMobileSidebar}
                   >
@@ -291,9 +305,9 @@ export function AppLayout() {
                     Admin Comunidad
                   </NavLink>
                 )}
-                {(userRole === 'admin' || userRole === 'comite_vigilancia') && community?.type === 'residential' && (
+                {(userRole === 'admin' || userRole === 'comite_vigilancia') && (
                   <NavLink
-                    to="/governance/vigilancia"
+                    to={slug ? communityPath(slug, 'governance/vigilancia') : '#'}
                     className={navLinkClassName}
                     onClick={closeMobileSidebar}
                   >
@@ -367,12 +381,12 @@ export function AppLayout() {
       {/* ============ MOBILE BOTTOM NAVIGATION ============ */}
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 backdrop-blur-sm pb-safe lg:hidden">
         <div className="flex items-stretch justify-around">
-          {BOTTOM_NAV_ITEMS.map((item) => {
-            const active = isBottomNavActive(item.href)
+          {BOTTOM_NAV_KEYS.map((item) => {
+            const active = isBottomNavActive(item.path)
             return (
               <NavLink
-                key={item.href}
-                to={item.href}
+                key={item.path}
+                to={slug ? communityPath(slug, item.path) : '#'}
                 className="flex flex-1 flex-col items-center gap-0.5 py-2 px-1"
               >
                 <item.icon
@@ -387,7 +401,7 @@ export function AppLayout() {
                     active ? 'font-semibold text-primary' : 'text-muted-foreground'
                   )}
                 >
-                  {item.name}
+                  {t(item.key as any)}
                 </span>
               </NavLink>
             )
