@@ -3,6 +3,8 @@ export type I18nKey =
   | 'nav.community'
   | 'nav.treasury'
   | 'nav.governance'
+  | 'nav.announcements'
+  | 'nav.calendar'
   | 'nav.vigilancia'
   | 'nav.settings'
   | 'nav.rules'
@@ -780,6 +782,8 @@ const es: Dictionary = {
   'nav.community': 'Comunidad',
   'nav.treasury': 'Finanzas',
   'nav.governance': 'Gobernanza',
+  'nav.announcements': 'Anuncios',
+  'nav.calendar': 'Calendario',
   'nav.vigilancia': 'Vigilancia',
   'nav.settings': 'Configuración',
   'nav.rules': 'Reglamento',
@@ -1552,6 +1556,8 @@ const en: Dictionary = {
   'nav.community': 'Community',
   'nav.treasury': 'Finances',
   'nav.governance': 'Governance',
+  'nav.announcements': 'Announcements',
+  'nav.calendar': 'Calendar',
   'nav.vigilancia': 'Oversight',
   'nav.settings': 'Settings',
   'nav.rules': 'Rules',

@@ -25,6 +25,7 @@ import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { Button } from '@/shared/components/ui/button'
 import { QuickActions } from '@/pages/dashboard/components/QuickActions'
 import { FirstStepsChecklist } from '@/pages/dashboard/components/FirstStepsChecklist'
+import { AnnouncementFeed } from '@/core/announcements/components/AnnouncementFeed'
 
 export function DashboardPage() {
   const { community, currentMember } = useCommunityContext()
@@ -90,6 +91,8 @@ export function DashboardPage() {
       {isAdmin && <FirstStepsChecklist />}
 
       <QuickActions />
+
+      <AnnouncementFeed limit={3} />
 
       {/* KPI row — visible for admins */}
       {isAdmin && (

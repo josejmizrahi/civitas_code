@@ -47,6 +47,8 @@ const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ defa
 const CommunitiesPage = lazy(() => import('@/pages/communities/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })))
 const CommunityPage = lazy(() => import('@/pages/community/CommunityPage').then(m => ({ default: m.CommunityPage })))
 const MyPaymentsPage = lazy(() => import('@/pages/treasury/MyPaymentsPage').then(m => ({ default: m.MyPaymentsPage })))
+const AnnouncementsPage = lazy(() => import('@/pages/announcements/AnnouncementsPage').then(m => ({ default: m.AnnouncementsPage })))
+const CalendarPage = lazy(() => import('@/pages/calendar/CalendarPage').then(m => ({ default: m.CalendarPage })))
 
 function LazyPage({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LoadingSpinner message="Cargando..." className="py-20" />}>{children}</Suspense>
@@ -219,6 +221,10 @@ export function AppRouter() {
 
             {/* Mi estado de cuenta (acceso directo) */}
             <Route path="my-payments" element={<LazyPage><MyPaymentsPage /></LazyPage>} />
+
+            {/* Anuncios + Calendario */}
+            <Route path="announcements" element={<LazyPage><AnnouncementsPage /></LazyPage>} />
+            <Route path="calendar" element={<LazyPage><CalendarPage /></LazyPage>} />
 
             {/* Misc */}
             <Route path="census" element={<LazyPage><CensusPage /></LazyPage>} />

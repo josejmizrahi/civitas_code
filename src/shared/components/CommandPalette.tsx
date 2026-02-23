@@ -8,7 +8,7 @@ import { hasPermission, type Role } from '@/shared/types'
 import {
   LayoutDashboard, Users, Wallet, Vote, FileText, Settings, Shield,
   Search, BarChart3, Building2, Home, BookOpen, Upload, User, ChevronRight,
-  Receipt,
+  Receipt, Megaphone, Calendar,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
@@ -68,6 +68,8 @@ export function CommandPalette() {
       { id: 'nav-entities', label: 'Proveedores', section: 'Navegación', icon: Building2, path: path('entities'), keywords: 'partes relacionadas contratistas' },
       { id: 'nav-rules', label: 'Reglamento', section: 'Navegación', icon: BookOpen, path: path('rules'), keywords: 'normas reglas' },
       { id: 'nav-my-payments', label: 'Mi Estado de Cuenta', section: 'Navegación', icon: Receipt, path: path('my-payments'), keywords: 'pagos cuotas obligaciones' },
+      { id: 'nav-announcements', label: 'Anuncios', section: 'Navegación', icon: Megaphone, path: path('announcements'), keywords: 'avisos comunicados noticias' },
+      { id: 'nav-calendar', label: 'Calendario', section: 'Navegación', icon: Calendar, path: path('calendar'), keywords: 'eventos fechas agenda asambleas pagos' },
     ]
 
     if (isResidential) {
