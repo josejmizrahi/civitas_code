@@ -181,7 +181,7 @@ function CategorySection({
   )
 }
 
-export function RulesPage() {
+export function RulesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { communityId, community } = useCommunityContext()
   const path = useCommunityPath()
   const { isAdmin } = usePermissions()
@@ -231,22 +231,24 @@ export function RulesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-blue-600" />
-            Reglamento
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {totalRules} reglas vigentes — haz clic en cualquiera para ver el detalle
-          </p>
+      {!embedded && (
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl flex items-center gap-2">
+              <BookOpen className="h-6 w-6 text-blue-600" />
+              Reglamento
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {totalRules} reglas vigentes — haz clic en cualquiera para ver el detalle
+            </p>
+          </div>
+          {isAdmin && (
+            <Button variant="outline" size="sm" onClick={() => navigate(path('settings'))}>
+              Configuración avanzada
+            </Button>
+          )}
         </div>
-        {isAdmin && (
-          <Button variant="outline" size="sm" onClick={() => navigate(path('settings'))}>
-            Configuración avanzada
-          </Button>
-        )}
-      </div>
+      )}
 
       {/* Search */}
       <div className="relative">

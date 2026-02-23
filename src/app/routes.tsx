@@ -47,6 +47,7 @@ const MultiCommunityPage = lazy(() => import('@/pages/admin/MultiCommunityPage')
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 const CommunitiesPage = lazy(() => import('@/pages/communities/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })))
 const CommunityPage = lazy(() => import('@/pages/community/CommunityPage').then(m => ({ default: m.CommunityPage })))
+const MyPaymentsPage = lazy(() => import('@/pages/treasury/MyPaymentsPage').then(m => ({ default: m.MyPaymentsPage })))
 
 function LazyPage({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LoadingSpinner message="Cargando..." className="py-20" />}>{children}</Suspense>
@@ -216,6 +217,9 @@ export function AppRouter() {
               path="residential"
               element={<CommunityTypeGuard requiredType="residential"><LazyPage><ResidentialPage /></LazyPage></CommunityTypeGuard>}
             />
+
+            {/* Mi estado de cuenta (acceso directo) */}
+            <Route path="my-payments" element={<LazyPage><MyPaymentsPage /></LazyPage>} />
 
             {/* Misc */}
             <Route path="census" element={<LazyPage><CensusPage /></LazyPage>} />

@@ -2,24 +2,33 @@ import { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/tabs'
 import { Button } from '@/shared/components/ui/button'
+import { Select } from '@/shared/components/ui/select'
 import { ProposalList } from '@/core/governance/components/ProposalList'
 import { AssemblyList } from '@/core/governance/components/AssemblyList'
 import { CreateProposalDialog } from '@/core/governance/components/CreateProposalDialog'
 import { CreateAssemblyDialog } from '@/core/governance/components/CreateAssemblyDialog'
+import { DelegationManager } from '@/core/governance/components/DelegationManager'
+import { MinutesGenerator } from '@/core/governance/components/MinutesGenerator'
+import { DecisionArchive } from '@/core/accountability/components/DecisionArchive'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useCommunityContext } from '@/app/providers'
 import { processExpiredProposals, processAutoExecutions } from '@/core/governance/services/governance.service'
 import { useProposals } from '@/core/governance/hooks/useProposals'
 import { exportToExcel } from '@/shared/services/export.service'
 import { formatDate } from '@/shared/lib/utils'
-import { Plus, Download, CheckCircle2 } from 'lucide-react'
+import { Plus, Download, CheckCircle2, FileText, Landmark, Handshake, ScrollText, BookOpen } from 'lucide-react'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useToast } from '@/shared/components/ui/toast'
+
+type GovernanceTab = 'proposals' | 'assemblies' | 'delegations' | 'minutes' | 'rules'
 
 export function GovernancePage() {
   const { t } = useI18n()
   const location = useLocation()
   const navigate = useNavigate()
-  const [tab, setTab] = useState('active')
+  const { currentMember } = useCommunityContext()
+  const [tab, setTab] = useState<GovernanceTab>('proposals')
+  const [statusFilter, setStatusFilter] = useState<string>('')
   const [showCreate, setShowCreate] = useState(false)
   const [showCreateAssembly, setShowCreateAssembly] = useState(false)
   const [initialTemplateId, setInitialTemplateId] = useState<string | undefined>()
@@ -30,9 +39,8 @@ export function GovernancePage() {
   const toast = useToast()
   const { data: allProposals } = useProposals()
 
-  // Consume location.state from Settings "Cambiar Regla via Propuesta" or Reglamento "Proponer cambio"
   useEffect(() => {
-    const state = location.state as { openProposal?: boolean; template?: string; ruleId?: string } | null
+    const state = location.state as { openProposal?: boolean; template?: string; ruleId?: string; tab?: GovernanceTab } | null
     if (state?.openProposal && state?.template) {
       queueMicrotask(() => {
         setShowCreate(true)
@@ -41,6 +49,7 @@ export function GovernancePage() {
       })
       navigate(location.pathname, { replace: true, state: {} })
     }
+    if (state?.tab) setTab(state.tab)
   }, [location.state, location.pathname, navigate])
 
   useEffect(() => {
@@ -57,7 +66,7 @@ export function GovernancePage() {
   }, [])
 
   const handleProposalCreated = (info: { endorsementsRequired: number }) => {
-    setTab('draft')
+    setStatusFilter('draft')
     if (info.endorsementsRequired > 0) {
       setSuccessBanner({
         message: 'Propuesta creada como borrador',
@@ -68,8 +77,6 @@ export function GovernancePage() {
     }
     setTimeout(() => setSuccessBanner(null), 8000)
   }
-
-  const isAssemblyTab = tab === 'assemblies'
 
   const handleExport = () => {
     const rows = (allProposals ?? []).map((p) => ({
@@ -84,30 +91,40 @@ export function GovernancePage() {
     exportToExcel(rows, { filename: 'propuestas', sheetName: 'Propuestas' })
   }
 
+  const subtitleMap: Record<GovernanceTab, string> = {
+    proposals: t('governance.subtitle.proposals'),
+    assemblies: t('governance.subtitle.assemblies'),
+    delegations: 'Gestiona las delegaciones de voto entre miembros',
+    minutes: 'Actas generadas a partir de propuestas ejecutadas',
+    rules: 'Reglamento vigente de la comunidad',
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('governance.title')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {isAssemblyTab ? t('governance.subtitle.assemblies') : t('governance.subtitle.proposals')}
-          </p>
+          <p className="text-sm text-muted-foreground">{subtitleMap[tab]}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={!allProposals?.length}>
-            <Download className="mr-1 h-4 w-4" />
-            {t('governance.export')}
-          </Button>
-          {isAssemblyTab && isAdmin && (
+          {tab === 'proposals' && (
+            <>
+              <Button variant="outline" size="sm" onClick={handleExport} disabled={!allProposals?.length}>
+                <Download className="mr-1 h-4 w-4" />
+                {t('governance.export')}
+              </Button>
+              {canCreateProposals && (
+                <Button onClick={() => setShowCreate(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t('governance.newProposal')}
+                </Button>
+              )}
+            </>
+          )}
+          {tab === 'assemblies' && isAdmin && (
             <Button onClick={() => setShowCreateAssembly(true)}>
               <Plus className="mr-2 h-4 w-4" />
               {t('governance.newAssembly')}
-            </Button>
-          )}
-          {!isAssemblyTab && canCreateProposals && (
-            <Button onClick={() => setShowCreate(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('governance.newProposal')}
             </Button>
           )}
         </div>
@@ -125,37 +142,93 @@ export function GovernancePage() {
         </div>
       )}
 
-      <Tabs value={tab} onValueChange={setTab}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as GovernanceTab)}>
         <TabsList className="gap-1">
-          <TabsTrigger value="active">{t('governance.tab.active')}</TabsTrigger>
-          <TabsTrigger value="discussion">{t('governance.tab.discussion')}</TabsTrigger>
-          <TabsTrigger value="draft">{t('governance.tab.draft')}</TabsTrigger>
-          <TabsTrigger value="closed">{t('governance.tab.closed')}</TabsTrigger>
-          <TabsTrigger value="all">{t('governance.tab.all')}</TabsTrigger>
-          <TabsTrigger value="assemblies">{t('governance.tab.assemblies')}</TabsTrigger>
+          <TabsTrigger value="proposals" className="flex items-center gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            {t('governance.tab.proposals')}
+          </TabsTrigger>
+          <TabsTrigger value="assemblies" className="flex items-center gap-1.5">
+            <Landmark className="h-3.5 w-3.5" />
+            {t('governance.tab.assemblies')}
+          </TabsTrigger>
+          <TabsTrigger value="delegations" className="flex items-center gap-1.5">
+            <Handshake className="h-3.5 w-3.5" />
+            {t('governance.tab.delegations')}
+          </TabsTrigger>
+          <TabsTrigger value="minutes" className="flex items-center gap-1.5">
+            <ScrollText className="h-3.5 w-3.5" />
+            {t('governance.tab.minutes')}
+          </TabsTrigger>
+          <TabsTrigger value="rules" className="flex items-center gap-1.5">
+            <BookOpen className="h-3.5 w-3.5" />
+            {t('governance.tab.rules')}
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="active">
-          <ProposalList statusFilter="active" />
+
+        <TabsContent value="proposals">
+          <div className="space-y-4 mt-2">
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full sm:w-48"
+            >
+              <option value="">{t('governance.tab.all')}</option>
+              <option value="active">{t('governance.tab.active')}</option>
+              <option value="discussion">{t('governance.tab.discussion')}</option>
+              <option value="draft">{t('governance.tab.draft')}</option>
+              <option value="closed">{t('governance.tab.closed')}</option>
+            </Select>
+            <ProposalList statusFilter={statusFilter || undefined} />
+          </div>
         </TabsContent>
-        <TabsContent value="discussion">
-          <ProposalList statusFilter="discussion" />
-        </TabsContent>
-        <TabsContent value="draft">
-          <ProposalList statusFilter="draft" />
-        </TabsContent>
-        <TabsContent value="closed">
-          <ProposalList statusFilter="closed" />
-        </TabsContent>
-        <TabsContent value="all">
-          <ProposalList />
-        </TabsContent>
+
         <TabsContent value="assemblies">
           <AssemblyList />
         </TabsContent>
+
+        <TabsContent value="delegations">
+          {currentMember ? (
+            <DelegationManager memberId={currentMember.id} />
+          ) : (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              Cargando información de miembro...
+            </p>
+          )}
+        </TabsContent>
+
+        <TabsContent value="minutes">
+          <DecisionArchive />
+        </TabsContent>
+
+        <TabsContent value="rules">
+          <RulesTabContent />
+        </TabsContent>
       </Tabs>
 
-      <CreateProposalDialog open={showCreate} onOpenChange={(open) => { setShowCreate(open); if (!open) { setInitialTemplateId(undefined); setInitialRuleId(undefined) } }} initialTemplateId={initialTemplateId} initialRuleId={initialRuleId} onCreated={handleProposalCreated} />
+      <CreateProposalDialog
+        open={showCreate}
+        onOpenChange={(open) => {
+          setShowCreate(open)
+          if (!open) { setInitialTemplateId(undefined); setInitialRuleId(undefined) }
+        }}
+        initialTemplateId={initialTemplateId}
+        initialRuleId={initialRuleId}
+        onCreated={handleProposalCreated}
+      />
       <CreateAssemblyDialog open={showCreateAssembly} onOpenChange={setShowCreateAssembly} />
     </div>
+  )
+}
+
+import { lazy, Suspense } from 'react'
+import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+const RulesPage = lazy(() => import('@/pages/rules/RulesPage').then(m => ({ default: m.RulesPage })))
+
+function RulesTabContent() {
+  return (
+    <Suspense fallback={<LoadingSpinner className="py-12" />}>
+      <RulesPage embedded />
+    </Suspense>
   )
 }
