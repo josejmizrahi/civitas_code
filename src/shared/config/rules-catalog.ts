@@ -203,7 +203,7 @@ export const RULES_CATALOG: RuleCatalogEntry[] = [
     category: 'treasury',
     label: 'Modo de tesorería',
     description: 'Cómo se conecta la comunidad con sus finanzas. Importación = subir estados de cuenta; Conector = conexión automática con banco.',
-    format: (r) => ({ import: 'Importación', connector: 'Conector', fintech_rail: 'Rail IFPE', hybrid: 'Híbrido' }[r.treasury.mode] ?? r.treasury.mode),
+    format: (r) => ({ import: 'Importación', connector: 'Conector', fintech_rail: 'Proveedor fintech', hybrid: 'Híbrido' }[r.treasury.mode] ?? r.treasury.mode),
     rawValue: (r) => r.treasury.mode,
   },
   {

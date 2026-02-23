@@ -25,7 +25,7 @@ import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
-import { FintocSetup } from '@/core/fintoc/components/FintocSetup'
+import { FinancialSetup } from '@/core/fintech/components/FinancialSetup'
 import { AuditLog } from '@/shared/components/AuditLog'
 
 export function SettingsPage() {
@@ -41,7 +41,7 @@ export function SettingsPage() {
     validTabs.includes(tabFromUrl as SettingsTab) ? (tabFromUrl as SettingsTab) : 'general'
   )
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
-  const [showFintocSetup, setShowFintocSetup] = useState(false)
+  const [showPaymentSetup, setShowPaymentSetup] = useState(false)
   const [, setNotifPrefsVersion] = useState(0)
 
   // Push notification state
@@ -82,7 +82,7 @@ export function SettingsPage() {
   }, [community])
 
   useEffect(() => {
-    if (searchParams.get('fintoc') === '1') setShowFintocSetup(true)
+    if (searchParams.get('payments') === '1') setShowPaymentSetup(true)
   }, [searchParams])
 
   const navigate = useNavigate()
@@ -188,10 +188,7 @@ export function SettingsPage() {
 
   const rulesCurrencyValid = isValidCurrencyCode(rules.treasury.currency)
   const rulesLocaleValid = isValidLocaleCode(rules.treasury.locale)
-  const requiresIfpeConfig = rules.treasury.mode === 'fintech_rail' || rules.treasury.mode === 'hybrid'
-  const clabeValid = !requiresIfpeConfig || /^\d{18}$/.test(rules.treasury.clabe ?? '')
-  const beneficiaryValid = !requiresIfpeConfig || Boolean((rules.treasury.beneficiary_name ?? '').trim())
-  const rulesFormValid = rulesCurrencyValid && rulesLocaleValid && clabeValid && beneficiaryValid
+  const rulesFormValid = rulesCurrencyValid && rulesLocaleValid
 
   if (!isAdmin) {
     return (
@@ -681,41 +678,21 @@ export function SettingsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
-                {/* Mode */}
-                <div className="space-y-2">
-                  <Label>Modo de tesorería</Label>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <Badge variant="secondary" className="text-sm w-fit">
-                      {{
-                        import: 'Importación',
-                        connector: 'Conector bancario',
-                        fintech_rail: 'Rail fintech (IFPE)',
-                        hybrid: 'Híbrido',
-                      }[rules.treasury.mode]}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {rules.treasury.mode === 'fintech_rail'
-                        ? 'Requiere licencia IFPE — no editable'
-                        : 'Configurado al crear la comunidad'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* BROXEL / Pagos electrónicos — visible desde el inicio; acceso por suscripción + documentación */}
+                {/* Pagos electrónicos */}
                 <div className="rounded-md border border-emerald-200 bg-emerald-50/40 p-4 space-y-3">
                   <p className="text-sm font-medium text-emerald-900 flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
-                    Pagos electrónicos con BROXEL
+                    Pagos electrónicos
                   </p>
                   <p className="text-xs text-emerald-800/90">
-                    Recibe SPEI, concilia cuotas automáticamente y dispersa pagos con gobernanza. Debes suscribirte y subir documentación para obtener acceso.
+                    Recibe SPEI, concilia cuotas automáticamente y dispersa pagos con gobernanza.
                   </p>
-                  {(community as any)?.ifpe_status === 'active' ? (
+                  {(community as any)?.fintoc_status === 'active' ? (
                     <div className="flex items-center gap-2 text-sm text-emerald-800">
                       <CheckCircle2 className="h-4 w-4 shrink-0" />
-                      <span>Acceso BROXEL activo. CLABE y opciones en Tesorería.</span>
+                      <span>Integración activa. CLABE y opciones disponibles en Tesorería.</span>
                     </div>
-                  ) : (community as any)?.ifpe_status === 'pending_kyb' ? (
+                  ) : (community as any)?.fintoc_status === 'pending' ? (
                     <p className="text-sm text-amber-800">Solicitud en revisión. Te notificaremos cuando esté lista.</p>
                   ) : (
                     <Button
@@ -723,9 +700,9 @@ export function SettingsPage() {
                       variant="default"
                       size="sm"
                       className="bg-emerald-700 hover:bg-emerald-800"
-                      onClick={() => setShowFintocSetup(true)}
+                      onClick={() => setShowPaymentSetup(true)}
                     >
-                      Configurar Fintoc
+                      Configurar pagos
                     </Button>
                   )}
                 </div>
@@ -791,71 +768,9 @@ export function SettingsPage() {
                   </p>
                 </div>
 
-                {/* IFPE config */}
-                {requiresIfpeConfig && (
-                  <div className="space-y-4 rounded-md border border-amber-200 bg-amber-50/40 p-4">
-                    <p className="text-sm font-medium text-amber-900">Configuración IFPE / SPEI</p>
-                    <div className="space-y-2">
-                      <Label htmlFor="ifpe-clabe">CLABE receptora (18 dígitos)</Label>
-                      <Input
-                        id="ifpe-clabe"
-                        value={rules.treasury.clabe ?? ''}
-                        onChange={(e) => updateTreasury('clabe', e.target.value.replace(/\D/g, '').slice(0, 18))}
-                        className="max-w-[260px]"
-                        placeholder="646180157000000000"
-                      />
-                      {!clabeValid && (
-                        <p className="text-xs text-destructive">La CLABE debe tener exactamente 18 dígitos.</p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="ifpe-beneficiary">Beneficiario</Label>
-                      <Input
-                        id="ifpe-beneficiary"
-                        value={rules.treasury.beneficiary_name ?? ''}
-                        onChange={(e) => updateTreasury('beneficiary_name', e.target.value)}
-                        className="max-w-[360px]"
-                        placeholder="Comunidad Ejemplo A.C."
-                      />
-                      {!beneficiaryValid && (
-                        <p className="text-xs text-destructive">El beneficiario es obligatorio en modo IFPE/híbrido.</p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="ifpe-bank">Banco / IFPE</Label>
-                      <Input
-                        id="ifpe-bank"
-                        value={rules.treasury.bank_name ?? ''}
-                        onChange={(e) => updateTreasury('bank_name', e.target.value)}
-                        className="max-w-[260px]"
-                        placeholder="STP"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="ifpe-prefix">Prefijo referencia</Label>
-                      <Input
-                        id="ifpe-prefix"
-                        value={rules.treasury.payment_reference_prefix ?? ''}
-                        onChange={(e) => updateTreasury('payment_reference_prefix', e.target.value.toUpperCase())}
-                        className="max-w-[200px]"
-                        placeholder="CIV-"
-                      />
-                    </div>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={rules.treasury.auto_reconciliation}
-                        onChange={(e) => updateTreasury('auto_reconciliation', e.target.checked)}
-                        className="h-4 w-4 rounded border-input accent-primary"
-                      />
-                      <span className="text-sm">Auto-conciliación de SPEI</span>
-                    </label>
-                  </div>
-                )}
-
-                {showFintocSetup && (
+                {showPaymentSetup && (
                   <div className="mt-4">
-                    <FintocSetup />
+                    <FinancialSetup />
                   </div>
                 )}
               </CardContent>

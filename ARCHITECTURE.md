@@ -26,7 +26,7 @@ src/
 │   │   ├── services/
 │   │   │   ├── treasury.service.ts      # CRUD transacciones, obligaciones, stats
 │   │   │   ├── payment-plan.service.ts  # Planes de pago para morosos
-│   │   │   ├── ifpe.service.ts          # Integración IFPE/SPEI (reconciliación)
+│   │   │   ├── fintoc.service.ts        # Integración Fintoc (pagos, reconciliación)
 │   │   │   ├── contracts.service.ts     # Contratos con proveedores
 │   │   │   └── receipt.service.ts       # Generación de recibos
 │   │   ├── hooks/                       # React Query hooks
@@ -74,19 +74,20 @@ Cada transacción registra su origen para trazabilidad:
 |--------|------------|---------|
 | `manual` | Captura humana en la UI | Tesorero registra un pago |
 | `import` | Importación CSV/Excel | Carga de estados de cuenta |
-| `rail` | Webhook IFPE/SPEI | Pago SPEI auto-reconciliado |
+| `fintoc` | Webhook Fintoc/SPEI | Pago SPEI auto-reconciliado |
 | `system` | Auto-generada por el sistema | Ejecución de propuesta aprobada |
 
-## Integración IFPE (Fintech Rail)
+## Integración Fintoc
 
 ```
-Miembro → SPEI → CLABE (IFPE) → Webhook → Edge Function → Reconciliación → Transaction(origin: 'rail')
+Miembro → SPEI → CLABE (Fintoc) → Webhook → Edge Function → Reconciliación → Transaction(origin: 'fintoc')
 ```
 
-- **Edge Function**: `supabase/functions/ifpe-webhook/` recibe notificaciones SPEI
-- **Tabla**: `ifpe_webhook_events` almacena eventos con estado de reconciliación
-- **Auto-reconciliación**: Matchea por referencia numérica o monto único contra obligaciones pendientes
-- **Manual**: UI en `IfpeReconciliationPanel` para conciliar eventos no matcheados
+- **Edge Functions**: `supabase/functions/fintoc-webhook/`, `fintoc-checkout/`, `fintoc-transfer/`
+- **Tablas**: `fintoc_events`, `fintoc_checkout_sessions`, `fintoc_transfers`
+- **Auto-reconciliación**: Matchea por CLABE de miembro, metadata o monto contra obligaciones pendientes
+- **Manual**: UI en `FintocReconciliation` para conciliar eventos no matcheados
+- **KYB**: Wizard automatizado para onboarding de nuevas comunidades (`fintoc_applications`)
 - **Modos**: Configurable por comunidad via `treasury.mode` en reglas
 
 ## Planes de Pago
@@ -122,7 +123,10 @@ BrowserRouter
 | `payment_obligations` | Cuotas/obligaciones por miembro |
 | `payment_plans` | Planes de pago estructurados para morosos |
 | `payment_plan_installments` | Parcialidades de un plan |
-| `ifpe_webhook_events` | Eventos SPEI recibidos; reconciliación |
+| `fintoc_events` | Eventos Fintoc recibidos; reconciliación |
+| `fintoc_checkout_sessions` | Sesiones de pago Fintoc |
+| `fintoc_transfers` | Transferencias SPEI salientes via Fintoc |
+| `fintoc_applications` | Solicitudes KYB para onboarding Fintoc |
 | `proposals` | Propuestas de gobernanza con ciclo de vida completo |
 | `votes` | Votos con peso, delegación y modelo de votación |
 | `audit_log` | Trail de auditoría por comunidad |
@@ -133,7 +137,7 @@ BrowserRouter
 - **RLS**: Todas las tablas con Row Level Security habilitado; aislamiento por `community_id`
 - **Roles**: `platform_admin` > `admin` > `comite_vigilancia` = `tesorero` > `miembro` > `observador`
 - **Permisos**: `canPerformAction()` evalúa rol + standing financiero + reglas de comunidad
-- **Webhook**: IFPE webhook verificado por HMAC-SHA256 signature
+- **Webhook**: Fintoc webhook verificado por signature header
 
 ## Manejo de errores
 
@@ -156,7 +160,7 @@ BrowserRouter
 |-----|-----------|----------------|
 | LPCI CDMX | Art. 2, 31-34, 36, 42, 43, 45-46, 57-58, 59 | Moroso, quórum, asambleas, dual fund, admin terms |
 | LFPDPPP | Aviso privacidad, ARCO | Módulo privacy, consentimientos |
-| Ley Fintech | IFPE, SPEI | Modo `fintech_rail`, webhook, reconciliación |
+| Ley Fintech | Fintoc, SPEI | Integración Fintoc, webhook, reconciliación |
 | Código de Comercio / NOM-151 | Integridad | Hash de integridad en actas |
 
 ## Testing
@@ -170,7 +174,8 @@ BrowserRouter
 
 46+ migraciones SQL en `supabase/migrations/`. Recientes:
 - `047_transaction_origin.sql` — Campo `origin` en transactions
-- `048_ifpe_webhooks.sql` — Tabla `ifpe_webhook_events` con RLS
+- `061_fintoc_integration.sql` — Tablas y columnas para integración Fintoc
+- `062_fintoc_kyb_applications.sql` — KYB onboarding para comunidades
 
 ## Edge Functions
 
@@ -178,4 +183,6 @@ BrowserRouter
 |---------|----------|
 | `send-email` | Envío de emails via Resend (propuestas, morosos, convocatorias) |
 | `reset-password` | Flujo de reset de contraseña |
-| `ifpe-webhook` | Recepción y reconciliación de pagos SPEI |
+| `fintoc-webhook` | Recepción y reconciliación de pagos SPEI via Fintoc |
+| `fintoc-checkout` | Creación de sesiones de checkout Fintoc |
+| `fintoc-transfer` | Transferencias SPEI salientes via Fintoc |

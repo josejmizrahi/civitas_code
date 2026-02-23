@@ -157,8 +157,8 @@ skipIfNoKey('RLS Penetration Tests', () => {
       expect(data?.length ?? 0).toBe(0)
     })
 
-    it('should not access ifpe_webhook_events without auth', async () => {
-      const { data } = await (anonClient.from('ifpe_webhook_events') as any).select('*')
+    it('should not access fintoc_events without auth', async () => {
+      const { data } = await (anonClient.from('fintoc_events') as any).select('*')
       expect(data?.length ?? 0).toBe(0)
     })
 
@@ -448,14 +448,14 @@ skipIfNoKey('RLS Penetration Tests', () => {
       }
     })
 
-    it('should enforce community_id isolation on ifpe_webhook_events', async () => {
+    it('should enforce community_id isolation on fintoc_events', async () => {
       requireAuth()
       if (!memberClient) return
 
       const { data: members } = await memberClient.from('members').select('community_id')
       const myCommunityIds = new Set((members || []).map((m: any) => m.community_id))
 
-      const { data: events } = await (memberClient.from('ifpe_webhook_events') as any).select('community_id')
+      const { data: events } = await (memberClient.from('fintoc_events') as any).select('community_id')
       for (const event of events || []) {
         expect(myCommunityIds.has(event.community_id)).toBe(true)
       }

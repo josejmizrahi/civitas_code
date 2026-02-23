@@ -35,6 +35,14 @@ verify_jwt = true
 [functions.reset-password]
 verify_jwt = false
 
-# ifpe-webhook: auth via x-webhook-signature HMAC. verify_jwt = false. Anti-replay in function body.
-[functions.ifpe-webhook]
+# fintoc-webhook: auth via Fintoc webhook signature. verify_jwt = false.
+[functions.fintoc-webhook]
 verify_jwt = false
+
+# fintoc-checkout: creates checkout sessions. Requires user JWT.
+[functions.fintoc-checkout]
+verify_jwt = true
+
+# fintoc-transfer: initiates outbound transfers. Requires user JWT.
+[functions.fintoc-transfer]
+verify_jwt = true

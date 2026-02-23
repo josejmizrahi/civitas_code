@@ -3,7 +3,7 @@ import { getCollectionConfig } from '../services/treasury.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { PaymentPlanManager } from './PaymentPlanManager'
-import { FintocReconciliation } from '@/core/fintoc/components/FintocReconciliation'
+import { PaymentReconciliation } from '@/core/fintech/components/PaymentReconciliation'
 import { AlertTriangle, CheckCircle2, Building2, Copy } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { useState } from 'react'
@@ -26,12 +26,12 @@ function ClabeDisplay({ config }: { config: { clabe: string | null; bank_name: s
             <Building2 className="mx-auto h-8 w-8 text-muted-foreground/50" />
             <p className="mt-2 font-medium text-muted-foreground">CLABE no configurada</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Cuando se integre el socio IFPE (Institucion de Fondos de Pago Electronico), se generara
-              una CLABE unica para esta comunidad. Los pagos via SPEI se reconciliaran automaticamente.
+              Configura la integración financiera desde la pestaña de Pagos para generar una CLABE única
+              para esta comunidad. Los pagos vía SPEI se reconciliarán automáticamente.
             </p>
             <div className="mt-4 rounded-md bg-amber-50 p-3 text-sm text-amber-800">
               <AlertTriangle className="mr-1 inline h-3 w-3" />
-              Mientras tanto, puedes registrar pagos manualmente desde la pestaña Obligaciones o importar datos desde CSV/Excel.
+              Mientras tanto, puedes registrar pagos manualmente desde la pestaña Obligaciones.
             </div>
           </div>
         </CardContent>
@@ -67,7 +67,7 @@ function ClabeDisplay({ config }: { config: { clabe: string | null; bank_name: s
           </div>
           {config.bank_name && (
             <div>
-              <div className="text-xs text-muted-foreground">Banco / IFPE</div>
+              <div className="text-xs text-muted-foreground">Banco</div>
               <div className="font-medium">{config.bank_name}</div>
             </div>
           )}
@@ -99,9 +99,9 @@ export function CollectionView({ onGoToObligations: _onGoToObligations }: { onGo
       {/* CLABE / Account info */}
       {canManageTreasury && <ClabeDisplay config={collectionConfig} />}
 
-      {/* IFPE Reconciliation — visible when fintech_rail or hybrid */}
+      {/* Payment Reconciliation */}
       {canManageTreasury && (
-        <FintocReconciliation />
+        <PaymentReconciliation />
       )}
 
       {/* Payment Plans */}

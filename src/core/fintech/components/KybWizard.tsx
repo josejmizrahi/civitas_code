@@ -1,13 +1,13 @@
 import { useState, useCallback } from 'react'
 import {
-  useFintocApplication,
+  useKybApplication,
   useCreateApplication,
   useUpdateApplication,
   useSubmitApplication,
   useUploadKybDoc,
 } from '../hooks/useKyb'
 import type {
-  FintocApplication,
+  KybApplication,
   KybShareholder,
   KybDashboardUser,
   KybEscalationContact,
@@ -69,15 +69,15 @@ const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secon
   requires_info: { label: 'Requiere información', variant: 'destructive' },
 }
 
-export function FintocKybWizard() {
-  const { data: app, isLoading } = useFintocApplication()
+export function KybWizard() {
+  const { data: app, isLoading } = useKybApplication()
   const create = useCreateApplication()
   const update = useUpdateApplication()
   const submit = useSubmitApplication()
   const uploadDoc = useUploadKybDoc()
   const toast = useToast()
   const [step, setStep] = useState(0)
-  const [form, setForm] = useState<Partial<FintocApplication>>({})
+  const [form, setForm] = useState<Partial<KybApplication>>({})
   const [initialized, setInitialized] = useState(false)
 
   // Initialize form from existing application
@@ -123,7 +123,7 @@ export function FintocKybWizard() {
     await saveStep()
     try {
       await submit.mutateAsync(appId)
-      toast.success('Solicitud enviada a Fintoc para revisión')
+      toast.success('Solicitud enviada para revisión')
     } catch {
       toast.error('Error al enviar solicitud')
     }
@@ -154,13 +154,13 @@ export function FintocKybWizard() {
           <h3 className="text-lg font-semibold">Solicitud KYB enviada</h3>
           <Badge variant={cfg.variant}>{cfg.label}</Badge>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-            Tu solicitud fue enviada a Fintoc el {app.submitted_at ? new Date(app.submitted_at).toLocaleDateString('es-MX') : '—'}.
+            Tu solicitud fue enviada el {app.submitted_at ? new Date(app.submitted_at).toLocaleDateString('es-MX') : '—'}.
             El equipo de compliance revisará la documentación y te notificará cuando sea aprobada.
           </p>
-          {app.fintoc_notes && (
+          {app.provider_notes && (
             <div className="rounded-lg bg-muted p-3 text-sm text-left mt-4">
-              <p className="font-medium">Notas de Fintoc:</p>
-              <p className="text-muted-foreground">{app.fintoc_notes}</p>
+              <p className="font-medium">Notas del proveedor:</p>
+              <p className="text-muted-foreground">{app.provider_notes}</p>
             </div>
           )}
         </CardContent>
@@ -175,7 +175,7 @@ export function FintocKybWizard() {
         <CardContent className="py-8 text-center space-y-3">
           <AlertCircle className="mx-auto h-10 w-10 text-destructive" />
           <h3 className="text-lg font-semibold">Solicitud rechazada</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">{app.rejection_reason || 'Contacta a soporte@fintoc.com para más detalles.'}</p>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">{app.rejection_reason || 'Contacta a soporte para más detalles.'}</p>
           <Button onClick={handleStart}>Iniciar nueva solicitud</Button>
         </CardContent>
       </Card>
@@ -188,10 +188,10 @@ export function FintocKybWizard() {
       <Card className="rounded-xl">
         <CardContent className="py-8 text-center space-y-4">
           <Building2 className="mx-auto h-12 w-12 text-blue-600/60" />
-          <h3 className="text-lg font-semibold">Solicitud KYB para Fintoc</h3>
+          <h3 className="text-lg font-semibold">Solicitud KYB</h3>
           <p className="text-sm text-muted-foreground max-w-lg mx-auto">
             Para activar pagos SPEI necesitas completar el proceso de conocimiento del cliente (KYB).
-            Recopila los documentos de tu empresa y completa los anexos requeridos por Fintoc.
+            Recopila los documentos de tu empresa y completa los anexos requeridos.
           </p>
           <Button onClick={handleStart} disabled={create.isPending} className="gap-1.5">
             {create.isPending ? 'Creando...' : 'Iniciar solicitud'}
@@ -263,7 +263,7 @@ export function FintocKybWizard() {
           </Button>
         ) : (
           <Button onClick={handleSubmit} disabled={submit.isPending} className="gap-1 bg-green-700 hover:bg-green-800">
-            {submit.isPending ? 'Enviando...' : 'Enviar solicitud a Fintoc'} <Check className="h-4 w-4" />
+            {submit.isPending ? 'Enviando...' : 'Enviar solicitud'} <Check className="h-4 w-4" />
           </Button>
         )}
       </div>
@@ -273,7 +273,7 @@ export function FintocKybWizard() {
 
 // ─── Step Components ──────────────────────────────────────────────
 
-function StepCompany({ form, set }: { form: Partial<FintocApplication>; set: (k: string, v: unknown) => void }) {
+function StepCompany({ form, set }: { form: Partial<KybApplication>; set: (k: string, v: unknown) => void }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <div className="space-y-2 sm:col-span-2">
@@ -312,10 +312,10 @@ function StepCompany({ form, set }: { form: Partial<FintocApplication>; set: (k:
   )
 }
 
-function StepRepresentative({ form, set }: { form: Partial<FintocApplication>; set: (k: string, v: unknown) => void }) {
+function StepRepresentative({ form, set }: { form: Partial<KybApplication>; set: (k: string, v: unknown) => void }) {
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Persona que firmará el contrato con Fintoc y que cuenta con poder notarial.</p>
+      <p className="text-sm text-muted-foreground">Persona que firmará el contrato y que cuenta con poder notarial.</p>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
           <Label>Nombre completo del Representante Legal</Label>
@@ -342,7 +342,7 @@ function StepRepresentative({ form, set }: { form: Partial<FintocApplication>; s
   )
 }
 
-function StepShareholders({ form, set }: { form: Partial<FintocApplication>; set: (k: string, v: unknown) => void }) {
+function StepShareholders({ form, set }: { form: Partial<KybApplication>; set: (k: string, v: unknown) => void }) {
   const shareholders = (form.shareholders || []) as KybShareholder[]
 
   const add = () => set('shareholders', [...shareholders, { name: '', id_type: 'ine', id_number: '', ownership_pct: 0, is_foreign: false, is_moral: false }])
@@ -402,12 +402,12 @@ function StepShareholders({ form, set }: { form: Partial<FintocApplication>; set
   )
 }
 
-function StepDocuments({ form, onUpload, uploading }: { form: Partial<FintocApplication>; onUpload: (docType: string, e: React.ChangeEvent<HTMLInputElement>) => void; uploading: boolean }) {
+function StepDocuments({ form, onUpload, uploading }: { form: Partial<KybApplication>; onUpload: (docType: string, e: React.ChangeEvent<HTMLInputElement>) => void; uploading: boolean }) {
   const docs = (form.documents || {}) as KybDocuments
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Sube los documentos requeridos por Fintoc. Formatos aceptados: PDF, JPG, PNG.</p>
+      <p className="text-sm text-muted-foreground">Sube los documentos requeridos. Formatos aceptados: PDF, JPG, PNG.</p>
       {REQUIRED_DOCS.map((doc) => {
         const uploaded = !!(docs as Record<string, unknown>)[doc.key]
         return (
@@ -435,11 +435,11 @@ function StepDocuments({ form, onUpload, uploading }: { form: Partial<FintocAppl
   )
 }
 
-function StepBank({ form, set }: { form: Partial<FintocApplication>; set: (k: string, v: unknown) => void }) {
+function StepBank({ form, set }: { form: Partial<KybApplication>; set: (k: string, v: unknown) => void }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Cuenta bancaria a nombre de la empresa para la liquidación de pagos recibidos vía Fintoc.
+        Cuenta bancaria a nombre de la empresa para la liquidación de pagos recibidos.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2 sm:col-span-2">
@@ -463,7 +463,7 @@ function StepBank({ form, set }: { form: Partial<FintocApplication>; set: (k: st
   )
 }
 
-function StepAnnexA({ form, set }: { form: Partial<FintocApplication>; set: (k: string, v: unknown) => void }) {
+function StepAnnexA({ form, set }: { form: Partial<KybApplication>; set: (k: string, v: unknown) => void }) {
   const escalation = (form.annex_a_escalation || []) as KybEscalationContact[]
 
   const addEscalation = () => set('annex_a_escalation', [...escalation, { area: '', email: '' }])
@@ -507,7 +507,7 @@ function StepAnnexA({ form, set }: { form: Partial<FintocApplication>; set: (k: 
   )
 }
 
-function StepAnnexB({ form, set }: { form: Partial<FintocApplication>; set: (k: string, v: unknown) => void }) {
+function StepAnnexB({ form, set }: { form: Partial<KybApplication>; set: (k: string, v: unknown) => void }) {
   const users = (form.annex_b_users || []) as KybDashboardUser[]
 
   const add = () => set('annex_b_users', [...users, { name: '', email: '', role: 'admin' }])
@@ -521,7 +521,7 @@ function StepAnnexB({ form, set }: { form: Partial<FintocApplication>; set: (k: 
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Usuarios que tendrán acceso al dashboard de Fintoc. Debe ser un correo electrónico empresarial.
+        Usuarios que tendrán acceso al panel del proveedor de pagos. Debe ser un correo electrónico empresarial.
       </p>
       <div className="text-xs text-muted-foreground rounded-lg bg-muted/50 p-3 space-y-1">
         <p><strong>Administrador:</strong> Gestiona usuarios y permisos.</p>
@@ -547,7 +547,7 @@ function StepAnnexB({ form, set }: { form: Partial<FintocApplication>; set: (k: 
   )
 }
 
-function StepAnnexD({ form, set }: { form: Partial<FintocApplication>; set: (k: string, v: unknown) => void }) {
+function StepAnnexD({ form, set }: { form: Partial<KybApplication>; set: (k: string, v: unknown) => void }) {
   const origins = (form.annex_d_fund_origin || []) as KybFundOrigin[]
 
   const toggleOrigin = (val: KybFundOrigin) => {
@@ -591,7 +591,7 @@ function StepAnnexD({ form, set }: { form: Partial<FintocApplication>; set: (k: 
   )
 }
 
-function StepReview({ form }: { form: Partial<FintocApplication> }) {
+function StepReview({ form }: { form: Partial<KybApplication> }) {
   const docs = (form.documents || {}) as KybDocuments
   const uploadedCount = REQUIRED_DOCS.filter((d) => !!(docs as Record<string, unknown>)[d.key]).length
   const shareholders = (form.shareholders || []) as KybShareholder[]
@@ -638,7 +638,7 @@ function StepReview({ form }: { form: Partial<FintocApplication> }) {
       {missingFields.length === 0 && (
         <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-800">
           <Check className="inline h-4 w-4 mr-1" />
-          Toda la información está completa. Puedes enviar la solicitud a Fintoc.
+          Toda la información está completa. Puedes enviar la solicitud.
         </div>
       )}
     </div>

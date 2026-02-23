@@ -25,7 +25,7 @@ export interface CommunityConfigShape {
   }
   separate_funds?: boolean
   funds?: string[]
-  treasury_mode?: 'manual' | 'ifpe' | 'hybrid'
+  treasury_mode?: 'manual' | 'fintoc' | 'hybrid'
 }
 
 const DEFAULT_CONFIG: CommunityConfigShape = {

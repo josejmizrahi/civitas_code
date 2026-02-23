@@ -1,10 +1,10 @@
 import { supabase } from '@/shared/lib/supabase'
-import type { FintocApplication } from '../types'
+import type { KybApplication } from '../types'
 
 const TABLE = 'fintoc_applications'
 const BUCKET = 'fintoc-kyb'
 
-export async function getApplication(communityId: string): Promise<FintocApplication | null> {
+export async function getApplication(communityId: string): Promise<KybApplication | null> {
   const { data, error } = await (supabase as any)
     .from(TABLE)
     .select('*')
@@ -15,10 +15,10 @@ export async function getApplication(communityId: string): Promise<FintocApplica
     .maybeSingle()
 
   if (error) throw error
-  return data as FintocApplication | null
+  return data as KybApplication | null
 }
 
-export async function createApplication(communityId: string, memberId: string): Promise<FintocApplication> {
+export async function createApplication(communityId: string, memberId: string): Promise<KybApplication> {
   const { data, error } = await (supabase as any)
     .from(TABLE)
     .insert({ community_id: communityId, submitted_by: memberId })
@@ -26,13 +26,13 @@ export async function createApplication(communityId: string, memberId: string): 
     .single()
 
   if (error) throw error
-  return data as FintocApplication
+  return data as KybApplication
 }
 
 export async function updateApplication(
   appId: string,
-  updates: Partial<Omit<FintocApplication, 'id' | 'community_id' | 'submitted_by' | 'created_at'>>,
-): Promise<FintocApplication> {
+  updates: Partial<Omit<KybApplication, 'id' | 'community_id' | 'submitted_by' | 'created_at'>>,
+): Promise<KybApplication> {
   const { data, error } = await (supabase as any)
     .from(TABLE)
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -41,10 +41,10 @@ export async function updateApplication(
     .single()
 
   if (error) throw error
-  return data as FintocApplication
+  return data as KybApplication
 }
 
-export async function submitApplication(appId: string): Promise<FintocApplication> {
+export async function submitApplication(appId: string): Promise<KybApplication> {
   const { data, error } = await (supabase as any)
     .from(TABLE)
     .update({
@@ -58,8 +58,7 @@ export async function submitApplication(appId: string): Promise<FintocApplicatio
 
   if (error) throw error
 
-  // Also update community status to pending
-  const app = data as FintocApplication
+  const app = data as KybApplication
   await (supabase as any)
     .from('communities')
     .update({ fintoc_status: 'pending' })

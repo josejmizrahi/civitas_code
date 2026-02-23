@@ -29,6 +29,6 @@ export function useCommunityConfig() {
     categories: config.financial_categories,
     separateFunds: Boolean(separateFunds),
     funds,
-    treasuryMode: mode === 'ifpe' ? 'ifpe' : mode === 'hybrid' ? 'hybrid' : 'manual',
+    treasuryMode: mode === 'fintoc' ? 'fintoc' : mode === 'hybrid' ? 'hybrid' : 'manual',
   }
 }

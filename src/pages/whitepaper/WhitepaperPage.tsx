@@ -11,7 +11,7 @@ const TOC = [
   { id: 'thesis', label: '2. Tesis Fundacional' },
   { id: 'primitives', label: '3. Las Cinco Primitivas' },
   { id: 'closed-loop', label: '4. Ciclo Cerrado' },
-  { id: 'fintech', label: '5. Alianza Fintech (IFPE)' },
+  { id: 'fintech', label: '5. Alianza Fintech' },
   { id: 'social-contract', label: '6. Contrato Social Configurable' },
   { id: 'architecture', label: '7. Arquitectura Tecnica' },
   { id: 'progressive', label: '8. Activacion Progresiva' },
@@ -371,25 +371,24 @@ export function WhitepaperPage() {
 
             {/* ─── Fintech Partnership ─── */}
             <section id="fintech" className="mb-14 scroll-mt-20">
-              <h2 className="mb-4 text-2xl font-bold tracking-tight">5. Alianza Fintech (IFPE)</h2>
+              <h2 className="mb-4 text-2xl font-bold tracking-tight">5. Alianza Fintech</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
                   Civitas es una plataforma de gobernanza, no una institucion financiera. La infraestructura
-                  de pagos la provee un socio IFPE (Institucion de Fondos de Pago Electronico) bajo la Ley
-                  Fintech en Mexico. El IFPE genera la CLABE de cada comunidad; los pagos SPEI se reconcilian
-                  automaticamente; los desembolsos aprobados por gobernanza se ejecutan por API. Sin
+                  de pagos la provee un socio fintech que genera CLABEs por comunidad, reconcilia
+                  pagos SPEI automaticamente y ejecuta desembolsos aprobados por gobernanza via API. Sin
                   discrecion del administrador: la decision es la ejecucion.
                 </p>
                 <p>
-                  <strong className="text-foreground">Modos de Tesoreria (progresivos):</strong> Import (CSV/Excel) en MVP; Conector (sincronizacion con ERP); Rail Fintech (SPEI nativo via IFPE) en Fase 2+; Hibrido (import + rail) en transicion. El dashboard distingue transacciones verificadas por el rail de las reportadas manualmente.
+                  <strong className="text-foreground">Integracion financiera:</strong> Checkout Sessions para cobros, transferencias SPEI para dispersiones, webhooks para reconciliacion automatica, y KYB automatizado para onboarding de nuevas comunidades.
                 </p>
               </div>
               <div className="mt-6 rounded-lg border bg-muted/30 p-4 text-sm">
                 <p className="font-medium text-foreground mb-1">Por que no construir la capa financiera?</p>
                 <p className="text-muted-foreground">
-                  Obtener una licencia IFPE exige capital significativo y aprobacion CNBV. La alianza permite
-                  salir al mercado de inmediato; si la escala lo justifica (miles de comunidades), una licencia
-                  propia puede evaluarse como opcion estrategica.
+                  Construir infraestructura de pagos propia exige licencias y capital significativo. La alianza
+                  con un socio fintech permite salir al mercado de inmediato con pagos nativos; si la escala lo justifica,
+                  una licencia propia puede evaluarse como opcion estrategica.
                 </p>
               </div>
             </section>
@@ -557,8 +556,8 @@ export function WhitepaperPage() {
                 </p>
                 <ul className="ml-4 list-disc space-y-2">
                   <li><strong className="text-foreground">Suscripcion SaaS</strong> — Las comunidades pagan por la plataforma (Identidad + Gobernanza). Ingreso recurrente predecible.</li>
-                  <li><strong className="text-foreground">Comision por transaccion</strong> — Un porcentaje sobre pagos procesados por el rail fintech (compartido con el IFPE). Ej.: 0,5% sobre flujo mensual por comunidad puede superar la suscripcion.</li>
-                  <li><strong className="text-foreground">Productos financieros</strong> — Futuro: cuentas de ahorro comunitarias, seguros colectivos, poder de compra agregado. El socio IFPE lo habilita sin que Civitas requiera licencia propia.</li>
+                  <li><strong className="text-foreground">Comision por transaccion</strong> — Un porcentaje sobre pagos procesados por el socio fintech. Ej.: 0,5% sobre flujo mensual por comunidad puede superar la suscripcion.</li>
+                  <li><strong className="text-foreground">Productos financieros</strong> — Futuro: cuentas de ahorro comunitarias, seguros colectivos, poder de compra agregado. El socio fintech lo habilita sin que Civitas requiera licencia propia.</li>
                 </ul>
                 <p>
                   Efecto compuesto: miles de comunidades x flujo mensual = volumen procesado recurrente y en crecimiento con la red.
@@ -576,8 +575,8 @@ export function WhitepaperPage() {
               </div>
               <div className="mt-6 space-y-3">
                 {[
-                  { phase: '1', title: 'Validar', members: '1 edificio, 200 miembros', desc: 'Identidad + Tesoreria (import) + Gobernanza. Sin rail fintech. Validar que transparencia y gobernanza digital tienen product-market fit.' },
-                  { phase: '2', title: 'Integrar', members: '10 edificios, 2,000 miembros', desc: 'Activar IFPE. Pagos nativos. Reconciliacion automatica. Pago condiciona voto. Gobernanza ejecutable.' },
+                  { phase: '1', title: 'Validar', members: '1 edificio, 200 miembros', desc: 'Identidad + Tesoreria + Gobernanza + Integracion financiera. Validar que transparencia y gobernanza digital tienen product-market fit.' },
+                  { phase: '2', title: 'Integrar', members: '10 edificios, 2,000 miembros', desc: 'Pagos nativos SPEI. Reconciliacion automatica. Pago condiciona voto. Gobernanza ejecutable.' },
                   { phase: '3', title: 'Escalar', members: '100 comunidades, 50,000 miembros', desc: 'Expandir a ONGs, cooperativas, clubes, sindicatos, religiosas. Mismo motor, parametros por vertical. Productos financieros iniciales.' },
                   { phase: '4', title: 'Federar', members: '1,000 comunidades, 500,000 miembros', desc: 'Comunidades federadas. Compras colectivas. Tesorerias federadas ejecutan decisiones conjuntas. Censo con escala verificable.' },
                   { phase: '5', title: 'Network State', members: '10,000+ comunidades, 5M+ miembros', desc: 'Infraestructura institucional completa. Verificacion on-chain cross-border. El contrato social como marco constitucional.' },
@@ -618,7 +617,7 @@ export function WhitepaperPage() {
                     <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Tesoreria</td><td className="px-3 py-2">Solo admin</td><td className="px-3 py-2">On-chain</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Todos los miembros (tiempo real, verificable)</td></tr>
                     <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Gobernanza</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Peso por token</td><td className="px-3 py-2">Solo votar</td><td className="px-3 py-2">Configurable + ejecutable</td></tr>
                     <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Cobro de pagos</td><td className="px-3 py-2">Banco aparte</td><td className="px-3 py-2">Transferencias token</td><td className="px-3 py-2">—</td><td className="px-3 py-2">SPEI nativo (integrado)</td></tr>
-                    <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Ejecucion de decisiones</td><td className="px-3 py-2">Manual (admin)</td><td className="px-3 py-2">Smart contract</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Auto-desembolso via IFPE</td></tr>
+                    <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Ejecucion de decisiones</td><td className="px-3 py-2">Manual (admin)</td><td className="px-3 py-2">Smart contract</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Auto-desembolso via socio fintech</td></tr>
                     <tr className="border-b"><td className="px-3 py-2 font-medium text-foreground">Pago condiciona derechos</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Por token</td><td className="px-3 py-2">—</td><td className="px-3 py-2">Configurable por comunidad</td></tr>
                     <tr><td className="px-3 py-2 font-medium text-foreground">Multi-vertical</td><td className="px-3 py-2">Un vertical</td><td className="px-3 py-2">Solo crypto</td><td className="px-3 py-2">Solo gobierno</td><td className="px-3 py-2">Cualquier comunidad organizada</td></tr>
                   </tbody>
@@ -633,8 +632,8 @@ export function WhitepaperPage() {
             <section id="risks" className="mb-14 scroll-mt-20">
               <h2 className="mb-4 text-2xl font-bold tracking-tight">Riesgos y Seguridad</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
-                <p><strong className="text-foreground">Riesgos clave y mitigaciones:</strong> fallo del socio IFPE → segregacion de fondos, migracion a otro IFPE, modo import como respaldo. Abuso de auto-ejecucion → periodos de enfriamiento configurables, umbrales, opcion de override manual. Cambios regulatorios → arquitectura de capa financiera intercambiable.</p>
-                <p><strong className="text-foreground">Seguridad:</strong> RLS por comunidad en base de datos; votos inmutables y auditoria completa; comunicaciones con IFPE por TLS y verificacion de webhooks; periodos de enfriamiento entre voto y desembolso. Civitas no almacena credenciales bancarias; el IFPE cumple reporteo regulatorio.</p>
+                <p><strong className="text-foreground">Riesgos clave y mitigaciones:</strong> fallo del socio fintech → segregacion de fondos, migracion a otro proveedor, registro manual como respaldo. Abuso de auto-ejecucion → periodos de enfriamiento configurables, umbrales, opcion de override manual. Cambios regulatorios → arquitectura de capa financiera intercambiable.</p>
+                <p><strong className="text-foreground">Seguridad:</strong> RLS por comunidad en base de datos; votos inmutables y auditoria completa; comunicaciones con el socio fintech por TLS y verificacion de webhooks; periodos de enfriamiento entre voto y desembolso. Civitas no almacena credenciales bancarias; el socio fintech cumple reporteo regulatorio.</p>
               </div>
             </section>
 

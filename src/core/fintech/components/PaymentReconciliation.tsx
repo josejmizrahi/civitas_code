@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useFintocEvents, useFintocReconciliationStats, useManualReconcile, useIgnoreEvent } from '../hooks/useFintoc'
+import { usePaymentEvents, useReconciliationStats, useManualReconcile, useIgnoreEvent } from '../hooks/useFintech'
 import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { useCommunityContext } from '@/app/providers'
 import { Card, CardContent } from '@/shared/components/ui/card'
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { useToast } from '@/shared/components/ui/toast'
 import { ArrowDownLeft, Link2, Filter, Ban } from 'lucide-react'
-import type { FintocEvent } from '../types'
+import type { PaymentEvent } from '../types'
 
 const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'destructive' | 'secondary' }> = {
   matched: { label: 'Conciliado', variant: 'default' },
@@ -20,13 +20,13 @@ const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'destr
   ignored: { label: 'Ignorado', variant: 'secondary' },
 }
 
-export function FintocReconciliation() {
+export function PaymentReconciliation() {
   const [statusFilter, setStatusFilter] = useState<string>('')
-  const [matchingEvent, setMatchingEvent] = useState<FintocEvent | null>(null)
+  const [matchingEvent, setMatchingEvent] = useState<PaymentEvent | null>(null)
   const [selectedObligation, setSelectedObligation] = useState('')
 
-  const { data: events, isLoading } = useFintocEvents(statusFilter || undefined)
-  const { data: stats } = useFintocReconciliationStats()
+  const { data: events, isLoading } = usePaymentEvents(statusFilter || undefined)
+  const { data: stats } = useReconciliationStats()
   useCommunityContext()
   const { data: obligations } = usePaymentObligations(undefined)
   const reconcile = useManualReconcile()
@@ -65,7 +65,6 @@ export function FintocReconciliation() {
 
   return (
     <div className="space-y-4">
-      {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           <Card className="rounded-xl">
@@ -101,7 +100,6 @@ export function FintocReconciliation() {
         </div>
       )}
 
-      {/* Filter */}
       <div className="flex items-center gap-2">
         <Filter className="h-4 w-4 text-muted-foreground" />
         <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-40">
@@ -113,7 +111,6 @@ export function FintocReconciliation() {
         </Select>
       </div>
 
-      {/* Events list */}
       {isLoading ? (
         <LoadingSpinner className="py-8" />
       ) : !events?.length ? (
@@ -161,7 +158,6 @@ export function FintocReconciliation() {
         </div>
       )}
 
-      {/* Manual reconciliation dialog */}
       <Dialog open={!!matchingEvent} onOpenChange={() => setMatchingEvent(null)}>
         <DialogContent onClose={() => setMatchingEvent(null)}>
           <DialogHeader>

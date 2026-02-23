@@ -7,13 +7,13 @@ import {
   submitApplication,
   uploadKybDocument,
 } from '../services/kyb.service'
-import type { FintocApplication } from '../types'
+import type { KybApplication } from '../types'
 
 const keys = {
-  app: (communityId: string) => ['fintoc-kyb', communityId] as const,
+  app: (communityId: string) => ['kyb', communityId] as const,
 }
 
-export function useFintocApplication() {
+export function useKybApplication() {
   const { communityId } = useCommunityContext()
   return useQuery({
     queryKey: keys.app(communityId!),
@@ -36,7 +36,7 @@ export function useUpdateApplication() {
   const { communityId } = useCommunityContext()
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ appId, updates }: { appId: string; updates: Partial<FintocApplication> }) =>
+    mutationFn: ({ appId, updates }: { appId: string; updates: Partial<KybApplication> }) =>
       updateApplication(appId, updates),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.app(communityId!) }),
   })
@@ -49,7 +49,7 @@ export function useSubmitApplication() {
     mutationFn: (appId: string) => submitApplication(appId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: keys.app(communityId!) })
-      qc.invalidateQueries({ queryKey: ['fintoc', 'status', communityId!] })
+      qc.invalidateQueries({ queryKey: ['fintech', 'status', communityId!] })
     },
   })
 }

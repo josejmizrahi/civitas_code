@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useFintocTransfers, useCreateTransfer, useFintocStatus } from '../hooks/useFintoc'
+import { useTransfers, useCreateTransfer, useFintechStatus } from '../hooks/useFintech'
 import { Card, CardContent } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
@@ -18,9 +18,9 @@ const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'destr
   returned: { label: 'Devuelta', variant: 'destructive' },
 }
 
-export function FintocTransferPanel() {
-  const { data: status } = useFintocStatus()
-  const { data: transfers, isLoading } = useFintocTransfers()
+export function TransferPanel() {
+  const { data: status } = useFintechStatus()
+  const { data: transfers, isLoading } = useTransfers()
   const createTransfer = useCreateTransfer()
   const toast = useToast()
 
@@ -30,11 +30,11 @@ export function FintocTransferPanel() {
   const [name, setName] = useState('')
   const [comment, setComment] = useState('')
 
-  if (status?.fintoc_status !== 'active') {
+  if (status?.fintech_status !== 'active') {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center">
         <Banknote className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
-        <p className="text-sm text-muted-foreground">Activa Fintoc para realizar transferencias SPEI</p>
+        <p className="text-sm text-muted-foreground">Activa la integración financiera para realizar transferencias SPEI</p>
       </div>
     )
   }

@@ -10,7 +10,7 @@ import { AlertTriangle, CheckCircle2, Clock, Building2, Copy } from 'lucide-reac
 import { Button } from '@/shared/components/ui/button'
 import { useState } from 'react'
 import type { TreasuryRules } from '@/shared/types/rules'
-import { FintocPaymentButton } from '@/core/fintoc/components/FintocPaymentButton'
+import { PaymentButton } from '@/core/fintech/components/PaymentButton'
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendiente',
@@ -109,7 +109,7 @@ export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boo
           <CardContent>
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Puedes pagar tus obligaciones directamente con transferencia SPEI a través de Fintoc.
+                Puedes pagar tus obligaciones directamente con transferencia SPEI.
                 Haz clic en "Pagar con SPEI" en la tabla de abajo, o realiza una transferencia manual a la CLABE indicada.
               </p>
               {hasClabe && (
@@ -190,7 +190,7 @@ export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boo
                       )}
                       <TableCell className="text-right">
                         {(ob.status === 'pending' || ob.status === 'overdue') && (
-                          <FintocPaymentButton
+                          <PaymentButton
                             obligationId={ob.id}
                             amount={ob.amount}
                             concept={ob.concept}

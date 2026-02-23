@@ -1,16 +1,19 @@
-export type FintocStatus = 'inactive' | 'pending' | 'active' | 'suspended'
+export type FintechStatus = 'inactive' | 'pending' | 'active' | 'suspended'
 
-export interface FintocCommunityConfig {
-  fintoc_status: FintocStatus
-  fintoc_account_id: string | null
-  fintoc_root_clabe: string | null
-  fintoc_public_key: string | null
+export type FintechProvider = 'fintoc' | 'custom' | string
+
+export interface FintechConfig {
+  fintech_status: FintechStatus
+  fintech_provider: FintechProvider | null
+  fintech_account_id: string | null
+  fintech_root_clabe: string | null
+  fintech_public_key: string | null
 }
 
-export interface FintocEvent {
+export interface PaymentEvent {
   id: string
   community_id: string
-  fintoc_event_id: string
+  external_event_id: string
   event_type: string
   event_data: Record<string, unknown>
   amount: number | null
@@ -26,12 +29,12 @@ export interface FintocEvent {
   created_at: string
 }
 
-export interface FintocCheckoutSession {
+export interface CheckoutSession {
   id: string
   community_id: string
   member_id: string
   obligation_id: string | null
-  fintoc_session_id: string
+  external_session_id: string
   amount: number
   currency: string
   status: 'created' | 'finished' | 'expired' | 'failed'
@@ -43,10 +46,10 @@ export interface FintocCheckoutSession {
   updated_at: string
 }
 
-export interface FintocTransfer {
+export interface PaymentTransfer {
   id: string
   community_id: string
-  fintoc_transfer_id: string | null
+  external_transfer_id: string | null
   direction: 'inbound' | 'outbound'
   amount: number
   currency: string
@@ -80,12 +83,13 @@ export interface CreateTransferInput {
   spend_request_id?: string
 }
 
-export interface FintocSetupInput {
-  secret_key: string
+export interface ProviderCredentials {
   public_key: string
+  account_id: string
+  root_clabe: string
 }
 
-export interface FintocReconciliationStats {
+export interface ReconciliationStats {
   total: number
   matched: number
   unmatched: number
@@ -135,7 +139,7 @@ export interface KybDocuments {
   estado_cuenta_banco?: string
 }
 
-export interface FintocApplication {
+export interface KybApplication {
   id: string
   community_id: string
   submitted_by: string
@@ -176,7 +180,7 @@ export interface FintocApplication {
   documents: KybDocuments
 
   rejection_reason: string | null
-  fintoc_notes: string | null
+  provider_notes: string | null
   submitted_at: string | null
   reviewed_at: string | null
   created_at: string

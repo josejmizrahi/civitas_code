@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { useCreateCheckout } from '../hooks/useFintoc'
-import { useFintocStatus } from '../hooks/useFintoc'
+import { useCreateCheckout, useFintechStatus } from '../hooks/useFintech'
 import { Button } from '@/shared/components/ui/button'
 import { useToast } from '@/shared/components/ui/toast'
 import { Banknote, Loader2, ExternalLink } from 'lucide-react'
 
-interface FintocPaymentButtonProps {
+interface PaymentButtonProps {
   obligationId: string
   amount: number
   concept: string
@@ -16,7 +15,7 @@ interface FintocPaymentButtonProps {
   className?: string
 }
 
-export function FintocPaymentButton({
+export function PaymentButton({
   obligationId,
   amount,
   concept,
@@ -25,13 +24,13 @@ export function FintocPaymentButton({
   size = 'sm',
   variant = 'default',
   className,
-}: FintocPaymentButtonProps) {
-  const { data: status } = useFintocStatus()
+}: PaymentButtonProps) {
+  const { data: status } = useFintechStatus()
   const checkout = useCreateCheckout()
   const toast = useToast()
   const [redirecting, setRedirecting] = useState(false)
 
-  if (status?.fintoc_status !== 'active') return null
+  if (status?.fintech_status !== 'active') return null
 
   const handlePay = async () => {
     try {
@@ -45,7 +44,7 @@ export function FintocPaymentButton({
       if (session.redirect_url) {
         setRedirecting(true)
         window.open(session.redirect_url, '_blank')
-        toast.success('Redirigiendo a Fintoc para completar el pago...')
+        toast.success('Redirigiendo al portal de pago...')
       }
     } catch {
       toast.error('Error al crear sesión de pago')

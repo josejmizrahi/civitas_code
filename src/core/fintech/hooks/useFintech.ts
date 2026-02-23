@@ -1,70 +1,70 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCommunityContext } from '@/app/providers'
 import {
-  getFintocStatus,
-  activateFintoc,
-  deactivateFintoc,
-  getFintocEvents,
+  getFintechStatus,
+  activateProvider,
+  deactivateProvider,
+  getPaymentEvents,
   getReconciliationStats,
   manualReconcile,
   ignoreEvent,
   getCheckoutSessions,
   createCheckoutSession,
-  getFintocTransfers,
+  getTransfers,
   createOutboundTransfer,
   getMemberClabe,
-} from '../services/fintoc.service'
+} from '../services/fintech.service'
 import type { CreateCheckoutInput, CreateTransferInput } from '../types'
 
 const keys = {
-  status: (communityId: string) => ['fintoc', 'status', communityId] as const,
-  events: (communityId: string, status?: string) => ['fintoc', 'events', communityId, status] as const,
-  stats: (communityId: string) => ['fintoc', 'stats', communityId] as const,
-  sessions: (communityId: string) => ['fintoc', 'sessions', communityId] as const,
-  transfers: (communityId: string) => ['fintoc', 'transfers', communityId] as const,
-  memberClabe: (memberId: string) => ['fintoc', 'clabe', memberId] as const,
+  status: (communityId: string) => ['fintech', 'status', communityId] as const,
+  events: (communityId: string, status?: string) => ['fintech', 'events', communityId, status] as const,
+  stats: (communityId: string) => ['fintech', 'stats', communityId] as const,
+  sessions: (communityId: string) => ['fintech', 'sessions', communityId] as const,
+  transfers: (communityId: string) => ['fintech', 'transfers', communityId] as const,
+  memberClabe: (memberId: string) => ['fintech', 'clabe', memberId] as const,
 }
 
-export function useFintocStatus() {
+export function useFintechStatus() {
   const { communityId } = useCommunityContext()
   return useQuery({
     queryKey: keys.status(communityId!),
-    queryFn: () => getFintocStatus(communityId!),
+    queryFn: () => getFintechStatus(communityId!),
     enabled: !!communityId,
     staleTime: 120_000,
   })
 }
 
-export function useActivateFintoc() {
+export function useActivateProvider() {
   const { communityId } = useCommunityContext()
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (config: { account_id: string; root_clabe: string; public_key: string }) =>
-      activateFintoc(communityId!, config),
+      activateProvider(communityId!, config),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.status(communityId!) }),
   })
 }
 
-export function useDeactivateFintoc() {
+export function useDeactivateProvider() {
   const { communityId } = useCommunityContext()
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: () => deactivateFintoc(communityId!),
+    mutationFn: () => deactivateProvider(communityId!),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.status(communityId!) }),
   })
 }
 
-export function useFintocEvents(status?: string) {
+export function usePaymentEvents(status?: string) {
   const { communityId } = useCommunityContext()
   return useQuery({
     queryKey: keys.events(communityId!, status),
-    queryFn: () => getFintocEvents(communityId!, status),
+    queryFn: () => getPaymentEvents(communityId!, status),
     enabled: !!communityId,
     staleTime: 30_000,
   })
 }
 
-export function useFintocReconciliationStats() {
+export function useReconciliationStats() {
   const { communityId } = useCommunityContext()
   return useQuery({
     queryKey: keys.stats(communityId!),
@@ -100,7 +100,7 @@ export function useIgnoreEvent() {
   })
 }
 
-export function useFintocCheckoutSessions(memberId?: string) {
+export function useCheckoutSessions(memberId?: string) {
   const { communityId } = useCommunityContext()
   return useQuery({
     queryKey: [...keys.sessions(communityId!), memberId],
@@ -122,11 +122,11 @@ export function useCreateCheckout() {
   })
 }
 
-export function useFintocTransfers() {
+export function useTransfers() {
   const { communityId } = useCommunityContext()
   return useQuery({
     queryKey: keys.transfers(communityId!),
-    queryFn: () => getFintocTransfers(communityId!),
+    queryFn: () => getTransfers(communityId!),
     enabled: !!communityId,
     staleTime: 30_000,
   })
