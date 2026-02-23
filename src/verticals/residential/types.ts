@@ -9,7 +9,6 @@ export interface Unit {
   tower: string | null
   indiviso_pct: number | null
   area_m2: number | null
-  // Joined
   member_name?: string
 }
 
@@ -21,6 +20,21 @@ export interface CommonArea {
   reservation_enabled: boolean
 }
 
+export interface Reservation {
+  id: string
+  community_id: string
+  common_area_id: string
+  member_id: string
+  title: string
+  start_time: string
+  end_time: string
+  notes: string | null
+  status: 'pending' | 'confirmed' | 'cancelled'
+  created_at: string
+  area_name?: string
+  member_name?: string
+}
+
 export interface MaintenanceRequest {
   id: string
   community_id: string
@@ -30,6 +44,5 @@ export interface MaintenanceRequest {
   priority: MaintenancePriority
   assigned_to: string | null
   created_at: string
-  // Joined
   unit_number?: string
 }

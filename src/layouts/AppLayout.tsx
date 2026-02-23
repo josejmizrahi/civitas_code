@@ -22,12 +22,14 @@ import {
   Ellipsis,
   Sun,
   Moon,
+  Search,
 } from 'lucide-react'
 import { Avatar } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
 import { NotificationBell } from '@/shared/components/NotificationBell'
 import { cn } from '@/shared/lib/utils'
 import { PrivacyGate } from '@/core/privacy/components/PrivacyGate'
+import { CommandPalette } from '@/shared/components/CommandPalette'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { communityPath } from '@/shared/lib/communityRoutes'
@@ -262,6 +264,18 @@ export function AppLayout() {
           )}
         </div>
 
+        {/* Search shortcut */}
+        <div className="px-3 pt-3">
+          <button
+            onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+            className="flex w-full items-center gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted"
+          >
+            <Search className="h-4 w-4 shrink-0" />
+            <span className="flex-1 text-left">Buscar…</span>
+            <kbd className="hidden sm:inline-flex h-5 items-center rounded border bg-background px-1.5 text-[10px] font-mono text-muted-foreground">⌘K</kbd>
+          </button>
+        </div>
+
         {/* Navigation Links */}
         <nav className="flex-1 overflow-y-auto p-3">
           <div className="flex flex-col gap-0.5">
@@ -404,6 +418,8 @@ export function AppLayout() {
           </button>
         </div>
       </nav>
+
+      <CommandPalette />
     </div>
   )
 }
