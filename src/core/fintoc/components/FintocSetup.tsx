@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useFintocStatus, useActivateFintoc, useDeactivateFintoc } from '../hooks/useFintoc'
+import { FintocKybWizard } from './FintocKybWizard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
@@ -135,6 +136,11 @@ export function FintocSetup() {
           )}
         </CardContent>
       </Card>
+
+      {/* KYB Application Wizard */}
+      {fintocStatus !== 'active' && (
+        <FintocKybWizard />
+      )}
 
       {/* Setup Dialog */}
       <Dialog open={showSetup} onOpenChange={setShowSetup}>
