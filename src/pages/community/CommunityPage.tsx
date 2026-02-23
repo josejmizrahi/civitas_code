@@ -8,16 +8,15 @@ import { exportToExcel } from '@/shared/services/export.service'
 import { formatDate } from '@/shared/lib/utils'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { ROLE_LABELS } from '@/shared/constants/roles'
-import { Download, BookOpen, Activity, Users, Building2, LayoutGrid, List } from 'lucide-react'
-import { CommunityDirectoryTab } from './CommunityDirectoryTab'
+import { Download, BookOpen, Activity, Users, Building2 } from 'lucide-react'
 import { CommunityActivityTab } from './CommunityActivityTab'
 
-type DirectoryView = 'table' | 'cards' | 'providers'
+type DirectoryView = 'members' | 'providers'
 
 export function CommunityPage() {
   const { t } = useI18n()
   const [tab, setTab] = useState('directory')
-  const [directoryView, setDirectoryView] = useState<DirectoryView>('table')
+  const [directoryView, setDirectoryView] = useState<DirectoryView>('members')
   const { data: members } = useMembers()
 
   const handleExport = () => {
@@ -60,26 +59,15 @@ export function CommunityPage() {
 
         <TabsContent value="directory">
           <div className="mt-4 space-y-4">
-            {/* Segmented control */}
             <div className="flex items-center gap-1 rounded-lg border bg-muted/40 p-1 w-fit">
               <button
-                onClick={() => setDirectoryView('table')}
+                onClick={() => setDirectoryView('members')}
                 className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  directoryView === 'table' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                  directoryView === 'members' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <List className="h-3.5 w-3.5" />
                 <Users className="h-3.5 w-3.5" />
                 Miembros
-              </button>
-              <button
-                onClick={() => setDirectoryView('cards')}
-                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  directoryView === 'cards' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <LayoutGrid className="h-3.5 w-3.5" />
-                Tarjetas
               </button>
               <button
                 onClick={() => setDirectoryView('providers')}
@@ -92,8 +80,7 @@ export function CommunityPage() {
               </button>
             </div>
 
-            {directoryView === 'table' && <MemberDirectory />}
-            {directoryView === 'cards' && <CommunityDirectoryTab />}
+            {directoryView === 'members' && <MemberDirectory />}
             {directoryView === 'providers' && <EntityList />}
           </div>
         </TabsContent>
