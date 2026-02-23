@@ -54,7 +54,7 @@ export function FirstStepsChecklist() {
       id: 'invite',
       label: 'Invitar miembros',
       description: 'Envía invitaciones por correo',
-      href: path('members'),
+      href: path('community'),
       done: (members?.length ?? 0) > 1,
       icon: Users,
     },

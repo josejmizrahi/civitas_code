@@ -124,7 +124,7 @@ export function MemberDetailPage() {
   if (error || !member) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => navigate(path('members'))}>
+        <Button variant="ghost" onClick={() => navigate(path('community'))}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Volver
         </Button>
         <div className="rounded-md bg-destructive/10 border border-destructive/20 p-4 flex items-center gap-2 text-destructive">
@@ -177,8 +177,8 @@ export function MemberDetailPage() {
   return (
     <div className="space-y-6">
       {/* Back button */}
-      <Button variant="ghost" onClick={() => navigate(path('members'))} className="gap-2">
-        <ArrowLeft className="h-4 w-4" /> Volver a Miembros
+      <Button variant="ghost" onClick={() => navigate(path('community'))} className="gap-2">
+        <ArrowLeft className="h-4 w-4" /> Volver a Comunidad
       </Button>
 
       {/* Header Card */}

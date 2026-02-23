@@ -46,6 +46,7 @@ const OnboardingWizard = lazy(() => import('@/pages/onboarding/OnboardingWizard'
 const MultiCommunityPage = lazy(() => import('@/pages/admin/MultiCommunityPage').then(m => ({ default: m.MultiCommunityPage })))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 const CommunitiesPage = lazy(() => import('@/pages/communities/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })))
+const CommunityPage = lazy(() => import('@/pages/community/CommunityPage').then(m => ({ default: m.CommunityPage })))
 
 function LazyPage({ children }: { children: ReactNode }) {
   return <Suspense fallback={<LoadingSpinner message="Cargando..." className="py-20" />}>{children}</Suspense>
@@ -179,30 +180,46 @@ export function AppRouter() {
           <Route element={<AppLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<LazyPage><DashboardPage /></LazyPage>} />
-            <Route path="members" element={<LazyPage><MembersPage /></LazyPage>} />
+
+            {/* Comunidad */}
+            <Route path="community" element={<LazyPage><CommunityPage /></LazyPage>} />
+            <Route path="members" element={<Navigate to="../community" replace />} />
             <Route path="members/:memberId" element={<LazyPage><MemberDetailPage /></LazyPage>} />
+
+            {/* Finanzas */}
             <Route path="treasury" element={<LazyPage><TreasuryPage /></LazyPage>} />
             <Route path="treasury/requests" element={<LazyPage><SpendRequestsPage /></LazyPage>} />
             <Route path="treasury/requests/new" element={<LazyPage><SpendRequestNewPage /></LazyPage>} />
             <Route path="treasury/requests/:id" element={<LazyPage><SpendRequestDetailPage /></LazyPage>} />
+            <Route path="entities" element={<LazyPage><EntitiesPage /></LazyPage>} />
+            <Route path="entities/:entityId" element={<LazyPage><EntityDetailPage /></LazyPage>} />
+            <Route path="ingestion" element={<RoleGuard requiredRole="tesorero"><LazyPage><IngestionPage /></LazyPage></RoleGuard>} />
+
+            {/* Gobernanza */}
+            <Route path="governance" element={<LazyPage><GovernancePage /></LazyPage>} />
+            <Route path="governance/assemblies/:assemblyId" element={<LazyPage><AssemblyDetailPage /></LazyPage>} />
+            <Route path="governance/archive" element={<LazyPage><DecisionArchivePage /></LazyPage>} />
+            <Route path="governance/:proposalId" element={<LazyPage><ProposalDetailPage /></LazyPage>} />
+            <Route path="governance/assemblies" element={<Navigate to="governance" replace />} />
+            <Route path="rules" element={<LazyPage><RulesPage /></LazyPage>} />
+
+            {/* Vigilancia (top-level) */}
+            <Route path="vigilancia" element={<RoleGuard requiredRole="comite_vigilancia"><LazyPage><VigilanciaPage /></LazyPage></RoleGuard>} />
+            <Route path="governance/vigilancia" element={<Navigate to="../vigilancia" replace />} />
+
+            {/* Configuración */}
+            <Route path="settings" element={<RoleGuard requiredRole="admin"><LazyPage><SettingsPage /></LazyPage></RoleGuard>} />
+            <Route path="settings/audit" element={<RoleGuard requiredRole="admin"><LazyPage><AuditLogPage /></LazyPage></RoleGuard>} />
+
+            {/* Vertical-specific */}
             <Route
               path="residential"
               element={<CommunityTypeGuard requiredType="residential"><LazyPage><ResidentialPage /></LazyPage></CommunityTypeGuard>}
             />
-            <Route path="ingestion" element={<RoleGuard requiredRole="tesorero"><LazyPage><IngestionPage /></LazyPage></RoleGuard>} />
-            <Route path="governance" element={<LazyPage><GovernancePage /></LazyPage>} />
-            <Route path="governance/assemblies/:assemblyId" element={<LazyPage><AssemblyDetailPage /></LazyPage>} />
-            <Route path="governance/vigilancia" element={<RoleGuard requiredRole="comite_vigilancia"><LazyPage><VigilanciaPage /></LazyPage></RoleGuard>} />
-            <Route path="governance/archive" element={<LazyPage><DecisionArchivePage /></LazyPage>} />
-            <Route path="governance/:proposalId" element={<LazyPage><ProposalDetailPage /></LazyPage>} />
-            <Route path="rules" element={<LazyPage><RulesPage /></LazyPage>} />
+
+            {/* Misc */}
             <Route path="census" element={<LazyPage><CensusPage /></LazyPage>} />
             <Route path="documents" element={<LazyPage><DocumentsPage /></LazyPage>} />
-            <Route path="entities" element={<LazyPage><EntitiesPage /></LazyPage>} />
-            <Route path="entities/:entityId" element={<LazyPage><EntityDetailPage /></LazyPage>} />
-            <Route path="settings" element={<RoleGuard requiredRole="admin"><LazyPage><SettingsPage /></LazyPage></RoleGuard>} />
-            <Route path="settings/audit" element={<RoleGuard requiredRole="admin"><LazyPage><AuditLogPage /></LazyPage></RoleGuard>} />
-            <Route path="governance/assemblies" element={<Navigate to="governance" replace />} />
             <Route path="admin/communities" element={<RoleGuard requiredRole="platform_admin"><LazyPage><MultiCommunityPage /></LazyPage></RoleGuard>} />
             <Route path="*" element={<SlugCatchAll />} />
           </Route>
