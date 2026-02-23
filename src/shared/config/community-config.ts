@@ -23,6 +23,9 @@ export interface CommunityConfigShape {
     income: string[]
     expense: string[]
   }
+  separate_funds?: boolean
+  funds?: string[]
+  treasury_mode?: 'manual' | 'ifpe' | 'hybrid'
 }
 
 const DEFAULT_CONFIG: CommunityConfigShape = {
@@ -39,6 +42,9 @@ const DEFAULT_CONFIG: CommunityConfigShape = {
     income: ['Cuotas', 'Donaciones', 'Otros ingresos'],
     expense: ['Operación', 'Mantenimiento', 'Servicios', 'Otros egresos'],
   },
+  separate_funds: false,
+  funds: ['general'],
+  treasury_mode: 'manual',
 }
 
 const PRESETS: Record<CommunityType, CommunityConfigShape> = {
@@ -147,5 +153,10 @@ export function mergeCommunityConfig(
       income: incoming.financial_categories?.income ?? preset.financial_categories.income,
       expense: incoming.financial_categories?.expense ?? preset.financial_categories.expense,
     },
+    separate_funds: incoming.separate_funds ?? preset.separate_funds ?? false,
+    funds: (incoming.funds ?? preset.funds ?? ['general']).length
+      ? (incoming.funds ?? preset.funds ?? ['general'])
+      : ['general'],
+    treasury_mode: incoming.treasury_mode ?? preset.treasury_mode ?? 'manual',
   }
 }

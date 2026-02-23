@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { Shield, FileText, DollarSign, CalendarClock } from 'lucide-react'
+import { Shield, FileText, DollarSign, CalendarClock, Activity, AlertTriangle, Flag } from 'lucide-react'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { FinancialReviewPanel } from '@/core/governance/components/FinancialReviewPanel'
 import { DiscretionaryApprovalsPanel } from '@/core/treasury/components/DiscretionaryApprovalsPanel'
+import { VigilanceActivityLogTab } from '@/core/governance/components/VigilanceActivityLogTab'
+import { VigilanceAlertasTab } from '@/core/governance/components/VigilanceAlertasTab'
+import { FlaggedTransactionsTab } from '@/core/governance/components/FlaggedTransactionsTab'
 
 export function VigilanciaPage() {
   const { communityId: _communityId } = useCommunityContext()
@@ -56,6 +59,18 @@ export function VigilanciaPage() {
             <CalendarClock className="h-3.5 w-3.5" />
             Terminos
           </TabsTrigger>
+          <TabsTrigger value="activity" className="flex items-center gap-1.5">
+            <Activity className="h-3.5 w-3.5" />
+            Activity Log
+          </TabsTrigger>
+          <TabsTrigger value="alertas" className="flex items-center gap-1.5">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            Alertas
+          </TabsTrigger>
+          <TabsTrigger value="flagged" className="flex items-center gap-1.5">
+            <Flag className="h-3.5 w-3.5" />
+            Marcadas
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="reportes" className="mt-4">
@@ -72,6 +87,16 @@ export function VigilanciaPage() {
 
         <TabsContent value="terminos" className="mt-4">
           <AdminTermTracker />
+        </TabsContent>
+
+        <TabsContent value="activity" className="mt-4">
+          <VigilanceActivityLogTab />
+        </TabsContent>
+        <TabsContent value="alertas" className="mt-4">
+          <VigilanceAlertasTab />
+        </TabsContent>
+        <TabsContent value="flagged" className="mt-4">
+          <FlaggedTransactionsTab />
         </TabsContent>
       </Tabs>
     </div>

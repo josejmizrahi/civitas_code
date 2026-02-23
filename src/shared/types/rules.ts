@@ -53,6 +53,8 @@ export interface TreasuryRules {
   currency: string
   admin_spending_limit: number    // admin can spend below this without vote
   require_vote_above: number      // require governance vote above this amount
+  /** Monto máximo para aprobación discrecional (Nivel 2). Si no se define, se usa admin_spending_limit. */
+  discretionary_threshold?: number
   // Fintech rail config (Phase 2+)
   clabe: string | null
   bank_name: string | null
@@ -94,7 +96,7 @@ export type ExecutionStatus = 'pending' | 'cool_down' | 'executed' | 'failed' | 
 export type FundType = 'mantenimiento' | 'reserva'
 
 export interface FinancialInstruction {
-  type: 'disbursement' | 'budget_allocation' | 'quota_change' | 'config_change' | 'none'
+  type: 'disbursement' | 'budget_allocation' | 'quota_change' | 'config_change' | 'removal' | 'none'
   amount?: number
   recipient_name?: string
   recipient_clabe?: string
@@ -105,6 +107,8 @@ export interface FinancialInstruction {
   effective_date?: string
   config_key?: string
   config_value?: unknown
+  member_id?: string
+  role?: string
 }
 
 export const DEFAULT_RULES: CommunityRules = {

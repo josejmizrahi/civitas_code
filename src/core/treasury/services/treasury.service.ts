@@ -1,7 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
 import { AppError, handleServiceError } from '@/shared/lib/errors'
 import { assertCanPerformAction, getCommunityRules } from '@/shared/services/rules.service'
-import { notifyCommunity, notifyMember } from '@/shared/services/notification.service'
+import { notifyCommunity, notifyMember, notifyVigilance } from '@/shared/services/notification.service'
 import { sendEmailToMembers } from '@/shared/services/email.service'
 import { sendPushToMembers } from '@/shared/services/push-notification.service'
 import type { TreasuryRules } from '@/shared/types/rules'
@@ -109,6 +109,13 @@ async function validateExpenseAgainstBudget(
   const budgetAmount = Number((budget as { amount: number }).amount ?? 0)
   const available = budgetAmount - spent
   if (amount > available) {
+    await notifyVigilance(
+      communityId,
+      'budget_exceeded',
+      'Presupuesto excedido',
+      `Intento de registro de egreso que excede el presupuesto. Categoría: ${categoryId}. Periodo: ${period}. Disponible: ${available.toLocaleString('es-MX')}, solicitado: ${amount.toLocaleString('es-MX')}.`,
+      { category_id: categoryId, period, available, requested: amount },
+    )
     throw new AppError(
       `Presupuesto insuficiente. Disponible: ${available.toLocaleString('es-MX')}, solicitado: ${amount.toLocaleString('es-MX')}.`,
       'FORBIDDEN',
@@ -378,6 +385,58 @@ export async function createTransaction(
   return data as Transaction
 }
 
+/**
+ * Create a correction transaction linked to an original. Does not modify or delete the original.
+ * Amount: positive to add (e.g. original was underreported), negative to offset (e.g. original was overreported).
+ */
+export async function createCorrectionTransaction(
+  communityId: string,
+  originalTransactionId: string,
+  params: {
+    type: string
+    amount: number
+    description: string
+    date: string
+    created_by: string
+    category_id?: string
+    correction_note: string
+  },
+): Promise<Transaction> {
+  const memberId = await getMemberIdByUserId(communityId, params.created_by)
+  if (memberId) {
+    await assertCanPerformAction(communityId, memberId, 'register_transaction')
+  }
+
+  const { data: original, error: fetchError } = await supabase
+    .from('transactions')
+    .select('id, community_id, type, amount, description')
+    .eq('id', originalTransactionId)
+    .eq('community_id', communityId)
+    .single()
+  if (fetchError || !original) {
+    throw new AppError('Transacción original no encontrada o no pertenece a esta comunidad.', 'NOT_FOUND')
+  }
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .insert({
+      community_id: communityId,
+      type: params.type,
+      amount: Math.abs(params.amount),
+      description: params.description,
+      date: params.date,
+      created_by: params.created_by,
+      origin: 'manual',
+      category_id: params.category_id ?? (original as { category_id?: string }).category_id ?? null,
+      correction_of: originalTransactionId,
+      correction_note: params.correction_note,
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return data as Transaction
+}
+
 export async function updateTransaction(transactionId: string, updates: Partial<Pick<Transaction, 'type' | 'amount' | 'category_id' | 'description' | 'date'>>): Promise<Transaction> {
   void transactionId
   void updates
@@ -387,6 +446,26 @@ export async function updateTransaction(transactionId: string, updates: Partial<
 export async function deleteTransaction(transactionId: string): Promise<void> {
   void transactionId
   throw new AppError('Las transacciones no se pueden eliminar. Usa una corrección contable.', 'FORBIDDEN')
+}
+
+/** Set vigilance flag and note (Comité de Vigilancia). GAP-06. */
+export async function setVigilanceFlag(
+  communityId: string,
+  memberId: string,
+  transactionId: string,
+  flag: boolean,
+  note?: string | null,
+): Promise<Transaction> {
+  await assertCanPerformAction(communityId, memberId, 'flag_transaction')
+  const { data, error } = await supabase
+    .from('transactions')
+    .update({ vigilance_flag: flag, vigilance_note: flag ? (note ?? null) : null })
+    .eq('id', transactionId)
+    .eq('community_id', communityId)
+    .select()
+    .single()
+  if (error) throw error
+  return data as Transaction
 }
 
 export async function createBudget(communityId: string, budget: { category_id: string; period: string; amount: number }): Promise<Budget> {
@@ -617,7 +696,7 @@ export async function getDiscretionaryApprovals(
 
   const { data, error } = await query
   if (error) throw error
-  return (data ?? []) as DiscretionaryApproval[]
+  return (data ?? []) as unknown as DiscretionaryApproval[]
 }
 
 export async function createDiscretionaryApproval(
@@ -672,7 +751,7 @@ export async function createDiscretionaryApproval(
     approval_id: data.id,
     app_url: typeof window !== 'undefined' ? window.location.origin : '',
   })
-  return data as DiscretionaryApproval
+  return data as unknown as DiscretionaryApproval
 }
 
 export async function respondDiscretionaryApproval(
@@ -681,12 +760,13 @@ export async function respondDiscretionaryApproval(
   decision: 'approved' | 'rejected',
   responseNote?: string,
 ): Promise<DiscretionaryApproval> {
-  const { data: approval, error: approvalError } = await (supabase as any)
+  const { data: approvalRaw, error: approvalError } = await (supabase as any)
     .from('discretionary_approvals')
     .select('*')
     .eq('id', approvalId)
     .single()
 
+  const approval = approvalRaw as DiscretionaryApproval | null
   if (approvalError || !approval) throw approvalError ?? new Error('Solicitud discrecional no encontrada')
   await assertCanPerformAction(approval.community_id, responderMemberId, 'approve_discretionary')
   if (approval.status !== 'pending') throw new Error('Esta solicitud ya fue atendida')
@@ -770,5 +850,5 @@ export async function respondDiscretionaryApproval(
     transaction_id: transactionId,
     app_url: typeof window !== 'undefined' ? window.location.origin : '',
   })
-  return data as DiscretionaryApproval
+  return data as unknown as DiscretionaryApproval
 }

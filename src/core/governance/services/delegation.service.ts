@@ -11,6 +11,7 @@ export async function getDelegations(communityId: string): Promise<Delegation[]>
   return (data ?? []) as Delegation[]
 }
 
+/** Prevent chain A→B→C: delegatee cannot already be a delegator (only one level). */
 export async function createDelegation(delegation: {
   community_id: string; from_member_id: string; to_member_id: string; scope: string
 }): Promise<Delegation> {
@@ -18,6 +19,20 @@ export async function createDelegation(delegation: {
 
   if (delegation.from_member_id === delegation.to_member_id) {
     throw new AppError('No puedes delegarte a ti mismo', 'VALIDATION')
+  }
+
+  const { data: existing } = await supabase
+    .from('delegations')
+    .select('id')
+    .eq('community_id', delegation.community_id)
+    .eq('from_member_id', delegation.to_member_id)
+    .eq('active', true)
+    .limit(1)
+  if (existing?.length) {
+    throw new AppError(
+      'Solo se permite un nivel de delegación. El delegado ya tiene delegaciones activas.',
+      'VALIDATION',
+    )
   }
 
   const { data, error } = await supabase.from('delegations')

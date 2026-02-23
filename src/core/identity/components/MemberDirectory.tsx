@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMembers, useUpdateMemberRole, useDeactivateMember, useReactivateMember } from '../hooks/useMembers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useCommunityConfig } from '@/shared/hooks/useCommunityConfig'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { Input } from '@/shared/components/ui/input'
@@ -22,6 +23,7 @@ export function MemberDirectory() {
   const navigate = useNavigate()
   const path = useCommunityPath()
   const { data: roles } = useRoles()
+  const { membershipAttributes } = useCommunityConfig()
   const { data: members, isLoading } = useMembers()
   const { canManageMembers } = usePermissions()
   const { t } = useI18n()
@@ -34,6 +36,7 @@ export function MemberDirectory() {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('')
   const [statusFilter, setStatusFilter] = useState<string>('')
+  const [standingFilter, setStandingFilter] = useState<string>('')
 
   const filteredMembers = members?.filter((m) => {
     if (search) {
@@ -42,6 +45,7 @@ export function MemberDirectory() {
     }
     if (roleFilter && m.role !== roleFilter) return false
     if (statusFilter && (m.status ?? 'active') !== statusFilter) return false
+    if (standingFilter && (m.financial_standing ?? '') !== standingFilter) return false
     return true
   }) ?? []
 
@@ -74,6 +78,13 @@ export function MemberDirectory() {
             <option value="inactive">{t('memberDir.statusInactive')}</option>
             <option value="pending">{t('memberDir.statusPending')}</option>
           </Select>
+          <Select value={standingFilter} onChange={(e) => setStandingFilter(e.target.value)} className="w-full sm:w-40">
+            <option value="">Todos los standing</option>
+            <option value="good_standing">Al corriente</option>
+            <option value="grace_period">Gracia</option>
+            <option value="delinquent">Moroso</option>
+            <option value="moroso">Moroso</option>
+          </Select>
         </div>
         {canManageMembers && (
           <Button onClick={() => setInviteOpen(true)} className="w-full sm:w-auto">
@@ -92,6 +103,9 @@ export function MemberDirectory() {
               <TableHead>{t('memberDir.col.role')}</TableHead>
               <TableHead className="hidden sm:table-cell">{t('memberDir.col.status')}</TableHead>
               <TableHead>{t('memberDir.col.standing')}</TableHead>
+              {membershipAttributes.map((attr) => (
+                <TableHead key={attr.key} className="hidden lg:table-cell">{attr.label}</TableHead>
+              ))}
               <TableHead className="hidden sm:table-cell">{t('memberDir.col.since')}</TableHead>
               {canManageMembers && <TableHead className="w-24">{t('memberDir.col.actions')}</TableHead>}
             </TableRow>
@@ -149,6 +163,13 @@ export function MemberDirectory() {
                     {STANDING_LABELS[member.financial_standing] || '—'}
                   </Badge>
                 </TableCell>
+                {membershipAttributes.map((attr) => (
+                  <TableCell key={attr.key} className="hidden lg:table-cell text-muted-foreground">
+                    {(member.custom_attributes as Record<string, unknown>)?.[attr.key] != null
+                      ? String((member.custom_attributes as Record<string, unknown>)[attr.key])
+                      : '—'}
+                  </TableCell>
+                ))}
                 <TableCell className="hidden sm:table-cell text-muted-foreground">
                   {formatDate(member.joined_at)}
                 </TableCell>
@@ -189,7 +210,7 @@ export function MemberDirectory() {
             ))}
             {filteredMembers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={canManageMembers ? 7 : 6} className="text-center text-muted-foreground">
+                <TableCell colSpan={canManageMembers ? 7 + membershipAttributes.length : 6 + membershipAttributes.length} className="text-center text-muted-foreground">
                   {t('memberDir.empty')}
                 </TableCell>
               </TableRow>

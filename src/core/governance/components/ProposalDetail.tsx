@@ -138,10 +138,9 @@ export function ProposalDetail({ proposalId }: Props) {
   const castVoteMut = useCastVoteWithDelegations()
   const toast = useToast()
 
-  // Discussion hours input for starting discussion
-  const [discussionHours, setDiscussionHours] = useState(
-    String(rules.governance.default_discussion_hours)
-  )
+  // Discussion hours input for starting discussion (default from rules or 48)
+  const defaultDiscussionHours = rules?.governance?.default_discussion_hours ?? 48
+  const [discussionHours, setDiscussionHours] = useState(String(defaultDiscussionHours))
   // Voting end date for opening voting from discussion
   const [votingEndInput, setVotingEndInput] = useState('')
   // Outcome declaration text
@@ -207,8 +206,9 @@ export function ProposalDetail({ proposalId }: Props) {
   const canAppeal = proposal.status === 'approved' && hasGracePeriod && !proposal.appealed && currentMember
 
   const handleStartDiscussion = () => {
+    const hours = Math.max(1, Math.min(720, parseInt(discussionHours, 10) || defaultDiscussionHours))
     startDiscussionMut.mutate(
-      { proposalId, discussionHours: parseInt(discussionHours) },
+      { proposalId, discussionHours: hours },
       {
         onSuccess: () => { toast.success(t('proposalDetail.toast.discussionStarted')); refetchProposal() },
         onError: (err) => toast.error(err instanceof Error ? err.message : t('proposalDetail.toast.discussionError')),
@@ -377,8 +377,8 @@ export function ProposalDetail({ proposalId }: Props) {
 
           {/* Action buttons */}
           <div className="flex flex-col gap-2 sm:flex-row">
-            {/* Draft → Discussion */}
-            {canStartDiscussion && proposal.discussion_min_hours && (
+            {/* Draft → Discussion (always available for admin when endorsements met) */}
+            {canStartDiscussion && (
               <div className="flex items-end gap-2">
                 <div className="space-y-1">
                   <Label className="text-xs">{t('proposalDetail.discussionHours')}</Label>
@@ -592,14 +592,17 @@ export function ProposalDetail({ proposalId }: Props) {
       )}
 
       {/* B6: Manual execution of financial proposals */}
-      {(proposal.status === 'approved' || proposal.status === 'executed') && proposal.financial_instruction && (
+      {(proposal.status === 'approved' || proposal.status === 'executed') && (proposal.financial_instruction || proposal.type === 'election') && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t('proposalDetail.financialInstruction')}</CardTitle>
+            <CardTitle className="text-base">
+              {proposal.type === 'election' ? 'Ejecución de elección' : t('proposalDetail.financialInstruction')}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-md bg-muted p-3 text-sm space-y-1">
-              {(() => {
+            {proposal.financial_instruction ? (
+              <div className="rounded-md bg-muted p-3 text-sm space-y-1">
+                {(() => {
                 const fi = proposal.financial_instruction
                 const typeLabels: Record<string, string> = {
                   disbursement: t('proposalDetail.fi.type.disbursement'),
@@ -608,20 +611,25 @@ export function ProposalDetail({ proposalId }: Props) {
                   config_change: t('proposalDetail.fi.type.configChange'),
                   none: t('proposalDetail.fi.type.none'),
                 }
-                return (
-                  <>
-                    <p><strong>{t('proposalDetail.fi.type')}:</strong> {typeLabels[fi.type] || fi.type}</p>
-                    {fi.amount != null && <p><strong>{t('proposalDetail.fi.amount')}:</strong> ${Number(fi.amount).toLocaleString('es-MX')}</p>}
-                    {fi.new_amount != null && <p><strong>{t('proposalDetail.fi.newAmount')}:</strong> ${Number(fi.new_amount).toLocaleString('es-MX')}</p>}
-                    {fi.description && <p><strong>{t('proposalDetail.fi.description')}:</strong> {fi.description}</p>}
-                    {fi.period && <p><strong>{t('proposalDetail.fi.period')}:</strong> {fi.period}</p>}
-                    {fi.effective_date && <p><strong>{t('proposalDetail.fi.effectiveDate')}:</strong> {fi.effective_date}</p>}
-                    {fi.recipient_name && <p><strong>{t('proposalDetail.fi.beneficiary')}:</strong> {fi.recipient_name}</p>}
-                    {fi.config_key && <p><strong>{t('proposalDetail.fi.config')}:</strong> {fi.config_key} = {JSON.stringify(fi.config_value)}</p>}
-                  </>
-                )
-              })()}
-            </div>
+                  return (
+                    <>
+                      <p><strong>{t('proposalDetail.fi.type')}:</strong> {typeLabels[fi.type] || fi.type}</p>
+                      {fi.amount != null && <p><strong>{t('proposalDetail.fi.amount')}:</strong> ${Number(fi.amount).toLocaleString('es-MX')}</p>}
+                      {fi.new_amount != null && <p><strong>{t('proposalDetail.fi.newAmount')}:</strong> ${Number(fi.new_amount).toLocaleString('es-MX')}</p>}
+                      {fi.description && <p><strong>{t('proposalDetail.fi.description')}:</strong> {fi.description}</p>}
+                      {fi.period && <p><strong>{t('proposalDetail.fi.period')}:</strong> {fi.period}</p>}
+                      {fi.effective_date && <p><strong>{t('proposalDetail.fi.effectiveDate')}:</strong> {fi.effective_date}</p>}
+                      {fi.recipient_name && <p><strong>{t('proposalDetail.fi.beneficiary')}:</strong> {fi.recipient_name}</p>}
+                      {fi.config_key && <p><strong>{t('proposalDetail.fi.config')}:</strong> {fi.config_key} = {JSON.stringify(fi.config_value)}</p>}
+                    </>
+                  )
+                })()}
+              </div>
+            ) : (
+              <div className="rounded-md bg-muted p-3 text-sm">
+                Esta propuesta es de elección. Al ejecutar, se asigna el cargo al candidato ganador y se registra el periodo en `admin_terms`.
+              </div>
+            )}
 
             {(proposal.execution_status === 'executed' || proposal.status === 'executed') ? (
               <div className="flex items-center gap-2 text-green-600">

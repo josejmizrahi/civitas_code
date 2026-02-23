@@ -17,7 +17,17 @@ vi.mock('@/shared/components/LoadingSpinner', () => ({
   LoadingSpinner: ({ message }: { message?: string }) => <div data-testid="loading">{message ?? 'Loading'}</div>,
 }))
 vi.mock('@/shared/types', () => ({
-  hasPermission: (_role: string, required: string) => required === 'observador' || _role === 'admin',
+  hasPermission: (role: string, required: string) => {
+    const rank: Record<string, number> = {
+      observador: 0,
+      miembro: 1,
+      tesorero: 2,
+      comite_vigilancia: 3,
+      admin: 4,
+      platform_admin: 5,
+    }
+    return (rank[role] ?? 0) >= (rank[required] ?? 0)
+  },
   type: {},
 }))
 vi.mock('@/layouts/AppLayout', () => ({ AppLayout: ({ children }: { children: ReactNode }) => <div>{children}</div> }))
@@ -26,8 +36,13 @@ vi.mock('@/layouts/AuthLayout', () => ({ AuthLayout: ({ children }: { children: 
 import { AppRouter } from './routes'
 
 describe('AppRouter', () => {
+  const setPath = (path: string) => {
+    window.history.pushState({}, '', path)
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
+    setPath('/')
     mockUseCommunityContext.mockReturnValue({
       communityId: null,
       community: null,
@@ -50,6 +65,38 @@ describe('AppRouter', () => {
 
   it('unauthenticated at root renders something (landing or redirect)', () => {
     mockUseAuth.mockReturnValue({ user: null, loading: false })
+    const { container } = render(<AppRouter />)
+    expect(container.firstChild).toBeTruthy()
+  })
+
+  it('smoke: authenticated user can render critical core routes', () => {
+    mockUseAuth.mockReturnValue({ user: { id: 'u-1' }, loading: false })
+    mockUseCommunityContext.mockReturnValue({
+      communityId: 'comm-1',
+      community: { id: 'comm-1', type: 'residential' },
+      currentMember: { role: 'admin' },
+      communityLoading: false,
+    })
+
+    const criticalRoutes = ['/dashboard', '/treasury', '/governance', '/members', '/rules', '/settings']
+    for (const path of criticalRoutes) {
+      setPath(path)
+      const { unmount, container } = render(<AppRouter />)
+      expect(container.firstChild).toBeTruthy()
+      unmount()
+    }
+  })
+
+  it('smoke: platform_admin can render multi-community route', () => {
+    setPath('/admin/communities')
+    mockUseAuth.mockReturnValue({ user: { id: 'u-platform' }, loading: false })
+    mockUseCommunityContext.mockReturnValue({
+      communityId: 'comm-1',
+      community: { id: 'comm-1', type: 'residential' },
+      currentMember: { role: 'platform_admin' },
+      communityLoading: false,
+    })
+
     const { container } = render(<AppRouter />)
     expect(container.firstChild).toBeTruthy()
   })

@@ -85,3 +85,24 @@ export async function notifyMember(
   })
   if (error) logger.warn('notify_member failed:', error.message)
 }
+
+/** Notify only Comité de Vigilancia and admins (GAP-11 budget alerts, etc.) */
+export async function notifyVigilance(
+  communityId: string,
+  type: string,
+  title: string,
+  body?: string,
+  metadata?: Record<string, unknown>
+): Promise<number> {
+  const { data: members, error: fetchError } = await supabase
+    .from('members')
+    .select('id')
+    .eq('community_id', communityId)
+    .eq('status', 'active')
+    .in('role', ['comite_vigilancia', 'admin'])
+  if (fetchError || !members?.length) return 0
+  for (const m of members) {
+    await notifyMember(communityId, m.id, type, title, body, metadata)
+  }
+  return members.length
+}

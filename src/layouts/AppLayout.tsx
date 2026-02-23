@@ -315,6 +315,16 @@ export function AppLayout() {
                     Vigilancia
                   </NavLink>
                 )}
+                {userRole === 'platform_admin' && (
+                  <NavLink
+                    to="/admin/communities"
+                    className={navLinkClassName}
+                    onClick={closeMobileSidebar}
+                  >
+                    <Building2 className="h-4 w-4 shrink-0" />
+                    Multi-Community
+                  </NavLink>
+                )}
               </div>
             </>
           )}

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/app/providers'
-import { acceptInvitation } from '@/core/identity/services/identity.service'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -38,15 +37,14 @@ export function RegisterPage() {
     }
   }
 
+  // Post-register: redirect to invite accept page or dashboard
   useEffect(() => {
     if (user && inviteToken) {
-      acceptInvitation(inviteToken, user.id)
-        .then(() => navigate('/communities', { replace: true }))
-        .catch(() => navigate('/communities', { replace: true }))
+      navigate(`/invite/${inviteToken}`, { replace: true })
     } else if (user) {
       navigate('/communities', { replace: true })
     }
-  }, [user, inviteToken])
+  }, [user, inviteToken, navigate])
 
   if (needsConfirmation) {
     return (
@@ -58,7 +56,7 @@ export function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardFooter>
-          <Link to="/login" className="w-full">
+          <Link to={inviteToken ? `/login?invite=${inviteToken}` : '/login'} className="w-full">
             <Button className="w-full">Ir a Iniciar Sesión</Button>
           </Link>
         </CardFooter>

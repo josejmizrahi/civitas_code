@@ -143,10 +143,11 @@ function MultipleChoiceChart({ votes, votingOptions }: { votes: Vote[]; votingOp
   }
 
   const data = votingOptions.map((opt, idx) => {
-    const optionValue = `option_${idx + 1}`
+    const optionValue = opt.id || `option_${idx + 1}`
+    const legacyValue = `option_${idx + 1}`
     return {
       name: opt.label,
-      votos: optionCounts[optionValue] ?? 0,
+      votos: (optionCounts[optionValue] ?? 0) + (legacyValue !== optionValue ? (optionCounts[legacyValue] ?? 0) : 0),
       fill: OPTION_COLORS[idx % OPTION_COLORS.length],
     }
   })

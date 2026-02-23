@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { Badge } from '@/shared/components/ui/badge'
 import {
@@ -12,6 +14,88 @@ import {
   useRespondDiscretionaryApproval,
 } from '../hooks/useDiscretionary'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
+import type { DiscretionaryApproval } from '../types'
+
+function DiscretionaryApprovalCard({
+  approval,
+  canRespond,
+  currentMemberId,
+  responseNote,
+  onResponseNoteChange,
+  onRespond,
+  isResponding,
+}: {
+  approval: DiscretionaryApproval
+  canRespond: boolean
+  currentMemberId: string | null
+  responseNote: string
+  onResponseNoteChange: (note: string) => void
+  onRespond: (decision: 'approved' | 'rejected') => void
+  isResponding: boolean
+}) {
+  return (
+    <div className="rounded-lg border p-3 space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-medium">{formatCurrency(approval.amount)}</p>
+        <Badge
+          variant={
+            approval.status === 'approved'
+              ? 'success'
+              : approval.status === 'rejected'
+                ? 'destructive'
+                : 'secondary'
+          }
+        >
+          {approval.status === 'pending' ? 'Pendiente' : approval.status === 'approved' ? 'Aprobada' : 'Rechazada'}
+        </Badge>
+      </div>
+      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{approval.description}</p>
+      <p className="text-xs text-muted-foreground">Creada: {formatDate(approval.created_at)}</p>
+      {approval.response_note && (
+        <p className="text-xs text-muted-foreground border-l-2 border-muted pl-2">
+          Respuesta: {approval.response_note}
+        </p>
+      )}
+      {approval.status === 'approved' && approval.transaction_id && (
+        <p className="text-xs text-green-700">
+          Transacción registrada.{' '}
+          <Link to="/treasury" className="underline hover:no-underline">
+            Ver en Tesorería
+          </Link>
+        </p>
+      )}
+      {canRespond && approval.status === 'pending' && currentMemberId && (
+        <div className="space-y-2 pt-1">
+          <Label className="text-xs text-muted-foreground">Nota (opcional)</Label>
+          <Textarea
+            placeholder="Ej. motivo de rechazo o observación"
+            value={responseNote}
+            onChange={(e) => onResponseNoteChange(e.target.value)}
+            rows={2}
+            className="text-sm"
+          />
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => onRespond('approved')}
+              disabled={isResponding}
+            >
+              Aprobar
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onRespond('rejected')}
+              disabled={isResponding}
+            >
+              Rechazar
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export function DiscretionaryApprovalsPanel() {
   const { currentMember } = useCommunityContext()
@@ -26,6 +110,7 @@ export function DiscretionaryApprovalsPanel() {
   const [amount, setAmount] = useState('')
   const [description, setDescription] = useState('')
   const [filter, setFilter] = useState<'pending' | 'all'>('pending')
+  const [responseNoteByApproval, setResponseNoteByApproval] = useState<Record<string, string>>({})
 
   const visibleApprovals = (approvals ?? []).filter((approval) =>
     filter === 'all' ? true : approval.status === 'pending',
@@ -113,52 +198,27 @@ export function DiscretionaryApprovalsPanel() {
             <p className="text-sm text-muted-foreground">No hay solicitudes discrecionales.</p>
           )}
           {visibleApprovals.map((approval) => (
-            <div key={approval.id} className="rounded-lg border p-3 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-medium">{formatCurrency(approval.amount)}</p>
-                <Badge variant={
-                  approval.status === 'approved'
-                    ? 'success'
-                    : approval.status === 'rejected'
-                      ? 'destructive'
-                      : 'secondary'
-                }>
-                  {approval.status}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{approval.description}</p>
-              <p className="text-xs text-muted-foreground">
-                Creada: {formatDate(approval.created_at)}
-              </p>
-
-              {canRespond && approval.status === 'pending' && currentMember?.id && (
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => respondMut.mutate({
-                      approvalId: approval.id,
-                      responderMemberId: currentMember.id,
-                      decision: 'approved',
-                    })}
-                    disabled={respondMut.isPending}
-                  >
-                    Aprobar
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => respondMut.mutate({
-                      approvalId: approval.id,
-                      responderMemberId: currentMember.id,
-                      decision: 'rejected',
-                    })}
-                    disabled={respondMut.isPending}
-                  >
-                    Rechazar
-                  </Button>
-                </div>
-              )}
-            </div>
+            <DiscretionaryApprovalCard
+              key={approval.id}
+              approval={approval}
+              canRespond={canRespond}
+              currentMemberId={currentMember?.id ?? null}
+              responseNote={responseNoteByApproval[approval.id] ?? ''}
+              onResponseNoteChange={(note) =>
+                setResponseNoteByApproval((prev) => ({ ...prev, [approval.id]: note }))
+              }
+              onRespond={(decision) => {
+                if (!currentMember?.id) return
+                respondMut.mutate({
+                  approvalId: approval.id,
+                  responderMemberId: currentMember.id,
+                  decision,
+                  responseNote: responseNoteByApproval[approval.id]?.trim() || undefined,
+                })
+                setResponseNoteByApproval((prev) => ({ ...prev, [approval.id]: '' }))
+              }}
+              isResponding={respondMut.isPending}
+            />
           ))}
         </CardContent>
       </Card>

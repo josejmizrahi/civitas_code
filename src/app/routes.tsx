@@ -23,6 +23,9 @@ const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage').then(
 const MembersPage = lazy(() => import('@/pages/members/MembersPage').then(m => ({ default: m.MembersPage })))
 const MemberDetailPage = lazy(() => import('@/pages/members/MemberDetailPage').then(m => ({ default: m.MemberDetailPage })))
 const TreasuryPage = lazy(() => import('@/pages/treasury/TreasuryPage').then(m => ({ default: m.TreasuryPage })))
+const SpendRequestsPage = lazy(() => import('@/pages/treasury/SpendRequestsPage').then(m => ({ default: m.SpendRequestsPage })))
+const SpendRequestNewPage = lazy(() => import('@/pages/treasury/SpendRequestNewPage').then(m => ({ default: m.SpendRequestNewPage })))
+const SpendRequestDetailPage = lazy(() => import('@/pages/treasury/SpendRequestDetailPage').then(m => ({ default: m.SpendRequestDetailPage })))
 const IngestionPage = lazy(() => import('@/pages/ingestion/IngestionPage').then(m => ({ default: m.IngestionPage })))
 const GovernancePage = lazy(() => import('@/pages/governance/GovernancePage').then(m => ({ default: m.GovernancePage })))
 const ProposalDetailPage = lazy(() => import('@/pages/governance/ProposalDetailPage').then(m => ({ default: m.ProposalDetailPage })))
@@ -40,6 +43,7 @@ const RulesPage = lazy(() => import('@/pages/rules/RulesPage').then(m => ({ defa
 const AuditLogPage = lazy(() => import('@/pages/settings/AuditLogPage').then(m => ({ default: m.AuditLogPage })))
 const ResidentialPage = lazy(() => import('@/pages/residential/ResidentialPage').then(m => ({ default: m.ResidentialPage })))
 const OnboardingWizard = lazy(() => import('@/pages/onboarding/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })))
+const MultiCommunityPage = lazy(() => import('@/pages/admin/MultiCommunityPage').then(m => ({ default: m.MultiCommunityPage })))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 const CommunitiesPage = lazy(() => import('@/pages/communities/CommunitiesPage').then(m => ({ default: m.CommunitiesPage })))
 
@@ -178,6 +182,9 @@ export function AppRouter() {
             <Route path="members" element={<LazyPage><MembersPage /></LazyPage>} />
             <Route path="members/:memberId" element={<LazyPage><MemberDetailPage /></LazyPage>} />
             <Route path="treasury" element={<LazyPage><TreasuryPage /></LazyPage>} />
+            <Route path="treasury/requests" element={<LazyPage><SpendRequestsPage /></LazyPage>} />
+            <Route path="treasury/requests/new" element={<LazyPage><SpendRequestNewPage /></LazyPage>} />
+            <Route path="treasury/requests/:id" element={<LazyPage><SpendRequestDetailPage /></LazyPage>} />
             <Route
               path="residential"
               element={<CommunityTypeGuard requiredType="residential"><LazyPage><ResidentialPage /></LazyPage></CommunityTypeGuard>}
@@ -196,6 +203,7 @@ export function AppRouter() {
             <Route path="settings" element={<RoleGuard requiredRole="admin"><LazyPage><SettingsPage /></LazyPage></RoleGuard>} />
             <Route path="settings/audit" element={<RoleGuard requiredRole="admin"><LazyPage><AuditLogPage /></LazyPage></RoleGuard>} />
             <Route path="governance/assemblies" element={<Navigate to="governance" replace />} />
+            <Route path="admin/communities" element={<RoleGuard requiredRole="platform_admin"><LazyPage><MultiCommunityPage /></LazyPage></RoleGuard>} />
             <Route path="*" element={<SlugCatchAll />} />
           </Route>
         </Route>

@@ -52,17 +52,26 @@ export function MultipleChoiceVotingPanel({
         {/* My vote status */}
         {myVote && (
           <div className="rounded-md bg-muted p-2 text-sm">
-            {t('multipleChoice.myVote')} <strong>{options.find((_, i) => `option_${i + 1}` === myVote.value)?.label ?? myVote.value}</strong>
+            {t('multipleChoice.myVote')} <strong>{
+              options.find((opt) => opt.id === myVote.value)?.label
+              ?? options.find((_, i) => `option_${i + 1}` === myVote.value)?.label
+              ?? myVote.value
+            }</strong>
           </div>
         )}
 
         {/* Options as radio-style buttons + results bar */}
         <div className="space-y-2">
           {options.map((option, idx) => {
-            const optionValue = `option_${idx + 1}`
-            const count = voteCounts[optionValue] ?? 0
+            const optionValue = option.id || `option_${idx + 1}`
+            const legacyValue = `option_${idx + 1}`
+            const count = (voteCounts[optionValue] ?? 0) + (legacyValue !== optionValue ? (voteCounts[legacyValue] ?? 0) : 0)
             const pct = totalWeight > 0 ? (count / totalWeight) * 100 : 0
-            const isSelected = selected === optionValue || myVote?.value === optionValue
+            const isSelected =
+              selected === optionValue ||
+              selected === legacyValue ||
+              myVote?.value === optionValue ||
+              myVote?.value === legacyValue
 
             return (
               <button

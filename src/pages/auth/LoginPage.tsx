@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers'
-import { acceptInvitation } from '@/core/identity/services/identity.service'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -18,16 +17,10 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const [inviteError, setInviteError] = useState('')
-
+  // Post-login: redirect to invite accept page so user can click "Aceptar invitación"
   useEffect(() => {
     if (user && inviteToken) {
-      acceptInvitation(inviteToken, user.id)
-        .then(() => navigate('/communities'))
-        .catch((err) => {
-          setInviteError(err instanceof Error ? err.message : 'No se pudo aceptar la invitación')
-          // No navegar para que el usuario vea el mensaje de error
-        })
+      navigate(`/invite/${inviteToken}`, { replace: true })
     }
   }, [user, inviteToken, navigate])
 
@@ -55,11 +48,6 @@ export function LoginPage() {
           {inviteToken && (
             <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
               Inicia sesión para aceptar tu invitación
-            </div>
-          )}
-          {inviteError && (
-            <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800">
-              No se pudo aceptar la invitación: {inviteError}
             </div>
           )}
           {error && (

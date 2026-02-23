@@ -1,16 +1,44 @@
+import { useMemo } from 'react'
 import { useDashboard } from '../hooks/useDashboard'
+import { useBudgets } from '../hooks/useBudgets'
+import { useTransactions } from '../hooks/useTransactions'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { useCollectionStats } from '../hooks/usePaymentStatus'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Progress } from '@/shared/components/ui/progress'
 import { IncomeVsExpenseChart } from './IncomeVsExpenseChart'
 import { formatCurrency } from '@/shared/lib/utils'
-import { TrendingUp, TrendingDown, Wallet, AlertTriangle, ArrowUpCircle } from 'lucide-react'
+import { TrendingUp, TrendingDown, Wallet, AlertTriangle, ArrowUpCircle, PieChart } from 'lucide-react'
 import type { FundType } from '@/shared/types/rules'
 
 export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
   const { data: stats, isLoading } = useDashboard(fundType)
   const { data: collStats } = useCollectionStats()
+  const { data: budgets } = useBudgets(fundType)
+  const { data: transactions } = useTransactions(fundType ? { fundType } : undefined)
+
+  const currentPeriod = useMemo(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  }, [])
+
+  const budgetVsReal = useMemo(() => {
+    if (!budgets?.length || !transactions) return []
+    const spentByCat = new Map<string, number>()
+    transactions.forEach((tx) => {
+      if (tx.type === 'expense' && tx.category_id) {
+        spentByCat.set(tx.category_id, (spentByCat.get(tx.category_id) ?? 0) + Number(tx.amount))
+      }
+    })
+    return budgets
+      .filter((b) => b.period === currentPeriod)
+      .map((b) => ({
+        name: (b as any).category_name ?? b.category_id,
+        budget: Number(b.amount),
+        spent: spentByCat.get(b.category_id) ?? 0,
+      }))
+      .filter((r) => r.budget > 0)
+  }, [budgets, transactions, currentPeriod])
 
   if (isLoading) return <LoadingSpinner message="Cargando datos financieros..." className="py-12" />
   if (!stats) {
@@ -94,6 +122,33 @@ export function FinancialDashboard({ fundType }: { fundType?: FundType } = {}) {
           </>
         )}
       </div>
+
+      {budgetVsReal.length > 0 && (
+        <Card className="rounded-xl border-border/80 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PieChart className="h-4 w-4" />
+              Presupuesto vs real ({currentPeriod})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {budgetVsReal.map((row) => {
+                const pct = Math.min(100, (row.spent / row.budget) * 100)
+                return (
+                  <div key={row.name} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>{row.name}</span>
+                      <span className="text-muted-foreground">{formatCurrency(row.spent)} / {formatCurrency(row.budget)}</span>
+                    </div>
+                    <Progress value={pct} className="h-2" indicatorClassName={pct > 100 ? 'bg-destructive' : 'bg-primary'} />
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {stats.monthlyData.length > 0 && (
         <Card className="rounded-xl border-border/80 shadow-sm">

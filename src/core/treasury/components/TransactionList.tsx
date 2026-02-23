@@ -8,7 +8,11 @@ import { Input } from '@/shared/components/ui/input'
 import { Select } from '@/shared/components/ui/select'
 import { Button } from '@/shared/components/ui/button'
 import { formatCurrency, formatDate, downloadAsCSV, downloadAsExcel } from '@/shared/lib/utils'
-import { Download, ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react'
+import { Download, ShieldCheck, ShieldAlert, ShieldQuestion, FileEdit, FileText, Flag } from 'lucide-react'
+import { CorrectionDialog } from './CorrectionDialog'
+import { TransactionDetailDialog } from './TransactionDetailDialog'
+import { FlagVigilanceDialog } from './FlagVigilanceDialog'
+import type { Transaction } from '../types'
 import { useToast } from '@/shared/components/ui/toast'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { verifyTransaction } from '../services/receipt.service'
@@ -20,11 +24,15 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
   const [type, setType] = useState<string>('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [correctionTx, setCorrectionTx] = useState<Transaction | null>(null)
+  const [detailTx, setDetailTx] = useState<Transaction | null>(null)
+  const [flagTx, setFlagTx] = useState<Transaction | null>(null)
 
   const { communityId } = useCommunityContext()
-  const { canManageTreasury } = usePermissions()
+  const { canManageTreasury, role, isAdmin } = usePermissions()
   const toast = useToast()
   const queryClient = useQueryClient()
+  const canFlagVigilance = role === 'comite_vigilancia' || isAdmin
 
   const verifyMut = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'verified' | 'disputed' }) =>
@@ -96,24 +104,28 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
               <TableHead className="hidden lg:table-cell">{t('transactions.table.origin')}</TableHead>
               <TableHead className="hidden md:table-cell">{t('transactions.table.verification')}</TableHead>
               <TableHead className="text-right">{t('transactions.table.amount')}</TableHead>
-              {canManageTreasury && <TableHead className="w-28">{t('transactions.table.actions')}</TableHead>}
+              {(canManageTreasury || canFlagVigilance) && <TableHead className="w-32">{t('transactions.table.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={canManageTreasury ? 8 : 7} className="text-center text-muted-foreground">{t('transactions.table.loading')}</TableCell>
+                <TableCell colSpan={(canManageTreasury || canFlagVigilance) ? 8 : 7} className="text-center text-muted-foreground">{t('transactions.table.loading')}</TableCell>
               </TableRow>
             ) : transactions?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={canManageTreasury ? 8 : 7} className="text-center text-muted-foreground">
+                <TableCell colSpan={(canManageTreasury || canFlagVigilance) ? 8 : 7} className="text-center text-muted-foreground">
                   {t('transactions.table.empty')}
                 </TableCell>
               </TableRow>
             ) : (
               transactions?.map((tx) => {
                 return (
-                  <TableRow key={tx.id}>
+                  <TableRow
+                    key={tx.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => setDetailTx(tx)}
+                  >
                     <TableCell className="text-muted-foreground">{formatDate(tx.date)}</TableCell>
                     <TableCell>{tx.description || '\u2014'}</TableCell>
                     <TableCell className="hidden sm:table-cell">
@@ -150,19 +162,52 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                     <TableCell className={`text-right font-medium ${tx.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                       {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                     </TableCell>
-                    {canManageTreasury && (
-                      <TableCell>
+                    {(canManageTreasury || canFlagVigilance) && (
+                      <TableCell onClick={(e) => e.stopPropagation()}>
                         <div className="flex gap-1">
-                          {(tx as any).verification_status !== 'verified' && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => setDetailTx(tx)}
+                            aria-label="Ver detalle"
+                            title="Ver detalle"
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                          {canManageTreasury && (
+                            <>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => setCorrectionTx(tx)}
+                                aria-label="Registrar corrección"
+                                title="Registrar corrección"
+                              >
+                                <FileEdit className="h-4 w-4" />
+                              </Button>
+                              {(tx as any).verification_status !== 'verified' && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={() => verifyMut.mutate({ id: tx.id, status: 'verified' })}
+                                  disabled={verifyMut.isPending}
+                                  aria-label={t('transactions.action.verify')}
+                                  title={t('transactions.action.verify')}
+                                >
+                                  <ShieldCheck className="h-4 w-4 text-green-600" />
+                                </Button>
+                              )}
+                            </>
+                          )}
+                          {canFlagVigilance && (
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => verifyMut.mutate({ id: tx.id, status: 'verified' })}
-                              disabled={verifyMut.isPending}
-                              aria-label={t('transactions.action.verify')}
-                              title={t('transactions.action.verify')}
+                              onClick={() => setFlagTx(tx)}
+                              aria-label="Marcar para vigilancia"
+                              title="Marcar para vigilancia"
                             >
-                              <ShieldCheck className="h-4 w-4 text-green-600" />
+                              <Flag className={`h-4 w-4 ${(tx as any).vigilance_flag ? 'text-amber-600' : ''}`} />
                             </Button>
                           )}
                         </div>
@@ -177,8 +222,29 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Las transacciones son inmutables. Para corregir un movimiento, registra una transacción de ajuste.
+        Las transacciones son inmutables. Para corregir un movimiento, usa el botón de corrección en cada fila.
       </p>
+      {correctionTx && (
+        <CorrectionDialog
+          open={!!correctionTx}
+          onOpenChange={(open) => !open && setCorrectionTx(null)}
+          transaction={correctionTx}
+        />
+      )}
+      {detailTx && (
+        <TransactionDetailDialog
+          open={!!detailTx}
+          onOpenChange={(open) => !open && setDetailTx(null)}
+          transaction={detailTx}
+        />
+      )}
+      {flagTx && (
+        <FlagVigilanceDialog
+          open={!!flagTx}
+          onOpenChange={(open) => !open && setFlagTx(null)}
+          transaction={flagTx}
+        />
+      )}
     </div>
   )
 }

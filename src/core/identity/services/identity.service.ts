@@ -100,6 +100,21 @@ export async function updateMemberRole(
   return data as Member
 }
 
+export async function updateMemberCustomAttributes(
+  memberId: string,
+  custom_attributes: Record<string, unknown>,
+): Promise<Member> {
+  const { data, error } = await supabase
+    .from('members')
+    .update({ custom_attributes: custom_attributes as any })
+    .eq('id', memberId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Member
+}
+
 // ---------------------------------------------------------------------------
 // Invitations
 // ---------------------------------------------------------------------------
@@ -228,9 +243,13 @@ async function seedCommunityDefaults(communityId: string, type: CommunityType): 
 
   if (Object.keys(updates).length === 0) return
 
+  type Json = import('@/shared/types/database').Json
+  const updatePayload: { config?: Json; rules?: Json } = {}
+  if (updates.config !== undefined) updatePayload.config = updates.config as Json
+  if (updates.rules !== undefined) updatePayload.rules = updates.rules as Json
   const { error: updateError } = await supabase
     .from('communities')
-    .update(updates)
+    .update(updatePayload)
     .eq('id', communityId)
 
   if (updateError) {
@@ -311,6 +330,54 @@ export async function getUserCommunities(
   return (data ?? []).map((row: { communities?: unknown }) => row.communities as Community | null).filter(Boolean) as Community[]
 }
 
+export interface CommunityOverview {
+  community: Community
+  activeMembers: number
+  pendingObligations: number
+  activeProposals: number
+  pendingDiscretionary: number
+}
+
+export async function getUserCommunitiesOverview(userId: string): Promise<CommunityOverview[]> {
+  const communities = await getUserCommunities(userId)
+  const overview = await Promise.all(
+    communities.map(async (community) => {
+      const [membersRes, obligationsRes, proposalsRes, discretionaryRes] = await Promise.all([
+        supabase
+          .from('members')
+          .select('id', { count: 'exact', head: true })
+          .eq('community_id', community.id)
+          .eq('status', 'active'),
+        supabase
+          .from('payment_obligations')
+          .select('id', { count: 'exact', head: true })
+          .eq('community_id', community.id)
+          .eq('status', 'pending'),
+        supabase
+          .from('proposals')
+          .select('id', { count: 'exact', head: true })
+          .eq('community_id', community.id)
+          .in('status', ['active', 'discussion']),
+        supabase
+          .from('discretionary_approvals')
+          .select('id', { count: 'exact', head: true })
+          .eq('community_id', community.id)
+          .eq('status', 'pending'),
+      ])
+
+      return {
+        community,
+        activeMembers: membersRes.count ?? 0,
+        pendingObligations: obligationsRes.count ?? 0,
+        activeProposals: proposalsRes.count ?? 0,
+        pendingDiscretionary: discretionaryRes.count ?? 0,
+      } satisfies CommunityOverview
+    }),
+  )
+
+  return overview.sort((a, b) => a.community.name.localeCompare(b.community.name, 'es'))
+}
+
 export async function joinCommunity(
   communityId: string,
   userId: string,
@@ -383,7 +450,7 @@ export async function updateCommunityConfig(
 ): Promise<void> {
   const { error } = await supabase
     .from('communities')
-    .update({ config: config as any })
+    .update({ config: config as import('@/shared/types/database').Json })
     .eq('id', communityId)
 
   if (error) throw error
@@ -405,15 +472,16 @@ export async function seedCommunityCategories(
   const income = unique(categories.income.map((n) => n.trim()).filter(Boolean))
   const expense = unique(categories.expense.map((n) => n.trim()).filter(Boolean))
 
-  const rows = [
-    ...income.map((name) => ({ community_id: communityId, name, type: 'income', is_system: true })),
-    ...expense.map((name) => ({ community_id: communityId, name, type: 'expense', is_system: true })),
+  type CategoryInsert = { community_id: string; name: string; type: string; is_system: boolean }
+  const rows: CategoryInsert[] = [
+    ...income.map((name) => ({ community_id: communityId, name, type: 'income' as const, is_system: true })),
+    ...expense.map((name) => ({ community_id: communityId, name, type: 'expense' as const, is_system: true })),
   ]
   if (rows.length === 0) return
 
   const { error } = await supabase
     .from('categories')
-    .insert(rows as any)
+    .insert(rows)
 
   if (error) throw error
 }
@@ -476,13 +544,9 @@ export async function reactivateMember(memberId: string): Promise<Member> {
 // ---------------------------------------------------------------------------
 
 export async function getInvitationByToken(token: string): Promise<Invitation | null> {
-  const { data, error } = await supabase
-    .from('invitations')
-    .select('*')
-    .eq('token', token)
-    .single()
-
+  const { data, error } = await (supabase as any).rpc('get_invitation_by_token', { p_token: token })
   if (error) return null
+  if (data == null) return null
   return data as Invitation
 }
 
