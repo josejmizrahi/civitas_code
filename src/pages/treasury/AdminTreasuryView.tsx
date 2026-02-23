@@ -152,10 +152,20 @@ export function AdminTreasuryView() {
               </Button>
             )}
             {canManageTreasury && (
-              <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
-                <Plus className="h-4 w-4" />
-                {t('treasury.manualCapture')}
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={() => navigate(path('treasury/requests'))} className="gap-1.5">
+                  <FileText className="h-4 w-4" />
+                  Solicitudes
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate(path('entities'))} className="gap-1.5">
+                  <Building2 className="h-4 w-4" />
+                  Proveedores
+                </Button>
+                <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  {t('treasury.manualCapture')}
+                </Button>
+              </>
             )}
           </div>
         </div>
