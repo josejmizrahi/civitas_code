@@ -8,7 +8,7 @@ import { hasPermission, type Role } from '@/shared/types'
 import {
   LayoutDashboard, Users, Wallet, Vote, FileText, Settings, Shield,
   Search, BarChart3, Building2, Home, BookOpen, Upload, User, ChevronRight,
-  Calendar, Receipt,
+  Receipt,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
