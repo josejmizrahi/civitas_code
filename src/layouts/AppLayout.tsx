@@ -10,19 +10,15 @@ import {
   Users,
   Wallet,
   Vote,
-  Upload,
   LogOut,
   Building2,
   Settings,
-  BarChart3,
-  FileText,
   ChevronsUpDown,
   Check,
   Plus,
   Menu,
   X,
   Shield,
-  BookOpen,
   Ellipsis,
   Sun,
   Moon,
@@ -38,22 +34,16 @@ import { communityPath } from '@/shared/lib/communityRoutes'
 
 const coreNavigation = [
   { key: 'nav.dashboard', path: 'dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
+  { key: 'nav.community', path: 'community', icon: Users, minRole: 'observador' as Role },
   { key: 'nav.treasury', path: 'treasury', icon: Wallet, minRole: 'observador' as Role },
   { key: 'nav.governance', path: 'governance', icon: Vote, minRole: 'observador' as Role },
-  { key: 'nav.rules', path: 'rules', icon: BookOpen, minRole: 'observador' as Role },
-  { key: 'nav.members', path: 'members', icon: Users, minRole: 'observador' as Role },
-  { key: 'nav.entities', path: 'entities', icon: Building2, minRole: 'observador' as Role },
-  { key: 'nav.documents', path: 'documents', icon: FileText, minRole: 'observador' as Role },
-  { key: 'nav.census', path: 'census', icon: BarChart3, minRole: 'observador' as Role },
-  { key: 'nav.import', path: 'ingestion', icon: Upload, minRole: 'tesorero' as Role },
 ]
 
-/* Bottom nav shows the 4 most important items + a "More" toggle */
 const BOTTOM_NAV_KEYS = [
   { key: 'nav.dashboard', path: 'dashboard', icon: LayoutDashboard },
+  { key: 'nav.community', path: 'community', icon: Users },
   { key: 'nav.treasury', path: 'treasury', icon: Wallet },
   { key: 'nav.governance', path: 'governance', icon: Vote },
-  { key: 'nav.members', path: 'members', icon: Users },
 ] as const
 
 export function AppLayout() {
@@ -289,12 +279,21 @@ export function AppLayout() {
             ))}
           </div>
 
-          {/* Admin section */}
+          {/* Vigilancia + Configuración */}
           {(hasPermission(userRole, 'admin') || userRole === 'comite_vigilancia') && (
             <>
               <div className="my-3 border-t" />
-              <p className="mb-1 px-3 text-xs font-medium text-muted-foreground">{t('common.settings')}</p>
               <div className="flex flex-col gap-0.5">
+                {(userRole === 'admin' || userRole === 'comite_vigilancia') && (
+                  <NavLink
+                    to={slug ? communityPath(slug, 'vigilancia') : '#'}
+                    className={navLinkClassName}
+                    onClick={closeMobileSidebar}
+                  >
+                    <Shield className="h-4 w-4 shrink-0" />
+                    {t('nav.vigilancia')}
+                  </NavLink>
+                )}
                 {hasPermission(userRole, 'admin') && (
                   <NavLink
                     to={slug ? communityPath(slug, 'settings') : '#'}
@@ -302,22 +301,12 @@ export function AppLayout() {
                     onClick={closeMobileSidebar}
                   >
                     <Settings className="h-4 w-4 shrink-0" />
-                    Admin Comunidad
-                  </NavLink>
-                )}
-                {(userRole === 'admin' || userRole === 'comite_vigilancia') && (
-                  <NavLink
-                    to={slug ? communityPath(slug, 'governance/vigilancia') : '#'}
-                    className={navLinkClassName}
-                    onClick={closeMobileSidebar}
-                  >
-                    <Shield className="h-4 w-4 shrink-0" />
-                    Vigilancia
+                    {t('nav.settings')}
                   </NavLink>
                 )}
                 {userRole === 'platform_admin' && (
                   <NavLink
-                    to="/admin/communities"
+                    to={slug ? communityPath(slug, 'admin/communities') : '#'}
                     className={navLinkClassName}
                     onClick={closeMobileSidebar}
                   >

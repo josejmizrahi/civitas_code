@@ -421,7 +421,7 @@ function MemberAdmissionPanel({ proposal: _proposal }: { proposal: Proposal }) {
         <div className="rounded-lg bg-sky-50 border border-sky-200 p-3 text-sm text-sky-800">
           <p>{t('context.memberAdmissionWarning')}</p>
         </div>
-        <Link to={path('members')}>
+        <Link to={path('community')}>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Users className="h-3.5 w-3.5" />
             {t('context.viewMembers')}
@@ -485,7 +485,7 @@ function ElectionPanel({ proposal: _proposal }: { proposal: Proposal }) {
           </p>
         </div>
 
-        <Link to={path('governance/vigilancia')}>
+        <Link to={path('vigilancia')}>
           <Button variant="outline" size="sm" className="gap-1.5">
             <Crown className="h-3.5 w-3.5" />
             {t('context.viewAdminTerms')}

@@ -1,7 +1,10 @@
 export type I18nKey =
   | 'nav.dashboard'
+  | 'nav.community'
   | 'nav.treasury'
   | 'nav.governance'
+  | 'nav.vigilancia'
+  | 'nav.settings'
   | 'nav.rules'
   | 'nav.members'
   | 'nav.entities'
@@ -9,6 +12,11 @@ export type I18nKey =
   | 'nav.census'
   | 'nav.import'
   | 'nav.more'
+  | 'community.tabs.members'
+  | 'community.tabs.directory'
+  | 'community.tabs.activity'
+  | 'community.title'
+  | 'community.subtitle'
   | 'common.settings'
   | 'common.logout'
   | 'onboarding.step.type'
@@ -765,8 +773,11 @@ type Dictionary = Record<I18nKey, string>
 
 const es: Dictionary = {
   'nav.dashboard': 'Dashboard',
-  'nav.treasury': 'Tesoreria',
+  'nav.community': 'Comunidad',
+  'nav.treasury': 'Finanzas',
   'nav.governance': 'Gobernanza',
+  'nav.vigilancia': 'Vigilancia',
+  'nav.settings': 'Configuración',
   'nav.rules': 'Reglamento',
   'nav.members': 'Miembros',
   'nav.entities': 'Partes Relacionadas',
@@ -774,6 +785,11 @@ const es: Dictionary = {
   'nav.census': 'Censo',
   'nav.import': 'Importar Datos',
   'nav.more': 'Mas',
+  'community.tabs.members': 'Miembros',
+  'community.tabs.directory': 'Directorio',
+  'community.tabs.activity': 'Actividad',
+  'community.title': 'Comunidad',
+  'community.subtitle': 'Miembros, directorio y actividad de tu comunidad',
   'common.settings': 'Administracion',
   'common.logout': 'Cerrar sesion',
   'onboarding.step.type': 'Tipo',
@@ -1525,8 +1541,11 @@ const es: Dictionary = {
 
 const en: Dictionary = {
   'nav.dashboard': 'Dashboard',
-  'nav.treasury': 'Treasury',
+  'nav.community': 'Community',
+  'nav.treasury': 'Finances',
   'nav.governance': 'Governance',
+  'nav.vigilancia': 'Oversight',
+  'nav.settings': 'Settings',
   'nav.rules': 'Rules',
   'nav.members': 'Members',
   'nav.entities': 'Related Parties',
@@ -1534,6 +1553,11 @@ const en: Dictionary = {
   'nav.census': 'Census',
   'nav.import': 'Import Data',
   'nav.more': 'More',
+  'community.tabs.members': 'Members',
+  'community.tabs.directory': 'Directory',
+  'community.tabs.activity': 'Activity',
+  'community.title': 'Community',
+  'community.subtitle': 'Members, directory and activity for your community',
   'common.settings': 'Administration',
   'common.logout': 'Sign out',
   'onboarding.step.type': 'Type',
