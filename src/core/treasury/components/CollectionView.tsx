@@ -92,7 +92,6 @@ export function CollectionView({ onGoToObligations: _onGoToObligations }: { onGo
   const { canManageTreasury } = usePermissions()
 
   const rules = community?.rules as { treasury?: TreasuryRules } | null
-  const treasuryMode = rules?.treasury?.mode || 'import'
   const collectionConfig = getCollectionConfig(rules)
 
   return (

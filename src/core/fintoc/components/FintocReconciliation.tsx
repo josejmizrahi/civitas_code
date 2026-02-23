@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { useFintocEvents, useFintocReconciliationStats, useManualReconcile, useIgnoreEvent } from '../hooks/useFintoc'
 import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { useCommunityContext } from '@/app/providers'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Card, CardContent } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { Select } from '@/shared/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { useToast } from '@/shared/components/ui/toast'
-import { ArrowDownLeft, CheckCircle2, XCircle, Link2, Eye, BarChart3, Filter, Ban } from 'lucide-react'
+import { ArrowDownLeft, Link2, Filter, Ban } from 'lucide-react'
 import type { FintocEvent } from '../types'
 
 const STATUS_BADGES: Record<string, { label: string; variant: 'default' | 'destructive' | 'secondary' }> = {
@@ -27,7 +27,7 @@ export function FintocReconciliation() {
 
   const { data: events, isLoading } = useFintocEvents(statusFilter || undefined)
   const { data: stats } = useFintocReconciliationStats()
-  const { currentMember } = useCommunityContext()
+  useCommunityContext()
   const { data: obligations } = usePaymentObligations(undefined)
   const reconcile = useManualReconcile()
   const ignore = useIgnoreEvent()

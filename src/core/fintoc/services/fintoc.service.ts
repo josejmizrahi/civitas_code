@@ -10,7 +10,7 @@ import type {
 
 // ─── Community Fintoc Config ──────────────────────────────────────
 export async function getFintocStatus(communityId: string) {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('communities')
     .select('fintoc_status, fintoc_account_id, fintoc_root_clabe, fintoc_public_key')
     .eq('id', communityId)
@@ -29,7 +29,7 @@ export async function activateFintoc(
   communityId: string,
   config: { account_id: string; root_clabe: string; public_key: string },
 ) {
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('communities')
     .update({
       fintoc_status: 'active',
@@ -43,7 +43,7 @@ export async function activateFintoc(
 }
 
 export async function deactivateFintoc(communityId: string) {
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('communities')
     .update({ fintoc_status: 'inactive' })
     .eq('id', communityId)
@@ -57,7 +57,7 @@ export async function createCheckoutSession(
   memberId: string,
   input: CreateCheckoutInput,
 ): Promise<FintocCheckoutSession> {
-  const { data: community } = await supabase
+  const { data: community } = await (supabase as any)
     .from('communities')
     .select('fintoc_public_key, fintoc_account_id')
     .eq('id', communityId)
@@ -226,7 +226,7 @@ export async function getFintocTransfers(communityId: string): Promise<FintocTra
 
 // ─── Member CLABE management ──────────────────────────────────────
 export async function getMemberClabe(memberId: string): Promise<string | null> {
-  const { data } = await supabase
+  const { data } = await (supabase as any)
     .from('members')
     .select('fintoc_clabe')
     .eq('id', memberId)
@@ -240,7 +240,7 @@ export async function assignMemberClabe(
   clabe: string,
   accountNumberId: string,
 ): Promise<void> {
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('members')
     .update({ fintoc_clabe: clabe, fintoc_account_number_id: accountNumberId })
     .eq('id', memberId)
