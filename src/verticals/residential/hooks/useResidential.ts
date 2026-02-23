@@ -11,6 +11,9 @@ import {
   deleteCommonArea,
   updateMaintenanceStatus,
   assignMaintenanceRequest,
+  getReservations,
+  createReservation,
+  cancelReservation,
 } from '../services/residential.service'
 import type { MaintenanceStatus } from '@/shared/types'
 
@@ -167,6 +170,56 @@ export function useAssignMaintenance() {
       assignMaintenanceRequest(requestId, memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: maintenanceKeys.list(communityId!) })
+    },
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Common Area Reservations
+// ---------------------------------------------------------------------------
+
+const reservationKeys = {
+  all: ['reservations'] as const,
+  list: (communityId: string) => [...reservationKeys.all, 'list', communityId] as const,
+}
+
+export function useReservations() {
+  const { communityId } = useCommunityContext()
+
+  return useQuery({
+    queryKey: reservationKeys.list(communityId!),
+    queryFn: () => getReservations(communityId!),
+    enabled: !!communityId,
+  })
+}
+
+export function useCreateReservation() {
+  const { communityId } = useCommunityContext()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (reservation: {
+      common_area_id: string
+      member_id: string
+      title: string
+      start_time: string
+      end_time: string
+      notes?: string | null
+    }) => createReservation(communityId!, reservation),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: reservationKeys.list(communityId!) })
+    },
+  })
+}
+
+export function useCancelReservation() {
+  const { communityId } = useCommunityContext()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (reservationId: string) => cancelReservation(reservationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: reservationKeys.list(communityId!) })
     },
   })
 }

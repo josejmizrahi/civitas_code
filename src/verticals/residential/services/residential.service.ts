@@ -1,5 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
-import type { Unit, CommonArea, MaintenanceRequest } from '../types'
+import type { Unit, CommonArea, MaintenanceRequest, Reservation } from '../types'
 import type { MaintenanceStatus } from '@/shared/types'
 
 // ---------------------------------------------------------------------------
@@ -228,4 +228,49 @@ export async function assignMaintenanceRequest(
 
   if (error) throw error
   return data as MaintenanceRequest
+}
+
+// ---------------------------------------------------------------------------
+// Common Area Reservations
+// ---------------------------------------------------------------------------
+
+export async function getReservations(communityId: string): Promise<Reservation[]> {
+  const { data, error } = await (supabase as any)
+    .from('common_area_reservations')
+    .select('*')
+    .eq('community_id', communityId)
+    .order('start_time', { ascending: true })
+
+  if (error) throw error
+  return (data ?? []) as Reservation[]
+}
+
+export async function createReservation(
+  communityId: string,
+  reservation: {
+    common_area_id: string
+    member_id: string
+    title: string
+    start_time: string
+    end_time: string
+    notes?: string | null
+  },
+): Promise<Reservation> {
+  const { data, error } = await (supabase as any)
+    .from('common_area_reservations')
+    .insert({ community_id: communityId, ...reservation })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Reservation
+}
+
+export async function cancelReservation(reservationId: string): Promise<void> {
+  const { error } = await (supabase as any)
+    .from('common_area_reservations')
+    .update({ status: 'cancelled' })
+    .eq('id', reservationId)
+
+  if (error) throw error
 }
