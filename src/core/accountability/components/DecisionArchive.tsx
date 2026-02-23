@@ -7,6 +7,7 @@ import { Select } from '@/shared/components/ui/select'
 import { Badge } from '@/shared/components/ui/badge'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { cn } from '@/shared/lib/utils'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import {
   Archive,
   Search,
@@ -41,6 +42,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 export function DecisionArchive() {
   const navigate = useNavigate()
+  const path = useCommunityPath()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterType, setFilterType] = useState<string>('all')
@@ -133,7 +135,7 @@ export function DecisionArchive() {
                 {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
               </p>
               {filtered.map((entry) => (
-                <DecisionRow key={entry.id} entry={entry} onClick={() => navigate(`/governance/${entry.id}`)} />
+                <DecisionRow key={entry.id} entry={entry} onClick={() => navigate(path(`governance/${entry.id}`))} />
               ))}
             </div>
           )}

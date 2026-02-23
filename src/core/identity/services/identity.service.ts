@@ -346,6 +346,26 @@ export async function isSlugAvailable(slug: string): Promise<boolean> {
 // Community fetching (for enriched context)
 // ---------------------------------------------------------------------------
 
+export async function getCommunityIdBySlug(slug: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('communities')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle()
+  if (error) return null
+  return (data as { id: string } | null)?.id ?? null
+}
+
+export async function getCommunityBySlug(slug: string): Promise<Community | null> {
+  const { data, error } = await supabase
+    .from('communities')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle()
+  if (error || !data) return null
+  return data as Community
+}
+
 export async function getCommunity(communityId: string): Promise<Community> {
   const { data, error } = await supabase
     .from('communities')

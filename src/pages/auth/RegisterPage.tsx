@@ -41,10 +41,10 @@ export function RegisterPage() {
   useEffect(() => {
     if (user && inviteToken) {
       acceptInvitation(inviteToken, user.id)
-        .then(() => navigate('/dashboard', { replace: true }))
-        .catch(() => navigate('/dashboard', { replace: true }))
+        .then(() => navigate('/communities', { replace: true }))
+        .catch(() => navigate('/communities', { replace: true }))
     } else if (user) {
-      navigate('/dashboard', { replace: true })
+      navigate('/communities', { replace: true })
     }
   }, [user, inviteToken])
 

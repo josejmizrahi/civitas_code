@@ -24,10 +24,12 @@ import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { BroxelSubscriptionWizard } from '@/core/treasury/components/BroxelSubscriptionWizard'
 
 export function SettingsPage() {
   const { communityId, community, currentMember } = useCommunityContext()
+  const path = useCommunityPath()
   const { isAdmin } = usePermissions()
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
@@ -190,7 +192,7 @@ export function SettingsPage() {
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => navigate('/dashboard')} className="gap-2">
+        <Button variant="ghost" onClick={() => navigate(path('dashboard'))} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> Volver al panel
         </Button>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -995,12 +997,12 @@ export function SettingsPage() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => navigate('/governance', { state: { openProposal: true, template: 'cambio_regla' } })}
+                onClick={() => navigate(path('governance'), { state: { openProposal: true, template: 'cambio_regla' } })}
               >
                 <Vote className="h-3.5 w-3.5 mr-1" />
                 Cambiar Regla via Propuesta
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/rules')}>
+              <Button variant="ghost" size="sm" onClick={() => navigate(path('rules'))}>
                 <BookOpen className="h-3.5 w-3.5 mr-1" />
                 Ver Reglas Vigentes
               </Button>

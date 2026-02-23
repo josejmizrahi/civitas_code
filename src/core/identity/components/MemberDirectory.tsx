@@ -14,11 +14,13 @@ import { formatDate } from '@/shared/lib/utils'
 import { useToast } from '@/shared/components/ui/toast'
 import { useRoles } from '@/core/identity/hooks/useRoles'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
 import { UserPlus, UserMinus, UserCheck, Search } from 'lucide-react'
 
 export function MemberDirectory() {
   const navigate = useNavigate()
+  const path = useCommunityPath()
   const { data: roles } = useRoles()
   const { data: members, isLoading } = useMembers()
   const { canManageMembers } = usePermissions()
@@ -99,7 +101,7 @@ export function MemberDirectory() {
               <TableRow
                 key={member.id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => navigate(`/members/${member.id}`)}
+                onClick={() => navigate(path(`members/${member.id}`))}
               >
                 <TableCell>
                   <div className="flex items-center gap-3">

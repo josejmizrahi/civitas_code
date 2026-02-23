@@ -11,6 +11,7 @@ import {
   type CommunityConfigShape,
   type MembershipAttributeSchemaItem,
 } from '@/shared/config/community-config'
+import { communityPath } from '@/shared/lib/communityRoutes'
 import { useToast } from '@/shared/components/ui/toast'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -1275,7 +1276,7 @@ export function OnboardingWizard() {
 
   const handleCancel = () => {
     if (hasCommunities) {
-      navigate('/dashboard')
+      navigate('/communities')
     } else {
       navigate('/')
     }
@@ -1346,7 +1347,7 @@ export function OnboardingWizard() {
       } else {
         toast.success('Comunidad creada exitosamente')
       }
-      navigate('/dashboard')
+      navigate(communityPath(community.slug, 'dashboard'))
     } catch (err: unknown) {
       if (!createdCommunityId) {
         toast.error(
@@ -1356,7 +1357,7 @@ export function OnboardingWizard() {
         setCommunityId(createdCommunityId)
         refreshCommunities()
         toast.error('Error al configurar la comunidad. Puedes ajustarla en Administración.')
-        navigate('/dashboard')
+        navigate('/communities')
       }
     } finally {
       setSubmitting(false)

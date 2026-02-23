@@ -14,8 +14,8 @@ export function NotFoundPage() {
           al inicio.
         </p>
       </div>
-      <Link to="/dashboard" className={buttonVariants({ variant: 'default' })}>
-        Volver al inicio
+      <Link to="/communities" className={buttonVariants({ variant: 'default' })}>
+        Ir a mis comunidades
       </Link>
     </div>
   )

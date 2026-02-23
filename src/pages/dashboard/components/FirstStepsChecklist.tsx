@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useCommunityContext } from '@/app/providers'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { useProposals } from '@/core/governance/hooks/useProposals'
 import { getCategories } from '@/core/treasury/services/treasury.service'
@@ -20,6 +21,7 @@ interface Step {
 
 export function FirstStepsChecklist() {
   const { communityId, community } = useCommunityContext()
+  const path = useCommunityPath()
   const { data: members } = useMembers()
   const { data: allProposals } = useProposals(undefined)
   const { data: categories } = useQuery({
@@ -52,7 +54,7 @@ export function FirstStepsChecklist() {
       id: 'invite',
       label: 'Invitar miembros',
       description: 'Envía invitaciones por correo',
-      href: '/members',
+      href: path('members'),
       done: (members?.length ?? 0) > 1,
       icon: Users,
     },
@@ -60,7 +62,7 @@ export function FirstStepsChecklist() {
       id: 'categories',
       label: 'Verificar categorías financieras',
       description: 'Ajusta ingresos y egresos',
-      href: '/settings',
+      href: path('settings'),
       done: (categories?.length ?? 0) > 0,
       icon: Layers,
     },
@@ -68,7 +70,7 @@ export function FirstStepsChecklist() {
       id: 'recurring',
       label: 'Crear primer cobro recurrente',
       description: 'Define cuotas periódicas',
-      href: '/treasury',
+      href: path('treasury'),
       done: (recurringSchedules?.length ?? 0) > 0,
       icon: Wallet,
     },
@@ -76,7 +78,7 @@ export function FirstStepsChecklist() {
       id: 'proposal',
       label: 'Crear primera propuesta',
       description: 'Pon algo a votación',
-      href: '/governance',
+      href: path('governance'),
       done: (allProposals?.length ?? 0) > 0,
       icon: Vote,
     },
@@ -87,7 +89,7 @@ export function FirstStepsChecklist() {
       id: 'units',
       label: 'Registrar unidades',
       description: 'Alta de departamentos o casas',
-      href: '/residential',
+      href: path('residential'),
       done: (units?.length ?? 0) > 0,
       icon: Building2,
     })

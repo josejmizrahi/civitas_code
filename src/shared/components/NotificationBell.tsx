@@ -23,6 +23,7 @@ import {
   useMarkAllAsRead,
   type Notification,
 } from '@/shared/hooks/useNotifications'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 
 const typeConfig: Record<string, { icon: typeof Bell; colorClass: string }> = {
   proposal_new: { icon: Vote, colorClass: 'text-indigo-500' },
@@ -44,6 +45,7 @@ const typeConfig: Record<string, { icon: typeof Bell; colorClass: string }> = {
   execution_completed: { icon: Zap, colorClass: 'text-purple-500' },
 }
 
+/** Returns the path segment under /c/:slug/ (e.g. 'governance', 'treasury', 'governance/abc-123'). */
 export function getNotificationRoute(notification: Notification): string | null {
   const meta = notification.metadata
   const proposalId = (meta?.proposal_id ?? meta?.proposalId) as string | undefined
@@ -55,10 +57,10 @@ export function getNotificationRoute(notification: Notification): string | null 
     case 'proposal_closed':
     case 'proposal_approved':
     case 'pre_execution':
-      return proposalId ? `/governance/${proposalId}` : '/governance'
+      return proposalId ? `governance/${proposalId}` : 'governance'
     case 'assembly_scheduled':
     case 'convocatoria':
-      return assemblyId ? `/governance/assemblies/${assemblyId}` : '/governance'
+      return assemblyId ? `governance/assemblies/${assemblyId}` : 'governance'
     case 'monthly_statement_ready':
     case 'payment_due':
     case 'payment_reminder':
@@ -66,11 +68,11 @@ export function getNotificationRoute(notification: Notification): string | null 
     case 'obligation_created':
     case 'discretionary_request':
     case 'discretionary_decision':
-      return '/treasury'
+      return 'treasury'
     case 'member_joined':
-      return '/members'
+      return 'members'
     case 'execution_completed':
-      return meta?.proposalId ? `/governance/${meta.proposalId}` : '/governance'
+      return meta?.proposalId ? `governance/${meta.proposalId}` : 'governance'
     default:
       return null
   }
@@ -80,6 +82,7 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+  const path = useCommunityPath()
 
   const { data: notifications = [] } = useNotifications()
   const { data: unreadCount = 0 } = useUnreadCount()
@@ -101,9 +104,9 @@ export function NotificationBell() {
     if (!notification.read) {
       markAsRead.mutate(notification.id)
     }
-    const route = getNotificationRoute(notification)
-    if (route) {
-      navigate(route)
+    const segment = getNotificationRoute(notification)
+    if (segment) {
+      navigate(path(segment))
     }
     setOpen(false)
   }

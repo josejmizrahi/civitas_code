@@ -49,7 +49,7 @@ export function InviteAcceptPage() {
       setCommunityId(invitation.community_id)
       setAccepted(true)
       // Redirect to dashboard after 2 seconds
-      setTimeout(() => navigate('/dashboard'), 2000)
+      setTimeout(() => navigate('/communities'), 2000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al aceptar la invitación')
     } finally {

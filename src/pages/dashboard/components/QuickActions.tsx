@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useProposals } from '@/core/governance/hooks/useProposals'
 import { usePaymentObligations } from '@/core/treasury/hooks/usePaymentStatus'
 import { useCommunityContext } from '@/app/providers'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { DynamicIcon } from '@/shared/components/DynamicIcon'
 import { ChevronRight } from 'lucide-react'
 
@@ -20,6 +21,7 @@ interface QuickAction {
  * Shows the most important thing the member should do right now.
  */
 export function QuickActions() {
+  const path = useCommunityPath()
   const { currentMember } = useCommunityContext()
   const { data: proposals } = useProposals('active')
   const { data: obligations } = usePaymentObligations(currentMember?.id)
@@ -33,7 +35,7 @@ export function QuickActions() {
       title: 'Ponte al corriente',
       subtitle: `Tienes ${overduePayments.length} pago${overduePayments.length > 1 ? 's' : ''} vencido${overduePayments.length > 1 ? 's' : ''}`,
       icon: 'alert-triangle',
-      href: '/treasury',
+      href: path('treasury'),
       urgency: 'high',
     })
   }
@@ -46,7 +48,7 @@ export function QuickActions() {
         ? proposals[0].title
         : `${proposals.length} propuestas esperan tu opinión`,
       icon: 'vote',
-      href: '/governance',
+      href: path('governance'),
       urgency: 'medium',
       badge: `${proposals.length}`,
     })
@@ -59,7 +61,7 @@ export function QuickActions() {
       title: 'Revisa tu cuota',
       subtitle: 'Tienes pagos pendientes',
       icon: 'wallet',
-      href: '/treasury',
+      href: path('treasury'),
       urgency: 'low',
     })
   }

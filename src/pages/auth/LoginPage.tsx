@@ -23,7 +23,7 @@ export function LoginPage() {
   useEffect(() => {
     if (user && inviteToken) {
       acceptInvitation(inviteToken, user.id)
-        .then(() => navigate('/dashboard'))
+        .then(() => navigate('/communities'))
         .catch((err) => {
           setInviteError(err instanceof Error ? err.message : 'No se pudo aceptar la invitación')
           // No navegar para que el usuario vea el mensaje de error

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { useMorosoMembers, useComputeMorosoStatus, useNotifyMorosos } from '../hooks/useMoroso'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
@@ -89,6 +90,7 @@ function MorosoRow({ member }: { member: MorosoMember }) {
 
 export function MorosoAdminPanel() {
   const navigate = useNavigate()
+  const path = useCommunityPath()
   const { data: morosos, isLoading, error } = useMorosoMembers()
   const { rules } = useRulesEngine()
   const computeMutation = useComputeMorosoStatus()
@@ -145,7 +147,7 @@ export function MorosoAdminPanel() {
               variant="outline"
               size="sm"
               onClick={() =>
-                navigate('/treasury', {
+                navigate(path('treasury'), {
                   state: { mainSection: 'programacion', programacionTab: 'payment-plans' },
                 })
               }

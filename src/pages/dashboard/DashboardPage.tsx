@@ -15,12 +15,14 @@ import {
   AlertCircle, Shield, UserCheck, BarChart3,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { Button } from '@/shared/components/ui/button'
 import { QuickActions } from '@/pages/dashboard/components/QuickActions'
 import { FirstStepsChecklist } from '@/pages/dashboard/components/FirstStepsChecklist'
 
 export function DashboardPage() {
   const { community, currentMember } = useCommunityContext()
+  const path = useCommunityPath()
   const { data: members, isLoading: membersLoading, error: membersError } = useMembers()
   const { data: stats, isLoading: statsLoading, error: statsError } = useDashboard()
   const { rules, financialStanding, treasuryMode, isPaymentToVoteEnabled } = useRulesEngine()
@@ -236,10 +238,10 @@ export function DashboardPage() {
             </div>
 
             <div className="mt-4 flex gap-2">
-              <Link to="/settings">
+              <Link to={path('settings')}>
                 <Button variant="outline" size="sm">Configurar Reglas</Button>
               </Link>
-              <Link to="/census">
+              <Link to={path('census')}>
                 <Button variant="outline" size="sm">
                   <BarChart3 className="mr-2 h-3 w-3" />
                   Ver Censo

@@ -1,5 +1,6 @@
 import { useCommunityContext } from '@/app/providers'
 import { useMemberDebt } from '../hooks/useMoroso'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { formatCurrency } from '@/shared/lib/utils'
 import { AlertTriangle, Ban, UserX, UsersRound } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -22,6 +23,7 @@ const restrictionLabels: Record<string, { label: string; icon: typeof Ban }> = {
 
 export function MorosoStatusBanner() {
   const { currentMember } = useCommunityContext()
+  const path = useCommunityPath()
 
   // Only render if user is moroso
   const isMoroso = currentMember?.financial_standing === 'moroso'
@@ -82,7 +84,7 @@ export function MorosoStatusBanner() {
           )}
 
           <div>
-            <Link to="/treasury">
+            <Link to={path('treasury')}>
               <Button variant="outline" size="sm" className="border-red-300 text-red-700 hover:bg-red-100">
                 Ver mis adeudos
               </Button>

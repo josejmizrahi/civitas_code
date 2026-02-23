@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
 import { useConfirm } from '@/shared/components/ConfirmDialog'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 
 interface PaymentObligation {
   id: string
@@ -85,6 +86,7 @@ export function MemberDetailPage() {
     }
   }, [auditQuery.isError, auditQuery.error, toastError])
 
+  const path = useCommunityPath()
   const member = memberQuery.data
   const loading = memberQuery.isLoading
   const error = memberQuery.error ? (memberQuery.error as Error).message : null
@@ -97,7 +99,7 @@ export function MemberDetailPage() {
   if (error || !member) {
     return (
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => navigate('/members')}>
+        <Button variant="ghost" onClick={() => navigate(path('members'))}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Volver
         </Button>
         <div className="rounded-md bg-destructive/10 border border-destructive/20 p-4 flex items-center gap-2 text-destructive">
@@ -150,7 +152,7 @@ export function MemberDetailPage() {
   return (
     <div className="space-y-6">
       {/* Back button */}
-      <Button variant="ghost" onClick={() => navigate('/members')} className="gap-2">
+      <Button variant="ghost" onClick={() => navigate(path('members'))} className="gap-2">
         <ArrowLeft className="h-4 w-4" /> Volver a Miembros
       </Button>
 
@@ -235,7 +237,7 @@ export function MemberDetailPage() {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  navigate('/treasury', {
+                  navigate(path('treasury'), {
                     state: { mainSection: 'programacion', programacionTab: 'payment-plans' },
                   })
                 }
@@ -365,7 +367,7 @@ export function MemberDetailPage() {
                     <TableRow
                       key={v.id}
                       className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => navigate(`/governance/${v.proposal_id}`)}
+                      onClick={() => navigate(path(`governance/${v.proposal_id}`))}
                     >
                       <TableCell className="font-medium">{v.proposal_title}</TableCell>
                       <TableCell>

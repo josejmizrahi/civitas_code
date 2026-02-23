@@ -24,6 +24,7 @@ import { DiscretionaryApprovalsPanel } from '@/core/treasury/components/Discreti
 import { ExpenseForm } from '@/core/treasury/components/ExpenseForm'
 import { formatCurrency } from '@/shared/lib/utils'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import type { TreasuryRules, FundType } from '@/shared/types/rules'
 import { cn } from '@/shared/lib/utils'
 import {
@@ -51,6 +52,7 @@ type ConfigSubTab = 'recurring' | 'contracts' | 'budgets' | 'categories' | 'stat
 export function AdminTreasuryView() {
   const { t } = useI18n()
   const navigate = useNavigate()
+  const path = useCommunityPath()
   const { community } = useCommunityContext()
   const { canManageTreasury, canImportData } = usePermissions()
   const [adminTab, setAdminTab] = useState<AdminTab>('cobranza')
@@ -144,7 +146,7 @@ export function AdminTreasuryView() {
               Excel
             </Button>
             {canImportData && (
-              <Button variant="outline" size="sm" onClick={() => navigate('/ingestion')} className="gap-1.5">
+              <Button variant="outline" size="sm" onClick={() => navigate(path('ingestion'))} className="gap-1.5">
                 <FileSpreadsheet className="h-4 w-4" />
                 {t('treasury.import')}
               </Button>
@@ -347,7 +349,7 @@ export function AdminTreasuryView() {
         }}
         onRequireAssembly={() => {
           setShowForm(false)
-          navigate('/governance')
+          navigate(path('governance'))
         }}
       />
     </div>
