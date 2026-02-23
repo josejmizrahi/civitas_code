@@ -5,7 +5,7 @@ import type { Vote, VoteSummary } from '../types'
 import { getProposal } from './proposal.service'
 
 async function calculateVoteWeight(memberId: string, communityId: string): Promise<number> {
-  const { data, error } = await (supabase as any).rpc('calculate_vote_weight', {
+  const { data, error } = await supabase.rpc('calculate_vote_weight', {
     p_member_id: memberId,
     p_community_id: communityId,
   })

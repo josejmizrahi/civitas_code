@@ -25,7 +25,7 @@ import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
-import { FinancialSetup } from '@/core/fintech/components/FinancialSetup'
+import { FintechOnboarding } from '@/core/fintech/components/FintechOnboarding'
 import { AuditLog } from '@/shared/components/AuditLog'
 
 export function SettingsPage() {
@@ -770,7 +770,7 @@ export function SettingsPage() {
 
                 {showPaymentSetup && (
                   <div className="mt-4">
-                    <FinancialSetup />
+                    <FintechOnboarding />
                   </div>
                 )}
               </CardContent>

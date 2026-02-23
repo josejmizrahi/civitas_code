@@ -46,7 +46,7 @@ import {
   Copy,
 } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-import { FinancialSetup } from '@/core/fintech/components/FinancialSetup'
+import { FintechOnboarding } from '@/core/fintech/components/FintechOnboarding'
 import { PaymentReconciliation } from '@/core/fintech/components/PaymentReconciliation'
 import { TransferPanel } from '@/core/fintech/components/TransferPanel'
 
@@ -426,7 +426,7 @@ function PaymentsTab() {
         <TabsTrigger value="transfers" className="gap-1 text-xs sm:text-sm">Dispersiones</TabsTrigger>
       </TabsList>
 
-      {paymentsSubTab === 'setup' && <div className="mt-4"><FinancialSetup /></div>}
+      {paymentsSubTab === 'setup' && <div className="mt-4"><FintechOnboarding /></div>}
       {paymentsSubTab === 'reconciliation' && <div className="mt-4"><PaymentReconciliation /></div>}
       {paymentsSubTab === 'transfers' && <div className="mt-4"><TransferPanel /></div>}
     </Tabs>

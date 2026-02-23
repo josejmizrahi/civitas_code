@@ -41,11 +41,11 @@ export async function generateStatement(
   // Get the current user ID for generated_by
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data, error } = await (supabase as any).rpc('generate_monthly_statement', {
+  const { data, error } = await supabase.rpc('generate_monthly_statement', {
     p_community_id: communityId,
     p_period: period,
     p_fund_type: fundType,
-    p_generated_by: user?.id ?? null,
+    p_generated_by: user?.id,
   })
 
   if (error) throw error

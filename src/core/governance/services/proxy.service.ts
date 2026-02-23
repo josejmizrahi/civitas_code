@@ -145,7 +145,7 @@ export async function canRepresent(
   representativeId: string
 ): Promise<{ allowed: boolean; reason?: string }> {
   // Try server-side validation first
-  const { data, error } = await (supabase as any).rpc('validate_proxy_limits', {
+  const { data, error } = await supabase.rpc('validate_proxy_limits', {
     p_community_id: communityId,
     p_assembly_id: assemblyId,
     p_representative_id: representativeId,

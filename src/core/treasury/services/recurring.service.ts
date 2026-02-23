@@ -88,7 +88,7 @@ export async function deleteRecurringSchedule(scheduleId: string): Promise<void>
 }
 
 export async function processRecurringSchedules(communityId: string): Promise<number> {
-  const { data, error } = await (supabase as any).rpc('process_recurring_schedules', {
+  const { data, error } = await supabase.rpc('process_recurring_schedules', {
     p_community_id: communityId,
   })
   if (error) throw error
@@ -96,7 +96,7 @@ export async function processRecurringSchedules(communityId: string): Promise<nu
 }
 
 export async function generateSingleSchedule(scheduleId: string): Promise<number> {
-  const { data, error } = await (supabase as any).rpc('generate_recurring_obligations', {
+  const { data, error } = await supabase.rpc('generate_recurring_obligations', {
     p_schedule_id: scheduleId,
   })
   if (error) throw error

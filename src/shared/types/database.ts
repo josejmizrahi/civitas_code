@@ -82,6 +82,107 @@ export type Database = {
           },
         ]
       }
+      announcement_reads: {
+        Row: {
+          announcement_id: string
+          member_id: string
+          read_at: string
+        }
+        Insert: {
+          announcement_id: string
+          member_id: string
+          read_at?: string
+        }
+        Update: {
+          announcement_id?: string
+          member_id?: string
+          read_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_reads_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_reads_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_reads_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          author_id: string
+          body: string
+          community_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          pinned: boolean
+          priority: string
+          published_at: string
+          title: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          community_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          pinned?: boolean
+          priority?: string
+          published_at?: string
+          title: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          community_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          pinned?: boolean
+          priority?: string
+          published_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       arco_requests: {
         Row: {
           created_at: string | null
@@ -601,6 +702,74 @@ export type Database = {
           },
         ]
       }
+      common_area_reservations: {
+        Row: {
+          common_area_id: string
+          community_id: string
+          created_at: string
+          end_time: string
+          id: string
+          member_id: string
+          notes: string | null
+          start_time: string
+          status: string
+          title: string
+        }
+        Insert: {
+          common_area_id: string
+          community_id: string
+          created_at?: string
+          end_time: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          start_time: string
+          status?: string
+          title: string
+        }
+        Update: {
+          common_area_id?: string
+          community_id?: string
+          created_at?: string
+          end_time?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          start_time?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "common_area_reservations_common_area_id_fkey"
+            columns: ["common_area_id"]
+            isOneToOne: false
+            referencedRelation: "common_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "common_area_reservations_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "common_area_reservations_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "common_area_reservations_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       common_areas: {
         Row: {
           community_id: string
@@ -641,7 +810,14 @@ export type Database = {
           config: Json
           created_at: string
           description: string | null
+          fintoc_account_id: string | null
+          fintoc_public_key: string | null
+          fintoc_root_clabe: string | null
+          fintoc_status: string
           id: string
+          ifpe_account_id: string | null
+          ifpe_clabe: string | null
+          ifpe_status: string | null
           name: string
           rules: Json
           slug: string
@@ -652,7 +828,14 @@ export type Database = {
           config?: Json
           created_at?: string
           description?: string | null
+          fintoc_account_id?: string | null
+          fintoc_public_key?: string | null
+          fintoc_root_clabe?: string | null
+          fintoc_status?: string
           id?: string
+          ifpe_account_id?: string | null
+          ifpe_clabe?: string | null
+          ifpe_status?: string | null
           name: string
           rules?: Json
           slug: string
@@ -663,7 +846,14 @@ export type Database = {
           config?: Json
           created_at?: string
           description?: string | null
+          fintoc_account_id?: string | null
+          fintoc_public_key?: string | null
+          fintoc_root_clabe?: string | null
+          fintoc_status?: string
           id?: string
+          ifpe_account_id?: string | null
+          ifpe_clabe?: string | null
+          ifpe_status?: string | null
           name?: string
           rules?: Json
           slug?: string
@@ -1057,6 +1247,111 @@ export type Database = {
           },
         ]
       }
+      discretionary_approvals: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          beneficiary_entity_id: string | null
+          category_id: string | null
+          community_id: string
+          created_at: string
+          description: string
+          id: string
+          requested_by: string
+          responded_at: string | null
+          response_note: string | null
+          status: string
+          transaction_id: string | null
+        }
+        Insert: {
+          amount: number
+          approved_by?: string | null
+          beneficiary_entity_id?: string | null
+          category_id?: string | null
+          community_id: string
+          created_at?: string
+          description: string
+          id?: string
+          requested_by: string
+          responded_at?: string | null
+          response_note?: string | null
+          status?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          beneficiary_entity_id?: string | null
+          category_id?: string | null
+          community_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          requested_by?: string
+          responded_at?: string | null
+          response_note?: string | null
+          status?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discretionary_approvals_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discretionary_approvals_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discretionary_approvals_beneficiary_entity_id_fkey"
+            columns: ["beneficiary_entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discretionary_approvals_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discretionary_approvals_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discretionary_approvals_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discretionary_approvals_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "discretionary_approvals_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discussion_comments: {
         Row: {
           attachments: Json | null
@@ -1233,58 +1528,6 @@ export type Database = {
           },
         ]
       }
-      discretionary_approvals: {
-        Row: {
-          id: string
-          community_id: string
-          requested_by: string
-          amount: number
-          description: string
-          category_id: string | null
-          beneficiary_entity_id: string | null
-          status: string
-          approved_by: string | null
-          response_note: string | null
-          transaction_id: string | null
-          responded_at: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          community_id: string
-          requested_by: string
-          amount: number
-          description: string
-          category_id?: string | null
-          beneficiary_entity_id?: string | null
-          status?: string
-          approved_by?: string | null
-          response_note?: string | null
-          transaction_id?: string | null
-          responded_at?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          community_id?: string
-          requested_by?: string
-          amount?: number
-          description?: string
-          category_id?: string | null
-          beneficiary_entity_id?: string | null
-          status?: string
-          approved_by?: string | null
-          response_note?: string | null
-          transaction_id?: string | null
-          responded_at?: string | null
-          created_at?: string
-        }
-        Relationships: [
-          { foreignKeyName: "discretionary_approvals_community_id_fkey", columns: ["community_id"], isOneToOne: false, referencedRelation: "communities", referencedColumns: ["id"] },
-          { foreignKeyName: "discretionary_approvals_requested_by_fkey", columns: ["requested_by"], isOneToOne: false, referencedRelation: "members", referencedColumns: ["id"] },
-          { foreignKeyName: "discretionary_approvals_transaction_id_fkey", columns: ["transaction_id"], isOneToOne: false, referencedRelation: "transactions", referencedColumns: ["id"] },
-        ]
-      }
       entities: {
         Row: {
           address: string | null
@@ -1456,6 +1699,382 @@ export type Database = {
           },
         ]
       }
+      fintoc_applications: {
+        Row: {
+          annex_a_billing_email: string | null
+          annex_a_contract_email: string | null
+          annex_a_escalation: Json | null
+          annex_a_support_email: string | null
+          annex_b_users: Json | null
+          annex_d_fund_origin: string[] | null
+          annex_d_monthly_operations: string | null
+          annex_d_monthly_volume: string | null
+          community_id: string
+          company_address: string | null
+          company_city: string | null
+          company_incorporation_date: string | null
+          company_legal_name: string | null
+          company_registro_publico: string | null
+          company_rfc: string | null
+          company_state: string | null
+          company_zip: string | null
+          created_at: string
+          documents: Json | null
+          fintoc_notes: string | null
+          id: string
+          rejection_reason: string | null
+          rep_legal_email: string | null
+          rep_legal_id_type: string | null
+          rep_legal_name: string | null
+          rep_legal_phone: string | null
+          reviewed_at: string | null
+          settlement_account_holder: string | null
+          settlement_account_number: string | null
+          settlement_bank_name: string | null
+          settlement_clabe: string | null
+          shareholders: Json | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string
+          updated_at: string
+        }
+        Insert: {
+          annex_a_billing_email?: string | null
+          annex_a_contract_email?: string | null
+          annex_a_escalation?: Json | null
+          annex_a_support_email?: string | null
+          annex_b_users?: Json | null
+          annex_d_fund_origin?: string[] | null
+          annex_d_monthly_operations?: string | null
+          annex_d_monthly_volume?: string | null
+          community_id: string
+          company_address?: string | null
+          company_city?: string | null
+          company_incorporation_date?: string | null
+          company_legal_name?: string | null
+          company_registro_publico?: string | null
+          company_rfc?: string | null
+          company_state?: string | null
+          company_zip?: string | null
+          created_at?: string
+          documents?: Json | null
+          fintoc_notes?: string | null
+          id?: string
+          rejection_reason?: string | null
+          rep_legal_email?: string | null
+          rep_legal_id_type?: string | null
+          rep_legal_name?: string | null
+          rep_legal_phone?: string | null
+          reviewed_at?: string | null
+          settlement_account_holder?: string | null
+          settlement_account_number?: string | null
+          settlement_bank_name?: string | null
+          settlement_clabe?: string | null
+          shareholders?: Json | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by: string
+          updated_at?: string
+        }
+        Update: {
+          annex_a_billing_email?: string | null
+          annex_a_contract_email?: string | null
+          annex_a_escalation?: Json | null
+          annex_a_support_email?: string | null
+          annex_b_users?: Json | null
+          annex_d_fund_origin?: string[] | null
+          annex_d_monthly_operations?: string | null
+          annex_d_monthly_volume?: string | null
+          community_id?: string
+          company_address?: string | null
+          company_city?: string | null
+          company_incorporation_date?: string | null
+          company_legal_name?: string | null
+          company_registro_publico?: string | null
+          company_rfc?: string | null
+          company_state?: string | null
+          company_zip?: string | null
+          created_at?: string
+          documents?: Json | null
+          fintoc_notes?: string | null
+          id?: string
+          rejection_reason?: string | null
+          rep_legal_email?: string | null
+          rep_legal_id_type?: string | null
+          rep_legal_name?: string | null
+          rep_legal_phone?: string | null
+          reviewed_at?: string | null
+          settlement_account_holder?: string | null
+          settlement_account_number?: string | null
+          settlement_bank_name?: string | null
+          settlement_clabe?: string | null
+          shareholders?: Json | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fintoc_applications_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fintoc_applications_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fintoc_applications_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fintoc_checkout_sessions: {
+        Row: {
+          amount: number
+          community_id: string
+          created_at: string
+          currency: string
+          fintoc_session_id: string
+          id: string
+          member_id: string
+          metadata: Json | null
+          obligation_id: string | null
+          payment_intent_id: string | null
+          payment_status: string | null
+          redirect_url: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          community_id: string
+          created_at?: string
+          currency?: string
+          fintoc_session_id: string
+          id?: string
+          member_id: string
+          metadata?: Json | null
+          obligation_id?: string | null
+          payment_intent_id?: string | null
+          payment_status?: string | null
+          redirect_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          community_id?: string
+          created_at?: string
+          currency?: string
+          fintoc_session_id?: string
+          id?: string
+          member_id?: string
+          metadata?: Json | null
+          obligation_id?: string | null
+          payment_intent_id?: string | null
+          payment_status?: string | null
+          redirect_url?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fintoc_checkout_sessions_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fintoc_checkout_sessions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fintoc_checkout_sessions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fintoc_checkout_sessions_obligation_id_fkey"
+            columns: ["obligation_id"]
+            isOneToOne: false
+            referencedRelation: "payment_obligations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fintoc_events: {
+        Row: {
+          account_number_id: string | null
+          amount: number | null
+          community_id: string
+          counterparty_clabe: string | null
+          counterparty_name: string | null
+          created_at: string
+          currency: string | null
+          event_data: Json
+          event_type: string
+          fintoc_event_id: string
+          id: string
+          matched_obligation_id: string | null
+          matched_transaction_id: string | null
+          processed_at: string | null
+          reconciliation_status: string
+          tracking_key: string | null
+        }
+        Insert: {
+          account_number_id?: string | null
+          amount?: number | null
+          community_id: string
+          counterparty_clabe?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          currency?: string | null
+          event_data?: Json
+          event_type: string
+          fintoc_event_id: string
+          id?: string
+          matched_obligation_id?: string | null
+          matched_transaction_id?: string | null
+          processed_at?: string | null
+          reconciliation_status?: string
+          tracking_key?: string | null
+        }
+        Update: {
+          account_number_id?: string | null
+          amount?: number | null
+          community_id?: string
+          counterparty_clabe?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          currency?: string | null
+          event_data?: Json
+          event_type?: string
+          fintoc_event_id?: string
+          id?: string
+          matched_obligation_id?: string | null
+          matched_transaction_id?: string | null
+          processed_at?: string | null
+          reconciliation_status?: string
+          tracking_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fintoc_events_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fintoc_events_matched_obligation_id_fkey"
+            columns: ["matched_obligation_id"]
+            isOneToOne: false
+            referencedRelation: "payment_obligations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fintoc_events_matched_transaction_id_fkey"
+            columns: ["matched_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fintoc_transfers: {
+        Row: {
+          amount: number
+          comment: string | null
+          community_id: string
+          counterparty_clabe: string | null
+          counterparty_name: string | null
+          created_at: string
+          currency: string
+          direction: string
+          error_reason: string | null
+          fintoc_transfer_id: string | null
+          id: string
+          linked_transaction_id: string | null
+          metadata: Json | null
+          reference_id: string | null
+          spend_request_id: string | null
+          status: string
+          tracking_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          comment?: string | null
+          community_id: string
+          counterparty_clabe?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          currency?: string
+          direction?: string
+          error_reason?: string | null
+          fintoc_transfer_id?: string | null
+          id?: string
+          linked_transaction_id?: string | null
+          metadata?: Json | null
+          reference_id?: string | null
+          spend_request_id?: string | null
+          status?: string
+          tracking_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          comment?: string | null
+          community_id?: string
+          counterparty_clabe?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          currency?: string
+          direction?: string
+          error_reason?: string | null
+          fintoc_transfer_id?: string | null
+          id?: string
+          linked_transaction_id?: string | null
+          metadata?: Json | null
+          reference_id?: string | null
+          spend_request_id?: string | null
+          status?: string
+          tracking_key?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fintoc_transfers_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fintoc_transfers_linked_transaction_id_fkey"
+            columns: ["linked_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gamification_events: {
         Row: {
           action: string
@@ -1504,6 +2123,83 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ifpe_applications: {
+        Row: {
+          address_document_path: string | null
+          community_id: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          fiscal_address: string | null
+          id: string
+          id_document_path: string | null
+          ifpe_account_id: string | null
+          ifpe_clabe: string | null
+          legal_name: string | null
+          legal_rep_document_path: string | null
+          rejection_reason: string | null
+          representative_name: string | null
+          representative_role: string | null
+          reviewed_at: string | null
+          rfc: string | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_document_path?: string | null
+          community_id: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          fiscal_address?: string | null
+          id?: string
+          id_document_path?: string | null
+          ifpe_account_id?: string | null
+          ifpe_clabe?: string | null
+          legal_name?: string | null
+          legal_rep_document_path?: string | null
+          rejection_reason?: string | null
+          representative_name?: string | null
+          representative_role?: string | null
+          reviewed_at?: string | null
+          rfc?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_document_path?: string | null
+          community_id?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          fiscal_address?: string | null
+          id?: string
+          id_document_path?: string | null
+          ifpe_account_id?: string | null
+          ifpe_clabe?: string | null
+          legal_name?: string | null
+          legal_rep_document_path?: string | null
+          rejection_reason?: string | null
+          representative_name?: string | null
+          representative_role?: string | null
+          reviewed_at?: string | null
+          rfc?: string | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ifpe_applications_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
             referencedColumns: ["id"]
           },
         ]
@@ -1913,6 +2609,8 @@ export type Database = {
           created_at: string
           custom_attributes: Json
           financial_standing: string
+          fintoc_account_number_id: string | null
+          fintoc_clabe: string | null
           id: string
           joined_at: string
           moroso_notified_at: string | null
@@ -1927,6 +2625,8 @@ export type Database = {
           created_at?: string
           custom_attributes?: Json
           financial_standing?: string
+          fintoc_account_number_id?: string | null
+          fintoc_clabe?: string | null
           id?: string
           joined_at?: string
           moroso_notified_at?: string | null
@@ -1941,6 +2641,8 @@ export type Database = {
           created_at?: string
           custom_attributes?: Json
           financial_standing?: string
+          fintoc_account_number_id?: string | null
+          fintoc_clabe?: string | null
           id?: string
           joined_at?: string
           moroso_notified_at?: string | null
@@ -2776,11 +3478,13 @@ export type Database = {
           last_run_date: string | null
           name: string
           next_run_date: string
+          proportional_attribute: string | null
           runs_completed: number | null
           start_date: string
           target_entity_id: string | null
           target_member_ids: Json | null
           target_type: string
+          total_amount: number | null
           type: string
           updated_at: string | null
         }
@@ -2802,11 +3506,13 @@ export type Database = {
           last_run_date?: string | null
           name: string
           next_run_date: string
+          proportional_attribute?: string | null
           runs_completed?: number | null
           start_date: string
           target_entity_id?: string | null
           target_member_ids?: Json | null
           target_type?: string
+          total_amount?: number | null
           type?: string
           updated_at?: string | null
         }
@@ -2828,11 +3534,13 @@ export type Database = {
           last_run_date?: string | null
           name?: string
           next_run_date?: string
+          proportional_attribute?: string | null
           runs_completed?: number | null
           start_date?: string
           target_entity_id?: string | null
           target_member_ids?: Json | null
           target_type?: string
+          total_amount?: number | null
           type?: string
           updated_at?: string | null
         }
@@ -2949,31 +3657,31 @@ export type Database = {
       }
       spend_request_attachments: {
         Row: {
+          created_at: string
+          description: string | null
+          file_url: string
           id: string
           spend_request_id: string
           type: string
-          file_url: string
-          description: string | null
           uploaded_by: string | null
-          created_at: string
         }
         Insert: {
+          created_at?: string
+          description?: string | null
+          file_url: string
           id?: string
           spend_request_id: string
           type: string
-          file_url: string
-          description?: string | null
           uploaded_by?: string | null
-          created_at?: string
         }
         Update: {
+          created_at?: string
+          description?: string | null
+          file_url?: string
           id?: string
           spend_request_id?: string
           type?: string
-          file_url?: string
-          description?: string | null
           uploaded_by?: string | null
-          created_at?: string
         }
         Relationships: [
           {
@@ -2983,36 +3691,50 @@ export type Database = {
             referencedRelation: "spend_requests"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "spend_request_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_request_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "members"
+            referencedColumns: ["id"]
+          },
         ]
       }
       spend_request_comments: {
         Row: {
-          id: string
-          spend_request_id: string
-          member_id: string
           content: string
           created_at: string
+          id: string
+          member_id: string
+          spend_request_id: string
         }
         Insert: {
-          id?: string
-          spend_request_id: string
-          member_id: string
           content: string
           created_at?: string
+          id?: string
+          member_id: string
+          spend_request_id: string
         }
         Update: {
-          id?: string
-          spend_request_id?: string
-          member_id?: string
           content?: string
           created_at?: string
+          id?: string
+          member_id?: string
+          spend_request_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "spend_request_comments_spend_request_id_fkey"
-            columns: ["spend_request_id"]
+            foreignKeyName: "spend_request_comments_member_id_fkey"
+            columns: ["member_id"]
             isOneToOne: false
-            referencedRelation: "spend_requests"
+            referencedRelation: "member_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3022,112 +3744,119 @@ export type Database = {
             referencedRelation: "members"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "spend_request_comments_spend_request_id_fkey"
+            columns: ["spend_request_id"]
+            isOneToOne: false
+            referencedRelation: "spend_requests"
+            referencedColumns: ["id"]
+          },
         ]
       }
       spend_requests: {
         Row: {
-          id: string
-          community_id: string
-          title: string
-          description: string | null
           amount: number
-          category_id: string
-          fund: string
-          beneficiary_entity_id: string | null
-          evidence_url: string | null
-          status: string
-          authorization_level: number | null
-          budget_id: string | null
-          proposal_id: string | null
-          approved_by: string | null
           approval_note: string | null
-          rejection_reason: string | null
-          transaction_id: string | null
-          payment_reference: string | null
+          approved_by: string | null
+          authorization_level: number | null
+          beneficiary_entity_id: string | null
+          budget_id: string | null
+          category_id: string
+          community_id: string
+          created_at: string
+          description: string | null
+          evidence_url: string | null
+          fund: string
+          id: string
+          is_emergency: boolean
           paid_at: string | null
-          verified_by: string | null
+          payment_reference: string | null
+          proposal_id: string | null
+          ratification_deadline: string | null
+          ratification_proposal_id: string | null
+          rejection_reason: string | null
+          requested_by: string
+          status: string
+          title: string
+          transaction_id: string | null
+          updated_at: string
           verification_note: string | null
           verified_at: string | null
-          is_emergency: boolean
-          ratification_proposal_id: string | null
-          ratification_deadline: string | null
-          requested_by: string
-          created_at: string
-          updated_at: string
+          verified_by: string | null
         }
         Insert: {
-          id?: string
-          community_id: string
-          title: string
-          description?: string | null
           amount: number
-          category_id: string
-          fund?: string
-          beneficiary_entity_id?: string | null
-          evidence_url?: string | null
-          status?: string
-          authorization_level?: number | null
-          budget_id?: string | null
-          proposal_id?: string | null
-          approved_by?: string | null
           approval_note?: string | null
-          rejection_reason?: string | null
-          transaction_id?: string | null
-          payment_reference?: string | null
+          approved_by?: string | null
+          authorization_level?: number | null
+          beneficiary_entity_id?: string | null
+          budget_id?: string | null
+          category_id: string
+          community_id: string
+          created_at?: string
+          description?: string | null
+          evidence_url?: string | null
+          fund?: string
+          id?: string
+          is_emergency?: boolean
           paid_at?: string | null
-          verified_by?: string | null
+          payment_reference?: string | null
+          proposal_id?: string | null
+          ratification_deadline?: string | null
+          ratification_proposal_id?: string | null
+          rejection_reason?: string | null
+          requested_by: string
+          status?: string
+          title: string
+          transaction_id?: string | null
+          updated_at?: string
           verification_note?: string | null
           verified_at?: string | null
-          is_emergency?: boolean
-          ratification_proposal_id?: string | null
-          ratification_deadline?: string | null
-          requested_by: string
-          created_at?: string
-          updated_at?: string
+          verified_by?: string | null
         }
         Update: {
-          id?: string
-          community_id?: string
-          title?: string
-          description?: string | null
           amount?: number
-          category_id?: string
-          fund?: string
-          beneficiary_entity_id?: string | null
-          evidence_url?: string | null
-          status?: string
-          authorization_level?: number | null
-          budget_id?: string | null
-          proposal_id?: string | null
-          approved_by?: string | null
           approval_note?: string | null
-          rejection_reason?: string | null
-          transaction_id?: string | null
-          payment_reference?: string | null
+          approved_by?: string | null
+          authorization_level?: number | null
+          beneficiary_entity_id?: string | null
+          budget_id?: string | null
+          category_id?: string
+          community_id?: string
+          created_at?: string
+          description?: string | null
+          evidence_url?: string | null
+          fund?: string
+          id?: string
+          is_emergency?: boolean
           paid_at?: string | null
-          verified_by?: string | null
+          payment_reference?: string | null
+          proposal_id?: string | null
+          ratification_deadline?: string | null
+          ratification_proposal_id?: string | null
+          rejection_reason?: string | null
+          requested_by?: string
+          status?: string
+          title?: string
+          transaction_id?: string | null
+          updated_at?: string
           verification_note?: string | null
           verified_at?: string | null
-          is_emergency?: boolean
-          ratification_proposal_id?: string | null
-          ratification_deadline?: string | null
-          requested_by?: string
-          created_at?: string
-          updated_at?: string
+          verified_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "spend_requests_community_id_fkey"
-            columns: ["community_id"]
+            foreignKeyName: "spend_requests_approved_by_fkey"
+            columns: ["approved_by"]
             isOneToOne: false
-            referencedRelation: "communities"
+            referencedRelation: "member_profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "spend_requests_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "spend_requests_approved_by_fkey"
+            columns: ["approved_by"]
             isOneToOne: false
-            referencedRelation: "categories"
+            referencedRelation: "members"
             referencedColumns: ["id"]
           },
           {
@@ -3145,6 +3874,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "spend_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "decision_archive"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "spend_requests_proposal_id_fkey"
             columns: ["proposal_id"]
             isOneToOne: false
@@ -3152,8 +3902,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "spend_requests_approved_by_fkey"
-            columns: ["approved_by"]
+            foreignKeyName: "spend_requests_ratification_proposal_id_fkey"
+            columns: ["ratification_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "decision_archive"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_ratification_proposal_id_fkey"
+            columns: ["ratification_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "member_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spend_requests_requested_by_fkey"
+            columns: ["requested_by"]
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["id"]
@@ -3169,12 +3940,12 @@ export type Database = {
             foreignKeyName: "spend_requests_verified_by_fkey"
             columns: ["verified_by"]
             isOneToOne: false
-            referencedRelation: "members"
+            referencedRelation: "member_profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "spend_requests_requested_by_fkey"
-            columns: ["requested_by"]
+            foreignKeyName: "spend_requests_verified_by_fkey"
+            columns: ["verified_by"]
             isOneToOne: false
             referencedRelation: "members"
             referencedColumns: ["id"]
@@ -3270,6 +4041,13 @@ export type Database = {
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_correction_of_fkey"
+            columns: ["correction_of"]
+            isOneToOne: false
+            referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
           {
@@ -3656,6 +4434,15 @@ export type Database = {
         Args: { p_token: string; p_user_id: string }
         Returns: undefined
       }
+      advance_expired_discussions: { Args: never; Returns: number }
+      calculate_vote_weight: {
+        Args: { p_community_id: string; p_member_id: string }
+        Returns: number
+      }
+      classify_spend_request: {
+        Args: { p_spend_request_id: string }
+        Returns: number
+      }
       close_expired_proposal: {
         Args: { p_proposal_id: string }
         Returns: undefined
@@ -3694,10 +4481,15 @@ export type Database = {
         }
         Returns: string
       }
+      generate_monthly_statements_for_all_communities: {
+        Args: never
+        Returns: number
+      }
       generate_recurring_obligations: {
         Args: { p_schedule_id: string }
         Returns: number
       }
+      get_invitation_by_token: { Args: { p_token: string }; Returns: Json }
       get_member_debt_summary: {
         Args: { p_member_id: string }
         Returns: {
@@ -3745,8 +4537,10 @@ export type Database = {
         Returns: string
       }
       notify_pending_executions: { Args: never; Returns: undefined }
+      process_all_recurring_schedules: { Args: never; Returns: undefined }
       process_auto_executions: { Args: never; Returns: number }
       process_expired_proposals: { Args: never; Returns: number }
+      process_overdue_obligations: { Args: never; Returns: number }
       process_recurring_schedules: {
         Args: { p_community_id: string }
         Returns: number
@@ -3769,6 +4563,7 @@ export type Database = {
           type: string
         }[]
       }
+      send_payment_reminders: { Args: never; Returns: number }
       take_census_snapshot: {
         Args: { p_community_id: string }
         Returns: {

@@ -235,7 +235,7 @@ export async function assignMaintenanceRequest(
 // ---------------------------------------------------------------------------
 
 export async function getReservations(communityId: string): Promise<Reservation[]> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('common_area_reservations')
     .select('*')
     .eq('community_id', communityId)
@@ -256,7 +256,7 @@ export async function createReservation(
     notes?: string | null
   },
 ): Promise<Reservation> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('common_area_reservations')
     .insert({ community_id: communityId, ...reservation })
     .select()
@@ -267,7 +267,7 @@ export async function createReservation(
 }
 
 export async function cancelReservation(reservationId: string): Promise<void> {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('common_area_reservations')
     .update({ status: 'cancelled' })
     .eq('id', reservationId)

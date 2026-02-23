@@ -47,7 +47,7 @@ export function TransactionDetailDialog({ open, onOpenChange, transaction }: Pro
         .select('*, categories(name)')
         .eq('id', transaction.correction_of!)
         .single()
-      return data ? { ...data, category_name: (data as any).categories?.name } : null
+      return data ? { ...data, category_name: (data as any).categories?.name } as any : null
     },
     enabled: open && !!transaction.correction_of,
   })

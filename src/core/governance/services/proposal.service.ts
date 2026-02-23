@@ -346,13 +346,13 @@ export async function closeProposal(proposalId: string, communityId: string, clo
 }
 
 export async function processExpiredProposals(): Promise<number> {
-  const { data, error } = await (supabase as any).rpc('process_expired_proposals')
+  const { data, error } = await supabase.rpc('process_expired_proposals')
   if (error) { logger.warn('process_expired_proposals RPC not available yet', error.message); return 0 }
   return (data as number) ?? 0
 }
 
 export async function processAutoExecutions(): Promise<number> {
-  const { data, error } = await (supabase as any).rpc('process_auto_executions')
+  const { data, error } = await supabase.rpc('process_auto_executions')
   if (error) { logger.warn('process_auto_executions RPC not available yet:', error.message); return 0 }
   return (data as number) ?? 0
 }
@@ -454,7 +454,7 @@ async function resolveElectionMemberIds(
     if (optionFromValue?.id?.startsWith('member_')) {
       electedMemberId = optionFromValue.id.replace('member_', '')
     } else if (optionFromValue?.label) {
-      const { data: memberMatch } = await (supabase as any)
+      const { data: memberMatch } = await supabase
         .from('member_profiles')
         .select('id')
         .eq('community_id', communityId)

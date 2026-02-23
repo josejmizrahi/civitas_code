@@ -13,11 +13,11 @@ export interface FintechConfig {
 export interface PaymentEvent {
   id: string
   community_id: string
-  external_event_id: string
+  fintoc_event_id: string
   event_type: string
   event_data: Record<string, unknown>
   amount: number | null
-  currency: string
+  currency: string | null
   counterparty_name: string | null
   counterparty_clabe: string | null
   tracking_key: string | null
@@ -34,7 +34,7 @@ export interface CheckoutSession {
   community_id: string
   member_id: string
   obligation_id: string | null
-  external_session_id: string
+  fintoc_session_id: string
   amount: number
   currency: string
   status: 'created' | 'finished' | 'expired' | 'failed'
@@ -49,7 +49,7 @@ export interface CheckoutSession {
 export interface PaymentTransfer {
   id: string
   community_id: string
-  external_transfer_id: string | null
+  fintoc_transfer_id: string | null
   direction: 'inbound' | 'outbound'
   amount: number
   currency: string
@@ -180,7 +180,7 @@ export interface KybApplication {
   documents: KybDocuments
 
   rejection_reason: string | null
-  provider_notes: string | null
+  fintoc_notes: string | null
   submitted_at: string | null
   reviewed_at: string | null
   created_at: string

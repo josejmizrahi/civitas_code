@@ -17,7 +17,7 @@ additional_redirect_urls = ["http://localhost:5173", "https://civitas-code.verce
 jwt_expiry = 3600
 enable_signup = true
 # Leaked password protection (HaveIBeenPwned). Enable in Dashboard for hosted project.
-password_protection = true
+# password_protection = true  # Not supported by CLI v2.75, enabled in Dashboard
 
 [auth.email]
 enable_signup = true

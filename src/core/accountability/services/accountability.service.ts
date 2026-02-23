@@ -112,18 +112,18 @@ export async function getDecisionArchive(communityId: string): Promise<DecisionA
     .order('closed_at', { ascending: false })
 
   if (error) throw error
-  return (data ?? []) as DecisionArchiveEntry[]
+  return (data ?? []) as unknown as DecisionArchiveEntry[]
 }
 
 export async function searchDecisions(
   communityId: string,
   query: string
 ): Promise<DecisionArchiveEntry[]> {
-  const { data, error } = await (supabase as any).rpc('search_decisions', {
+  const { data, error } = await supabase.rpc('search_decisions', {
     p_community_id: communityId,
     p_query: query,
   })
 
   if (error) throw error
-  return (data ?? []) as DecisionArchiveEntry[]
+  return (data ?? []) as unknown as DecisionArchiveEntry[]
 }

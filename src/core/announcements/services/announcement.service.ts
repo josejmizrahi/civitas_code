@@ -2,7 +2,7 @@ import { supabase } from '@/shared/lib/supabase'
 import type { Announcement } from '../types'
 
 export async function getAnnouncements(communityId: string, memberId?: string): Promise<Announcement[]> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('announcements')
     .select('*')
     .eq('community_id', communityId)
@@ -14,7 +14,7 @@ export async function getAnnouncements(communityId: string, memberId?: string): 
   const announcements = (data ?? []) as Announcement[]
 
   if (memberId && announcements.length > 0) {
-    const { data: reads } = await (supabase as any)
+    const { data: reads } = await supabase
       .from('announcement_reads')
       .select('announcement_id')
       .eq('member_id', memberId)
@@ -32,7 +32,7 @@ export async function createAnnouncement(
   authorId: string,
   announcement: { title: string; body: string; priority?: string; pinned?: boolean; expires_at?: string | null },
 ): Promise<Announcement> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('announcements')
     .insert({
       community_id: communityId,
@@ -50,7 +50,7 @@ export async function updateAnnouncement(
   announcementId: string,
   updates: { title?: string; body?: string; priority?: string; pinned?: boolean; expires_at?: string | null },
 ): Promise<Announcement> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('announcements')
     .update(updates)
     .eq('id', announcementId)
@@ -62,7 +62,7 @@ export async function updateAnnouncement(
 }
 
 export async function deleteAnnouncement(announcementId: string): Promise<void> {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('announcements')
     .delete()
     .eq('id', announcementId)
@@ -71,7 +71,7 @@ export async function deleteAnnouncement(announcementId: string): Promise<void> 
 }
 
 export async function markAnnouncementRead(announcementId: string, memberId: string): Promise<void> {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('announcement_reads')
     .upsert({ announcement_id: announcementId, member_id: memberId }, { onConflict: 'announcement_id,member_id' })
 

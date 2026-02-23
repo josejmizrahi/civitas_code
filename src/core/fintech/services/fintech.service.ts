@@ -10,7 +10,7 @@ import type {
 
 // ─── Community Fintech Config ────────────────────────────────────
 export async function getFintechStatus(communityId: string) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('communities')
     .select('fintoc_status, fintoc_account_id, fintoc_root_clabe, fintoc_public_key')
     .eq('id', communityId)
@@ -29,7 +29,7 @@ export async function activateProvider(
   communityId: string,
   config: { account_id: string; root_clabe: string; public_key: string },
 ) {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('communities')
     .update({
       fintoc_status: 'active',
@@ -43,7 +43,7 @@ export async function activateProvider(
 }
 
 export async function deactivateProvider(communityId: string) {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('communities')
     .update({ fintoc_status: 'inactive' })
     .eq('id', communityId)
@@ -57,7 +57,7 @@ export async function createCheckoutSession(
   memberId: string,
   input: CreateCheckoutInput,
 ): Promise<CheckoutSession> {
-  const { data: community } = await (supabase as any)
+  const { data: community } = await supabase
     .from('communities')
     .select('fintoc_public_key, fintoc_account_id')
     .eq('id', communityId)
@@ -86,7 +86,7 @@ export async function getCheckoutSessions(
   communityId: string,
   memberId?: string,
 ): Promise<CheckoutSession[]> {
-  let query = (supabase as any)
+  let query = supabase
     .from('fintoc_checkout_sessions')
     .select('*')
     .eq('community_id', communityId)
@@ -105,7 +105,7 @@ export async function getPaymentEvents(
   communityId: string,
   status?: string,
 ): Promise<PaymentEvent[]> {
-  let query = (supabase as any)
+  let query = supabase
     .from('fintoc_events')
     .select('*')
     .eq('community_id', communityId)
@@ -124,7 +124,7 @@ export async function manualReconcile(
   obligationId: string,
   communityId: string,
 ): Promise<void> {
-  const { data: evt } = await (supabase as any)
+  const { data: evt } = await supabase
     .from('fintoc_events')
     .select('*')
     .eq('id', eventId)
@@ -134,7 +134,7 @@ export async function manualReconcile(
 
   const amount = (evt.amount || 0) / 100
 
-  const { data: tx } = await (supabase as any)
+  const { data: tx } = await supabase
     .from('transactions')
     .insert({
       community_id: communityId,
@@ -149,13 +149,13 @@ export async function manualReconcile(
     .single()
 
   if (tx) {
-    await (supabase as any)
+    await supabase
       .from('payment_obligations')
       .update({ status: 'paid', payment_transaction_id: tx.id })
       .eq('id', obligationId)
   }
 
-  await (supabase as any)
+  await supabase
     .from('fintoc_events')
     .update({
       reconciliation_status: 'manual',
@@ -167,7 +167,7 @@ export async function manualReconcile(
 }
 
 export async function ignoreEvent(eventId: string): Promise<void> {
-  await (supabase as any)
+  await supabase
     .from('fintoc_events')
     .update({
       reconciliation_status: 'ignored',
@@ -177,7 +177,7 @@ export async function ignoreEvent(eventId: string): Promise<void> {
 }
 
 export async function getReconciliationStats(communityId: string): Promise<ReconciliationStats> {
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from('fintoc_events')
     .select('reconciliation_status, amount')
     .eq('community_id', communityId)
@@ -213,7 +213,7 @@ export async function createOutboundTransfer(
 }
 
 export async function getTransfers(communityId: string): Promise<PaymentTransfer[]> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('fintoc_transfers')
     .select('*')
     .eq('community_id', communityId)
@@ -226,7 +226,7 @@ export async function getTransfers(communityId: string): Promise<PaymentTransfer
 
 // ─── Member CLABE management ──────────────────────────────────────
 export async function getMemberClabe(memberId: string): Promise<string | null> {
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from('members')
     .select('fintoc_clabe')
     .eq('id', memberId)
@@ -240,7 +240,7 @@ export async function assignMemberClabe(
   clabe: string,
   accountNumberId: string,
 ): Promise<void> {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('members')
     .update({ fintoc_clabe: clabe, fintoc_account_number_id: accountNumberId })
     .eq('id', memberId)

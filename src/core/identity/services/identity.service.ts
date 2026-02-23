@@ -270,12 +270,12 @@ export async function createCommunity(
   // Use RPC to atomically create community + admin member in one transaction.
   // This avoids the RLS race condition where .select() after INSERT fails
   // because the user isn't yet a member (SELECT policy checks membership).
-  const { data: result, error } = await (supabase as any).rpc('create_community_with_admin', {
+  const { data: result, error } = await supabase.rpc('create_community_with_admin', {
     p_user_id: userId,
     p_name: data.name,
     p_slug: slug,
     p_type: communityType,
-    p_description: data.description ?? null,
+    p_description: data.description || undefined,
   })
 
   if (error) {
@@ -298,7 +298,7 @@ export async function createCommunity(
     return community as Community
   }
 
-  const community = result as Community
+  const community = result as unknown as Community
   await seedCommunityDefaults(community.id, communityType)
   return community
 }
@@ -544,14 +544,14 @@ export async function reactivateMember(memberId: string): Promise<Member> {
 // ---------------------------------------------------------------------------
 
 export async function getInvitationByToken(token: string): Promise<Invitation | null> {
-  const { data, error } = await (supabase as any).rpc('get_invitation_by_token', { p_token: token })
+  const { data, error } = await supabase.rpc('get_invitation_by_token', { p_token: token })
   if (error) return null
   if (data == null) return null
-  return data as Invitation
+  return data as unknown as Invitation
 }
 
 export async function acceptInvitation(token: string, userId: string): Promise<void> {
-  const { error } = await (supabase as any).rpc('accept_invitation', {
+  const { error } = await supabase.rpc('accept_invitation', {
     p_token: token,
     p_user_id: userId,
   })

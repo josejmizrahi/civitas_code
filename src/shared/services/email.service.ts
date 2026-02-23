@@ -51,7 +51,7 @@ export async function sendEmailToMembers(
 
     if (error || !members?.length) return
 
-    const { data: profiles } = await (supabase as any).rpc('get_member_emails', {
+    const { data: profiles } = await supabase.rpc('get_member_emails', {
       p_user_ids: members.map((m: any) => m.user_id),
     })
 

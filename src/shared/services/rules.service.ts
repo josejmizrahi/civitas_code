@@ -22,7 +22,7 @@ export async function updateCommunityRules(
   proposalId?: string
 ): Promise<void> {
   // Snapshot current rules in rule_versions before updating
-  const { data: nextVersion } = await (supabase as any).rpc('get_next_rule_version', {
+  const { data: nextVersion } = await supabase.rpc('get_next_rule_version', {
     p_community_id: communityId,
   })
 
@@ -47,7 +47,7 @@ export async function getMemberFinancialStanding(
   memberId: string,
   communityId: string
 ): Promise<FinancialStanding> {
-  const { data, error } = await (supabase as any).rpc('compute_financial_standing', {
+  const { data, error } = await supabase.rpc('compute_financial_standing', {
     p_member_id: memberId,
     p_community_id: communityId,
   })
@@ -56,7 +56,7 @@ export async function getMemberFinancialStanding(
 }
 
 export async function refreshFinancialStandings(communityId: string): Promise<void> {
-  const { error } = await (supabase as any).rpc('refresh_financial_standings', {
+  const { error } = await supabase.rpc('refresh_financial_standings', {
     p_community_id: communityId,
   })
   if (error) throw error

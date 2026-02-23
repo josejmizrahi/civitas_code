@@ -56,12 +56,12 @@ export async function notifyCommunity(
   body?: string,
   metadata?: Record<string, unknown>
 ): Promise<number> {
-  const { data, error } = await (supabase as any).rpc('notify_community', {
+  const { data, error } = await supabase.rpc('notify_community', {
     p_community_id: communityId,
     p_type: type,
     p_title: title,
-    p_body: body ?? null,
-    p_metadata: metadata ?? {},
+    p_body: body,
+    p_metadata: metadata as import('@/shared/types/database').Json | undefined,
   })
   if (error) { logger.warn('notify_community failed:', error.message); return 0 }
   return (data as number) ?? 0
@@ -75,13 +75,13 @@ export async function notifyMember(
   body?: string,
   metadata?: Record<string, unknown>
 ): Promise<void> {
-  const { error } = await (supabase as any).rpc('notify_member', {
+  const { error } = await supabase.rpc('notify_member', {
     p_community_id: communityId,
     p_member_id: memberId,
     p_type: type,
     p_title: title,
-    p_body: body ?? null,
-    p_metadata: metadata ?? {},
+    p_body: body,
+    p_metadata: metadata as import('@/shared/types/database').Json | undefined,
   })
   if (error) logger.warn('notify_member failed:', error.message)
 }

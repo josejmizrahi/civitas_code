@@ -37,7 +37,7 @@ export interface MorosoChangeRecord {
 export async function computeMorosoStatus(
   communityId: string,
 ): Promise<MorosoChangeRecord[]> {
-  const { data, error } = await (supabase as any).rpc('compute_moroso_status', {
+  const { data, error } = await supabase.rpc('compute_moroso_status', {
     p_community_id: communityId,
   })
 
@@ -92,7 +92,7 @@ export async function getMorosoMembers(
 export async function getMemberDebtSummary(
   memberId: string,
 ): Promise<DebtSummary> {
-  const { data, error } = await (supabase as any).rpc('get_member_debt_summary', {
+  const { data, error } = await supabase.rpc('get_member_debt_summary', {
     p_member_id: memberId,
   })
 

@@ -194,7 +194,7 @@ export async function markInstallmentPaid(
   if (upError) throw upError
 
   // Update compliance score
-  await (supabase as any).rpc('update_contract_compliance', { p_contract_id: installment.contract_id })
+  await supabase.rpc('update_contract_compliance', { p_contract_id: installment.contract_id })
 
   return { installment: updated as ContractInstallment, transactionId: tx.id }
 }

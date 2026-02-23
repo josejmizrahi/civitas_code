@@ -82,7 +82,7 @@ export async function getSpendRequest(id: string): Promise<SpendRequest | null> 
 
 /** Clasificación por BD: 1=presupuesto, 2=discrecional, 3=votación, 4=emergencia */
 export async function classifySpendRequest(spendRequestId: string): Promise<number | null> {
-  const { data, error } = await (supabase as any).rpc('classify_spend_request', {
+  const { data, error } = await supabase.rpc('classify_spend_request', {
     p_spend_request_id: spendRequestId,
   })
   if (error) throw error
