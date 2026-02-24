@@ -14,11 +14,12 @@ import { ConvocatoriaCard } from '@/core/governance/components/ConvocatoriaCard'
 import { QuorumTierIndicator } from '@/core/governance/components/QuorumTierIndicator'
 import { AttendanceManager } from '@/core/governance/components/AttendanceManager'
 import { ProxyManager } from '@/core/governance/components/ProxyManager'
-import { ArrowLeft, Calendar, MapPin, User, Play, SkipForward, CheckCircle, XCircle } from 'lucide-react'
+import { Calendar, MapPin, User, Play, SkipForward, CheckCircle, XCircle } from 'lucide-react'
 import { formatDateTime } from '@/shared/lib/utils'
 import type { AssemblyStatus } from '@/core/governance/types'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
+import { Breadcrumb } from '@/shared/components/ui/breadcrumb'
 
 const STATUS_VARIANTS: Record<string, 'default' | 'success' | 'destructive' | 'warning' | 'secondary'> = {
   scheduled: 'secondary',
@@ -92,11 +93,15 @@ export function AssemblyDetailPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: t('nav.governance'), to: path('governance') },
+          { label: assembly.title },
+        ]}
+      />
+
       {/* Header */}
       <div className="flex items-start gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate(path('governance'))}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{assembly.title}</h1>

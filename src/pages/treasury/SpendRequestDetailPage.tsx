@@ -21,10 +21,11 @@ import {
   useAddSpendRequestAttachment,
 } from '@/core/treasury/hooks/useSpendRequests'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
+import { Breadcrumb } from '@/shared/components/ui/breadcrumb'
 import { useToast } from '@/shared/components/ui/toast'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
 import {
-  ArrowLeft,
   Loader2,
   Check,
   X,
@@ -64,6 +65,7 @@ export function SpendRequestDetailPage() {
   const { user } = useAuth()
   const toast = useToast()
   const { canManageTreasury, role, isAdmin } = usePermissions()
+  const communityPath = useCommunityPath()
 
   const { data: sr, isLoading } = useSpendRequest(id ?? null)
   const submitSpendRequest = useSubmitSpendRequest()
@@ -219,10 +221,15 @@ export function SpendRequestDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
+      <Breadcrumb
+        items={[
+          { label: 'Treasury', to: communityPath('treasury') },
+          { label: 'Solicitudes', to: communityPath('treasury/requests') },
+          { label: sr.title },
+        ]}
+      />
+
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/treasury/requests')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl font-bold">{sr.title}</h1>
           <div className="mt-1 flex flex-wrap items-center gap-2">

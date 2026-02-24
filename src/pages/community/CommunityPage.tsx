@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/tabs'
 import { Button } from '@/shared/components/ui/button'
+import { PageHeader } from '@/shared/components/ui/page-header'
+import { useTabParam } from '@/shared/hooks/useTabParam'
 import { MemberDirectory } from '@/core/identity/components/MemberDirectory'
 import { EntityList } from '@/core/entities/components/EntityList'
 import { useMembers } from '@/core/identity/hooks/useMembers'
@@ -13,9 +15,12 @@ import { CommunityActivityTab } from './CommunityActivityTab'
 
 type DirectoryView = 'members' | 'providers'
 
+const TABS = ['directory', 'activity'] as const
+type CommunityTab = (typeof TABS)[number]
+
 export function CommunityPage() {
   const { t } = useI18n()
-  const [tab, setTab] = useState('directory')
+  const [tab, setTab] = useTabParam<CommunityTab>('directory', TABS)
   const [directoryView, setDirectoryView] = useState<DirectoryView>('members')
   const { data: members } = useMembers()
 
@@ -32,20 +37,20 @@ export function CommunityPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('community.title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('community.subtitle')}</p>
-        </div>
-        {tab === 'directory' && directoryView !== 'providers' && (
-          <Button variant="outline" size="sm" onClick={handleExport} disabled={!members?.length}>
-            <Download className="mr-1 h-4 w-4" />
-            {t('members.export')}
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title={t('community.title')}
+        subtitle={t('community.subtitle')}
+        actions={
+          tab === 'directory' && directoryView !== 'providers' ? (
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={!members?.length}>
+              <Download className="mr-1 h-4 w-4" />
+              {t('members.export')}
+            </Button>
+          ) : undefined
+        }
+      />
 
-      <Tabs value={tab} onValueChange={setTab}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as CommunityTab)}>
         <TabsList className="gap-1">
           <TabsTrigger value="directory" className="flex items-center gap-1.5">
             <BookOpen className="h-3.5 w-3.5" />

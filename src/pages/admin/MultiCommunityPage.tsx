@@ -6,6 +6,7 @@ import { Button } from '@/shared/components/ui/button'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { useMultiCommunityOverview } from '@/core/identity/hooks/useMultiCommunity'
 import { useCommunityContext } from '@/app/providers'
+import { PageHeader } from '@/shared/components/ui/page-header'
 
 export function MultiCommunityPage() {
   const { data, isLoading, isError } = useMultiCommunityOverview()
@@ -17,12 +18,11 @@ export function MultiCommunityPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Consolidado Multi-Community</h1>
-        <p className="text-sm text-muted-foreground">
-          Vista rápida para seguimiento operativo entre comunidades.
-        </p>
-      </div>
+      <PageHeader
+        title="Consolidado Multi-Community"
+        subtitle="Vista rápida para seguimiento operativo entre comunidades."
+        icon={Building2}
+      />
 
       {isError && (
         <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">

@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { EntityDetail } from '@/core/entities/components/EntityDetail'
+import { PageHeader } from '@/shared/components/ui/page-header'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 
 export function EntityDetailPage() {
@@ -7,14 +8,14 @@ export function EntityDetailPage() {
   const navigate = useNavigate()
   const path = useCommunityPath()
 
-  if (!entityId) return null
+  if (!entityId) return <div className="p-8 text-center text-muted-foreground">Entidad no encontrada</div>
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Detalle de Entidad</h1>
-        <p className="text-sm text-muted-foreground">Información completa del proveedor o parte relacionada</p>
-      </div>
+      <PageHeader
+        title="Detalle de Entidad"
+        subtitle="Información completa del proveedor o parte relacionada"
+      />
       <EntityDetail entityId={entityId} onBack={() => navigate(path('entities'))} />
     </div>
   )

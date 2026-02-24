@@ -858,9 +858,12 @@ export type I18nKey =
   | 'community.directory.providers'
   | 'residential.title'
   | 'residential.subtitle'
+  | 'memberDetail.title'
   | 'memberDetail.back'
   | 'memberDetail.loading'
   | 'memberDetail.notFound'
+  | 'entityDetail.title'
+  | 'common.notFound'
 
 type Dictionary = Record<I18nKey, string>
 
@@ -1720,9 +1723,12 @@ const es: Dictionary = {
   'community.directory.providers': 'Proveedores',
   'residential.title': 'Residencial',
   'residential.subtitle': 'Unidades, mantenimiento, áreas comunes y reservaciones',
+  'memberDetail.title': 'Detalle de Miembro',
   'memberDetail.back': 'Volver a Comunidad',
   'memberDetail.loading': 'Cargando perfil del miembro...',
   'memberDetail.notFound': 'Miembro no encontrado',
+  'entityDetail.title': 'Detalle de Entidad',
+  'common.notFound': 'No encontrado',
 }
 
 const en: Dictionary = {
@@ -2581,9 +2587,12 @@ const en: Dictionary = {
   'community.directory.providers': 'Providers',
   'residential.title': 'Residential',
   'residential.subtitle': 'Units, maintenance, common areas, and reservations',
+  'memberDetail.title': 'Member Detail',
   'memberDetail.back': 'Back to Community',
   'memberDetail.loading': 'Loading member profile...',
   'memberDetail.notFound': 'Member not found',
+  'entityDetail.title': 'Entity Detail',
+  'common.notFound': 'Not found',
 }
 
 export const MESSAGES: Record<string, Dictionary> = {

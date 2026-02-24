@@ -19,17 +19,20 @@ import { Plus, Download, CheckCircle2, FileText, Landmark, Handshake, ScrollText
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useToast } from '@/shared/components/ui/toast'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { PageHeader } from '@/shared/components/ui/page-header'
+import { useTabParam } from '@/shared/hooks/useTabParam'
 
 const RulesPage = lazy(() => import('@/pages/rules/RulesPage').then(m => ({ default: m.RulesPage })))
 
-type GovernanceTab = 'proposals' | 'assemblies' | 'delegations' | 'minutes' | 'rules'
+const GOVERNANCE_TABS = ['proposals', 'assemblies', 'delegations', 'minutes', 'rules'] as const
+type GovernanceTab = (typeof GOVERNANCE_TABS)[number]
 
 export function GovernancePage() {
   const { t } = useI18n()
   const location = useLocation()
   const navigate = useNavigate()
   const { currentMember } = useCommunityContext()
-  const [tab, setTab] = useState<GovernanceTab>('proposals')
+  const [tab, setTab] = useTabParam<GovernanceTab>('proposals', GOVERNANCE_TABS)
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [showCreate, setShowCreate] = useState(false)
   const [showCreateAssembly, setShowCreateAssembly] = useState(false)
@@ -101,34 +104,34 @@ export function GovernancePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('governance.title')}</h1>
-          <p className="text-sm text-muted-foreground">{subtitleMap[tab]}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {tab === 'proposals' && (
-            <>
-              <Button variant="outline" size="sm" onClick={handleExport} disabled={!allProposals?.length}>
-                <Download className="mr-1 h-4 w-4" />
-                {t('governance.export')}
-              </Button>
-              {canCreateProposals && (
-                <Button onClick={() => setShowCreate(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('governance.newProposal')}
+      <PageHeader
+        title={t('governance.title')}
+        subtitle={subtitleMap[tab]}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            {tab === 'proposals' && (
+              <>
+                <Button variant="outline" size="sm" onClick={handleExport} disabled={!allProposals?.length}>
+                  <Download className="mr-1 h-4 w-4" />
+                  {t('governance.export')}
                 </Button>
-              )}
-            </>
-          )}
-          {tab === 'assemblies' && isAdmin && (
-            <Button onClick={() => setShowCreateAssembly(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('governance.newAssembly')}
-            </Button>
-          )}
-        </div>
-      </div>
+                {canCreateProposals && (
+                  <Button onClick={() => setShowCreate(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t('governance.newProposal')}
+                  </Button>
+                )}
+              </>
+            )}
+            {tab === 'assemblies' && isAdmin && (
+              <Button onClick={() => setShowCreateAssembly(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t('governance.newAssembly')}
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {successBanner && (
         <div className="flex items-start gap-2 rounded-md bg-green-50 border border-green-200 p-4 animate-in fade-in slide-in-from-top-2 duration-300">

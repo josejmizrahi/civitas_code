@@ -10,7 +10,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { Tags, Mail, Copy, X, Shield, Sliders, ScrollText, CalendarClock, Bell, UserCheck, ArrowLeft } from 'lucide-react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { InviteMemberDialog } from '@/core/identity/components/InviteMemberDialog'
 import { formatDate } from '@/shared/lib/utils'
 import type { CommunityRules } from '@/shared/types/rules'
@@ -22,6 +22,8 @@ import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { AuditLog } from '@/shared/components/AuditLog'
+import { PageHeader } from '@/shared/components/ui/page-header'
+import { useTabParam } from '@/shared/hooks/useTabParam'
 import { GeneralSettings } from './components/GeneralSettings'
 import { RulesEditor } from './components/RulesEditor'
 import { NotificationSettings } from './components/NotificationSettings'
@@ -33,15 +35,11 @@ export function SettingsPage() {
   const { isAdmin } = usePermissions()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const { t } = useI18n()
 
-  const tabFromUrl = searchParams.get('tab')
   type SettingsTab = 'general' | 'categories' | 'invitations' | 'rules' | 'notifications' | 'audit' | 'privacy' | 'terminos'
-  const validTabs: SettingsTab[] = ['general', 'categories', 'invitations', 'rules', 'notifications', 'audit', 'privacy', 'terminos']
-  const [tab, setTab] = useState<SettingsTab>(
-    validTabs.includes(tabFromUrl as SettingsTab) ? (tabFromUrl as SettingsTab) : 'general'
-  )
+  const SETTINGS_TABS: readonly SettingsTab[] = ['general', 'categories', 'invitations', 'rules', 'notifications', 'audit', 'privacy', 'terminos']
+  const [tab, setTab] = useTabParam<SettingsTab>('general', SETTINGS_TABS)
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
 
   // Push notification state
@@ -140,26 +138,22 @@ export function SettingsPage() {
         <Button variant="ghost" onClick={() => navigate(path('dashboard'))} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> {t('settings.backToPanel')}
         </Button>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('settings.title')}</h1>
-            <p className="text-sm text-muted-foreground">{t('settings.adminOnly')}</p>
-          </div>
-        </div>
+        <PageHeader
+          title={t('settings.title')}
+          subtitle={t('settings.adminOnly')}
+        />
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('settings.title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('settings.subtitle')} — {community?.name}</p>
-        </div>
-      </div>
+      <PageHeader
+        title={t('settings.title')}
+        subtitle={`${t('settings.subtitle')} — ${community?.name}`}
+      />
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as SettingsTab)}>
         <TabsList className="gap-1">
           <TabsTrigger value="general" className="shrink-0 whitespace-nowrap">{t('settings.tab.general')}</TabsTrigger>
           <TabsTrigger value="categories" className="shrink-0 whitespace-nowrap">{t('settings.tab.categories')}</TabsTrigger>

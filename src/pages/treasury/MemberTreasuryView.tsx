@@ -7,6 +7,7 @@ import { formatCurrency } from '@/shared/lib/utils'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { Wallet, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { PageHeader } from '@/shared/components/ui/page-header'
 
 export function MemberTreasuryView() {
   const { t } = useI18n()
@@ -30,10 +31,10 @@ export function MemberTreasuryView() {
 
   return (
     <div id="treasury-content" className="space-y-6">
-      <header>
-        <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">{t('treasury.title')}</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">{t('treasury.member.subtitle')}</p>
-      </header>
+      <PageHeader
+        title={t('treasury.title')}
+        subtitle={t('treasury.member.subtitle')}
+      />
 
       {/* 3 compact cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

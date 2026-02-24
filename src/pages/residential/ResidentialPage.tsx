@@ -12,12 +12,15 @@ import { useUnitsWithMembers, useCommonAreas, useReservations } from '@/vertical
 import { useMaintenanceRequests } from '@/verticals/residential/hooks/useMaintenanceRequests'
 import { Plus, Home, Wrench, Building, CalendarCheck, BarChart3 } from 'lucide-react'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { PageHeader } from '@/shared/components/ui/page-header'
+import { useTabParam } from '@/shared/hooks/useTabParam'
 
-type ResidentialTab = 'overview' | 'units' | 'maintenance' | 'common-areas' | 'reservations'
+const TABS = ['overview', 'units', 'maintenance', 'common-areas', 'reservations'] as const
+type ResidentialTab = (typeof TABS)[number]
 
 export function ResidentialPage() {
   const { t } = useI18n()
-  const [tab, setTab] = useState<ResidentialTab>('overview')
+  const [tab, setTab] = useTabParam<ResidentialTab>('overview', TABS)
   const [showForm, setShowForm] = useState(false)
 
   const { data: units } = useUnitsWithMembers()
@@ -36,20 +39,18 @@ export function ResidentialPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('residential.title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('residential.subtitle')}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {tab === 'maintenance' && (
+      <PageHeader
+        title={t('residential.title')}
+        subtitle={t('residential.subtitle')}
+        actions={
+          tab === 'maintenance' ? (
             <Button onClick={() => setShowForm(true)} className="gap-1.5">
               <Plus className="mr-1 h-4 w-4" />
               Nueva Solicitud
             </Button>
-          )}
-        </div>
-      </div>
+          ) : undefined
+        }
+      />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as ResidentialTab)}>
         <TabsList className="h-auto flex-wrap gap-1">

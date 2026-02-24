@@ -1,4 +1,6 @@
 import { useState, Suspense } from 'react'
+import { PageHeader } from '@/shared/components/ui/page-header'
+import { useTabParam } from '@/shared/hooks/useTabParam'
 import { useNavigate } from 'react-router-dom'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
@@ -47,7 +49,11 @@ import {
 } from 'lucide-react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 
-type TreasuryTab = 'dashboard' | 'requests' | 'transactions' | 'budgets' | 'obligations'
+const TREASURY_TABS = ['dashboard', 'requests', 'transactions', 'budgets', 'obligations'] as const
+type TreasuryTab = (typeof TREASURY_TABS)[number]
+
+const OBLIGATION_SUB_TABS = ['cobranza', 'collection', 'recurring', 'contracts', 'plans', 'my-payments', 'morosos', 'statements', 'discretionary'] as const
+type ObligationSubTab = (typeof OBLIGATION_SUB_TABS)[number]
 
 export function AdminTreasuryView() {
   const { t } = useI18n()
@@ -55,10 +61,10 @@ export function AdminTreasuryView() {
   const path = useCommunityPath()
   const { community } = useCommunityContext()
   const { canManageTreasury } = usePermissions()
-  const [activeTab, setActiveTab] = useState<TreasuryTab>('dashboard')
+  const [activeTab, setActiveTab] = useTabParam<TreasuryTab>('dashboard', TREASURY_TABS)
   const [selectedFund, setSelectedFund] = useState<FundType>('mantenimiento')
   const [showForm, setShowForm] = useState(false)
-  const [obligationsSubTab, setObligationsSubTab] = useState<string>('cobranza')
+  const [obligationsSubTab, setObligationsSubTab] = useTabParam<ObligationSubTab>('cobranza', OBLIGATION_SUB_TABS, 'subtab')
   const [memberIdFilter, setMemberIdFilter] = useState<string | null>(null)
 
   const rules = community?.rules as { treasury?: TreasuryRules } | null
@@ -111,21 +117,12 @@ export function AdminTreasuryView() {
   return (
     <div id="treasury-content" className="space-y-6">
       {/* Header */}
-      <header className="space-y-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">{t('treasury.title')}</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">{t('treasury.subtitle')}</p>
-            <div className="mt-2 flex items-center gap-2">
-              <span className={cn(
-                'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
-                'bg-primary/10 text-primary border border-primary/20'
-              )}>
-                <Wallet className="h-3.5 w-3.5" />
-                {modeLabel[treasuryMode] || treasuryMode}
-              </span>
-            </div>
-          </div>
+      <PageHeader
+        title={t('treasury.title')}
+        subtitle={t('treasury.subtitle')}
+        meta={modeLabel[treasuryMode] || treasuryMode}
+        icon={Wallet}
+        actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExportPDF} title={t('treasury.export.pdf.title')} className="gap-1.5">
               <Download className="h-4 w-4" /> PDF
@@ -139,27 +136,27 @@ export function AdminTreasuryView() {
               </Button>
             )}
           </div>
+        }
+      />
+
+      {fintechStatus !== 'active' && (
+        <div className="rounded-lg border bg-muted px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 text-sm text-foreground">
+            <Banknote className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span>Conecta la integración financiera para recibir pagos SPEI automáticamente, conciliar cuotas y dispersar pagos a proveedores.</span>
+          </div>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate(path('payments'))}>
+            Configurar pagos
+          </Button>
         </div>
+      )}
 
-        {fintechStatus !== 'active' && (
-          <div className="rounded-lg border bg-muted px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-sm text-foreground">
-              <Banknote className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <span>Conecta la integración financiera para recibir pagos SPEI automáticamente, conciliar cuotas y dispersar pagos a proveedores.</span>
-            </div>
-            <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate(path('payments'))}>
-              Configurar pagos
-            </Button>
-          </div>
-        )}
-
-        {showFundSelector && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground">{t('treasury.fund')}:</span>
-            <FundSelector value={selectedFund} onChange={setSelectedFund} />
-          </div>
-        )}
-      </header>
+      {showFundSelector && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">{t('treasury.fund')}:</span>
+          <FundSelector value={selectedFund} onChange={setSelectedFund} />
+        </div>
+      )}
 
       {/* Quick metrics */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -273,7 +270,7 @@ export function AdminTreasuryView() {
 
         {/* Tab: Obligaciones — sub-tabs */}
         <TabsContent value="obligations" className="mt-4">
-          <Tabs value={obligationsSubTab} onValueChange={setObligationsSubTab}>
+          <Tabs value={obligationsSubTab} onValueChange={(v) => setObligationsSubTab(v as ObligationSubTab)}>
             <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted p-1">
               <TabsTrigger value="cobranza" className="gap-1 text-xs sm:text-sm">Cobranza</TabsTrigger>
               <TabsTrigger value="collection" className="gap-1 text-xs sm:text-sm">Recaudación</TabsTrigger>

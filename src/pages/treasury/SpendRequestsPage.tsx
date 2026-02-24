@@ -7,6 +7,7 @@ import { useSpendRequests } from '@/core/treasury/hooks/useSpendRequests'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { formatCurrency } from '@/shared/lib/utils'
 import { Plus, FileText, Loader2 } from 'lucide-react'
+import { PageHeader } from '@/shared/components/ui/page-header'
 import type { SpendRequestStatus } from '@/core/treasury/types'
 
 const STATUS_LABELS: Record<SpendRequestStatus, string> = {
@@ -41,22 +42,18 @@ export function SpendRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-            Solicitudes de gasto
-          </h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Ciclo de vida de egresos: borrador → clasificación → aprobación/ejecución.
-          </p>
-        </div>
-        {canManageTreasury && (
-          <Button onClick={() => navigate('/treasury/requests/new')} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Nueva solicitud
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Solicitudes de gasto"
+        subtitle="Ciclo de vida de egresos: borrador → clasificación → aprobación/ejecución."
+        actions={
+          canManageTreasury ? (
+            <Button onClick={() => navigate('/treasury/requests/new')} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Nueva solicitud
+            </Button>
+          ) : undefined
+        }
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm text-muted-foreground">Estado:</span>

@@ -1,8 +1,9 @@
-import { useState } from 'react'
 import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Shield, FileText, DollarSign, CalendarClock, Activity, AlertTriangle, Flag, ClipboardList } from 'lucide-react'
+import { PageHeader } from '@/shared/components/ui/page-header'
+import { useTabParam } from '@/shared/hooks/useTabParam'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { FinancialReviewPanel } from '@/core/governance/components/FinancialReviewPanel'
@@ -12,10 +13,13 @@ import { VigilanceAlertasTab } from '@/core/governance/components/VigilanceAlert
 import { FlaggedTransactionsTab } from '@/core/governance/components/FlaggedTransactionsTab'
 import { AuditLog } from '@/shared/components/AuditLog'
 
+const VIGILANCIA_TABS = ['reportes', 'revision', 'discrecional', 'terminos', 'activity', 'alertas', 'flagged', 'audit'] as const
+type VigilanciaTab = (typeof VIGILANCIA_TABS)[number]
+
 export function VigilanciaPage() {
   const { communityId: _communityId } = useCommunityContext()
   const { isAdmin, role } = usePermissions()
-  const [activeTab, setActiveTab] = useState('reportes')
+  const [activeTab, setActiveTab] = useTabParam<VigilanciaTab>('reportes', VIGILANCIA_TABS)
   const isComite = role === 'comite_vigilancia' || isAdmin
 
   if (!isComite) {
@@ -33,16 +37,13 @@ export function VigilanciaPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Comité de Vigilancia</h1>
-          <p className="text-sm text-muted-foreground">
-            Supervisión financiera y reportes — Art. 43-46 LPCI CDMX
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Comité de Vigilancia"
+        subtitle="Supervisión financiera y reportes — Art. 43-46 LPCI CDMX"
+        icon={Shield}
+      />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as VigilanciaTab)}>
         <TabsList className="h-auto flex-wrap gap-1">
           <TabsTrigger value="reportes" className="flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" />

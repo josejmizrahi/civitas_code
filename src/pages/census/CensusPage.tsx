@@ -31,7 +31,8 @@ import {
   useTakeCensusSnapshot,
   usePlatformCensus,
 } from '@/census/hooks/useCensus'
-import { useState } from 'react'
+import { PageHeader } from '@/shared/components/ui/page-header'
+import { useTabParam } from '@/shared/hooks/useTabParam'
 import { useToast } from '@/shared/components/ui/toast'
 import {
   AreaChart,
@@ -463,18 +464,19 @@ function PlatformCensusTab() {
   )
 }
 
+const CENSUS_TABS = ['community', 'platform'] as const
+type CensusTab = (typeof CENSUS_TABS)[number]
+
 export function CensusPage() {
-  const [activeTab, setActiveTab] = useState('community')
+  const [activeTab, setActiveTab] = useTabParam<CensusTab>('community', CENSUS_TABS)
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Censo</h1>
-          <p className="text-sm text-muted-foreground">Métricas de tu comunidad y de la red Civitas</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Censo"
+        subtitle="Métricas de tu comunidad y de la red Civitas"
+      />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as CensusTab)}>
         <TabsList className="gap-1">
           <TabsTrigger value="community">
             <Building2 className="mr-2 h-4 w-4" />

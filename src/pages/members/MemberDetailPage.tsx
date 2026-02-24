@@ -28,6 +28,7 @@ import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIAN
 import { useConfirm } from '@/shared/components/ConfirmDialog'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { Breadcrumb } from '@/shared/components/ui/breadcrumb'
 
 interface PaymentObligation {
   id: string
@@ -178,10 +179,12 @@ export function MemberDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Back button */}
-      <Button variant="ghost" onClick={() => navigate(path('community'))} className="gap-2">
-        <ArrowLeft className="h-4 w-4" /> {t('memberDetail.back')}
-      </Button>
+      <Breadcrumb
+        items={[
+          { label: t('nav.community'), to: path('community') },
+          { label: member.full_name || member.email || t('memberDetail.title') },
+        ]}
+      />
 
       {/* Header Card */}
       <Card>
