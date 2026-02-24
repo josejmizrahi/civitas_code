@@ -174,3 +174,69 @@ export function useClassifySpendRequest() {
     mutationFn: (spendRequestId: string) => spendRequestService.classifySpendRequest(spendRequestId),
   })
 }
+
+/** Creates a governance proposal linked to an N3 spend request */
+export function useCreateProposalForSpendRequest() {
+  const queryClient = useQueryClient()
+  const { community } = useCommunityContext()
+  const communityId = community?.id ?? ''
+
+  return useMutation({
+    mutationFn: ({ spendRequestId, createdByUserId }: { spendRequestId: string; createdByUserId: string }) =>
+      spendRequestService.createProposalForSpendRequest(communityId, spendRequestId, createdByUserId),
+    onSuccess: (_, { spendRequestId }) => {
+      queryClient.invalidateQueries({ queryKey: ['spend-requests', communityId] })
+      queryClient.invalidateQueries({ queryKey: ['spend-request', spendRequestId] })
+      queryClient.invalidateQueries({ queryKey: ['proposals'] })
+    },
+  })
+}
+
+export function useSpendRequestAttachments(spendRequestId: string | null) {
+  return useQuery({
+    queryKey: ['spend-request-attachments', spendRequestId],
+    queryFn: () => (spendRequestId ? spendRequestService.listSpendRequestAttachments(spendRequestId) : []),
+    enabled: !!spendRequestId,
+  })
+}
+
+export function useAddSpendRequestAttachment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ spendRequestId, ...payload }: {
+      spendRequestId: string
+      type: string
+      file_url: string
+      description?: string
+      uploaded_by?: string
+    }) => spendRequestService.addSpendRequestAttachment(spendRequestId, payload),
+    onSuccess: (_, { spendRequestId }) => {
+      queryClient.invalidateQueries({ queryKey: ['spend-request-attachments', spendRequestId] })
+    },
+  })
+}
+
+export function useSpendRequestComments(spendRequestId: string | null) {
+  return useQuery({
+    queryKey: ['spend-request-comments', spendRequestId],
+    queryFn: () => (spendRequestId ? spendRequestService.listSpendRequestComments(spendRequestId) : []),
+    enabled: !!spendRequestId,
+  })
+}
+
+export function useAddSpendRequestComment() {
+  const queryClient = useQueryClient()
+  const { community } = useCommunityContext()
+  const communityId = community?.id ?? ''
+
+  return useMutation({
+    mutationFn: ({ spendRequestId, userId, content }: {
+      spendRequestId: string
+      userId: string
+      content: string
+    }) => spendRequestService.addSpendRequestComment(communityId, spendRequestId, userId, content),
+    onSuccess: (_, { spendRequestId }) => {
+      queryClient.invalidateQueries({ queryKey: ['spend-request-comments', spendRequestId] })
+    },
+  })
+}

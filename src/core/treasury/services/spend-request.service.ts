@@ -1,6 +1,8 @@
 import { supabase } from '@/shared/lib/supabase'
 import { AppError } from '@/shared/lib/errors'
 import { assertCanPerformAction } from '@/shared/services/rules.service'
+import { createProposal } from '@/core/governance/services/proposal.service'
+import type { Proposal } from '@/core/governance/types'
 import type {
   SpendRequest,
   SpendRequestStatus,
@@ -378,6 +380,48 @@ export async function linkProposalToSpendRequest(
     .single()
   if (error) throw error
   return data as SpendRequest
+}
+
+/**
+ * Creates a governance proposal linked to an N3 spend request.
+ * 1. Creates a proposal with a `disbursement` financial instruction containing
+ *    the spend_request_id so that executeProposal auto-approves the SR.
+ * 2. Calls linkProposalToSpendRequest to set spend_request.proposal_id.
+ */
+export async function createProposalForSpendRequest(
+  communityId: string,
+  spendRequestId: string,
+  createdByUserId: string
+): Promise<Proposal> {
+  const sr = await getSpendRequest(spendRequestId)
+  if (!sr) throw new AppError('Solicitud no encontrada.', 'NOT_FOUND')
+  if (sr.status !== 'pending_vote') {
+    throw new AppError('Solo se puede crear propuesta para solicitudes en pending_vote.', 'VALIDATION')
+  }
+  if (sr.proposal_id) {
+    throw new AppError('Esta solicitud ya tiene una propuesta vinculada.', 'VALIDATION')
+  }
+
+  const proposal = await createProposal(communityId, {
+    title: `Gasto: ${sr.title}`,
+    description: sr.description || `Aprobación de gasto por ${sr.amount}`,
+    type: 'gasto',
+    quorum_required: 0,
+    majority_required: 0,
+    voting_start: null,
+    voting_end: null,
+    created_by: createdByUserId,
+    financial_instruction: {
+      type: 'disbursement',
+      amount: sr.amount,
+      description: sr.description ?? undefined,
+      category_id: sr.category_id,
+      spend_request_id: spendRequestId,
+    },
+  })
+
+  await linkProposalToSpendRequest(communityId, spendRequestId, proposal.id)
+  return proposal
 }
 
 /** Cancela una solicitud (solo draft o rechazada; admin/tesorero) */

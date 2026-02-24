@@ -109,6 +109,8 @@ export interface FinancialInstruction {
   config_value?: unknown
   member_id?: string
   role?: string
+  /** Links a disbursement proposal back to a spend request (N3 flow) */
+  spend_request_id?: string
 }
 
 export const DEFAULT_RULES: CommunityRules = {

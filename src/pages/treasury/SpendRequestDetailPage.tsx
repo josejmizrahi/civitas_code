@@ -14,6 +14,7 @@ import {
   useExecuteSpendRequest,
   useVerifySpendRequest,
   useCancelSpendRequest,
+  useCreateProposalForSpendRequest,
 } from '@/core/treasury/hooks/useSpendRequests'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useToast } from '@/shared/components/ui/toast'
@@ -27,6 +28,7 @@ import {
   Banknote,
   ShieldCheck,
   Ban,
+  Vote,
 } from 'lucide-react'
 import type { SpendRequestStatus } from '@/core/treasury/types'
 
@@ -63,6 +65,7 @@ export function SpendRequestDetailPage() {
   const executeSpendRequest = useExecuteSpendRequest()
   const verifySpendRequest = useVerifySpendRequest()
   const cancelSpendRequest = useCancelSpendRequest()
+  const createProposal = useCreateProposalForSpendRequest()
 
   const [approvalNote, setApprovalNote] = useState('')
   const [rejectionReason, setRejectionReason] = useState('')
@@ -76,6 +79,7 @@ export function SpendRequestDetailPage() {
   const canVerify = (role === 'comite_vigilancia' || isAdmin) && sr?.status === 'executed'
   const canSubmit = canManageTreasury && sr?.status === 'draft' && user?.id
   const canCancel = canManageTreasury && (sr?.status === 'draft' || sr?.status === 'rejected') && user?.id
+  const canCreateProposal = canManageTreasury && sr?.status === 'pending_vote' && !sr?.proposal_id && user?.id
 
   const handleSubmit = async () => {
     if (!sr || !user?.id) return
@@ -163,6 +167,20 @@ export function SpendRequestDetailPage() {
       navigate('/treasury/requests')
     } catch {
       toast.error('No se pudo cancelar.')
+    }
+  }
+
+  const handleCreateProposal = async () => {
+    if (!sr || !user?.id) return
+    try {
+      const proposal = await createProposal.mutateAsync({
+        spendRequestId: sr.id,
+        createdByUserId: user.id,
+      })
+      toast.success('Propuesta creada.')
+      navigate(`/governance/${proposal.id}`)
+    } catch {
+      toast.error('No se pudo crear la propuesta.')
     }
   }
 
@@ -358,6 +376,16 @@ export function SpendRequestDetailPage() {
               >
                 <Ban className="h-4 w-4" />
                 Cancelar solicitud
+              </Button>
+            )}
+            {canCreateProposal && (
+              <Button
+                onClick={handleCreateProposal}
+                disabled={createProposal.isPending}
+                className="gap-2"
+              >
+                {createProposal.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Vote className="h-4 w-4" />}
+                Crear propuesta de votacion
               </Button>
             )}
             {sr.status === 'pending_vote' && sr.proposal_id && (

@@ -6,6 +6,7 @@ import {
   updateRecurringSchedule,
   deleteRecurringSchedule,
   processRecurringSchedules,
+  generateSingleSchedule,
 } from '../services/recurring.service'
 
 const recurringKeys = {
@@ -63,6 +64,20 @@ export function useProcessRecurringSchedules() {
 
   return useMutation({
     mutationFn: () => processRecurringSchedules(communityId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: recurringKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['payment_obligations'] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+  })
+}
+
+export function useGenerateSingleSchedule() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (scheduleId: string) => generateSingleSchedule(scheduleId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: recurringKeys.all })
       queryClient.invalidateQueries({ queryKey: ['payment_obligations'] })

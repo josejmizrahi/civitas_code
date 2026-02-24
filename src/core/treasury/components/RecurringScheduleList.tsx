@@ -5,6 +5,7 @@ import {
   useUpdateRecurringSchedule,
   useDeleteRecurringSchedule,
   useProcessRecurringSchedules,
+  useGenerateSingleSchedule,
 } from '../hooks/useRecurring'
 import { useEntities } from '@/core/entities/hooks/useEntities'
 import { usePermissions } from '@/shared/hooks/usePermissions'
@@ -18,7 +19,7 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Card, CardContent } from '@/shared/components/ui/card'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
-import { Plus, Play, Pause, Trash2, RefreshCw, CalendarClock } from 'lucide-react'
+import { Plus, Play, Pause, Trash2, RefreshCw, CalendarClock, Zap } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
 import { useConfirm } from '@/shared/components/ConfirmDialog'
 
@@ -41,6 +42,7 @@ export function RecurringScheduleList() {
   const updateSchedule = useUpdateRecurringSchedule()
   const deleteSchedule = useDeleteRecurringSchedule()
   const processAll = useProcessRecurringSchedules()
+  const runSingle = useGenerateSingleSchedule()
   const toast = useToast()
   const confirm = useConfirm()
 
@@ -236,6 +238,14 @@ export function RecurringScheduleList() {
                   {canManageTreasury && (
                     <TableCell>
                       <div className="flex gap-1">
+                        {s.is_active && (
+                          <Button size="icon" variant="ghost" onClick={() => runSingle.mutate(s.id, {
+                            onSuccess: () => toast.success('Obligaciones generadas'),
+                            onError: () => toast.error('Error al ejecutar recurrente'),
+                          })} aria-label="Ejecutar ahora" disabled={runSingle.isPending}>
+                            <Zap className="h-4 w-4 text-amber-500" />
+                          </Button>
+                        )}
                         <Button size="icon" variant="ghost" onClick={() => handleToggle(s.id, s.is_active)} aria-label={s.is_active ? 'Pausar' : 'Activar'}>
                           {s.is_active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                         </Button>
