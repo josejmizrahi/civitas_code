@@ -21,7 +21,7 @@ import {
   Users, Wallet, Vote, TrendingUp, TrendingDown,
   AlertCircle, Shield, UserCheck, BarChart3,
   ArrowUpCircle, Receipt, Calendar, FileText, ChevronRight,
-  Heart, Activity,
+  Heart,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
@@ -87,7 +87,7 @@ function computeNationHealth(params: {
 
 export function DashboardPage() {
   const { community, currentMember } = useCommunityContext()
-  const { labels, isAdmin: tenantIsAdmin, legalFramework } = useTenant()
+  const { labels, legalFramework } = useTenant()
   const path = useCommunityPath()
   const { data: members, isLoading: membersLoading, error: membersError } = useMembers()
   const { data: stats, isLoading: statsLoading, error: statsError } = useDashboard()

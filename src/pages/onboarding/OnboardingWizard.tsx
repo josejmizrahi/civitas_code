@@ -42,6 +42,7 @@ import {
   AlertTriangle,
   Info,
   XCircle,
+  Circle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
