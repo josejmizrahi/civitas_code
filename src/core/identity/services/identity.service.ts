@@ -6,6 +6,7 @@ import { DEFAULT_RULES } from '@/shared/types/rules'
 import { getPresetForType } from '@/shared/config/vertical-presets'
 import type { CommunityType } from '@/shared/types'
 import type { Member, Invitation, Community } from '../types'
+import { emitMemberJoined, emitMemberRoleChanged, emitMemberDeactivated } from '@/primitives/identity/events'
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrador',
@@ -89,6 +90,14 @@ export async function updateMemberRole(
   memberId: string,
   role: string,
 ): Promise<Member> {
+  // Get current role before update for the event
+  const { data: current } = await supabase
+    .from('members')
+    .select('role, community_id, user_id')
+    .eq('id', memberId)
+    .single()
+  const previousRole = (current as { role: string } | null)?.role ?? 'unknown'
+
   const { data, error } = await supabase
     .from('members')
     .update({ role })
@@ -97,7 +106,17 @@ export async function updateMemberRole(
     .single()
 
   if (error) throw error
-  return data as Member
+  const member = data as Member
+
+  if (previousRole !== role) {
+    void emitMemberRoleChanged(member.community_id, null, {
+      memberId,
+      previousRole,
+      newRole: role,
+    })
+  }
+
+  return member
 }
 
 export async function updateMemberCustomAttributes(
@@ -195,11 +214,16 @@ function slugify(text: string): string {
     .replace(/-+/g, '-')
 }
 
+const VALID_COMMUNITY_TYPES: Set<string> = new Set([
+  'residential', 'association', 'club', 'school', 'religious',
+  'ngo', 'cooperative', 'custom', 'manufacturing', 'other',
+])
+
 function resolveCommunityType(type?: string): CommunityType {
-  if (type === 'residential' || type === 'religious' || type === 'manufacturing' || type === 'cooperative' || type === 'other') {
-    return type
+  if (type && VALID_COMMUNITY_TYPES.has(type)) {
+    return type as CommunityType
   }
-  return 'residential'
+  return 'custom'
 }
 
 function hasNonEmptyObject(value: unknown): value is Record<string, unknown> {
@@ -394,7 +418,17 @@ export async function joinCommunity(
     .single()
 
   if (error) throw error
-  return data as Member
+  const member = data as Member
+
+  // Fire-and-forget: emit domain event
+  void emitMemberJoined(communityId, userId, {
+    memberId: member.id,
+    userId,
+    role,
+    invitedBy: null,
+  })
+
+  return member
 }
 
 
@@ -524,7 +558,14 @@ export async function deactivateMember(memberId: string): Promise<Member> {
     .single()
 
   if (error) throw error
-  return data as unknown as Member
+  const member = data as unknown as Member
+
+  void emitMemberDeactivated(member.community_id, null, {
+    memberId,
+    reason: 'manual_deactivation',
+  })
+
+  return member
 }
 
 export async function reactivateMember(memberId: string): Promise<Member> {

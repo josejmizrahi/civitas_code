@@ -14,6 +14,11 @@ import type {
   CollectionConfig,
   DiscretionaryApproval,
 } from '../types'
+import {
+  emitObligationCreated,
+  emitObligationPaid,
+  emitTransactionCreated,
+} from '@/primitives/treasury/events'
 
 async function getMemberIdByUserId(communityId: string, userId: string): Promise<string | null> {
   const { data, error } = await supabase
@@ -382,6 +387,16 @@ export async function createTransaction(
     }
   }
 
+  // Emit domain event
+  void emitTransactionCreated(communityId, transaction.created_by, {
+    transactionId: (data as { id: string }).id,
+    type: transaction.type as 'income' | 'expense',
+    amount: Number(transaction.amount),
+    categoryId: transaction.category_id ?? null,
+    origin: transaction.origin ?? 'manual',
+    description: transaction.description,
+  })
+
   return data as Transaction
 }
 
@@ -504,7 +519,17 @@ export async function createPaymentObligation(communityId: string, obligation: {
     .select()
     .single()
   if (error) throw error
-  return data as PaymentObligation
+  const ob = data as PaymentObligation
+
+  void emitObligationCreated(communityId, null, {
+    obligationId: ob.id,
+    memberId: obligation.member_id,
+    amount: obligation.amount,
+    dueDate: obligation.due_date,
+    concept: obligation.concept,
+  })
+
+  return ob
 }
 
 export async function createBulkObligations(communityId: string, memberIds: string[], obligation: { amount: number; due_date: string; concept: string }): Promise<PaymentObligation[]> {
@@ -594,6 +619,14 @@ export async function markObligationAsPaid(
     .select()
     .single()
   if (obError) throw obError
+
+  // Emit domain event for obligation paid
+  void emitObligationPaid(obligation.community_id, paymentDetails.created_by, {
+    obligationId: obligation.id,
+    memberId: obligation.member_id,
+    amount: Number(obligation.amount),
+    transactionId: (tx as { id: string }).id,
+  })
 
   return {
     transaction: tx as Transaction,

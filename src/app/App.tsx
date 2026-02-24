@@ -1,10 +1,13 @@
+import { useEffect } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, CommunityProvider } from './providers'
+import { TenantProvider } from './providers/TenantProvider'
 import { AppRouter } from './routes'
 import { ToastProvider } from '@/shared/components/ui/toast'
 import { ConfirmProvider } from '@/shared/components/ConfirmDialog'
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary'
 import { ThemeContext, useThemeState } from '@/shared/hooks/useTheme'
+import { initializePrimitives } from '@/primitives/setup'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +25,12 @@ const queryClient = new QueryClient({
 export default function App() {
   const themeState = useThemeState()
 
+  // Initialize the primitive event system once at app bootstrap
+  useEffect(() => {
+    const cleanup = initializePrimitives()
+    return cleanup
+  }, [])
+
   return (
     <ErrorBoundary>
       <ThemeContext.Provider value={themeState}>
@@ -30,7 +39,9 @@ export default function App() {
             <ConfirmProvider>
               <AuthProvider>
                 <CommunityProvider>
-                  <AppRouter />
+                  <TenantProvider>
+                    <AppRouter />
+                  </TenantProvider>
                 </CommunityProvider>
               </AuthProvider>
             </ConfirmProvider>

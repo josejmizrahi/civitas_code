@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth, useCommunityContext } from '@/app/providers'
 import { createCommunity, seedCommunityCategories, updateCommunityConfig, isSlugAvailable } from '@/core/identity/services/identity.service'
@@ -23,22 +23,44 @@ import { cn } from '@/shared/lib/utils'
 import { isValidCurrencyCode, isValidLocaleCode, normalizeCurrencyCode, normalizeLocaleCode } from '@/shared/lib/locale'
 import { getCompliancePreset } from '@/shared/config/compliance-presets'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { COMMUNITY_TYPE_OPTIONS, getPreset } from '@/engine/rules'
+import type { CommunityType as EngineCommunityType } from '@/engine/rules'
+import { getLegalFramework, validateCompliance } from '@/engine/compliance'
 import {
-  Building2,
+  Home,
+  Users,
+  Trophy,
+  GraduationCap,
   Church,
-  Factory,
+  HeartHandshake,
   Handshake,
-  Circle,
+  Settings,
   ChevronRight,
   ChevronLeft,
   Check,
   Loader2,
+  AlertTriangle,
+  Info,
+  XCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
-// Community type options
+// Community type options — from engine presets
 // ---------------------------------------------------------------------------
+
+/** Map preset icon keys to Lucide components */
+const ICON_MAP: Record<string, LucideIcon> = {
+  'building-2': Home,
+  'home': Home,
+  'users': Users,
+  'trophy': Trophy,
+  'graduation-cap': GraduationCap,
+  'church': Church,
+  'heart-handshake': HeartHandshake,
+  'handshake': Handshake,
+  'settings': Settings,
+}
 
 interface CommunityTypeOption {
   value: CommunityType
@@ -47,146 +69,31 @@ interface CommunityTypeOption {
   icon: LucideIcon
 }
 
-const COMMUNITY_TYPES: CommunityTypeOption[] = [
-  {
-    value: 'residential',
-    label: 'Residencial',
-    description: 'Condominios, fraccionamientos, edificios',
-    icon: Building2,
-  },
-  {
-    value: 'religious',
-    label: 'Religioso',
-    description: 'Templos, parroquias, congregaciones',
-    icon: Church,
-  },
-  {
-    value: 'manufacturing',
-    label: 'Manufactura',
-    description: 'Asociaciones industriales, cooperativas de producción',
-    icon: Factory,
-  },
-  {
-    value: 'cooperative',
-    label: 'Cooperativa',
-    description: 'Cooperativas, asociaciones civiles',
-    icon: Handshake,
-  },
-  {
-    value: 'other',
-    label: 'Otro',
-    description: 'Otro tipo de organización',
-    icon: Circle,
-  },
-]
+const COMMUNITY_TYPES: CommunityTypeOption[] = COMMUNITY_TYPE_OPTIONS.map((opt) => ({
+  value: opt.type as CommunityType,
+  label: opt.displayName,
+  description: opt.description,
+  icon: ICON_MAP[opt.icon] ?? Settings,
+}))
 
 // ---------------------------------------------------------------------------
-// Rule presets by community type
+// Rule presets — derived from engine presets
 // ---------------------------------------------------------------------------
-
-const RULE_PRESETS: Record<string, Partial<CommunityRules>> = {
-  residential: {
-    governance: {
-      ...DEFAULT_RULES.governance,
-      default_quorum: 0.5,
-      default_majority: 0.5,
-      delegation_enabled: true,
-      proposal_rights: ['admin', 'tesorero', 'miembro'],
-      cool_down_hours: 48,
-      auto_execution_enabled: false,
-      auto_execution_threshold: 0,
-    },
-    treasury: {
-      ...DEFAULT_RULES.treasury,
-      admin_spending_limit: 50000,
-      require_vote_above: 50000,
-    },
-    identity: {
-      ...DEFAULT_RULES.identity,
-      payment_to_vote_enabled: true,
-      grace_period_months: 2,
-      delinquent_restrictions: ['vote', 'propose'],
-    },
-  },
-  religious: {
-    governance: {
-      ...DEFAULT_RULES.governance,
-      default_quorum: 0.33,
-      default_majority: 0.5,
-      delegation_enabled: false,
-      proposal_rights: ['admin'],
-      cool_down_hours: 24,
-      auto_execution_enabled: false,
-      auto_execution_threshold: 0,
-    },
-    treasury: {
-      ...DEFAULT_RULES.treasury,
-      admin_spending_limit: 20000,
-      require_vote_above: 20000,
-    },
-    identity: {
-      ...DEFAULT_RULES.identity,
-      payment_to_vote_enabled: false,
-      grace_period_months: 3,
-      delinquent_restrictions: [],
-    },
-  },
-  manufacturing: {
-    governance: {
-      ...DEFAULT_RULES.governance,
-      default_quorum: 0.66,
-      default_majority: 0.66,
-      delegation_enabled: true,
-      proposal_rights: ['admin', 'tesorero'],
-      cool_down_hours: 72,
-      auto_execution_enabled: false,
-      auto_execution_threshold: 0,
-    },
-    treasury: {
-      ...DEFAULT_RULES.treasury,
-      admin_spending_limit: 100000,
-      require_vote_above: 100000,
-    },
-    identity: {
-      ...DEFAULT_RULES.identity,
-      payment_to_vote_enabled: true,
-      grace_period_months: 1,
-      delinquent_restrictions: ['vote', 'propose', 'delegate'],
-    },
-  },
-  cooperative: {
-    governance: {
-      ...DEFAULT_RULES.governance,
-      default_quorum: 0.5,
-      default_majority: 0.5,
-      delegation_enabled: true,
-      proposal_rights: ['admin', 'tesorero', 'miembro'],
-      cool_down_hours: 48,
-      auto_execution_enabled: false,
-      auto_execution_threshold: 0,
-    },
-    treasury: {
-      ...DEFAULT_RULES.treasury,
-      admin_spending_limit: 30000,
-      require_vote_above: 30000,
-    },
-    identity: {
-      ...DEFAULT_RULES.identity,
-      payment_to_vote_enabled: true,
-      grace_period_months: 2,
-      delinquent_restrictions: ['vote'],
-    },
-  },
-}
 
 function getRulesForType(type: CommunityType): CommunityRules {
-  const preset = RULE_PRESETS[type]
-  const compliancePreset = type === 'residential' ? getCompliancePreset('mx') : getCompliancePreset('custom')
-  if (!preset) return { ...DEFAULT_RULES }
+  const engineType = type as EngineCommunityType
+  const preset = getPreset(engineType)
+  const defaultRules = preset.defaultRules
+
+  // Map legal framework to compliance preset
+  const compliancePreset = preset.legalFrameworkKey?.startsWith('mx.')
+    ? getCompliancePreset('mx')
+    : getCompliancePreset('custom')
+
   return {
-    governance: { ...DEFAULT_RULES.governance, ...(preset.governance || {}) },
-    treasury: { ...DEFAULT_RULES.treasury, ...(preset.treasury || {}) },
-    identity: { ...DEFAULT_RULES.identity, ...(preset.identity || {}) },
+    governance: { ...DEFAULT_RULES.governance, ...(defaultRules.governance || {}) },
+    treasury: { ...DEFAULT_RULES.treasury, ...(defaultRules.treasury || {}) },
+    identity: { ...DEFAULT_RULES.identity, ...(defaultRules.identity || {}) },
     compliance: compliancePreset,
   }
 }
@@ -750,9 +657,11 @@ function ToggleField({
 function StepRulesConfig({
   rules,
   onRulesChange,
+  communityType,
 }: {
   rules: CommunityRules
   onRulesChange: (rules: CommunityRules) => void
+  communityType: CommunityType | null
 }) {
   const updateGovernance = (key: string, value: unknown) => {
     onRulesChange({
@@ -782,6 +691,16 @@ function StepRulesConfig({
     })
   }
 
+  // Real-time compliance validation
+  const complianceResult = useMemo(() => {
+    if (!communityType) return null
+    const engineType = communityType as EngineCommunityType
+    const preset = getPreset(engineType)
+    const framework = getLegalFramework(preset.legalFrameworkKey)
+    if (!framework) return null
+    return validateCompliance(rules, framework)
+  }, [rules, communityType])
+
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -790,6 +709,59 @@ function StepRulesConfig({
           Ajusta las reglas de gobernanza, tesorería e identidad
         </p>
       </div>
+
+      {/* Compliance validation banner */}
+      {complianceResult && !complianceResult.isValid && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="pt-4 space-y-2">
+            <div className="flex items-center gap-2 text-destructive font-medium text-sm">
+              <XCircle className="h-4 w-4 shrink-0" />
+              Hay reglas que no cumplen con el marco legal aplicable
+            </div>
+            {complianceResult.errors.map((err, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm text-destructive/90 pl-6">
+                <span>- {err.message}</span>
+                {err.reference && (
+                  <Badge variant="outline" className="shrink-0 text-[10px]">{err.reference}</Badge>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+      {complianceResult && complianceResult.warnings.length > 0 && (
+        <Card className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+          <CardContent className="pt-4 space-y-2">
+            <div className="flex items-center gap-2 text-yellow-700 dark:text-yellow-400 font-medium text-sm">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              Recomendaciones de cumplimiento
+            </div>
+            {complianceResult.warnings.map((w, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm text-yellow-700/90 dark:text-yellow-400/80 pl-6">
+                <span>- {w.message}</span>
+                {w.reference && (
+                  <Badge variant="outline" className="shrink-0 text-[10px]">{w.reference}</Badge>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+      {complianceResult && complianceResult.info.length > 0 && (
+        <Card className="border-blue-500/30 bg-blue-50 dark:bg-blue-950/20">
+          <CardContent className="pt-4 space-y-2">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium text-sm">
+              <Info className="h-4 w-4 shrink-0" />
+              Información legal
+            </div>
+            {complianceResult.info.map((item, i) => (
+              <div key={i} className="flex items-start gap-2 text-sm text-blue-700/90 dark:text-blue-400/80 pl-6">
+                <span>- {item.message}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Governance */}
       <Card>
@@ -1162,6 +1134,23 @@ function StepConfirmation({
                   {rules.compliance.jurisdiction}
                 </p>
               </div>
+              {(() => {
+                const engineType = communityType as EngineCommunityType
+                const preset = getPreset(engineType)
+                const framework = getLegalFramework(preset.legalFrameworkKey)
+                if (!framework) return null
+                return (
+                  <div className="rounded-lg bg-muted/50 p-3 col-span-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Marco legal aplicable
+                    </p>
+                    <p className="text-sm font-semibold mt-1">{framework.displayName}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {framework.applicableLaws.map((l) => l.name).join(', ')}
+                    </p>
+                  </div>
+                )
+              })()}
             </div>
           </div>
         </CardContent>
@@ -1419,7 +1408,7 @@ export function OnboardingWizard() {
             />
           )}
           {step === 5 && (
-            <StepRulesConfig rules={rules} onRulesChange={setRules} />
+            <StepRulesConfig rules={rules} onRulesChange={setRules} communityType={communityType} />
           )}
           {step === 6 && communityType && (
             <StepConfirmation
