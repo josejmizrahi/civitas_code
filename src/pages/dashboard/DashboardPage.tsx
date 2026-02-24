@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { useDashboard } from '@/core/treasury/hooks/useDashboard'
@@ -6,6 +7,7 @@ import { useProposals } from '@/core/governance/hooks/useProposals'
 import { useAssemblies } from '@/core/governance/hooks/useAssemblies'
 import { useTransactions } from '@/core/treasury/hooks/useTransactions'
 import { useCommunityContext } from '@/app/providers'
+import { useTenant } from '@/app/providers/TenantProvider'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { AuditLog } from '@/shared/components/AuditLog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -19,6 +21,7 @@ import {
   Users, Wallet, Vote, TrendingUp, TrendingDown,
   AlertCircle, Shield, UserCheck, BarChart3,
   ArrowUpCircle, Receipt, Calendar, FileText, ChevronRight,
+  Heart, Activity,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
@@ -27,8 +30,64 @@ import { QuickActions } from '@/pages/dashboard/components/QuickActions'
 import { FirstStepsChecklist } from '@/pages/dashboard/components/FirstStepsChecklist'
 import { AnnouncementFeed } from '@/core/announcements/components/AnnouncementFeed'
 
+// ---------------------------------------------------------------------------
+// Nation Health — composite score from 4 pillars
+// ---------------------------------------------------------------------------
+
+interface NationHealth {
+  overall: number
+  identity: number
+  treasury: number
+  governance: number
+  label: string
+  color: string
+}
+
+function computeNationHealth(params: {
+  memberCount: number
+  activeCount: number
+  delinquentCount: number
+  balance: number
+  collectionRate: number
+  activeProposals: number
+  overdueCount: number
+}): NationHealth {
+  const { memberCount, activeCount, delinquentCount, balance, collectionRate, activeProposals, overdueCount } = params
+
+  // Identity pillar (0-100): based on member activity ratio + delinquency
+  const memberRatio = memberCount > 0 ? activeCount / memberCount : 0
+  const delinquentRatio = memberCount > 0 ? 1 - delinquentCount / memberCount : 1
+  const identity = Math.round((memberRatio * 50 + delinquentRatio * 50))
+
+  // Treasury pillar (0-100): balance health + collection rate
+  const balanceScore = balance >= 0 ? 100 : Math.max(0, 50 + balance / 100)
+  const collectionScore = collectionRate * 100
+  const overdueScore = Math.max(0, 100 - overdueCount * 10)
+  const treasury = Math.round((balanceScore * 0.3 + collectionScore * 0.4 + overdueScore * 0.3))
+
+  // Governance pillar (0-100): having active governance is good
+  const hasGovernance = activeProposals > 0 ? 100 : 60
+  const governance = hasGovernance
+
+  const overall = Math.round(identity * 0.35 + treasury * 0.40 + governance * 0.25)
+
+  let label: string
+  let color: string
+  if (overall >= 80) { label = 'Excelente'; color = 'text-green-600' }
+  else if (overall >= 60) { label = 'Saludable'; color = 'text-blue-600' }
+  else if (overall >= 40) { label = 'Atención'; color = 'text-yellow-600' }
+  else { label = 'Crítico'; color = 'text-red-600' }
+
+  return { overall, identity, treasury, governance, label, color }
+}
+
+// ---------------------------------------------------------------------------
+// Dashboard — Estado de la Nación
+// ---------------------------------------------------------------------------
+
 export function DashboardPage() {
   const { community, currentMember } = useCommunityContext()
+  const { labels, isAdmin: tenantIsAdmin, legalFramework } = useTenant()
   const path = useCommunityPath()
   const { data: members, isLoading: membersLoading, error: membersError } = useMembers()
   const { data: stats, isLoading: statsLoading, error: statsError } = useDashboard()
@@ -45,6 +104,7 @@ export function DashboardPage() {
   const isFirstLoad = !members && !stats && (membersLoading || statsLoading)
 
   const hasFinancialData = stats && (stats.totalIncome > 0 || stats.totalExpenses > 0)
+  const activeCount = members?.filter((m) => m.status === 'active').length ?? 0
   const goodStandingCount = members?.filter((m) => !m.financial_standing || m.financial_standing === 'good_standing').length ?? 0
   const delinquentCount = members?.filter((m) => m.financial_standing === 'delinquent').length ?? 0
 
@@ -55,17 +115,24 @@ export function DashboardPage() {
 
   const latestTransactions = (recentTx ?? []).slice(0, 5)
 
+  // Compute nation health
+  const health = useMemo(() => computeNationHealth({
+    memberCount: members?.length ?? 0,
+    activeCount,
+    delinquentCount,
+    balance: stats?.balance ?? 0,
+    collectionRate: collStats?.collectionRate ?? 0,
+    activeProposals: activeProposals?.length ?? 0,
+    overdueCount: collStats?.overdueCount ?? 0,
+  }), [members, activeCount, delinquentCount, stats, collStats, activeProposals])
+
   if (isFirstLoad) {
     return <LoadingSpinner message="Cargando..." className="py-20" />
   }
 
-  const memberLabel = typeof (community?.config as Record<string, unknown>)?.member_label === 'string'
-    ? (community!.config as Record<string, string>).member_label
-    : 'Miembro'
-
   const firstName = currentMember?.full_name?.split(' ')[0]
     || currentMember?.email?.split('@')[0]
-    || memberLabel
+    || labels.member
 
   return (
     <div className="space-y-6">
@@ -78,15 +145,60 @@ export function DashboardPage() {
 
       <MorosoStatusBanner />
 
-      {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-          Hola, {firstName}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {community?.name ?? 'Tu comunidad'}
-        </p>
+      {/* Estado de la Nación — Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+            Estado de la Nación
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {community?.name ?? labels.community} &middot; Hola, {firstName}
+          </p>
+          {legalFramework && (
+            <p className="text-xs text-muted-foreground/70 mt-0.5">
+              Marco legal: {legalFramework.displayName}
+            </p>
+          )}
+        </div>
+        {/* Health indicator */}
+        <div className="text-right shrink-0">
+          <div className="flex items-center gap-2 justify-end">
+            <Heart className={`h-5 w-5 ${health.color}`} />
+            <span className={`text-2xl font-bold ${health.color}`}>{health.overall}%</span>
+          </div>
+          <p className={`text-xs font-medium ${health.color}`}>{health.label}</p>
+        </div>
       </div>
+
+      {/* Health pillars — mini progress bars */}
+      {isAdmin && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="rounded-lg border p-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Users className="h-3.5 w-3.5 text-violet-500" />
+              <span className="text-xs font-medium">{labels.memberPlural}</span>
+              <span className="ml-auto text-xs font-bold">{health.identity}%</span>
+            </div>
+            <Progress value={health.identity} className="h-1.5" />
+          </div>
+          <div className="rounded-lg border p-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Wallet className="h-3.5 w-3.5 text-emerald-500" />
+              <span className="text-xs font-medium">Hacienda</span>
+              <span className="ml-auto text-xs font-bold">{health.treasury}%</span>
+            </div>
+            <Progress value={health.treasury} className="h-1.5" />
+          </div>
+          <div className="rounded-lg border p-3">
+            <div className="flex items-center gap-2 mb-1.5">
+              <Vote className="h-3.5 w-3.5 text-blue-500" />
+              <span className="text-xs font-medium">Gobierno</span>
+              <span className="ml-auto text-xs font-bold">{health.governance}%</span>
+            </div>
+            <Progress value={health.governance} className="h-1.5" />
+          </div>
+        </div>
+      )}
 
       {isAdmin && <FirstStepsChecklist />}
 
@@ -99,7 +211,7 @@ export function DashboardPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
           <Card className="rounded-xl border-border/80">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-xs font-medium text-muted-foreground">Miembros</CardTitle>
+              <CardTitle className="text-xs font-medium text-muted-foreground">{labels.memberPlural}</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>

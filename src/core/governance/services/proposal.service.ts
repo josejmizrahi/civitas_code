@@ -7,6 +7,7 @@ import { sendPushToMembers } from '@/shared/services/push-notification.service'
 import type { Proposal } from '../types'
 import { getEndorsements } from './endorsement.service'
 import { getVotes, getVoteSummary } from './vote.service'
+import { emitProposalApproved, emitProposalExecuted, emitElectionCompleted } from '@/primitives/governance/events'
 
 async function getActiveMemberIds(communityId: string): Promise<string[]> {
   const { data, error } = await supabase
@@ -322,6 +323,14 @@ export async function closeProposal(proposalId: string, communityId: string, clo
 
   if (resultStatus === 'approved') {
     sendEmailToMembers(communityId, 'proposal_approved', { title: proposal.title, proposal_id: proposalId, votes_for: summary.yes, votes_against: summary.no, community_name: communityId, app_url: window.location.origin }).catch(() => {})
+
+    // Emit domain event: proposal approved
+    void emitProposalApproved(communityId, closedByUserId, {
+      proposalId,
+      proposalType: proposal.type,
+      title: proposal.title,
+      financialInstruction: proposal.financial_instruction ?? null,
+    })
   } else {
     sendEmailToMembers(communityId, 'proposal_closed', {
       title: proposal.title,
@@ -582,6 +591,17 @@ async function executeElectionProposal(proposal: Proposal, communityId: string):
       } as any)
     if (newTermError) throw newTermError
   }
+
+  // Emit election completed event
+  if (uniqueElectedMemberIds.length > 0) {
+    void emitElectionCompleted(communityId, null, {
+      proposalId: proposal.id,
+      winners: uniqueElectedMemberIds.map((memberId) => ({
+        memberId,
+        role: roleToAssign,
+      })),
+    })
+  }
 }
 
 export async function executeProposal(proposalId: string, communityId: string, executedByUserId: string): Promise<Proposal> {
@@ -606,6 +626,13 @@ export async function executeProposal(proposalId: string, communityId: string, e
         .update({ status: 'executed', execution_status: 'executed', executed_at: new Date().toISOString() })
         .eq('id', proposalId).select().single()
       if (error) throw error
+
+      void emitProposalExecuted(communityId, executedByUserId, {
+        proposalId,
+        proposalType: 'election',
+        executionResult: { status: 'executed' },
+      })
+
       return data as unknown as Proposal
     } catch (execError) {
       await supabase.from('proposals').update({ execution_status: 'failed' }).eq('id', proposalId)
@@ -719,6 +746,13 @@ export async function executeProposal(proposalId: string, communityId: string, e
       .update({ status: 'executed', execution_status: 'executed', executed_at: new Date().toISOString() })
       .eq('id', proposalId).select().single()
     if (error) throw error
+
+    void emitProposalExecuted(communityId, executedByUserId, {
+      proposalId,
+      proposalType: proposal.type,
+      executionResult: { instructionType, status: 'executed' },
+    })
+
     return data as unknown as Proposal
   } catch (execError) {
     await supabase.from('proposals').update({ execution_status: 'failed' }).eq('id', proposalId)

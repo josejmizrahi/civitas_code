@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useCommunityContext } from '@/app/providers'
+import { useTenant } from '@/app/providers/TenantProvider'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getInvitations, cancelInvitation, updateCommunity } from '@/core/identity/services/identity.service'
 import { usePermissions } from '@/shared/hooks/usePermissions'
@@ -12,13 +13,14 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Label } from '@/shared/components/ui/label'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
-import { Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote, Bell, BellOff, Loader2, ArrowLeft, Building2, CheckCircle2 } from 'lucide-react'
+import { Tags, Mail, Copy, X, Shield, Wallet, UserCheck, Sliders, ScrollText, CalendarClock, BookOpen, Vote, Bell, BellOff, Loader2, ArrowLeft, Building2, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { InviteMemberDialog } from '@/core/identity/components/InviteMemberDialog'
 import { formatDate } from '@/shared/lib/utils'
 import { isValidCurrencyCode, isValidLocaleCode, normalizeCurrencyCode, normalizeLocaleCode } from '@/shared/lib/locale'
 import type { CommunityRules } from '@/shared/types/rules'
 import { getCommunityRules, updateCommunityRules } from '@/shared/services/rules.service'
+import { validateCompliance } from '@/engine/compliance'
 import { ARCOAdminPanel } from '@/core/privacy/components/ARCOAdminPanel'
 import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
@@ -29,6 +31,7 @@ import { AuditLog } from '@/shared/components/AuditLog'
 
 export function SettingsPage() {
   const { communityId, community, currentMember } = useCommunityContext()
+  const { legalFramework } = useTenant()
   const path = useCommunityPath()
   const { isAdmin } = usePermissions()
   const queryClient = useQueryClient()
@@ -129,6 +132,12 @@ export function SettingsPage() {
       return { ...prev, governance: { ...prev.governance, proposal_rights: next } }
     })
   }
+
+  // Compliance validation — real-time check against legal framework
+  const complianceResult = useMemo(() => {
+    if (!legalFramework) return null
+    return validateCompliance(rules, legalFramework)
+  }, [rules, legalFramework])
 
   // Community name editing
   const [editingName, setEditingName] = useState(false)
@@ -901,6 +910,59 @@ export function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Compliance validation banner */}
+            {complianceResult && !complianceResult.isValid && (
+              <Card className="border-destructive/50 bg-destructive/5">
+                <CardContent className="pt-4 space-y-2">
+                  <div className="flex items-center gap-2 text-destructive font-medium text-sm">
+                    <XCircle className="h-4 w-4 shrink-0" />
+                    Estas reglas no cumplen con el marco legal aplicable ({legalFramework?.displayName})
+                  </div>
+                  {complianceResult.errors.map((err, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm text-destructive/90 pl-6">
+                      <span>- {err.message}</span>
+                      {err.reference && (
+                        <Badge variant="outline" className="shrink-0 text-[10px]">{err.reference}</Badge>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+            {complianceResult && complianceResult.warnings.length > 0 && (
+              <Card className="border-yellow-500/50 bg-yellow-50 dark:bg-yellow-950/20">
+                <CardContent className="pt-4 space-y-2">
+                  <div className="flex items-center gap-2 text-yellow-700 dark:text-yellow-400 font-medium text-sm">
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    Recomendaciones de cumplimiento
+                  </div>
+                  {complianceResult.warnings.map((w, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm text-yellow-700/90 dark:text-yellow-400/80 pl-6">
+                      <span>- {w.message}</span>
+                      {w.reference && (
+                        <Badge variant="outline" className="shrink-0 text-[10px]">{w.reference}</Badge>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+            {complianceResult && complianceResult.info.length > 0 && (
+              <Card className="border-blue-500/30 bg-blue-50 dark:bg-blue-950/20">
+                <CardContent className="pt-4 space-y-2">
+                  <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium text-sm">
+                    <Info className="h-4 w-4 shrink-0" />
+                    Información legal
+                  </div>
+                  {complianceResult.info.map((item, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm text-blue-700/90 dark:text-blue-400/80 pl-6">
+                      <span>- {item.message}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Save button + shortcuts */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth, useCommunityContext } from '@/app/providers'
+import { useTenant } from '@/app/providers/TenantProvider'
 import { NoCommunityView } from '@/core/identity/components/NoCommunityView'
-import { VERTICALS } from '@/shared/config/verticals'
 import { hasPermission, type Role } from '@/shared/types'
 import {
   LayoutDashboard,
@@ -26,6 +26,8 @@ import {
   Megaphone,
   Calendar,
   CreditCard,
+  FileText,
+  type LucideIcon,
 } from 'lucide-react'
 import { Avatar } from '@/shared/components/ui/avatar'
 import { Button } from '@/shared/components/ui/button'
@@ -37,15 +39,62 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { communityPath } from '@/shared/lib/communityRoutes'
 
-const coreNavigation = [
-  { key: 'nav.dashboard', path: 'dashboard', icon: LayoutDashboard, minRole: 'observador' as Role },
-  { key: 'nav.community', path: 'community', icon: Users, minRole: 'observador' as Role },
-  { key: 'nav.treasury', path: 'treasury', icon: Wallet, minRole: 'observador' as Role },
-  { key: 'nav.payments', path: 'payments', icon: CreditCard, minRole: 'admin' as Role },
-  { key: 'nav.governance', path: 'governance', icon: Vote, minRole: 'observador' as Role },
-  { key: 'nav.announcements', path: 'announcements', icon: Megaphone, minRole: 'observador' as Role },
-  { key: 'nav.calendar', path: 'calendar', icon: Calendar, minRole: 'observador' as Role },
-]
+// ---------------------------------------------------------------------------
+// Navigation — 5 sections inspired by the Network State metaphor
+// ---------------------------------------------------------------------------
+
+interface NavItem {
+  label: string
+  path: string
+  icon: LucideIcon
+  minRole: Role
+}
+
+interface NavSection {
+  title: string
+  items: NavItem[]
+}
+
+function buildNavSections(
+  labels: { memberPlural: string },
+  t: (key: string) => string,
+): NavSection[] {
+  return [
+    {
+      title: 'Mi Nación',
+      items: [
+        { label: t('nav.dashboard'), path: 'dashboard', icon: LayoutDashboard, minRole: 'observador' },
+      ],
+    },
+    {
+      title: labels.memberPlural,
+      items: [
+        { label: t('nav.community'), path: 'community', icon: Users, minRole: 'observador' },
+      ],
+    },
+    {
+      title: 'Hacienda',
+      items: [
+        { label: t('nav.treasury'), path: 'treasury', icon: Wallet, minRole: 'observador' },
+        { label: t('nav.payments'), path: 'payments', icon: CreditCard, minRole: 'admin' },
+      ],
+    },
+    {
+      title: 'Gobierno',
+      items: [
+        { label: t('nav.governance'), path: 'governance', icon: Vote, minRole: 'observador' },
+      ],
+    },
+    {
+      title: 'Servicios',
+      items: [
+        { label: t('nav.announcements'), path: 'announcements', icon: Megaphone, minRole: 'observador' },
+        { label: t('nav.calendar'), path: 'calendar', icon: Calendar, minRole: 'observador' },
+        { label: 'Documentos', path: 'documents', icon: FileText, minRole: 'observador' },
+      ],
+    },
+  ]
+}
 
 const BOTTOM_NAV_KEYS = [
   { key: 'nav.dashboard', path: 'dashboard', icon: LayoutDashboard },
@@ -57,6 +106,7 @@ const BOTTOM_NAV_KEYS = [
 export function AppLayout() {
   const { user, signOut } = useAuth()
   const { communityId, community, currentMember, userCommunities, setCommunityId } = useCommunityContext()
+  const { labels, isAdmin, isVigilance } = useTenant()
   const navigate = useNavigate()
   const location = useLocation()
   const [switcherOpen, setSwitcherOpen] = useState(false)
@@ -110,30 +160,11 @@ export function AppLayout() {
   const { resolvedTheme, setTheme } = useTheme()
   const { t } = useI18n()
 
-  // Build navigation: core items filtered by role + vertical items
-  const localizedCoreNavigation = coreNavigation.map((item) => ({
-    ...item,
-    name: t(item.key as any),
-  }))
-  const navigation = [
-    ...localizedCoreNavigation.filter((item) => hasPermission(userRole, item.minRole)),
-  ]
-
-  // Add vertical-specific nav items (path = href without leading slash)
-  if (community?.type) {
-    const vertical = VERTICALS[community.type]
-    if (vertical?.navItems) {
-      navigation.push(
-        ...vertical.navItems.map((item) => ({
-          key: item.href,
-          path: item.href.replace(/^\//, ''),
-          name: item.name,
-          icon: item.icon,
-          minRole: 'observador' as Role,
-        })),
-      )
-    }
-  }
+  // Build section-based navigation with dynamic labels from TenantProvider
+  const navSections = useMemo(
+    () => buildNavSections(labels, t as (key: string) => string),
+    [labels, t],
+  )
 
   const queryClient = useQueryClient()
 
@@ -282,29 +313,44 @@ export function AppLayout() {
           </button>
         </div>
 
-        {/* Navigation Links */}
+        {/* Navigation Links — Section-based */}
         <nav className="flex-1 overflow-y-auto p-3">
-          <div className="flex flex-col gap-0.5">
-            {navigation.map((item) => (
-              <NavLink
-                key={item.path}
-                to={slug ? communityPath(slug, item.path) : '#'}
-                className={navLinkClassName}
-                end={item.path === 'dashboard'}
-                onClick={closeMobileSidebar}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {item.name}
-              </NavLink>
-            ))}
-          </div>
+          {navSections.map((section, idx) => {
+            const visibleItems = section.items.filter((item) =>
+              hasPermission(userRole, item.minRole),
+            )
+            if (visibleItems.length === 0) return null
+            return (
+              <div key={section.title} className={idx > 0 ? 'mt-4' : ''}>
+                <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                  {section.title}
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  {visibleItems.map((item) => (
+                    <NavLink
+                      key={item.path}
+                      to={slug ? communityPath(slug, item.path) : '#'}
+                      className={navLinkClassName}
+                      end={item.path === 'dashboard'}
+                      onClick={closeMobileSidebar}
+                    >
+                      <item.icon className="h-4 w-4 shrink-0" />
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
 
-          {/* Vigilancia + Configuración */}
-          {(hasPermission(userRole, 'admin') || userRole === 'comite_vigilancia') && (
-            <>
-              <div className="my-3 border-t" />
+          {/* Admin section */}
+          {(isAdmin || isVigilance) && (
+            <div className="mt-4">
+              <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                Administración
+              </p>
               <div className="flex flex-col gap-0.5">
-                {(userRole === 'admin' || userRole === 'comite_vigilancia') && (
+                {(isAdmin || isVigilance) && (
                   <NavLink
                     to={slug ? communityPath(slug, 'vigilancia') : '#'}
                     className={navLinkClassName}
@@ -314,7 +360,7 @@ export function AppLayout() {
                     {t('nav.vigilancia')}
                   </NavLink>
                 )}
-                {hasPermission(userRole, 'admin') && (
+                {isAdmin && (
                   <NavLink
                     to={slug ? communityPath(slug, 'settings') : '#'}
                     className={navLinkClassName}
@@ -335,7 +381,7 @@ export function AppLayout() {
                   </NavLink>
                 )}
               </div>
-            </>
+            </div>
           )}
         </nav>
 
