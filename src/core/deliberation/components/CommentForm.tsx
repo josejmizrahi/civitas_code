@@ -3,6 +3,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { cn } from '@/shared/lib/utils'
 import { Send } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { SENTIMENT_CONFIG, type Sentiment, type MentionRef } from '../types'
 import { MentionAutocomplete, useMentionDetection } from './MentionAutocomplete'
 
@@ -28,11 +29,13 @@ export function CommentForm({
   onSubmit,
   members,
   isPending,
-  placeholder = 'Escribe tu comentario... Usa @nombre para mencionar',
+  placeholder,
   autoFocus,
   compact,
   onCancel,
 }: Props) {
+  const { t } = useI18n()
+  const defaultPlaceholder = t('deliberation.commentPlaceholder' as any)
   const [content, setContent] = useState('')
   const [sentiment, setSentiment] = useState<Sentiment>('neutral')
   const [mentions, setMentions] = useState<MentionRef[]>([])
@@ -86,7 +89,7 @@ export function CommentForm({
     <form onSubmit={handleSubmit} className="space-y-2">
       {/* Sentiment selector */}
       <div className="flex items-center gap-1">
-        <span className="text-xs text-muted-foreground mr-1">Postura:</span>
+        <span className="text-xs text-muted-foreground mr-1">{t('deliberation.stance' as any)}:</span>
         {SENTIMENTS.map((s) => {
           const config = SENTIMENT_CONFIG[s]
           return (
@@ -118,7 +121,7 @@ export function CommentForm({
           }}
           onSelect={(e) => setCursorPos((e.target as HTMLTextAreaElement).selectionStart ?? 0)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={placeholder ?? defaultPlaceholder}
           rows={compact ? 2 : 3}
           autoFocus={autoFocus}
           className="pr-12"
@@ -155,17 +158,17 @@ export function CommentForm({
       {/* Submit row */}
       <div className="flex items-center justify-between">
         <p className="text-[10px] text-muted-foreground">
-          Ctrl+Enter para enviar
+          {t('deliberation.ctrlEnterToSend' as any)}
         </p>
         <div className="flex gap-2">
           {onCancel && (
             <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-              Cancelar
+              {t('common.cancel')}
             </Button>
           )}
           <Button type="submit" size="sm" disabled={isPending || !content.trim()}>
             <Send className="mr-1.5 h-3.5 w-3.5" />
-            {isPending ? 'Enviando...' : 'Comentar'}
+            {isPending ? t('common.sending') : t('deliberation.comment' as any)}
           </Button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/app/providers'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -10,6 +11,7 @@ import { PrivacyNoticeModal } from '@/core/privacy/components/PrivacyNoticeModal
 
 export function RegisterPage() {
   const { signUp, user } = useAuth()
+  const { t } = useI18n()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const inviteToken = searchParams.get('invite')
@@ -32,7 +34,7 @@ export function RegisterPage() {
       setNeedsConfirmation(true)
       setLoading(false)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al registrarse')
+      setError(err instanceof Error ? err.message : t('auth.register.error' as any))
       setLoading(false)
     }
   }
@@ -50,14 +52,14 @@ export function RegisterPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Revisa tu correo</CardTitle>
+          <CardTitle>{t('auth.register.checkEmail' as any)}</CardTitle>
           <CardDescription>
-            Te enviamos un enlace de confirmación a <strong>{email}</strong>. Confirma tu correo para acceder.
+            {t('auth.register.confirmationSent' as any)} <strong>{email}</strong>. {t('auth.register.confirmToAccess' as any)}
           </CardDescription>
         </CardHeader>
         <CardFooter>
           <Link to={inviteToken ? `/login?invite=${inviteToken}` : '/login'} className="w-full">
-            <Button className="w-full">Ir a Iniciar Sesión</Button>
+            <Button className="w-full">{t('auth.register.goToLogin' as any)}</Button>
           </Link>
         </CardFooter>
       </Card>
@@ -67,8 +69,8 @@ export function RegisterPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Crear Cuenta</CardTitle>
-        <CardDescription>Regístrate en Civitas</CardDescription>
+        <CardTitle>{t('auth.register.title' as any)}</CardTitle>
+        <CardDescription>{t('auth.register.subtitle' as any)}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -76,16 +78,16 @@ export function RegisterPage() {
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="fullName">Nombre completo</Label>
+            <Label htmlFor="fullName">{t('auth.register.fullName' as any)}</Label>
             <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="Juan Pérez" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
+            <Label htmlFor="email">{t('common.email')}</Label>
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="tu@email.com" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder="Mínimo 6 caracteres" />
+            <Label htmlFor="password">{t('common.password')}</Label>
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder={t('auth.register.minChars' as any)} />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
@@ -97,11 +99,11 @@ export function RegisterPage() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading || !privacyAccepted}>
-            {loading ? 'Registrando...' : 'Crear Cuenta'}
+            {loading ? t('auth.register.registering' as any) : t('auth.register.title' as any)}
           </Button>
           <p className="text-sm text-muted-foreground">
-            ¿Ya tienes cuenta?{' '}
-            <Link to={inviteToken ? `/login?invite=${inviteToken}` : '/login'} className="font-medium text-primary hover:underline">Inicia Sesión</Link>
+            {t('auth.register.hasAccount' as any)}{' '}
+            <Link to={inviteToken ? `/login?invite=${inviteToken}` : '/login'} className="font-medium text-primary hover:underline">{t('auth.register.signIn' as any)}</Link>
           </p>
         </CardFooter>
       </form>

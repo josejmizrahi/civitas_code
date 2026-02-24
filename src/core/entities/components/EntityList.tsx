@@ -14,11 +14,13 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
 import { Plus, Trash2, Star, Building2, Phone, Mail, Search } from 'lucide-react'
 import { useToast } from '@/shared/components/ui/toast'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { ENTITY_TYPE_LABELS, ENTITY_STATUS_LABELS } from '../types'
 import type { EntityType, EntityStatus } from '@/shared/types'
 
 export function EntityList() {
+  const { t } = useI18n()
   const navigate = useNavigate()
   const path = useCommunityPath()
   const [typeFilter, setTypeFilter] = useState('')
@@ -65,21 +67,21 @@ export function EntityList() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name) { setError('El nombre es obligatorio'); return }
+    if (!form.name) { setError(t('entities.nameRequired' as any)); return }
     try {
       await createEntity.mutateAsync(form)
       resetForm()
       setShowCreate(false)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al crear entidad')
+      setError(err instanceof Error ? err.message : t('entities.errorCreating' as any))
     }
   }
 
   const handleDelete = (id: string, name: string) => {
-    if (confirm(`Eliminar "${name}"? Esta acción no se puede deshacer.`)) {
+    if (confirm(`${t('entities.confirmDelete' as any)} "${name}"?`)) {
       deleteEntity.mutate(id, {
-        onSuccess: () => toast.success('Entidad eliminada'),
-        onError: () => toast.error('Error al eliminar entidad'),
+        onSuccess: () => toast.success(t('entities.deleted' as any)),
+        onError: () => toast.error(t('entities.errorDeleting' as any)),
       })
     }
   }
@@ -96,7 +98,7 @@ export function EntityList() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar por nombre, RFC, contacto..."
+              placeholder={t('entities.searchPlaceholder' as any)}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -104,13 +106,13 @@ export function EntityList() {
           </div>
           <div className="flex gap-2">
             <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="flex-1 sm:w-44">
-              <option value="">Todos los tipos</option>
+              <option value="">{t('entities.allTypes' as any)}</option>
               {Object.entries(ENTITY_TYPE_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
               ))}
             </Select>
             <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="flex-1 sm:w-36">
-              <option value="">Todos</option>
+              <option value="">{t('entities.allStatuses' as any)}</option>
               {Object.entries(ENTITY_STATUS_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
               ))}
@@ -120,7 +122,7 @@ export function EntityList() {
         {canManageTreasury && (
           <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
-            Nueva Entidad
+            {t('entities.new' as any)}
           </Button>
         )}
       </div>
@@ -129,25 +131,25 @@ export function EntityList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead className="hidden md:table-cell">Contacto</TableHead>
-              <TableHead className="hidden sm:table-cell">Rating</TableHead>
-              <TableHead>Estado</TableHead>
-              {canManageTreasury && <TableHead className="w-20">Acciones</TableHead>}
+              <TableHead>{t('common.name')}</TableHead>
+              <TableHead>{t('entities.type' as any)}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('entities.contact' as any)}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('entities.rating' as any)}</TableHead>
+              <TableHead>{t('entities.status' as any)}</TableHead>
+              {canManageTreasury && <TableHead className="w-20">{t('entities.actions' as any)}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={canManageTreasury ? 6 : 5} className="text-center text-muted-foreground">
-                  Cargando...
+                  {t('common.loading')}
                 </TableCell>
               </TableRow>
             ) : !entities || filteredEntities.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={canManageTreasury ? 6 : 5} className="text-center text-muted-foreground">
-                  No hay entidades registradas. Agrega proveedores, socios y contratistas.
+                  {t('entities.empty' as any)}
                 </TableCell>
               </TableRow>
             ) : (
@@ -190,7 +192,7 @@ export function EntityList() {
                           <span className="text-xs text-muted-foreground">({rating.total_ratings})</span>
                         </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground">Sin calificar</span>
+                        <span className="text-xs text-muted-foreground">{t('entities.unrated' as any)}</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -202,7 +204,7 @@ export function EntityList() {
                           size="icon"
                           variant="ghost"
                           onClick={(e) => { e.stopPropagation(); handleDelete(entity.id, entity.name) }}
-                          aria-label="Eliminar"
+                          aria-label={t('common.delete')}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
@@ -220,7 +222,7 @@ export function EntityList() {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent onClose={() => setShowCreate(false)}>
           <DialogHeader>
-            <DialogTitle>Nueva Entidad</DialogTitle>
+            <DialogTitle>{t('entities.new' as any)}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreate}>
             <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
@@ -228,11 +230,11 @@ export function EntityList() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>Nombre *</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder="Nombre de la entidad" />
+                  <Label>{t('common.name')} *</Label>
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder={t('entities.namePlaceholder' as any)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Tipo</Label>
+                  <Label>{t('entities.type' as any)}</Label>
                   <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as EntityType })}>
                     {Object.entries(ENTITY_TYPE_LABELS).map(([k, v]) => (
                       <option key={k} value={k}>{v}</option>
@@ -240,35 +242,35 @@ export function EntityList() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>RFC</Label>
-                  <Input value={form.rfc} onChange={(e) => setForm({ ...form, rfc: e.target.value })} placeholder="Opcional" />
+                  <Label>{t('entities.rfc' as any)}</Label>
+                  <Input value={form.rfc} onChange={(e) => setForm({ ...form, rfc: e.target.value })} placeholder={t('entities.optional' as any)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
+                  <Label>{t('common.email')}</Label>
                   <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="contacto@empresa.com" />
                 </div>
                 <div className="space-y-2">
-                  <Label>Teléfono</Label>
+                  <Label>{t('entities.phone' as any)}</Label>
                   <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+52 ..." />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>Persona de Contacto</Label>
-                  <Input value={form.contact_person} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder="Nombre del contacto principal" />
+                  <Label>{t('entities.contactPerson' as any)}</Label>
+                  <Input value={form.contact_person} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder={t('entities.contactPersonPlaceholder' as any)} />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>Dirección</Label>
-                  <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Dirección fiscal o comercial" />
+                  <Label>{t('entities.address' as any)}</Label>
+                  <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder={t('entities.addressPlaceholder' as any)} />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>Notas</Label>
-                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Notas internas" rows={2} />
+                  <Label>{t('entities.notes' as any)}</Label>
+                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder={t('entities.notesPlaceholder' as any)} rows={2} />
                 </div>
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => { resetForm(); setShowCreate(false) }}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={() => { resetForm(); setShowCreate(false) }}>{t('common.cancel')}</Button>
               <Button type="submit" disabled={createEntity.isPending}>
-                {createEntity.isPending ? 'Creando...' : 'Crear Entidad'}
+                {createEntity.isPending ? t('entities.creating' as any) : t('entities.create' as any)}
               </Button>
             </DialogFooter>
           </form>

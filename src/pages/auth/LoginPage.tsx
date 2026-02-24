@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -8,6 +9,7 @@ import { Button } from '@/shared/components/ui/button'
 
 export function LoginPage() {
   const { signIn, user } = useAuth()
+  const { t } = useI18n()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const inviteToken = searchParams.get('invite')
@@ -31,7 +33,7 @@ export function LoginPage() {
     try {
       await signIn(email, password)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
+      setError(err instanceof Error ? err.message : t('auth.login.error' as any))
     } finally {
       setLoading(false)
     }
@@ -40,38 +42,38 @@ export function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Iniciar Sesión</CardTitle>
-        <CardDescription>Ingresa a tu cuenta de Civitas</CardDescription>
+        <CardTitle>{t('auth.login.title' as any)}</CardTitle>
+        <CardDescription>{t('auth.login.subtitle' as any)}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {inviteToken && (
             <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
-              Inicia sesión para aceptar tu invitación
+              {t('auth.login.inviteMessage' as any)}
             </div>
           )}
           {error && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
+            <Label htmlFor="email">{t('common.email')}</Label>
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="tu@email.com" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password">{t('common.password')}</Label>
             <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Ingresando...' : 'Iniciar Sesión'}
+            {loading ? t('auth.login.signingIn' as any) : t('auth.login.title' as any)}
           </Button>
           <Link to="/forgot-password" className="text-sm text-muted-foreground hover:underline">
-            ¿Olvidaste tu contraseña?
+            {t('auth.login.forgotPassword' as any)}
           </Link>
           <p className="text-sm text-muted-foreground">
-            ¿No tienes cuenta?{' '}
-            <Link to={inviteToken ? `/register?invite=${inviteToken}` : '/register'} className="font-medium text-primary hover:underline">Regístrate</Link>
+            {t('auth.login.noAccount' as any)}{' '}
+            <Link to={inviteToken ? `/register?invite=${inviteToken}` : '/register'} className="font-medium text-primary hover:underline">{t('auth.login.signUp' as any)}</Link>
           </p>
         </CardFooter>
       </form>

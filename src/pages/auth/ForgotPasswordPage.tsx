@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/app/providers'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { supabase } from '@/shared/lib/supabase'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Input } from '@/shared/components/ui/input'
@@ -10,6 +11,7 @@ import { Mail, ArrowLeft } from 'lucide-react'
 
 export function ForgotPasswordPage() {
   const { resetPassword } = useAuth()
+  const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
@@ -45,17 +47,17 @@ export function ForgotPasswordPage() {
           <div className="flex items-center gap-3">
             <Mail className="h-8 w-8 text-primary" />
             <div>
-              <CardTitle>Revisa tu correo</CardTitle>
+              <CardTitle>{t('auth.forgotPassword.checkEmail' as any)}</CardTitle>
               <CardDescription>
-                Si existe una cuenta con <strong>{email}</strong>, recibirás un enlace para restablecer tu contraseña.
+                {t('auth.forgotPassword.ifAccountExists' as any)} <strong>{email}</strong>{t('auth.forgotPassword.willReceiveLink' as any)}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md bg-muted p-4 text-sm text-muted-foreground space-y-2">
-            <p>Revisa tu bandeja de entrada y la carpeta de spam.</p>
-            <p>El enlace expirará en 1 hora por seguridad.</p>
+            <p>{t('auth.forgotPassword.checkInbox' as any)}</p>
+            <p>{t('auth.forgotPassword.linkExpiry' as any)}</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
@@ -67,12 +69,12 @@ export function ForgotPasswordPage() {
               setEmail('')
             }}
           >
-            Enviar de nuevo
+            {t('auth.forgotPassword.sendAgain' as any)}
           </Button>
           <Link to="/login" className="w-full">
             <Button variant="ghost" className="w-full">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver al inicio de sesión
+              {t('auth.forgotPassword.backToLogin' as any)}
             </Button>
           </Link>
         </CardFooter>
@@ -83,15 +85,15 @@ export function ForgotPasswordPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recuperar Contraseña</CardTitle>
+        <CardTitle>{t('auth.forgotPassword.title' as any)}</CardTitle>
         <CardDescription>
-          Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+          {t('auth.forgotPassword.subtitle' as any)}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
+            <Label htmlFor="email">{t('common.email')}</Label>
             <Input
               id="email"
               type="email"
@@ -107,11 +109,11 @@ export function ForgotPasswordPage() {
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading}>
             <Mail className="mr-2 h-4 w-4" />
-            {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+            {loading ? t('common.sending') : t('auth.forgotPassword.sendResetLink' as any)}
           </Button>
           <Link to="/login" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
             <ArrowLeft className="h-3 w-3" />
-            Volver al inicio de sesión
+            {t('auth.forgotPassword.backToLogin' as any)}
           </Link>
         </CardFooter>
       </form>

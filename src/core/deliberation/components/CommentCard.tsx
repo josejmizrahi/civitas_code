@@ -5,6 +5,7 @@ import { cn } from '@/shared/lib/utils'
 import { Button } from '@/shared/components/ui/button'
 import { Textarea } from '@/shared/components/ui/textarea'
 import { MessageSquare, Pencil, Trash2 } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { CommentReactions } from './CommentReactions'
 import { CommentForm } from './CommentForm'
 import {
@@ -51,6 +52,7 @@ export function CommentCard({
   reactionSummaries,
   isPending,
 }: Props) {
+  const { t } = useI18n()
   const [showReplyForm, setShowReplyForm] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(comment.content)
@@ -73,7 +75,7 @@ export function CommentCard({
   }
 
   const handleDelete = () => {
-    if (window.confirm('¿Eliminar este comentario? Esta acción no se puede deshacer.')) {
+    if (window.confirm(t('deliberation.confirmDeleteComment' as any))) {
       onDelete(comment.id)
     }
   }
@@ -102,7 +104,7 @@ export function CommentCard({
           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
             {(comment.author_name ?? 'M').charAt(0).toUpperCase()}
           </div>
-          <span className="font-medium text-foreground">{comment.author_name ?? 'Miembro'}</span>
+          <span className="font-medium text-foreground">{comment.author_name ?? t('deliberation.member' as any)}</span>
           {comment.author_role && comment.author_role !== 'miembro' && (
             <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
               {comment.author_role}
@@ -116,7 +118,7 @@ export function CommentCard({
             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: es })}
           </span>
           {comment.edited_at && (
-            <span className="text-muted-foreground/60">(editado)</span>
+            <span className="text-muted-foreground/60">({t('deliberation.edited' as any)})</span>
           )}
         </div>
 
@@ -132,10 +134,10 @@ export function CommentCard({
               />
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleSaveEdit} disabled={!editContent.trim()}>
-                  Guardar
+                  {t('common.save')}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => { setIsEditing(false); setEditContent(comment.content) }}>
-                  Cancelar
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -164,7 +166,7 @@ export function CommentCard({
                   onClick={() => setShowReplyForm(!showReplyForm)}
                 >
                   <MessageSquare className="mr-1 h-3 w-3" />
-                  Responder
+                  {t('deliberation.reply' as any)}
                 </Button>
               )}
               {isAuthor && (
@@ -176,7 +178,7 @@ export function CommentCard({
                     onClick={() => { setIsEditing(true); setEditContent(comment.content) }}
                   >
                     <Pencil className="mr-1 h-3 w-3" />
-                    Editar
+                    {t('common.edit')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -185,7 +187,7 @@ export function CommentCard({
                     onClick={handleDelete}
                   >
                     <Trash2 className="mr-1 h-3 w-3" />
-                    Eliminar
+                    {t('common.delete')}
                   </Button>
                 </>
               )}
@@ -201,7 +203,7 @@ export function CommentCard({
             onSubmit={(content, sentiment, mentions) => handleReply(content, sentiment, mentions)}
             members={members}
             isPending={isPending}
-            placeholder="Escribe tu respuesta..."
+            placeholder={t('deliberation.writeReplyPlaceholder' as any)}
             compact
             autoFocus
             onCancel={() => setShowReplyForm(false)}
