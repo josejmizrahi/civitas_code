@@ -1,19 +1,32 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
-import { useMorosoMembers, useComputeMorosoStatus, useNotifyMorosos } from '../hooks/useMoroso'
+import {
+  useMorosoMembers,
+  useComputeMorosoStatus,
+  useNotifyMorosos,
+  useMemberDebt,
+  useMorosoNotices,
+  useCreateMorosoNotice,
+  useAcknowledgeMorosoNotice,
+  useResolveMorosoNotice,
+} from '../hooks/useMoroso'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
+import { Select } from '@/shared/components/ui/select'
 import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from '@/shared/components/ui/table'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
+import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
 import { formatDate, formatCurrency } from '@/shared/lib/utils'
-import { AlertTriangle, RefreshCw, Bell, Ban, UserX, UsersRound, CheckCircle } from 'lucide-react'
-import { useMemberDebt } from '../hooks/useMoroso'
-import type { Member } from '../types'
+import { AlertTriangle, RefreshCw, Bell, Ban, UserX, UsersRound, CheckCircle, FileText, Plus, CheckCheck } from 'lucide-react'
+import { useToast } from '@/shared/components/ui/toast'
+import type { Member, MorosoNoticeType } from '../types'
 
 /** Member with moroso timestamps from member_profiles / view */
 type MorosoMember = Member & { moroso_since?: string; moroso_notified_at?: string }
@@ -139,6 +152,7 @@ export function MorosoAdminPanel({ onRegisterPayment }: { onRegisterPayment?: (m
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -248,6 +262,213 @@ export function MorosoAdminPanel({ onRegisterPayment }: { onRegisterPayment?: (m
           </p>
         )}
       </CardContent>
+    </Card>
+
+    {/* Moroso Notices Section */}
+    <MorosoNoticesPanel morosos={morosos ?? []} />
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Notices panel
+// ---------------------------------------------------------------------------
+
+const NOTICE_TYPE_LABELS: Record<MorosoNoticeType, string> = {
+  pre_assembly: 'Pre-asamblea',
+  warning: 'Advertencia',
+  suspension: 'Suspensión',
+}
+
+const NOTICE_STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'success' | 'destructive' | 'warning' | 'outline'> = {
+  pending: 'warning',
+  acknowledged: 'secondary',
+  resolved: 'success',
+  expired: 'outline',
+}
+
+function MorosoNoticesPanel({ morosos }: { morosos: MorosoMember[] }) {
+  const toast = useToast()
+  const { data: notices, isLoading } = useMorosoNotices()
+  const createNotice = useCreateMorosoNotice()
+  const ackNotice = useAcknowledgeMorosoNotice()
+  const resolveNotice = useResolveMorosoNotice()
+
+  const [showCreate, setShowCreate] = useState(false)
+  const [selectedMemberId, setSelectedMemberId] = useState('')
+  const [noticeType, setNoticeType] = useState<MorosoNoticeType>('warning')
+  const [amount, setAmount] = useState('')
+  const [deadline, setDeadline] = useState('')
+
+  const handleCreate = async () => {
+    if (!selectedMemberId || !amount) return
+    try {
+      await createNotice.mutateAsync({
+        memberId: selectedMemberId,
+        noticeType,
+        outstandingAmount: parseFloat(amount),
+        opts: deadline ? { deadline } : undefined,
+      })
+      toast.success('Aviso creado.')
+      setShowCreate(false)
+      setSelectedMemberId('')
+      setAmount('')
+      setDeadline('')
+    } catch {
+      toast.error('No se pudo crear el aviso.')
+    }
+  }
+
+  const handleAcknowledge = async (noticeId: string) => {
+    try {
+      await ackNotice.mutateAsync(noticeId)
+      toast.success('Aviso acusado de recibo.')
+    } catch {
+      toast.error('Error al acusar recibo.')
+    }
+  }
+
+  const handleResolve = async (noticeId: string) => {
+    try {
+      await resolveNotice.mutateAsync(noticeId)
+      toast.success('Aviso resuelto.')
+    } catch {
+      toast.error('Error al resolver aviso.')
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileText className="h-4 w-4 text-amber-500" />
+            Avisos Morosos — Art. 59 LPCI
+          </CardTitle>
+          <Button size="sm" onClick={() => setShowCreate(true)} disabled={morosos.length === 0}>
+            <Plus className="mr-1.5 h-3.5 w-3.5" />
+            Crear aviso
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isLoading ? (
+          <LoadingSpinner message="Cargando avisos..." className="py-6" />
+        ) : notices && notices.length > 0 ? (
+          <div className="overflow-x-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Miembro</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead className="text-right">Monto adeudado</TableHead>
+                  <TableHead className="hidden sm:table-cell">Emitido</TableHead>
+                  <TableHead className="hidden md:table-cell">Plazo</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {notices.map((n) => (
+                  <TableRow key={n.id}>
+                    <TableCell className="font-medium">
+                      {n.member_name ?? n.member_id.slice(0, 8)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{NOTICE_TYPE_LABELS[n.notice_type] ?? n.notice_type}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">{formatCurrency(n.outstanding_amount)}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{formatDate(n.issued_at)}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {n.deadline ? formatDate(n.deadline) : <span className="text-muted-foreground text-xs">—</span>}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={NOTICE_STATUS_VARIANTS[n.status] ?? 'outline'}>{n.status}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        {n.status === 'pending' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAcknowledge(n.id)}
+                            disabled={ackNotice.isPending}
+                            className="text-xs"
+                          >
+                            <CheckCircle className="mr-1 h-3 w-3" />
+                            Acusar
+                          </Button>
+                        )}
+                        {(n.status === 'pending' || n.status === 'acknowledged') && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleResolve(n.id)}
+                            disabled={resolveNotice.isPending}
+                            className="text-xs"
+                          >
+                            <CheckCheck className="mr-1 h-3 w-3" />
+                            Resolver
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 py-6 text-muted-foreground">
+            <FileText className="h-8 w-8 opacity-30" />
+            <p className="text-sm">No hay avisos registrados.</p>
+          </div>
+        )}
+      </CardContent>
+
+      {/* Create notice dialog */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent onClose={() => setShowCreate(false)}>
+          <DialogHeader>
+            <DialogTitle>Crear aviso moroso</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Miembro</Label>
+              <Select value={selectedMemberId} onChange={(e) => setSelectedMemberId(e.target.value)}>
+                <option value="">Seleccionar miembro...</option>
+                {morosos.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.full_name ?? m.email ?? m.id.slice(0, 8)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Tipo de aviso</Label>
+              <Select value={noticeType} onChange={(e) => setNoticeType(e.target.value as MorosoNoticeType)}>
+                <option value="pre_assembly">Pre-asamblea</option>
+                <option value="warning">Advertencia</option>
+                <option value="suspension">Suspensión</option>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Monto adeudado</Label>
+              <Input type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+            </div>
+            <div className="space-y-2">
+              <Label>Plazo (opcional)</Label>
+              <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreate(false)}>Cancelar</Button>
+            <Button onClick={handleCreate} disabled={!selectedMemberId || !amount || createNotice.isPending}>
+              {createNotice.isPending ? 'Creando...' : 'Crear aviso'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

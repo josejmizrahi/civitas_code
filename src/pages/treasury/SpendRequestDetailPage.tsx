@@ -15,6 +15,10 @@ import {
   useVerifySpendRequest,
   useCancelSpendRequest,
   useCreateProposalForSpendRequest,
+  useSpendRequestComments,
+  useAddSpendRequestComment,
+  useSpendRequestAttachments,
+  useAddSpendRequestAttachment,
 } from '@/core/treasury/hooks/useSpendRequests'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useToast } from '@/shared/components/ui/toast'
@@ -29,6 +33,9 @@ import {
   ShieldCheck,
   Ban,
   Vote,
+  MessageSquare,
+  Paperclip,
+  ExternalLink,
 } from 'lucide-react'
 import type { SpendRequestStatus } from '@/core/treasury/types'
 
@@ -67,12 +74,20 @@ export function SpendRequestDetailPage() {
   const cancelSpendRequest = useCancelSpendRequest()
   const createProposal = useCreateProposalForSpendRequest()
 
+  const { data: comments } = useSpendRequestComments(id ?? null)
+  const addComment = useAddSpendRequestComment()
+  const { data: attachments } = useSpendRequestAttachments(id ?? null)
+  const addAttachment = useAddSpendRequestAttachment()
+
   const [approvalNote, setApprovalNote] = useState('')
   const [rejectionReason, setRejectionReason] = useState('')
   const [paymentRef, setPaymentRef] = useState('')
   const [verifyNote, setVerifyNote] = useState('')
   const [showReject, setShowReject] = useState(false)
   const [showExecute, setShowExecute] = useState(false)
+  const [commentText, setCommentText] = useState('')
+  const [attachUrl, setAttachUrl] = useState('')
+  const [attachDesc, setAttachDesc] = useState('')
 
   const canApprove = (role === 'comite_vigilancia' || isAdmin) && sr?.status === 'pending_approval'
   const canExecute = canManageTreasury && sr?.status === 'approved'
@@ -414,6 +429,121 @@ export function SpendRequestDetailPage() {
           )}
         </div>
       )}
+
+      {/* Attachments */}
+      <div className="rounded-lg border bg-card p-4 space-y-3">
+        <h3 className="flex items-center gap-2 font-medium">
+          <Paperclip className="h-4 w-4" />
+          Adjuntos
+          {attachments && attachments.length > 0 && (
+            <Badge variant="secondary" className="text-xs">{attachments.length}</Badge>
+          )}
+        </h3>
+        {attachments && attachments.length > 0 && (
+          <div className="space-y-1">
+            {attachments.map((a) => (
+              <div key={a.id} className="flex items-center gap-2 text-sm rounded border px-2 py-1.5">
+                <Paperclip className="h-3 w-3 text-muted-foreground shrink-0" />
+                <span className="flex-1 truncate">{a.description || a.type}</span>
+                <a href={a.file_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1 text-xs shrink-0">
+                  Ver <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            ))}
+          </div>
+        )}
+        {canManageTreasury && (
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              value={attachUrl}
+              onChange={(e) => setAttachUrl(e.target.value)}
+              placeholder="URL del archivo"
+              className="flex-1"
+            />
+            <Input
+              value={attachDesc}
+              onChange={(e) => setAttachDesc(e.target.value)}
+              placeholder="Descripcion (opcional)"
+              className="flex-1"
+            />
+            <Button
+              size="sm"
+              disabled={!attachUrl.trim() || addAttachment.isPending}
+              onClick={async () => {
+                if (!id || !attachUrl.trim()) return
+                try {
+                  await addAttachment.mutateAsync({
+                    spendRequestId: id,
+                    type: 'document',
+                    file_url: attachUrl.trim(),
+                    description: attachDesc.trim() || undefined,
+                    uploaded_by: user?.id,
+                  })
+                  setAttachUrl('')
+                  setAttachDesc('')
+                  toast.success('Adjunto agregado.')
+                } catch {
+                  toast.error('No se pudo agregar.')
+                }
+              }}
+              className="shrink-0"
+            >
+              Adjuntar
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Comments */}
+      <div className="rounded-lg border bg-card p-4 space-y-3">
+        <h3 className="flex items-center gap-2 font-medium">
+          <MessageSquare className="h-4 w-4" />
+          Comentarios
+          {comments && comments.length > 0 && (
+            <Badge variant="secondary" className="text-xs">{comments.length}</Badge>
+          )}
+        </h3>
+        {comments && comments.length > 0 && (
+          <div className="space-y-2">
+            {comments.map((c) => (
+              <div key={c.id} className="rounded border px-3 py-2 text-sm">
+                <p>{c.content}</p>
+                <p className="text-xs text-muted-foreground mt-1">{formatDate(c.created_at)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <Textarea
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            placeholder="Escribe un comentario..."
+            rows={2}
+            className="flex-1"
+          />
+          <Button
+            size="sm"
+            disabled={!commentText.trim() || addComment.isPending || !user?.id}
+            onClick={async () => {
+              if (!id || !user?.id || !commentText.trim()) return
+              try {
+                await addComment.mutateAsync({
+                  spendRequestId: id,
+                  userId: user.id,
+                  content: commentText.trim(),
+                })
+                setCommentText('')
+                toast.success('Comentario agregado.')
+              } catch {
+                toast.error('No se pudo agregar.')
+              }
+            }}
+            className="shrink-0 self-end"
+          >
+            {addComment.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
