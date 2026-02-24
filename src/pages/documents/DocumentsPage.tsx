@@ -29,6 +29,7 @@ import { uploadFile } from '@/core/documents/services/documents.service'
 import { useCommunityContext } from '@/app/providers'
 import { hasPermission, type Role } from '@/shared/types'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 const CATEGORIES = [
   { value: 'general', label: 'General' },
@@ -54,6 +55,7 @@ export function DocumentsPage() {
   const createDoc = useCreateDocument()
   const deleteDoc = useDeleteDocument()
   const toast = useToast()
+  const { t } = useI18n()
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -161,14 +163,14 @@ export function DocumentsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Documentos</h1>
-          <p className="text-sm text-muted-foreground">Gestión documental de la comunidad</p>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('documents.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('documents.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {isAdmin && (
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Subir Documento
+              {t('documents.upload')}
             </Button>
           )}
         </div>
@@ -177,11 +179,11 @@ export function DocumentsPage() {
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle>Documentos de la comunidad</CardTitle>
+            <CardTitle>{t('documents.communityDocs')}</CardTitle>
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar documentos..."
+                placeholder={t('documents.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
@@ -191,15 +193,15 @@ export function DocumentsPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <LoadingSpinner message="Cargando documentos..." className="py-8" />
+            <LoadingSpinner message={t('documents.loading')} className="py-8" />
           ) : filteredDocs.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p className="font-medium">
-                {search ? 'Sin resultados para tu búsqueda' : 'No hay documentos aún'}
+                {search ? t('documents.noResults') : t('documents.empty')}
               </p>
               <p className="text-sm mt-1">
-                {search ? 'Intenta con otro término' : 'Sube el primero con el botón de arriba'}
+                {search ? t('documents.noResultsHint') : t('documents.emptyHint')}
               </p>
             </div>
           ) : (

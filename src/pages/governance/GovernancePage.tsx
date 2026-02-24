@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/shared/components/ui/tabs'
 import { Button } from '@/shared/components/ui/button'
@@ -18,6 +18,9 @@ import { formatDate } from '@/shared/lib/utils'
 import { Plus, Download, CheckCircle2, FileText, Landmark, Handshake, ScrollText, BookOpen } from 'lucide-react'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useToast } from '@/shared/components/ui/toast'
+import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+
+const RulesPage = lazy(() => import('@/pages/rules/RulesPage').then(m => ({ default: m.RulesPage })))
 
 type GovernanceTab = 'proposals' | 'assemblies' | 'delegations' | 'minutes' | 'rules'
 
@@ -54,12 +57,10 @@ export function GovernancePage() {
   useEffect(() => {
     if (processedRpcRef.current) return
     processedRpcRef.current = true
-    processExpiredProposals().catch((err) => {
-      console.error('[Governance] processExpiredProposals:', err)
+    processExpiredProposals().catch(() => {
       toast.error('Error al sincronizar propuestas vencidas')
     })
-    processAutoExecutions().catch((err) => {
-      console.error('[Governance] processAutoExecutions:', err)
+    processAutoExecutions().catch(() => {
       toast.error('Error al sincronizar auto-ejecuciones')
     })
   }, [])
@@ -93,9 +94,9 @@ export function GovernancePage() {
   const subtitleMap: Record<GovernanceTab, string> = {
     proposals: t('governance.subtitle.proposals'),
     assemblies: t('governance.subtitle.assemblies'),
-    delegations: 'Gestiona las delegaciones de voto entre miembros',
-    minutes: 'Actas generadas a partir de propuestas ejecutadas',
-    rules: 'Reglamento vigente de la comunidad',
+    delegations: t('governance.subtitle.delegations'),
+    minutes: t('governance.subtitle.minutes'),
+    rules: t('governance.subtitle.rules'),
   }
 
   return (
@@ -191,7 +192,7 @@ export function GovernancePage() {
             <DelegationManager memberId={currentMember.id} />
           ) : (
             <p className="py-12 text-center text-sm text-muted-foreground">
-              Cargando información de miembro...
+              {t('governance.loadingMember')}
             </p>
           )}
         </TabsContent>
@@ -219,10 +220,6 @@ export function GovernancePage() {
     </div>
   )
 }
-
-import { lazy, Suspense } from 'react'
-import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-const RulesPage = lazy(() => import('@/pages/rules/RulesPage').then(m => ({ default: m.RulesPage })))
 
 function RulesTabContent() {
   return (

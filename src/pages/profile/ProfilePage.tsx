@@ -11,12 +11,14 @@ import { User, Lock, Building2, Shield, CheckCircle, AlertCircle, ScrollText } f
 import { formatDate } from '@/shared/lib/utils'
 import type { Member } from '@/core/identity/types'
 import { ARCORightsPanel } from '@/core/privacy/components/ARCORightsPanel'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
 
 export function ProfilePage() {
   const { user, updatePassword } = useAuth()
   const { currentMember, userCommunities, communityId, setCommunityId } = useCommunityContext()
+  const { t } = useI18n()
   const [membersByCommunity, setMembersByCommunity] = useState<Record<string, Member>>({})
 
   // Fetch member info for all communities
@@ -122,8 +124,8 @@ export function ProfilePage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Mi Perfil</h1>
-          <p className="text-sm text-muted-foreground">Gestiona tu cuenta y preferencias</p>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('profile.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('profile.subtitle')}</p>
         </div>
       </div>
 
@@ -132,13 +134,13 @@ export function ProfilePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Información Personal
+            {t('profile.personalInfo')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Nombre completo</Label>
+              <Label htmlFor="fullName">{t('profile.fullName')}</Label>
               <Input
                 id="fullName"
                 value={fullName}
@@ -147,7 +149,7 @@ export function ProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email">{t('profile.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -156,7 +158,7 @@ export function ProfilePage() {
                 className="bg-muted"
               />
               <p className="text-xs text-muted-foreground">
-                El correo electrónico no se puede cambiar
+                {t('profile.emailHint')}
               </p>
             </div>
           </div>
@@ -169,12 +171,12 @@ export function ProfilePage() {
           {nameSuccess && (
             <div className="mt-4 rounded-md bg-green-50 border border-green-200 p-3 flex items-center gap-2 text-sm text-green-800">
               <CheckCircle className="h-4 w-4 shrink-0" />
-              <span>Nombre actualizado exitosamente</span>
+              <span>{t('profile.nameUpdated')}</span>
             </div>
           )}
           <div className="mt-4">
             <Button onClick={handleSaveName} disabled={nameSaving}>
-              {nameSaving ? 'Guardando...' : 'Guardar cambios'}
+              {nameSaving ? t('profile.saving') : t('profile.saveChanges')}
             </Button>
           </div>
         </CardContent>
@@ -185,13 +187,13 @@ export function ProfilePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Lock className="h-5 w-5" />
-            Cambiar Contraseña
+            {t('profile.changePassword')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="newPassword">Nueva contraseña</Label>
+              <Label htmlFor="newPassword">{t('profile.newPassword')}</Label>
               <Input
                 id="newPassword"
                 type="password"
@@ -202,7 +204,7 @@ export function ProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar nueva contraseña</Label>
+              <Label htmlFor="confirmPassword">{t('profile.confirmPassword')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -222,12 +224,12 @@ export function ProfilePage() {
           {passwordSuccess && (
             <div className="mt-4 rounded-md bg-green-50 border border-green-200 p-3 flex items-center gap-2 text-sm text-green-800">
               <CheckCircle className="h-4 w-4 shrink-0" />
-              <span>Contraseña actualizada exitosamente</span>
+              <span>{t('profile.passwordUpdated')}</span>
             </div>
           )}
           <div className="mt-4">
             <Button onClick={handleChangePassword} disabled={passwordSaving}>
-              {passwordSaving ? 'Actualizando...' : 'Actualizar contraseña'}
+              {passwordSaving ? t('profile.updating') : t('profile.updatePassword')}
             </Button>
           </div>
         </CardContent>
@@ -238,12 +240,12 @@ export function ProfilePage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            Mis Comunidades
+            {t('profile.myCommunities')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {userCommunities.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No perteneces a ninguna comunidad aún.</p>
+            <p className="text-sm text-muted-foreground">{t('profile.noCommunities')}</p>
           ) : (
             <div className="space-y-3">
               {userCommunities.map((community) => {
@@ -284,11 +286,11 @@ export function ProfilePage() {
                           size="sm"
                           onClick={() => handleSwitchCommunity(community.id)}
                         >
-                          Cambiar a esta
+                          {t('profile.switchTo')}
                         </Button>
                       )}
                       {isCurrent && (
-                        <Badge variant="default">Actual</Badge>
+                        <Badge variant="default">{t('profile.current')}</Badge>
                       )}
                     </div>
                   </div>
@@ -305,13 +307,13 @@ export function ProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Resumen de Actividad
+              {t('profile.activitySummary')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label className="text-muted-foreground">Rol en la comunidad actual</Label>
+                <Label className="text-muted-foreground">{t('profile.roleInCommunity')}</Label>
                 <div>
                   <Badge variant={ROLE_BADGE_VARIANT[currentMember.role] || 'secondary'}>
                     {ROLE_LABELS[currentMember.role] || currentMember.role}
@@ -319,7 +321,7 @@ export function ProfilePage() {
                 </div>
               </div>
               <div className="space-y-1">
-                <Label className="text-muted-foreground">Estado financiero</Label>
+                <Label className="text-muted-foreground">{t('profile.financialStatus')}</Label>
                 <div>
                   <Badge variant={STANDING_BADGE_VARIANT[currentMember.financial_standing] || 'success'}>
                     {STANDING_LABELS[currentMember.financial_standing] || currentMember.financial_standing}
@@ -327,13 +329,13 @@ export function ProfilePage() {
                 </div>
               </div>
               <div className="space-y-1">
-                <Label className="text-muted-foreground">Peso de voto</Label>
+                <Label className="text-muted-foreground">{t('profile.votingWeight')}</Label>
                 <p className="text-sm font-medium">
-                  {(currentMember as any)?.voting_weight || 1}
+                  {(currentMember?.custom_attributes as Record<string, unknown>)?.voting_weight as number ?? 1}
                 </p>
               </div>
               <div className="space-y-1">
-                <Label className="text-muted-foreground">Miembro desde</Label>
+                <Label className="text-muted-foreground">{t('profile.memberSince')}</Label>
                 <p className="text-sm font-medium">
                   {formatDate(currentMember.joined_at || currentMember.created_at)}
                 </p>
@@ -347,7 +349,7 @@ export function ProfilePage() {
       <div>
         <h2 className="flex items-center gap-2 text-lg font-semibold mb-4">
           <ScrollText className="h-5 w-5" />
-          Datos y Privacidad
+          {t('profile.dataPrivacy')}
         </h2>
         <ARCORightsPanel />
       </div>

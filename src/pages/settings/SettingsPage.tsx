@@ -70,12 +70,12 @@ export function SettingsPage() {
 
   // Rules state
   const [rules, setRules] = useState<CommunityRules>(() =>
-    getCommunityRules(null, (community as any)?.rules)
+    getCommunityRules(null, community?.rules as Record<string, unknown> | null)
   )
   const [rulesSaved, setRulesSaved] = useState(false)
 
   useEffect(() => {
-    if (community) setRules(getCommunityRules(null, (community as any)?.rules))
+    if (community) setRules(getCommunityRules(null, community.rules as Record<string, unknown> | null))
   }, [community])
 
   const updateRulesMut = useMutation({
@@ -138,7 +138,7 @@ export function SettingsPage() {
     return (
       <div className="space-y-6">
         <Button variant="ghost" onClick={() => navigate(path('dashboard'))} className="gap-2">
-          <ArrowLeft className="h-4 w-4" /> Volver al panel
+          <ArrowLeft className="h-4 w-4" /> {t('settings.backToPanel')}
         </Button>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -155,7 +155,7 @@ export function SettingsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('settings.title')}</h1>
-          <p className="text-sm text-muted-foreground">Nombre, reglas, categorías e invitaciones de {community?.name || 'tu comunidad'}</p>
+          <p className="text-sm text-muted-foreground">{t('settings.subtitle')} — {community?.name}</p>
         </div>
       </div>
 
@@ -178,11 +178,11 @@ export function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger value="notifications" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <Bell className="h-3.5 w-3.5" />
-            Notificaciones
+            {t('settings.tab.notifications')}
           </TabsTrigger>
           <TabsTrigger value="audit" className="shrink-0 flex items-center gap-1.5 whitespace-nowrap">
             <Shield className="h-3.5 w-3.5" />
-            Auditoría
+            {t('settings.tab.audit')}
           </TabsTrigger>
         </TabsList>
 
@@ -202,7 +202,7 @@ export function SettingsPage() {
           <div className="rounded-lg border p-6">
             <div className="mb-4 flex items-center gap-2">
               <Tags className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Gestión de Categorías</h2>
+              <h2 className="text-lg font-semibold">{t('settings.categories.title')}</h2>
             </div>
             <CategoryManager />
           </div>
@@ -213,16 +213,16 @@ export function SettingsPage() {
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
-                <h2 className="text-lg font-semibold">Invitaciones Pendientes</h2>
+                <h2 className="text-lg font-semibold">{t('settings.invitations.title')}</h2>
               </div>
               <Button onClick={() => setInviteDialogOpen(true)} className="w-full sm:w-auto">
                 <UserCheck className="h-4 w-4 mr-2" />
-                Crear invitación
+                {t('settings.invitations.create')}
               </Button>
             </div>
             <InviteMemberDialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen} />
             {pendingInvitations.length === 0 ? (
-              <p className="text-muted-foreground">No hay invitaciones pendientes.</p>
+              <p className="text-muted-foreground">{t('settings.invitations.empty')}</p>
             ) : (
               <div className="overflow-x-auto rounded-md border">
                 <Table>
@@ -266,7 +266,7 @@ export function SettingsPage() {
             isSaving={updateRulesMut.isPending}
             saveError={updateRulesMut.isError}
             legalFramework={legalFramework}
-            fintocStatus={(community as any)?.fintoc_status}
+            fintocStatus={community?.fintoc_status}
             onUpdateGovernance={updateGovernance}
             onUpdateTreasury={updateTreasury}
             onUpdateIdentity={updateIdentity}

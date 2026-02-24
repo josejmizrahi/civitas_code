@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/lib/utils'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { Calendar, ChevronLeft, ChevronRight, Vote, Landmark, Receipt, Megaphone } from 'lucide-react'
 
 interface CalendarEvent {
@@ -35,6 +36,7 @@ function sameDay(a: Date, b: Date) {
 }
 
 export function CalendarPage() {
+  const { t } = useI18n()
   const path = useCommunityPath()
   const { currentMember } = useCommunityContext()
   const [currentMonth, setCurrentMonth] = useState(() => {
@@ -139,9 +141,9 @@ export function CalendarPage() {
       <div>
         <h1 className="flex items-center gap-2 text-xl font-bold tracking-tight sm:text-2xl">
           <Calendar className="h-6 w-6 text-blue-600" />
-          Calendario
+          {t('calendar.title')}
         </h1>
-        <p className="text-sm text-muted-foreground">Asambleas, pagos y propuestas en un solo lugar</p>
+        <p className="text-sm text-muted-foreground">{t('calendar.subtitle')}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -153,7 +155,7 @@ export function CalendarPage() {
               <Button variant="ghost" size="icon" onClick={prevMonth}><ChevronLeft className="h-4 w-4" /></Button>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-semibold">{MONTHS[month]} {year}</h2>
-                <Button variant="outline" size="sm" className="text-xs" onClick={goToday}>Hoy</Button>
+                <Button variant="outline" size="sm" className="text-xs" onClick={goToday}>{t('calendar.today')}</Button>
               </div>
               <Button variant="ghost" size="icon" onClick={nextMonth}><ChevronRight className="h-4 w-4" /></Button>
             </div>
@@ -213,10 +215,10 @@ export function CalendarPage() {
           <h3 className="text-sm font-semibold text-muted-foreground">
             {selectedDate
               ? selectedDate.toLocaleDateString('es-MX', { weekday: 'long', month: 'long', day: 'numeric' })
-              : `Eventos de ${MONTHS[month]}`}
+              : `${t('calendar.eventsFor')} ${MONTHS[month]}`}
           </h3>
           {selectedEvents.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">Sin eventos</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">{t('calendar.noEvents')}</p>
           ) : (
             selectedEvents.map((e) => {
               const cfg = TYPE_CONFIG[e.type]

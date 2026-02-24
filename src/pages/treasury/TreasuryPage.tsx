@@ -18,8 +18,7 @@ export function TreasuryPage() {
   useEffect(() => {
     if (hasRun.current) return
     hasRun.current = true
-    const onError = (label: string) => (err: unknown) => {
-      console.error(`[Treasury] ${label}:`, err)
+    const onError = (label: string) => () => {
       toast.error(`Error al sincronizar: ${label}`)
     }
     refreshOverdue.mutate(undefined, { onError: onError('obligaciones vencidas') })

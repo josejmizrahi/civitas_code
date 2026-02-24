@@ -11,10 +11,12 @@ import { ReservationList } from '@/verticals/residential/components/ReservationL
 import { useUnitsWithMembers, useCommonAreas, useReservations } from '@/verticals/residential/hooks/useResidential'
 import { useMaintenanceRequests } from '@/verticals/residential/hooks/useMaintenanceRequests'
 import { Plus, Home, Wrench, Building, CalendarCheck, BarChart3 } from 'lucide-react'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 type ResidentialTab = 'overview' | 'units' | 'maintenance' | 'common-areas' | 'reservations'
 
 export function ResidentialPage() {
+  const { t } = useI18n()
   const [tab, setTab] = useState<ResidentialTab>('overview')
   const [showForm, setShowForm] = useState(false)
 
@@ -36,8 +38,8 @@ export function ResidentialPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Residencial</h1>
-          <p className="text-sm text-muted-foreground">Unidades, mantenimiento, áreas comunes y reservaciones</p>
+          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{t('residential.title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('residential.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {tab === 'maintenance' && (

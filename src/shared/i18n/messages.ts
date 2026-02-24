@@ -799,6 +799,69 @@ export type I18nKey =
   | 'memberDir.deactivateError'
   | 'memberDir.reactivated'
   | 'memberDir.reactivateError'
+  // Page titles & subtitles
+  | 'announcements.title'
+  | 'announcements.subtitle'
+  | 'calendar.title'
+  | 'calendar.subtitle'
+  | 'calendar.today'
+  | 'calendar.eventsFor'
+  | 'calendar.noEvents'
+  | 'documents.title'
+  | 'documents.subtitle'
+  | 'documents.upload'
+  | 'documents.communityDocs'
+  | 'documents.searchPlaceholder'
+  | 'documents.loading'
+  | 'documents.noResults'
+  | 'documents.empty'
+  | 'documents.noResultsHint'
+  | 'documents.emptyHint'
+  | 'profile.title'
+  | 'profile.subtitle'
+  | 'profile.personalInfo'
+  | 'profile.fullName'
+  | 'profile.email'
+  | 'profile.emailHint'
+  | 'profile.saveChanges'
+  | 'profile.saving'
+  | 'profile.nameUpdated'
+  | 'profile.changePassword'
+  | 'profile.newPassword'
+  | 'profile.confirmPassword'
+  | 'profile.updatePassword'
+  | 'profile.updating'
+  | 'profile.passwordUpdated'
+  | 'profile.myCommunities'
+  | 'profile.noCommunities'
+  | 'profile.switchTo'
+  | 'profile.current'
+  | 'profile.activitySummary'
+  | 'profile.roleInCommunity'
+  | 'profile.financialStatus'
+  | 'profile.votingWeight'
+  | 'profile.memberSince'
+  | 'profile.dataPrivacy'
+  | 'settings.subtitle'
+  | 'settings.tab.notifications'
+  | 'settings.tab.audit'
+  | 'settings.categories.title'
+  | 'settings.invitations.title'
+  | 'settings.invitations.create'
+  | 'settings.invitations.empty'
+  | 'settings.backToPanel'
+  | 'governance.subtitle.delegations'
+  | 'governance.subtitle.minutes'
+  | 'governance.subtitle.rules'
+  | 'governance.loadingMember'
+  | 'community.tabs.directory'
+  | 'community.directory.members'
+  | 'community.directory.providers'
+  | 'residential.title'
+  | 'residential.subtitle'
+  | 'memberDetail.back'
+  | 'memberDetail.loading'
+  | 'memberDetail.notFound'
 
 type Dictionary = Record<I18nKey, string>
 
@@ -1599,6 +1662,69 @@ const es: Dictionary = {
   'memberDir.deactivateError': 'Error al desactivar miembro',
   'memberDir.reactivated': 'Miembro reactivado',
   'memberDir.reactivateError': 'Error al reactivar miembro',
+  // Page titles & subtitles
+  'announcements.title': 'Anuncios',
+  'announcements.subtitle': 'Avisos y comunicados de la comunidad',
+  'calendar.title': 'Calendario',
+  'calendar.subtitle': 'Asambleas, pagos y propuestas en un solo lugar',
+  'calendar.today': 'Hoy',
+  'calendar.eventsFor': 'Eventos de',
+  'calendar.noEvents': 'Sin eventos',
+  'documents.title': 'Documentos',
+  'documents.subtitle': 'Gestión documental de la comunidad',
+  'documents.upload': 'Subir Documento',
+  'documents.communityDocs': 'Documentos de la comunidad',
+  'documents.searchPlaceholder': 'Buscar documentos...',
+  'documents.loading': 'Cargando documentos...',
+  'documents.noResults': 'Sin resultados para tu búsqueda',
+  'documents.empty': 'No hay documentos aún',
+  'documents.noResultsHint': 'Intenta con otro término',
+  'documents.emptyHint': 'Sube el primero con el botón de arriba',
+  'profile.title': 'Mi Perfil',
+  'profile.subtitle': 'Gestiona tu cuenta y preferencias',
+  'profile.personalInfo': 'Información Personal',
+  'profile.fullName': 'Nombre completo',
+  'profile.email': 'Correo electrónico',
+  'profile.emailHint': 'El correo electrónico no se puede cambiar',
+  'profile.saveChanges': 'Guardar cambios',
+  'profile.saving': 'Guardando...',
+  'profile.nameUpdated': 'Nombre actualizado exitosamente',
+  'profile.changePassword': 'Cambiar Contraseña',
+  'profile.newPassword': 'Nueva contraseña',
+  'profile.confirmPassword': 'Confirmar nueva contraseña',
+  'profile.updatePassword': 'Actualizar contraseña',
+  'profile.updating': 'Actualizando...',
+  'profile.passwordUpdated': 'Contraseña actualizada exitosamente',
+  'profile.myCommunities': 'Mis Comunidades',
+  'profile.noCommunities': 'No perteneces a ninguna comunidad aún.',
+  'profile.switchTo': 'Cambiar a esta',
+  'profile.current': 'Actual',
+  'profile.activitySummary': 'Resumen de Actividad',
+  'profile.roleInCommunity': 'Rol en la comunidad actual',
+  'profile.financialStatus': 'Estado financiero',
+  'profile.votingWeight': 'Peso de voto',
+  'profile.memberSince': 'Miembro desde',
+  'profile.dataPrivacy': 'Datos y Privacidad',
+  'settings.subtitle': 'Nombre, reglas, categorías e invitaciones',
+  'settings.tab.notifications': 'Notificaciones',
+  'settings.tab.audit': 'Auditoría',
+  'settings.categories.title': 'Gestión de Categorías',
+  'settings.invitations.title': 'Invitaciones Pendientes',
+  'settings.invitations.create': 'Crear invitación',
+  'settings.invitations.empty': 'No hay invitaciones pendientes.',
+  'settings.backToPanel': 'Volver al panel',
+  'governance.subtitle.delegations': 'Gestiona las delegaciones de voto entre miembros',
+  'governance.subtitle.minutes': 'Actas generadas a partir de propuestas ejecutadas',
+  'governance.subtitle.rules': 'Reglamento vigente de la comunidad',
+  'governance.loadingMember': 'Cargando información de miembro...',
+  'community.tabs.directory': 'Directorio',
+  'community.directory.members': 'Miembros',
+  'community.directory.providers': 'Proveedores',
+  'residential.title': 'Residencial',
+  'residential.subtitle': 'Unidades, mantenimiento, áreas comunes y reservaciones',
+  'memberDetail.back': 'Volver a Comunidad',
+  'memberDetail.loading': 'Cargando perfil del miembro...',
+  'memberDetail.notFound': 'Miembro no encontrado',
 }
 
 const en: Dictionary = {
@@ -2398,6 +2524,69 @@ const en: Dictionary = {
   'memberDir.deactivateError': 'Error deactivating member',
   'memberDir.reactivated': 'Member reactivated',
   'memberDir.reactivateError': 'Error reactivating member',
+  // Page titles & subtitles
+  'announcements.title': 'Announcements',
+  'announcements.subtitle': 'Community notices and communications',
+  'calendar.title': 'Calendar',
+  'calendar.subtitle': 'Assemblies, payments, and proposals in one place',
+  'calendar.today': 'Today',
+  'calendar.eventsFor': 'Events for',
+  'calendar.noEvents': 'No events',
+  'documents.title': 'Documents',
+  'documents.subtitle': 'Community document management',
+  'documents.upload': 'Upload Document',
+  'documents.communityDocs': 'Community documents',
+  'documents.searchPlaceholder': 'Search documents...',
+  'documents.loading': 'Loading documents...',
+  'documents.noResults': 'No results for your search',
+  'documents.empty': 'No documents yet',
+  'documents.noResultsHint': 'Try a different term',
+  'documents.emptyHint': 'Upload the first one with the button above',
+  'profile.title': 'My Profile',
+  'profile.subtitle': 'Manage your account and preferences',
+  'profile.personalInfo': 'Personal Information',
+  'profile.fullName': 'Full name',
+  'profile.email': 'Email',
+  'profile.emailHint': 'Email address cannot be changed',
+  'profile.saveChanges': 'Save changes',
+  'profile.saving': 'Saving...',
+  'profile.nameUpdated': 'Name updated successfully',
+  'profile.changePassword': 'Change Password',
+  'profile.newPassword': 'New password',
+  'profile.confirmPassword': 'Confirm new password',
+  'profile.updatePassword': 'Update password',
+  'profile.updating': 'Updating...',
+  'profile.passwordUpdated': 'Password updated successfully',
+  'profile.myCommunities': 'My Communities',
+  'profile.noCommunities': 'You are not a member of any community yet.',
+  'profile.switchTo': 'Switch to this',
+  'profile.current': 'Current',
+  'profile.activitySummary': 'Activity Summary',
+  'profile.roleInCommunity': 'Role in current community',
+  'profile.financialStatus': 'Financial status',
+  'profile.votingWeight': 'Voting weight',
+  'profile.memberSince': 'Member since',
+  'profile.dataPrivacy': 'Data & Privacy',
+  'settings.subtitle': 'Name, rules, categories and invitations',
+  'settings.tab.notifications': 'Notifications',
+  'settings.tab.audit': 'Audit',
+  'settings.categories.title': 'Category Management',
+  'settings.invitations.title': 'Pending Invitations',
+  'settings.invitations.create': 'Create invitation',
+  'settings.invitations.empty': 'No pending invitations.',
+  'settings.backToPanel': 'Back to dashboard',
+  'governance.subtitle.delegations': 'Manage vote delegations between members',
+  'governance.subtitle.minutes': 'Minutes generated from executed proposals',
+  'governance.subtitle.rules': 'Current community rulebook',
+  'governance.loadingMember': 'Loading member information...',
+  'community.tabs.directory': 'Directory',
+  'community.directory.members': 'Members',
+  'community.directory.providers': 'Providers',
+  'residential.title': 'Residential',
+  'residential.subtitle': 'Units, maintenance, common areas, and reservations',
+  'memberDetail.back': 'Back to Community',
+  'memberDetail.loading': 'Loading member profile...',
+  'memberDetail.notFound': 'Member not found',
 }
 
 export const MESSAGES: Record<string, Dictionary> = {

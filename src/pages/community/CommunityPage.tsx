@@ -49,7 +49,7 @@ export function CommunityPage() {
         <TabsList className="gap-1">
           <TabsTrigger value="directory" className="flex items-center gap-1.5">
             <BookOpen className="h-3.5 w-3.5" />
-            Directorio
+            {t('community.tabs.directory')}
           </TabsTrigger>
           <TabsTrigger value="activity" className="flex items-center gap-1.5">
             <Activity className="h-3.5 w-3.5" />
@@ -67,7 +67,7 @@ export function CommunityPage() {
                 }`}
               >
                 <Users className="h-3.5 w-3.5" />
-                Miembros
+                {t('community.directory.members')}
               </button>
               <button
                 onClick={() => setDirectoryView('providers')}
@@ -76,7 +76,7 @@ export function CommunityPage() {
                 }`}
               >
                 <Building2 className="h-3.5 w-3.5" />
-                Proveedores
+                {t('community.directory.providers')}
               </button>
             </div>
 

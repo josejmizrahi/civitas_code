@@ -27,6 +27,7 @@ import {
 import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
 import { useConfirm } from '@/shared/components/ConfirmDialog'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
+import { useI18n } from '@/shared/hooks/useI18n'
 
 interface PaymentObligation {
   id: string
@@ -86,6 +87,7 @@ export function MemberDetailPage() {
 
   const { error: toastError, success: toastSuccess } = useToast()
   const confirm = useConfirm()
+  const { t } = useI18n()
   const memberQuery = useMember(memberId)
   const obligationsQuery = usePaymentObligations(memberId)
   const votesQuery = useQuery({
@@ -119,17 +121,17 @@ export function MemberDetailPage() {
   const auditLog = auditQuery.data ?? []
   const memberProposals = proposalsQuery.data ?? []
 
-  if (loading) return <LoadingSpinner message="Cargando perfil del miembro..." className="py-20" />
+  if (loading) return <LoadingSpinner message={t('memberDetail.loading')} className="py-20" />
 
   if (error || !member) {
     return (
       <div className="space-y-6">
         <Button variant="ghost" onClick={() => navigate(path('community'))}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+          <ArrowLeft className="mr-2 h-4 w-4" /> {t('memberDetail.back')}
         </Button>
         <div className="rounded-md bg-destructive/10 border border-destructive/20 p-4 flex items-center gap-2 text-destructive">
           <AlertCircle className="h-5 w-5 shrink-0" />
-          <span>{error || 'Miembro no encontrado'}</span>
+          <span>{error || t('memberDetail.notFound')}</span>
         </div>
       </div>
     )
@@ -178,7 +180,7 @@ export function MemberDetailPage() {
     <div className="space-y-6">
       {/* Back button */}
       <Button variant="ghost" onClick={() => navigate(path('community'))} className="gap-2">
-        <ArrowLeft className="h-4 w-4" /> Volver a Comunidad
+        <ArrowLeft className="h-4 w-4" /> {t('memberDetail.back')}
       </Button>
 
       {/* Header Card */}
