@@ -46,7 +46,7 @@ export function PaymentsPage() {
 
       {isActive && isAdmin ? (
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as PaymentsTab)}>
-          <TabsList className="h-auto flex-wrap gap-1 rounded-xl bg-muted/60 p-1.5">
+          <TabsList className="h-auto flex-wrap gap-1 rounded-xl bg-muted p-1.5">
             <TabsTrigger value="setup" className="gap-1.5 text-xs sm:text-sm">
               <CreditCard className="h-3.5 w-3.5" />
               Configuración

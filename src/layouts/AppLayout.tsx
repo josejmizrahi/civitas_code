@@ -274,7 +274,7 @@ export function AppLayout() {
         <div className="px-3 pt-3">
           <button
             onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-            className="flex w-full items-center gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted"
+            className="flex w-full items-center gap-2 rounded-lg border bg-muted px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent"
           >
             <Search className="h-4 w-4 shrink-0" />
             <span className="flex-1 text-left">Buscar…</span>

@@ -27,7 +27,7 @@ function OnboardingSkeleton() {
   return (
     <div className="space-y-6">
       <Card className="rounded-xl overflow-hidden">
-        <div className="h-1.5 bg-gradient-to-r from-emerald-200 via-blue-200 to-emerald-200 animate-pulse" />
+        <div className="h-1.5 bg-muted animate-pulse" />
         <CardContent className="pt-8 pb-8 space-y-6">
           <div className="flex flex-col items-center gap-4">
             <Skeleton className="h-14 w-14 rounded-full" />
@@ -138,11 +138,11 @@ export function FintechOnboarding() {
       {phase === 'welcome' && (
         <>
           <Card className="rounded-xl overflow-hidden">
-            <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500" />
+            <div className="h-1.5 bg-primary" />
             <CardContent className="pt-8 pb-8">
               <div className="flex flex-col items-center text-center gap-5">
-                <div className="rounded-full bg-emerald-50 p-4">
-                  <Banknote className="h-8 w-8 text-emerald-600" />
+                <div className="rounded-full bg-muted p-4">
+                  <Banknote className="h-8 w-8 text-primary" />
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-xl font-semibold tracking-tight">Activa pagos electrónicos</h2>
@@ -155,7 +155,7 @@ export function FintechOnboarding() {
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
                   <Button
                     size="lg"
-                    className="gap-2 bg-emerald-700 hover:bg-emerald-800 shadow-lg shadow-emerald-200/50"
+                    className="gap-2"
                     onClick={() => setPhase('kyb')}
                   >
                     <FileText className="h-4 w-4" />
@@ -177,8 +177,8 @@ export function FintechOnboarding() {
               <div className="mt-10 mx-auto max-w-lg">
                 <div className="grid gap-4">
                   {FEATURES.map((f) => (
-                    <div key={f.title} className="flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted/30">
-                      <div className="rounded-lg bg-primary/5 p-2 shrink-0">
+                    <div key={f.title} className="flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:bg-muted">
+                      <div className="rounded-lg bg-muted p-2 shrink-0">
                         <f.icon className="h-5 w-5 text-primary" />
                       </div>
                       <div>
@@ -226,15 +226,15 @@ export function FintechOnboarding() {
       {/* ─── PHASE: PENDING ──────────────────────────────────── */}
       {phase === 'pending' && (
         <Card className="rounded-xl overflow-hidden">
-          <div className="h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400 animate-pulse" />
+          <div className="h-1.5 bg-muted-foreground animate-pulse" />
           <CardContent className="pt-8 pb-8">
             <div className="flex flex-col items-center text-center gap-5">
               <div className="relative">
-                <div className="rounded-full bg-amber-50 p-4">
-                  <Clock className="h-8 w-8 text-amber-600" />
+                <div className="rounded-full bg-muted p-4">
+                  <Clock className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5">
-                  <div className="h-4 w-4 rounded-full bg-amber-400 animate-pulse" />
+                <div className="absolute -bottom-1 -right-1 rounded-full bg-background p-0.5">
+                  <div className="h-4 w-4 rounded-full bg-muted-foreground animate-pulse" />
                 </div>
               </div>
 
@@ -252,9 +252,9 @@ export function FintechOnboarding() {
               </div>
 
               {kybApp?.fintoc_notes && (
-                <div className="rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-left w-full max-w-md">
-                  <p className="font-medium text-amber-900 mb-1">Notas del equipo:</p>
-                  <p className="text-amber-800">{kybApp.fintoc_notes}</p>
+                <div className="rounded-lg bg-muted border p-4 text-sm text-left w-full max-w-md">
+                  <p className="font-medium text-foreground mb-1">Notas del equipo:</p>
+                  <p className="text-muted-foreground">{kybApp.fintoc_notes}</p>
                 </div>
               )}
 
@@ -280,29 +280,29 @@ export function FintechOnboarding() {
       {/* ─── PHASE: ACTIVE ───────────────────────────────────── */}
       {phase === 'active' && (
         <Card className="rounded-xl overflow-hidden">
-          <div className="h-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600" />
+          <div className="h-1.5 bg-primary" />
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <BadgeCheck className="h-5 w-5 text-emerald-600" />
+              <BadgeCheck className="h-5 w-5 text-primary" />
               Integración financiera activa
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="rounded-full bg-emerald-100 p-1.5">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-700" />
+                <div className="rounded-full bg-muted p-1.5">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Pagos SPEI habilitados</p>
                   <p className="text-xs text-muted-foreground">Recibiendo transferencias en tiempo real</p>
                 </div>
               </div>
-              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">Activo</Badge>
+              <Badge variant="secondary">Activo</Badge>
             </div>
 
             {status?.fintech_root_clabe && (
-              <div className="rounded-lg border bg-muted/20 p-4 space-y-3">
+              <div className="rounded-lg border bg-muted p-4 space-y-3">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">CLABE principal</p>
@@ -337,12 +337,12 @@ export function FintechOnboarding() {
 
       {/* ─── PHASE: SUSPENDED ────────────────────────────────── */}
       {phase === 'suspended' && (
-        <Card className="rounded-xl overflow-hidden border-destructive/30">
-          <div className="h-1.5 bg-gradient-to-r from-red-400 to-red-500" />
+        <Card className="rounded-xl overflow-hidden border-destructive">
+          <div className="h-1.5 bg-destructive" />
           <CardContent className="pt-8 pb-8">
             <div className="flex flex-col items-center text-center gap-4">
-              <div className="rounded-full bg-red-50 p-4">
-                <AlertTriangle className="h-8 w-8 text-red-600" />
+              <div className="rounded-full bg-muted p-4">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-semibold tracking-tight">Integración suspendida</h2>
@@ -452,7 +452,7 @@ function PendingTimeline({ status }: { status: string }) {
 
   return (
     <div className="space-y-3">
-      <Progress value={progressPct} className="h-1.5" indicatorClassName="bg-amber-500" />
+      <Progress value={progressPct} className="h-1.5" />
       <div className="space-y-3">
         {steps.map((s, i) => {
           const isComplete = i < (currentIdx >= 0 ? currentIdx + 1 : 1)
@@ -461,7 +461,7 @@ function PendingTimeline({ status }: { status: string }) {
             <div key={s.id} className="flex items-center gap-3">
               <div className={cn(
                 'flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium shrink-0 transition-colors',
-                isComplete ? 'bg-amber-500 text-white' : isCurrent ? 'bg-amber-100 text-amber-700 ring-2 ring-amber-400' : 'bg-muted text-muted-foreground',
+                isComplete ? 'bg-primary text-primary-foreground' : isCurrent ? 'bg-muted text-foreground ring-2 ring-ring' : 'bg-muted text-muted-foreground',
               )}>
                 {isComplete ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
               </div>

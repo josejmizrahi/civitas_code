@@ -347,13 +347,13 @@ export function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Bell className="h-5 w-5 text-amber-600" />
+                  <Bell className="h-5 w-5 text-muted-foreground" />
                   Notificaciones Push
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {!import.meta.env.VITE_VAPID_PUBLIC_KEY && (
-                  <div className="rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+                  <div className="rounded-md bg-muted border px-4 py-3 text-sm text-muted-foreground">
                     La clave pública VAPID no está configurada (VITE_VAPID_PUBLIC_KEY). Las notificaciones push no estarán disponibles hasta que se configure en el servidor.
                   </div>
                 )}
@@ -521,7 +521,7 @@ export function SettingsPage() {
           <div className="space-y-6">
             {/* Success banner */}
             {rulesSaved && (
-              <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+              <div className="rounded-md bg-muted border px-4 py-3 text-sm text-foreground">
                 Reglas guardadas exitosamente.
               </div>
             )}
@@ -530,7 +530,7 @@ export function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Shield className="h-5 w-5 text-blue-600" />
+                  <Shield className="h-5 w-5 text-muted-foreground" />
                   Gobernanza
                 </CardTitle>
               </CardHeader>
@@ -667,33 +667,32 @@ export function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Wallet className="h-5 w-5 text-emerald-600" />
+                  <Wallet className="h-5 w-5 text-muted-foreground" />
                   Tesorería
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
                 {/* Pagos electrónicos */}
-                <div className="rounded-md border border-emerald-200 bg-emerald-50/40 p-4 space-y-3">
-                  <p className="text-sm font-medium text-emerald-900 flex items-center gap-2">
+                <div className="rounded-md border bg-muted p-4 space-y-3">
+                  <p className="text-sm font-medium text-foreground flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
                     Pagos electrónicos
                   </p>
-                  <p className="text-xs text-emerald-800/90">
+                  <p className="text-xs text-muted-foreground">
                     Recibe SPEI, concilia cuotas automáticamente y dispersa pagos con gobernanza.
                   </p>
                   {(community as any)?.fintoc_status === 'active' ? (
-                    <div className="flex items-center gap-2 text-sm text-emerald-800">
-                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <div className="flex items-center gap-2 text-sm text-foreground">
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
                       <span>Integración activa. Gestiona desde la sección de Pagos.</span>
                     </div>
                   ) : (community as any)?.fintoc_status === 'pending' ? (
-                    <p className="text-sm text-amber-800">Solicitud en revisión. Te notificaremos cuando esté lista.</p>
+                    <p className="text-sm text-muted-foreground">Solicitud en revisión. Te notificaremos cuando esté lista.</p>
                   ) : (
                     <Button
                       type="button"
                       variant="default"
                       size="sm"
-                      className="bg-emerald-700 hover:bg-emerald-800"
                       onClick={() => navigate(path('payments'))}
                     >
                       Configurar pagos
@@ -769,13 +768,13 @@ export function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <UserCheck className="h-5 w-5 text-violet-600" />
+                  <UserCheck className="h-5 w-5 text-muted-foreground" />
                   Identidad
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
                 {/* Payment to vote — KEY FEATURE */}
-                <div className="rounded-md border border-violet-200 bg-violet-50/50 p-4 space-y-3">
+                <div className="rounded-md border bg-muted p-4 space-y-3">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -793,7 +792,7 @@ export function SettingsPage() {
                 </div>
 
                 {rules.identity.payment_to_vote_enabled && (
-                  <div className="ml-4 space-y-5 border-l-2 border-violet-200 pl-4">
+                  <div className="ml-4 space-y-5 border-l-2 border-border pl-4">
                     {/* Grace period */}
                     <div className="space-y-2">
                       <Label htmlFor="grace_period_months">Periodo de gracia (meses)</Label>
@@ -853,7 +852,7 @@ export function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Shield className="h-5 w-5 text-amber-600" />
+                  <Shield className="h-5 w-5 text-muted-foreground" />
                   Cumplimiento legal
                 </CardTitle>
               </CardHeader>
@@ -950,13 +949,13 @@ export function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Bell className="h-5 w-5 text-amber-600" />
+                  <Bell className="h-5 w-5 text-muted-foreground" />
                   Notificaciones Push
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {!import.meta.env.VITE_VAPID_PUBLIC_KEY && (
-                  <div className="rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+                  <div className="rounded-md bg-muted border px-4 py-3 text-sm text-muted-foreground">
                     La clave pública VAPID no está configurada. Las notificaciones push no estarán disponibles.
                   </div>
                 )}

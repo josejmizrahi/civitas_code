@@ -142,12 +142,12 @@ export function AdminTreasuryView() {
         </div>
 
         {fintechStatus !== 'active' && (
-          <div className="rounded-lg border border-blue-200 bg-blue-50/50 px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 text-sm text-blue-900">
-              <Banknote className="h-4 w-4 shrink-0" />
+          <div className="rounded-lg border bg-muted px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <Banknote className="h-4 w-4 shrink-0 text-muted-foreground" />
               <span>Conecta la integración financiera para recibir pagos SPEI automáticamente, conciliar cuotas y dispersar pagos a proveedores.</span>
             </div>
-            <Button variant="outline" size="sm" className="border-blue-300 text-blue-800 hover:bg-blue-100 shrink-0" onClick={() => navigate(path('payments'))}>
+            <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate(path('payments'))}>
               Configurar pagos
             </Button>
           </div>
@@ -214,7 +214,7 @@ export function AdminTreasuryView() {
 
       {/* 7 Main Tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TreasuryTab)}>
-        <TabsList className="h-auto flex-wrap gap-1 rounded-xl bg-muted/60 p-1.5">
+        <TabsList className="h-auto flex-wrap gap-1 rounded-xl bg-muted p-1.5">
           <TabsTrigger value="dashboard" className="gap-1.5 text-xs sm:text-sm">
             <BarChart3 className="h-3.5 w-3.5" />
             Dashboard
@@ -274,7 +274,7 @@ export function AdminTreasuryView() {
         {/* Tab: Obligaciones — sub-tabs */}
         <TabsContent value="obligations" className="mt-4">
           <Tabs value={obligationsSubTab} onValueChange={setObligationsSubTab}>
-            <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1">
+            <TabsList className="h-auto flex-wrap gap-1 rounded-lg bg-muted p-1">
               <TabsTrigger value="cobranza" className="gap-1 text-xs sm:text-sm">Cobranza</TabsTrigger>
               <TabsTrigger value="collection" className="gap-1 text-xs sm:text-sm">Recaudación</TabsTrigger>
               <TabsTrigger value="recurring" className="gap-1 text-xs sm:text-sm">Cuotas Recurrentes</TabsTrigger>
@@ -289,7 +289,7 @@ export function AdminTreasuryView() {
               {obligationsSubTab === 'cobranza' && (
                 <>
                   {canManageTreasury && hasClabe && (
-                    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3">
+                    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border bg-muted px-4 py-3">
                       <Building2 className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">CLABE:</span>
                       <code className="text-sm font-mono font-medium">{collectionConfig?.clabe}</code>
@@ -387,7 +387,7 @@ function SpendRequestsInline() {
         </TableHeader>
         <TableBody>
           {requests.map((r) => (
-            <TableRow key={r.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(path(`treasury/requests/${r.id}`))}>
+            <TableRow key={r.id} className="cursor-pointer hover:bg-muted" onClick={() => navigate(path(`treasury/requests/${r.id}`))}>
               <TableCell className="font-medium">{r.title}</TableCell>
               <TableCell>{formatCurrency(r.amount)}</TableCell>
               <TableCell className="text-xs">N{r.authorization_level ?? '—'}</TableCell>

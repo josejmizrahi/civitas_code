@@ -102,7 +102,7 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
     <div className={cn(
       'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all',
       status === 'saving' && 'text-muted-foreground',
-      status === 'saved' && 'text-emerald-600',
+      status === 'saved' && 'text-primary',
       status === 'error' && 'text-destructive',
     )}>
       {status === 'saving' && <><Loader2 className="h-3 w-3 animate-spin" /> Guardando...</>}
@@ -223,7 +223,7 @@ export function KybWizard(_props: KybWizardProps) {
 
   if (app?.status === 'rejected') {
     return (
-      <Card className="rounded-xl border-destructive/30">
+      <Card className="rounded-xl border-destructive">
         <CardContent className="py-8 text-center space-y-3">
           <AlertCircle className="mx-auto h-10 w-10 text-destructive" />
           <h3 className="text-lg font-semibold">Solicitud rechazada</h3>
@@ -238,8 +238,8 @@ export function KybWizard(_props: KybWizardProps) {
     return (
       <Card className="rounded-xl">
         <CardContent className="py-10 text-center space-y-5">
-          <div className="mx-auto rounded-full bg-blue-50 p-4 w-fit">
-            <FileText className="h-8 w-8 text-blue-600" />
+          <div className="mx-auto rounded-full bg-muted p-4 w-fit">
+            <FileText className="h-8 w-8 text-primary" />
           </div>
           <div className="space-y-2">
             <h3 className="text-lg font-semibold">Proceso de conocimiento del cliente (KYB)</h3>
@@ -275,7 +275,7 @@ export function KybWizard(_props: KybWizardProps) {
           </span>
           <SaveIndicator status={saveStatus} />
         </div>
-        <Progress value={progressPct} className="h-1.5" indicatorClassName="bg-emerald-500 transition-all duration-500" />
+        <Progress value={progressPct} className="h-1.5" />
 
         <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none">
           {STEPS.map((s, i) => {
@@ -291,7 +291,7 @@ export function KybWizard(_props: KybWizardProps) {
                   isCurrent
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : complete
-                      ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                      ? 'bg-muted text-foreground hover:bg-accent'
                       : 'text-muted-foreground hover:bg-muted',
                 )}
               >
@@ -341,7 +341,7 @@ export function KybWizard(_props: KybWizardProps) {
           <Button
             onClick={handleSubmit}
             disabled={submit.isPending}
-            className="gap-1.5 bg-emerald-700 hover:bg-emerald-800 shadow-lg shadow-emerald-200/50"
+            className="gap-1.5"
           >
             {submit.isPending ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Enviando...</>
@@ -444,7 +444,7 @@ function StepShareholders({ form, set }: { form: Partial<KybApplication>; set: (
       </p>
       {shareholders.length === 0 && (
         <div className="rounded-lg border border-dashed p-6 text-center">
-          <Users className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
+          <Users className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground">No hay accionistas registrados.</p>
         </div>
       )}
@@ -510,22 +510,22 @@ function StepDocuments({ form, onUpload, uploading }: { form: Partial<KybApplica
           return (
             <div key={doc.key} className={cn(
               'flex items-center gap-3 rounded-lg border p-3 transition-colors',
-              uploaded ? 'border-emerald-200 bg-emerald-50/30' : 'hover:bg-muted/30',
+              uploaded ? 'bg-muted' : 'hover:bg-muted',
             )}>
               <div className={cn(
                 'rounded-full p-1.5 shrink-0',
-                uploaded ? 'bg-emerald-100 text-emerald-700' : 'bg-muted text-muted-foreground',
+                uploaded ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
               )}>
                 {uploaded ? <CheckCircle2 className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium leading-tight">{doc.label}</p>
-                {uploaded && <p className="text-xs text-emerald-600 mt-0.5">Documento subido</p>}
+                {uploaded && <p className="text-xs text-primary mt-0.5">Documento subido</p>}
               </div>
               <label className="cursor-pointer shrink-0">
                 <input type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => onUpload(doc.key, e)} disabled={uploading} />
                 <span className={cn(
-                  'inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-muted',
+                  'inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent',
                   uploading ? 'opacity-50 cursor-wait' : '',
                 )}>
                   {uploading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
@@ -628,7 +628,7 @@ function StepAnnexB({ form, set }: { form: Partial<KybApplication>; set: (k: str
       <p className="text-sm text-muted-foreground">
         Usuarios que tendrán acceso al portal del proveedor de pagos.
       </p>
-      <div className="text-xs rounded-lg bg-muted/50 p-3 space-y-1">
+      <div className="text-xs rounded-lg bg-muted p-3 space-y-1">
         <p><strong>Administrador:</strong> Gestiona usuarios y permisos.</p>
         <p><strong>Operador:</strong> Captura y ejecuta transferencias.</p>
         <p><strong>Capturador:</strong> Captura operaciones (requiere autorización).</p>
@@ -636,7 +636,7 @@ function StepAnnexB({ form, set }: { form: Partial<KybApplication>; set: (k: str
       </div>
       {users.length === 0 && (
         <div className="rounded-lg border border-dashed p-6 text-center">
-          <Shield className="mx-auto h-8 w-8 text-muted-foreground/40 mb-2" />
+          <Shield className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
           <p className="text-sm text-muted-foreground">No hay usuarios registrados.</p>
         </div>
       )}
@@ -674,8 +674,8 @@ function StepAnnexD({ form, set }: { form: Partial<KybApplication>; set: (k: str
             <label key={fo.value} className={cn(
               'flex items-center gap-2 text-sm rounded-lg border p-2.5 cursor-pointer transition-colors',
               origins.includes(fo.value)
-                ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
-                : 'hover:bg-muted/50',
+                ? 'border-primary bg-muted text-foreground'
+                : 'hover:bg-muted',
             )}>
               <input type="checkbox" checked={origins.includes(fo.value)} onChange={() => toggleOrigin(fo.value)} className="h-4 w-4 rounded" />
               {fo.label}
@@ -731,8 +731,8 @@ function StepReview({ form, onGoToStep }: { form: Partial<KybApplication>; onGoT
   return (
     <div className="space-y-4">
       {missingCount > 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4 text-sm">
-          <p className="font-medium text-amber-900 flex items-center gap-2">
+        <div className="rounded-lg border p-4 text-sm">
+          <p className="font-medium text-foreground flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
             {missingCount} campo{missingCount > 1 ? 's' : ''} pendiente{missingCount > 1 ? 's' : ''} por completar
           </p>
@@ -746,18 +746,18 @@ function StepReview({ form, onGoToStep }: { form: Partial<KybApplication>; onGoT
             onClick={() => !s.value && s.required ? onGoToStep(s.step) : undefined}
             className={cn(
               'flex items-start gap-3 text-sm w-full text-left rounded-lg p-2.5 transition-colors',
-              !s.value && s.required ? 'hover:bg-amber-50 cursor-pointer' : 'cursor-default',
+              !s.value && s.required ? 'hover:bg-muted cursor-pointer' : 'cursor-default',
             )}
           >
             <div className={cn(
               'mt-0.5 h-5 w-5 rounded-full flex items-center justify-center shrink-0 text-xs',
-              s.value ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700',
+              s.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
             )}>
               {s.value ? <CheckCircle2 className="h-3.5 w-3.5" /> : '!'}
             </div>
             <div className="flex-1 min-w-0">
               <span className="text-muted-foreground">{s.label}</span>
-              <p className={cn('font-medium truncate', !s.value && 'text-amber-600 font-normal')}>
+              <p className={cn('font-medium truncate', !s.value && 'text-muted-foreground font-normal')}>
                 {s.value || 'Pendiente — click para completar'}
               </p>
             </div>
@@ -766,11 +766,11 @@ function StepReview({ form, onGoToStep }: { form: Partial<KybApplication>; onGoT
       </div>
 
       {missingCount === 0 && (
-        <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800 flex items-start gap-2">
-          <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5" />
+        <div className="rounded-lg bg-muted border p-4 text-sm text-foreground flex items-start gap-2">
+          <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5 text-primary" />
           <div>
             <p className="font-medium">Toda la información está completa</p>
-            <p className="text-emerald-700 mt-0.5">Puedes enviar la solicitud. El equipo de compliance revisará tu documentación en 3-5 días hábiles.</p>
+            <p className="text-muted-foreground mt-0.5">Puedes enviar la solicitud. El equipo de compliance revisará tu documentación en 3-5 días hábiles.</p>
           </div>
         </div>
       )}
