@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useContracts, useCreateContract, useDeleteContract, useInstallments, useMarkInstallmentPaid, useUpdateContract } from '../hooks/useContracts'
 import { useEntities } from '@/core/entities/hooks/useEntities'
 import { usePermissions } from '@/shared/hooks/usePermissions'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { Badge } from '@/shared/components/ui/badge'
 import { StatusBadge } from '@/shared/components/ui/status-badge'
@@ -70,6 +71,7 @@ function ComplianceBar({ score }: { score: number }) {
 }
 
 function InstallmentView({ contract }: { contract: Contract }) {
+  const { t } = useI18n()
   const { data: installments, isLoading } = useInstallments(contract.id)
   const markPaid = useMarkInstallmentPaid()
   const { canManageTreasury } = usePermissions()
@@ -78,32 +80,32 @@ function InstallmentView({ contract }: { contract: Contract }) {
 
   const handleMarkPaid = async (inst: ContractInstallment) => {
     const ok = await confirm({
-      title: 'Registrar pago',
-      description: `¿Registrar pago de parcialidad #${inst.installment_number} por ${formatCurrency(inst.amount)}?`,
-      confirmLabel: 'Registrar pago',
+      title: t('contracts.registerPayment' as any),
+      description: `${t('contracts.confirmRegisterPayment' as any)} #${inst.installment_number} (${formatCurrency(inst.amount)})`,
+      confirmLabel: t('contracts.registerPayment' as any),
     })
     if (!ok) return
     markPaid.mutate({ installment: inst }, {
-      onSuccess: () => toast.success('Pago registrado'),
-      onError: () => toast.error('Error al registrar pago'),
+      onSuccess: () => toast.success(t('contracts.paymentRegistered' as any)),
+      onError: () => toast.error(t('contracts.errorRegisteringPayment' as any)),
     })
   }
 
-  if (isLoading) return <div className="text-muted-foreground text-sm">Cargando parcialidades...</div>
+  if (isLoading) return <div className="text-muted-foreground text-sm">{t('contracts.loadingInstallments' as any)}</div>
 
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium">Plan de Pagos ({installments?.length ?? 0} parcialidades)</h4>
+      <h4 className="text-sm font-medium">{t('contracts.paymentPlan' as any)} ({installments?.length ?? 0} {t('contracts.installments' as any)})</h4>
       <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
-              <TableHead className="text-right">Monto</TableHead>
-              <TableHead className="hidden sm:table-cell">Vencimiento</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="hidden sm:table-cell">Pagado</TableHead>
-              {canManageTreasury && <TableHead>Accion</TableHead>}
+              <TableHead className="text-right">{t('treasury.amount' as any)}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('contracts.dueDate' as any)}</TableHead>
+              <TableHead>{t('entities.status' as any)}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('contracts.paidDate' as any)}</TableHead>
+              {canManageTreasury && <TableHead>{t('contracts.action' as any)}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -116,13 +118,13 @@ function InstallmentView({ contract }: { contract: Contract }) {
                   <StatusBadge status={inst.status} variantMap={INSTALLMENT_VARIANTS} labelMap={INSTALLMENT_LABELS} />
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
-                  {inst.paid_at ? formatDate(inst.paid_at) : '—'}
+                  {inst.paid_at ? formatDate(inst.paid_at) : '\u2014'}
                 </TableCell>
                 {canManageTreasury && (
                   <TableCell>
                     {(inst.status === 'pending' || inst.status === 'overdue') && (
                       <Button size="sm" variant="outline" onClick={() => handleMarkPaid(inst)} disabled={markPaid.isPending}>
-                        <CheckCircle className="mr-1 h-3 w-3" /> Pagar
+                        <CheckCircle className="mr-1 h-3 w-3" /> {t('contracts.pay' as any)}
                       </Button>
                     )}
                   </TableCell>
@@ -137,6 +139,7 @@ function InstallmentView({ contract }: { contract: Contract }) {
 }
 
 export function ContractList() {
+  const { t } = useI18n()
   const [statusFilter, setStatusFilter] = useState('')
   const { data: contracts, isLoading } = useContracts(statusFilter ? { status: statusFilter } : undefined)
   const { data: entities } = useEntities()
@@ -168,7 +171,7 @@ export function ContractList() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name || !form.total_amount) { setError('Nombre y monto total son obligatorios'); return }
+    if (!form.name || !form.total_amount) { setError(t('contracts.nameAndAmountRequired' as any)); return }
     try {
       await createContract.mutateAsync({
         name: form.name,
@@ -185,29 +188,29 @@ export function ContractList() {
       resetForm()
       setShowCreate(false)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al crear contrato')
+      setError(err instanceof Error ? err.message : t('contracts.errorCreating' as any))
     }
   }
 
   const handleDelete = async (id: string) => {
     const ok = await confirm({
-      title: 'Eliminar contrato',
-      description: '¿Eliminar este contrato y todas sus parcialidades? Esta acción no se puede deshacer.',
-      confirmLabel: 'Eliminar',
+      title: t('contracts.deleteContract' as any),
+      description: t('contracts.confirmDelete' as any),
+      confirmLabel: t('common.delete'),
       variant: 'destructive',
     })
     if (!ok) return
     deleteContract.mutate(id, {
-      onSuccess: () => toast.success('Contrato eliminado'),
-      onError: () => toast.error('Error al eliminar contrato'),
+      onSuccess: () => toast.success(t('contracts.deleted' as any)),
+      onError: () => toast.error(t('contracts.errorDeleting' as any)),
     })
     setSelectedContract(null)
   }
 
   const handleStatusChange = (id: string, status: string) => {
     updateContract.mutate({ id, updates: { status: status as any } }, {
-      onSuccess: () => toast.success('Estado del contrato actualizado'),
-      onError: () => toast.error('Error al actualizar contrato'),
+      onSuccess: () => toast.success(t('contracts.statusUpdated' as any)),
+      onError: () => toast.error(t('contracts.errorUpdatingStatus' as any)),
     })
   }
 
@@ -215,7 +218,7 @@ export function ContractList() {
     return (
       <div className="space-y-4">
         <Button variant="ghost" onClick={() => setSelectedContract(null)} className="gap-1">
-          <ArrowLeft className="h-4 w-4" /> Volver a contratos
+          <ArrowLeft className="h-4 w-4" /> {t('contracts.backToContracts' as any)}
         </Button>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -229,22 +232,21 @@ export function ContractList() {
           <div className="text-right">
             <div className="text-2xl font-bold">{formatCurrency(selectedContract.total_amount)}</div>
             <div className="text-sm text-muted-foreground">
-              {selectedContract.number_of_installments} parcialidades
+              {selectedContract.number_of_installments} {t('contracts.installments' as any)}
             </div>
             <ComplianceBar score={selectedContract.compliance_score} />
           </div>
         </div>
 
-        {/* Partes involucradas */}
         <Card>
-          <CardHeader><CardTitle className="text-base">Partes del Contrato</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{t('contracts.contractParties' as any)}</CardTitle></CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
               {selectedContract.entity_name && (
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground">Entidad / Proveedor</div>
+                    <div className="text-xs text-muted-foreground">{t('contracts.entityProvider' as any)}</div>
                     <div className="font-medium">{selectedContract.entity_name}</div>
                   </div>
                 </div>
@@ -253,7 +255,7 @@ export function ContractList() {
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground">Miembro</div>
+                    <div className="text-xs text-muted-foreground">{t('contracts.member' as any)}</div>
                     <div className="font-medium">{selectedContract.member_name}</div>
                   </div>
                 </div>
@@ -262,7 +264,7 @@ export function ContractList() {
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground">Creado por</div>
+                    <div className="text-xs text-muted-foreground">{t('contracts.createdBy' as any)}</div>
                     <div className="font-medium">{selectedContract.creator_name}</div>
                   </div>
                 </div>
@@ -271,13 +273,13 @@ export function ContractList() {
                 <div className="flex items-center gap-2">
                   <ClipboardCheck className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div>
-                    <div className="text-xs text-muted-foreground">Aprobado por propuesta</div>
+                    <div className="text-xs text-muted-foreground">{t('contracts.approvedByProposal' as any)}</div>
                     <div className="font-medium">{selectedContract.proposal_title}</div>
                   </div>
                 </div>
               )}
               {!selectedContract.entity_name && !selectedContract.member_name && !selectedContract.creator_name && (
-                <p className="text-sm text-muted-foreground col-span-2">Sin partes vinculadas.</p>
+                <p className="text-sm text-muted-foreground col-span-2">{t('contracts.noLinkedParties' as any)}</p>
               )}
             </div>
           </CardContent>
@@ -286,25 +288,25 @@ export function ContractList() {
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
           <Card>
             <CardContent className="pt-4">
-              <div className="text-xs text-muted-foreground">Inicio</div>
+              <div className="text-xs text-muted-foreground">{t('contracts.startDate' as any)}</div>
               <div className="font-medium">{formatDate(selectedContract.start_date)}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-xs text-muted-foreground">Fin</div>
-              <div className="font-medium">{selectedContract.end_date ? formatDate(selectedContract.end_date) : 'Indefinido'}</div>
+              <div className="text-xs text-muted-foreground">{t('contracts.endDate' as any)}</div>
+              <div className="font-medium">{selectedContract.end_date ? formatDate(selectedContract.end_date) : t('contracts.indefinite' as any)}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-xs text-muted-foreground">Cumplimiento</div>
+              <div className="text-xs text-muted-foreground">{t('contracts.compliance' as any)}</div>
               <ComplianceBar score={selectedContract.compliance_score} />
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-xs text-muted-foreground">Creado</div>
+              <div className="text-xs text-muted-foreground">{t('contracts.created' as any)}</div>
               <div className="font-medium text-sm">{formatDateTime(selectedContract.created_at)}</div>
             </CardContent>
           </Card>
@@ -320,18 +322,18 @@ export function ContractList() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Contratos con planes de pago y parcialidades (obra, arrendamiento, servicios, etc.).
+        {t('contracts.description' as any)}
       </p>
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <Card>
           <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">Contratos Activos</div>
+            <div className="text-sm text-muted-foreground">{t('contracts.activeContracts' as any)}</div>
             <div className="text-xl font-bold">{activeContracts.length}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">Monto Total</div>
+            <div className="text-sm text-muted-foreground">{t('contracts.totalAmount' as any)}</div>
             <div className="text-xl font-bold">{formatCurrency(activeContracts.reduce((s, c) => s + c.total_amount, 0))}</div>
           </CardContent>
         </Card>
@@ -339,7 +341,7 @@ export function ContractList() {
           <CardContent className="pt-4">
             <div className="text-sm text-muted-foreground flex items-center gap-1">
               {defaultedContracts.length > 0 && <AlertTriangle className="h-3 w-3 text-red-500" />}
-              Incumplidos
+              {t('contracts.defaulted' as any)}
             </div>
             <div className={`text-xl font-bold ${defaultedContracts.length > 0 ? 'text-red-600' : ''}`}>{defaultedContracts.length}</div>
           </CardContent>
@@ -348,14 +350,14 @@ export function ContractList() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full sm:w-44">
-          <option value="">Todos los estados</option>
+          <option value="">{t('contracts.allStatuses' as any)}</option>
           {Object.entries(STATUS_LABELS).map(([k, v]) => (
             <option key={k} value={k}>{v}</option>
           ))}
         </Select>
         {canManageTreasury && (
           <Button onClick={() => setShowCreate(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Nuevo Contrato
+            <Plus className="mr-2 h-4 w-4" /> {t('contracts.new' as any)}
           </Button>
         )}
       </div>
@@ -364,22 +366,22 @@ export function ContractList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Contrato</TableHead>
-              <TableHead className="hidden sm:table-cell">Tipo</TableHead>
-              <TableHead className="hidden md:table-cell">Entidad</TableHead>
-              <TableHead className="text-right">Monto Total</TableHead>
-              <TableHead className="hidden lg:table-cell">Parcialidades</TableHead>
-              <TableHead className="hidden md:table-cell">Cumplimiento</TableHead>
-              <TableHead>Estado</TableHead>
-              {canManageTreasury && <TableHead>Acciones</TableHead>}
+              <TableHead>{t('contracts.contract' as any)}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('entities.type' as any)}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('contracts.entity' as any)}</TableHead>
+              <TableHead className="text-right">{t('contracts.totalAmount' as any)}</TableHead>
+              <TableHead className="hidden lg:table-cell">{t('contracts.installments' as any)}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('contracts.compliance' as any)}</TableHead>
+              <TableHead>{t('entities.status' as any)}</TableHead>
+              {canManageTreasury && <TableHead>{t('entities.actions' as any)}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground">Cargando...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground">{t('common.loading')}</TableCell></TableRow>
             ) : !contracts || contracts.length === 0 ? (
               <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground">
-                Sin contratos. Crea uno para gestionar acuerdos con proveedores y planes de pago.
+                {t('contracts.empty' as any)}
               </TableCell></TableRow>
             ) : (
               contracts.map((c) => (
@@ -390,8 +392,8 @@ export function ContractList() {
                       <div>
                         <div className="font-medium">{c.name}</div>
                         <div className="text-xs text-muted-foreground">
-                          {formatDate(c.start_date)}{c.end_date ? ` — ${formatDate(c.end_date)}` : ''}
-                          {c.creator_name && <> · por {c.creator_name}</>}
+                          {formatDate(c.start_date)}{c.end_date ? ` \u2014 ${formatDate(c.end_date)}` : ''}
+                          {c.creator_name && <> · {t('contracts.by' as any)} {c.creator_name}</>}
                         </div>
                       </div>
                     </div>
@@ -399,8 +401,8 @@ export function ContractList() {
                   <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{TYPE_LABELS[c.type] || c.type}</Badge></TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div>
-                      <div>{c.entity_name || '—'}</div>
-                      {c.member_name && <div className="text-xs text-muted-foreground">Miembro: {c.member_name}</div>}
+                      <div>{c.entity_name || '\u2014'}</div>
+                      {c.member_name && <div className="text-xs text-muted-foreground">{t('contracts.member' as any)}: {c.member_name}</div>}
                     </div>
                   </TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(c.total_amount)}</TableCell>
@@ -417,7 +419,7 @@ export function ContractList() {
                             <option key={k} value={k}>{v}</option>
                           ))}
                         </Select>
-                        <Button size="icon" variant="ghost" onClick={() => handleDelete(c.id)} aria-label="Eliminar">
+                        <Button size="icon" variant="ghost" onClick={() => handleDelete(c.id)} aria-label={t('common.delete')}>
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </div>
@@ -433,65 +435,65 @@ export function ContractList() {
       {/* Create Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent onClose={() => setShowCreate(false)}>
-          <DialogHeader><DialogTitle>Nuevo Contrato</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('contracts.new' as any)}</DialogTitle></DialogHeader>
           <form onSubmit={handleCreate}>
             <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
               {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
               <div className="space-y-2">
-                <Label>Nombre *</Label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder="Ej: Contrato limpieza anual" />
+                <Label>{t('common.name')} *</Label>
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder={t('contracts.namePlaceholder' as any)} />
               </div>
               <div className="space-y-2">
-                <Label>Descripcion</Label>
+                <Label>{t('contracts.descriptionLabel' as any)}</Label>
                 <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Tipo</Label>
+                  <Label>{t('entities.type' as any)}</Label>
                   <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as ContractType })}>
                     {Object.entries(TYPE_LABELS).map(([k, v]) => (<option key={k} value={k}>{v}</option>))}
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Entidad</Label>
+                  <Label>{t('contracts.entity' as any)}</Label>
                   <Select value={form.entity_id} onChange={(e) => setForm({ ...form, entity_id: e.target.value })}>
-                    <option value="">Sin entidad</option>
+                    <option value="">{t('contracts.noEntity' as any)}</option>
                     {entities?.map((e) => (<option key={e.id} value={e.id}>{e.name}</option>))}
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Monto Total *</Label>
+                  <Label>{t('contracts.totalAmount' as any)} *</Label>
                   <Input type="number" step="0.01" min="0" value={form.total_amount} onChange={(e) => setForm({ ...form, total_amount: e.target.value })} required />
                 </div>
                 <div className="space-y-2">
-                  <Label>Num. Parcialidades</Label>
+                  <Label>{t('contracts.numInstallments' as any)}</Label>
                   <Input type="number" min="1" value={form.number_of_installments} onChange={(e) => setForm({ ...form, number_of_installments: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Frecuencia Pago</Label>
+                  <Label>{t('contracts.paymentFrequency' as any)}</Label>
                   <Select value={form.payment_frequency} onChange={(e) => setForm({ ...form, payment_frequency: e.target.value })}>
-                    <option value="one_time">Pago unico</option>
-                    <option value="weekly">Semanal</option>
-                    <option value="biweekly">Quincenal</option>
-                    <option value="monthly">Mensual</option>
-                    <option value="bimonthly">Bimestral</option>
-                    <option value="quarterly">Trimestral</option>
-                    <option value="semiannual">Semestral</option>
-                    <option value="annual">Anual</option>
+                    <option value="one_time">{t('contracts.freq.oneTime' as any)}</option>
+                    <option value="weekly">{t('contracts.freq.weekly' as any)}</option>
+                    <option value="biweekly">{t('contracts.freq.biweekly' as any)}</option>
+                    <option value="monthly">{t('contracts.freq.monthly' as any)}</option>
+                    <option value="bimonthly">{t('contracts.freq.bimonthly' as any)}</option>
+                    <option value="quarterly">{t('contracts.freq.quarterly' as any)}</option>
+                    <option value="semiannual">{t('contracts.freq.semiannual' as any)}</option>
+                    <option value="annual">{t('contracts.freq.annual' as any)}</option>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Fecha Inicio</Label>
+                  <Label>{t('contracts.startDate' as any)}</Label>
                   <Input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} required />
                 </div>
               </div>
               <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
-                Al crear el contrato se generaran automaticamente las {form.number_of_installments} parcialidades con sus fechas de vencimiento.
+                {`${t('contracts.installmentAutoGenNote' as any)}: ${form.number_of_installments}`}
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => { resetForm(); setShowCreate(false) }}>Cancelar</Button>
-              <Button type="submit" disabled={createContract.isPending}>{createContract.isPending ? 'Creando...' : 'Crear Contrato'}</Button>
+              <Button type="button" variant="outline" onClick={() => { resetForm(); setShowCreate(false) }}>{t('common.cancel')}</Button>
+              <Button type="submit" disabled={createContract.isPending}>{createContract.isPending ? t('contracts.creating' as any) : t('contracts.create' as any)}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
