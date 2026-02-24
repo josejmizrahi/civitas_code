@@ -73,7 +73,6 @@ export function useStartTerm() {
 
 export function useEndTerm() {
   const queryClient = useQueryClient()
-  const { communityId } = useCommunityContext()
 
   return useMutation({
     mutationFn: (termId: string) => endTerm(termId),
