@@ -34,6 +34,15 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(supabaseUrl),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(supabaseAnonKey),
     },
+    server: {
+      watch: {
+        ignored: ['**/.env', '**/.env.*', '**/.env.local'],
+      },
+      hmr: {
+        timeout: 60000,
+        overlay: false,
+      },
+    },
     build: {
       rollupOptions: {
         output: {
