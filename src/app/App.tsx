@@ -27,7 +27,7 @@ export default function App() {
 
   // Initialize the primitive event system once at app bootstrap
   useEffect(() => {
-    const cleanup = initializePrimitives()
+    const cleanup = initializePrimitives(queryClient)
     return cleanup
   }, [])
 

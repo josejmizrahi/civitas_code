@@ -6,6 +6,7 @@
  */
 
 import { supabase } from '@/shared/lib/supabase'
+import { emitPaymentReceived } from '../../events'
 import type {
   PaymentGateway,
   CheckoutParams,
@@ -126,6 +127,17 @@ export class FintocGateway implements PaymentGateway {
         processed_at: new Date().toISOString(),
       })
       .eq('id', eventId)
+
+    void emitPaymentReceived(evt.community_id, null, {
+      externalId: evt.fintoc_event_id || eventId,
+      provider: 'fintoc',
+      amount,
+      currency: 'MXN',
+      reference: evt.tracking_key || '',
+      counterpartyClabe: evt.counterparty_clabe || null,
+      matchedObligationId: obligationId,
+      matchedMemberId: null,
+    })
 
     return {
       success: true,

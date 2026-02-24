@@ -2,15 +2,16 @@
  * Governance Primitive — Event listeners
  *
  * Governance listens to:
- * - identity.member.standing_changed → update voting rights
- * - treasury.budget.exceeded → alert vigilance committee
+ * - identity.member.standing_changed → invalidate voting caches
+ * - treasury.budget.exceeded → invalidate governance/vigilance caches
  */
 
 import { getEventBus, type Unsubscribe } from '@/engine/events'
 import type { StandingChangedPayload, BudgetExceededPayload } from '@/engine/events'
+import type { QueryClient } from '@tanstack/react-query'
 
 /** Set up all Governance listeners. Returns a cleanup function. */
-export function registerGovernanceListeners(): Unsubscribe {
+export function registerGovernanceListeners(queryClient?: QueryClient): Unsubscribe {
   const bus = getEventBus()
   const unsubs: Unsubscribe[] = []
 
@@ -21,19 +22,24 @@ export function registerGovernanceListeners(): Unsubscribe {
       console.info(
         `[Governance] Standing changed for member ${payload.memberId}: ${payload.previousStanding} → ${payload.newStanding}`,
       )
-      // Voting rights are enforced at vote time via canPerformAction
-      // This listener is for UI updates (show/hide vote buttons)
+      if (queryClient) {
+        void queryClient.invalidateQueries({ queryKey: ['proposals'] })
+        void queryClient.invalidateQueries({ queryKey: ['votes'] })
+      }
     }),
   )
 
-  // When a budget is exceeded, alert the vigilance committee
+  // When a budget is exceeded, refresh governance/vigilance data
   unsubs.push(
     bus.on('treasury.budget.exceeded', async (event) => {
       const payload = event.payload as BudgetExceededPayload
       console.info(
         `[Governance] Budget exceeded: ${payload.budgetId} — excess $${payload.excessAmount}`,
       )
-      // TODO: Create notification for vigilance committee
+      if (queryClient) {
+        void queryClient.invalidateQueries({ queryKey: ['vigilance'] })
+        void queryClient.invalidateQueries({ queryKey: ['budgets'] })
+      }
     }),
   )
 

@@ -1,4 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
+import { emitPaymentReceived, emitTransferCompleted, emitCheckoutCompleted } from '@/primitives/commerce/events'
+import { emitObligationPaid } from '@/primitives/treasury/events'
 import type {
   PaymentEvent,
   CheckoutSession,
@@ -79,7 +81,16 @@ export async function createCheckoutSession(
   })
 
   if (error) throw error
-  return data as CheckoutSession
+  const session = data as CheckoutSession
+
+  void emitCheckoutCompleted(communityId, memberId, {
+    sessionId: session.id,
+    memberId,
+    amount: input.amount,
+    obligationId: input.obligation_id ?? null,
+  })
+
+  return session
 }
 
 export async function getCheckoutSessions(
@@ -164,6 +175,27 @@ export async function manualReconcile(
       processed_at: new Date().toISOString(),
     })
     .eq('id', eventId)
+
+  // Emit domain events so other primitives react
+  void emitPaymentReceived(communityId, null, {
+    externalId: evt.fintoc_event_id || eventId,
+    provider: 'fintoc',
+    amount,
+    currency: 'MXN',
+    reference: evt.tracking_key || '',
+    counterpartyClabe: evt.counterparty_clabe || null,
+    matchedObligationId: obligationId,
+    matchedMemberId: null,
+  })
+
+  if (tx) {
+    void emitObligationPaid(communityId, null, {
+      obligationId,
+      memberId: '',
+      amount,
+      transactionId: tx.id,
+    })
+  }
 }
 
 export async function ignoreEvent(eventId: string): Promise<void> {
@@ -209,7 +241,17 @@ export async function createOutboundTransfer(
   })
 
   if (error) throw error
-  return data as PaymentTransfer
+  const transfer = data as PaymentTransfer
+
+  void emitTransferCompleted(communityId, null, {
+    transferId: transfer.id,
+    provider: 'fintoc',
+    amount: input.amount,
+    destinationClabe: input.counterparty_clabe,
+    status: transfer.status ?? 'pending',
+  })
+
+  return transfer
 }
 
 export async function getTransfers(communityId: string): Promise<PaymentTransfer[]> {

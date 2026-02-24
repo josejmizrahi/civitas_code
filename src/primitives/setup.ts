@@ -8,6 +8,7 @@
 import { getEventBus } from '@/engine/events'
 import { supabase } from '@/shared/lib/supabase'
 import type { DomainEvent } from '@/engine/events'
+import type { QueryClient } from '@tanstack/react-query'
 
 import { registerIdentityListeners } from './identity/listeners'
 import { registerTreasuryListeners } from './treasury/listeners'
@@ -20,8 +21,9 @@ let _cleanup: (() => void) | null = null
 /**
  * Initialize the primitive event system.
  * Safe to call multiple times — only runs once.
+ * Pass queryClient so listeners can invalidate caches.
  */
-export function initializePrimitives(): () => void {
+export function initializePrimitives(queryClient?: QueryClient): () => void {
   if (_initialized && _cleanup) return _cleanup
 
   const bus = getEventBus()
@@ -44,9 +46,9 @@ export function initializePrimitives(): () => void {
 
   // Register all primitive listeners
   const cleanups = [
-    registerIdentityListeners(),
-    registerTreasuryListeners(),
-    registerGovernanceListeners(),
+    registerIdentityListeners(queryClient),
+    registerTreasuryListeners(queryClient),
+    registerGovernanceListeners(queryClient),
     registerCommerceListeners(),
   ]
 

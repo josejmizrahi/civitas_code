@@ -2,28 +2,32 @@
  * Identity Primitive — Event listeners
  *
  * Identity listens to:
- * - treasury.obligation.paid → recalculate standing
- * - treasury.obligation.overdue → recalculate standing
- * - governance.election.completed → update member roles
+ * - treasury.obligation.paid → invalidate member standing caches
+ * - treasury.obligation.overdue → invalidate member standing caches
+ * - governance.election.completed → invalidate member/role caches
  */
 
 import { getEventBus, type Unsubscribe } from '@/engine/events'
 import type { ObligationPaidPayload, ObligationOverduePayload, ElectionCompletedPayload } from '@/engine/events'
+import type { QueryClient } from '@tanstack/react-query'
 
 /** Set up all Identity listeners. Returns a cleanup function. */
-export function registerIdentityListeners(): Unsubscribe {
+export function registerIdentityListeners(queryClient?: QueryClient): Unsubscribe {
   const bus = getEventBus()
   const unsubs: Unsubscribe[] = []
 
-  // When an obligation is paid, standing might improve
+  // When an obligation is paid, standing might improve — refresh member data
   unsubs.push(
     bus.on('treasury.obligation.paid', async (event) => {
       const payload = event.payload as ObligationPaidPayload
       console.info(
-        `[Identity] Obligation paid for member ${payload.memberId} — will recalculate standing`,
+        `[Identity] Obligation paid for member ${payload.memberId} — refreshing standing`,
       )
-      // Standing recalculation happens in Postgres via trigger (compute_financial_standing)
-      // This listener is for client-side cache invalidation / optimistic UI
+      if (queryClient) {
+        void queryClient.invalidateQueries({ queryKey: ['members'] })
+        void queryClient.invalidateQueries({ queryKey: ['moroso'] })
+        void queryClient.invalidateQueries({ queryKey: ['financial-standing'] })
+      }
     }),
   )
 
@@ -32,20 +36,26 @@ export function registerIdentityListeners(): Unsubscribe {
     bus.on('treasury.obligation.overdue', async (event) => {
       const payload = event.payload as ObligationOverduePayload
       console.info(
-        `[Identity] Obligation overdue for member ${payload.memberId} — standing may change`,
+        `[Identity] Obligation overdue for member ${payload.memberId} — refreshing standing`,
       )
+      if (queryClient) {
+        void queryClient.invalidateQueries({ queryKey: ['members'] })
+        void queryClient.invalidateQueries({ queryKey: ['moroso'] })
+        void queryClient.invalidateQueries({ queryKey: ['financial-standing'] })
+      }
     }),
   )
 
-  // When an election completes, update roles
+  // When an election completes, roles change — refresh member data
   unsubs.push(
     bus.on('governance.election.completed', async (event) => {
       const payload = event.payload as ElectionCompletedPayload
       console.info(
-        `[Identity] Election ${payload.proposalId} completed — updating roles for ${payload.winners.length} winners`,
+        `[Identity] Election ${payload.proposalId} completed — refreshing roles for ${payload.winners.length} winners`,
       )
-      // Role updates happen in the proposal execution service
-      // This listener is for client-side cache invalidation
+      if (queryClient) {
+        void queryClient.invalidateQueries({ queryKey: ['members'] })
+      }
     }),
   )
 
