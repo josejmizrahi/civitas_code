@@ -15,6 +15,30 @@ export type I18nKey =
   | 'nav.import'
   | 'nav.payments'
   | 'nav.more'
+  | 'nav.section.nation'
+  | 'nav.section.treasury'
+  | 'nav.section.governance'
+  | 'nav.section.services'
+  | 'nav.section.admin'
+  | 'nav.switcher.title'
+  | 'nav.switcher.new'
+  | 'nav.search'
+  | 'dashboard.title'
+  | 'dashboard.greeting'
+  | 'dashboard.legalFramework'
+  | 'dashboard.loading'
+  | 'dashboard.error'
+  | 'dashboard.health.excellent'
+  | 'dashboard.health.healthy'
+  | 'dashboard.health.attention'
+  | 'dashboard.health.critical'
+  | 'dashboard.proposals'
+  | 'dashboard.assemblies'
+  | 'dashboard.viewAll'
+  | 'dashboard.recentActivity'
+  | 'dashboard.systemConfig'
+  | 'dashboard.latestTransactions'
+  | 'dashboard.incomeVsExpense'
   | 'community.tabs.members'
   | 'community.tabs.directory'
   | 'community.tabs.activity'
@@ -795,6 +819,30 @@ const es: Dictionary = {
   'nav.import': 'Importar Datos',
   'nav.payments': 'Pagos',
   'nav.more': 'Mas',
+  'nav.section.nation': 'Mi Nación',
+  'nav.section.treasury': 'Hacienda',
+  'nav.section.governance': 'Gobierno',
+  'nav.section.services': 'Servicios',
+  'nav.section.admin': 'Administración',
+  'nav.switcher.title': 'Tus comunidades',
+  'nav.switcher.new': 'Nueva Comunidad',
+  'nav.search': 'Buscar…',
+  'dashboard.title': 'Estado de la Nación',
+  'dashboard.greeting': 'Hola',
+  'dashboard.legalFramework': 'Marco legal',
+  'dashboard.loading': 'Cargando...',
+  'dashboard.error': 'Error al cargar algunos datos. Intenta recargar la página.',
+  'dashboard.health.excellent': 'Excelente',
+  'dashboard.health.healthy': 'Saludable',
+  'dashboard.health.attention': 'Atención',
+  'dashboard.health.critical': 'Crítico',
+  'dashboard.proposals': 'Propuestas activas',
+  'dashboard.assemblies': 'Próximas asambleas',
+  'dashboard.viewAll': 'Ver todas',
+  'dashboard.recentActivity': 'Actividad Reciente',
+  'dashboard.systemConfig': 'Configuración del Sistema',
+  'dashboard.latestTransactions': 'Últimas transacciones',
+  'dashboard.incomeVsExpense': 'Ingresos vs Egresos',
   'community.tabs.members': 'Miembros',
   'community.tabs.directory': 'Directorio',
   'community.tabs.activity': 'Actividad',
@@ -1570,6 +1618,30 @@ const en: Dictionary = {
   'nav.import': 'Import Data',
   'nav.payments': 'Payments',
   'nav.more': 'More',
+  'nav.section.nation': 'My Nation',
+  'nav.section.treasury': 'Treasury',
+  'nav.section.governance': 'Governance',
+  'nav.section.services': 'Services',
+  'nav.section.admin': 'Administration',
+  'nav.switcher.title': 'Your communities',
+  'nav.switcher.new': 'New Community',
+  'nav.search': 'Search…',
+  'dashboard.title': 'State of the Nation',
+  'dashboard.greeting': 'Hello',
+  'dashboard.legalFramework': 'Legal framework',
+  'dashboard.loading': 'Loading...',
+  'dashboard.error': 'Error loading some data. Try refreshing the page.',
+  'dashboard.health.excellent': 'Excellent',
+  'dashboard.health.healthy': 'Healthy',
+  'dashboard.health.attention': 'Attention',
+  'dashboard.health.critical': 'Critical',
+  'dashboard.proposals': 'Active proposals',
+  'dashboard.assemblies': 'Upcoming assemblies',
+  'dashboard.viewAll': 'View all',
+  'dashboard.recentActivity': 'Recent Activity',
+  'dashboard.systemConfig': 'System Configuration',
+  'dashboard.latestTransactions': 'Latest transactions',
+  'dashboard.incomeVsExpense': 'Income vs Expenses',
   'community.tabs.members': 'Members',
   'community.tabs.directory': 'Directory',
   'community.tabs.activity': 'Activity',

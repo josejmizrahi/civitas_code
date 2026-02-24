@@ -9,19 +9,19 @@ import { useTransactions } from '@/core/treasury/hooks/useTransactions'
 import { useCommunityContext } from '@/app/providers'
 import { useTenant } from '@/app/providers/TenantProvider'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { AuditLog } from '@/shared/components/AuditLog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
-import { Progress } from '@/shared/components/ui/progress'
+import { PageHeader } from '@/shared/components/ui/page-header'
+import { EmptyState } from '@/shared/components/ui/empty-state'
 import { IncomeVsExpenseChart } from '@/core/treasury/components/IncomeVsExpenseChart'
 import { MorosoStatusBanner } from '@/core/identity/components/MorosoStatusBanner'
 import { formatCurrency } from '@/shared/lib/utils'
 import { hasPermission, type Role } from '@/shared/types'
 import {
-  Users, Wallet, Vote, TrendingUp, TrendingDown,
-  AlertCircle, Shield, UserCheck, BarChart3,
-  ArrowUpCircle, Receipt, Calendar, FileText, ChevronRight,
-  Heart,
+  AlertCircle, Heart, Vote, Calendar,
+  FileText, ChevronRight, Receipt,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
@@ -29,17 +29,22 @@ import { Button } from '@/shared/components/ui/button'
 import { QuickActions } from '@/pages/dashboard/components/QuickActions'
 import { FirstStepsChecklist } from '@/pages/dashboard/components/FirstStepsChecklist'
 import { AnnouncementFeed } from '@/core/announcements/components/AnnouncementFeed'
+import { HealthPillars } from '@/pages/dashboard/components/HealthPillars'
+import { KpiRow } from '@/pages/dashboard/components/KpiRow'
+import { SystemConfigPanel } from '@/pages/dashboard/components/SystemConfigPanel'
 
 // ---------------------------------------------------------------------------
 // Nation Health — composite score from 4 pillars
 // ---------------------------------------------------------------------------
+
+type HealthLevel = 'excellent' | 'healthy' | 'attention' | 'critical'
 
 interface NationHealth {
   overall: number
   identity: number
   treasury: number
   governance: number
-  label: string
+  level: HealthLevel
   color: string
 }
 
@@ -54,31 +59,27 @@ function computeNationHealth(params: {
 }): NationHealth {
   const { memberCount, activeCount, delinquentCount, balance, collectionRate, activeProposals, overdueCount } = params
 
-  // Identity pillar (0-100): based on member activity ratio + delinquency
   const memberRatio = memberCount > 0 ? activeCount / memberCount : 0
   const delinquentRatio = memberCount > 0 ? 1 - delinquentCount / memberCount : 1
   const identity = Math.round((memberRatio * 50 + delinquentRatio * 50))
 
-  // Treasury pillar (0-100): balance health + collection rate
   const balanceScore = balance >= 0 ? 100 : Math.max(0, 50 + balance / 100)
   const collectionScore = collectionRate * 100
   const overdueScore = Math.max(0, 100 - overdueCount * 10)
   const treasury = Math.round((balanceScore * 0.3 + collectionScore * 0.4 + overdueScore * 0.3))
 
-  // Governance pillar (0-100): having active governance is good
-  const hasGovernance = activeProposals > 0 ? 100 : 60
-  const governance = hasGovernance
+  const governance = activeProposals > 0 ? 100 : 60
 
   const overall = Math.round(identity * 0.35 + treasury * 0.40 + governance * 0.25)
 
-  let label: string
+  let level: HealthLevel
   let color: string
-  if (overall >= 80) { label = 'Excelente'; color = 'text-green-600' }
-  else if (overall >= 60) { label = 'Saludable'; color = 'text-blue-600' }
-  else if (overall >= 40) { label = 'Atención'; color = 'text-yellow-600' }
-  else { label = 'Crítico'; color = 'text-red-600' }
+  if (overall >= 80) { level = 'excellent'; color = 'text-green-600' }
+  else if (overall >= 60) { level = 'healthy'; color = 'text-blue-600' }
+  else if (overall >= 40) { level = 'attention'; color = 'text-yellow-600' }
+  else { level = 'critical'; color = 'text-red-600' }
 
-  return { overall, identity, treasury, governance, label, color }
+  return { overall, identity, treasury, governance, level, color }
 }
 
 // ---------------------------------------------------------------------------
@@ -96,6 +97,7 @@ export function DashboardPage() {
   const { data: assemblies } = useAssemblies()
   const { data: recentTx } = useTransactions()
   const { rules, financialStanding, treasuryMode, isPaymentToVoteEnabled } = useRulesEngine()
+  const { t } = useI18n()
 
   const userRole = (currentMember?.role ?? 'observador') as Role
   const isAdmin = hasPermission(userRole, 'admin')
@@ -115,7 +117,6 @@ export function DashboardPage() {
 
   const latestTransactions = (recentTx ?? []).slice(0, 5)
 
-  // Compute nation health
   const health = useMemo(() => computeNationHealth({
     memberCount: members?.length ?? 0,
     activeCount,
@@ -127,7 +128,7 @@ export function DashboardPage() {
   }), [members, activeCount, delinquentCount, stats, collStats, activeProposals])
 
   if (isFirstLoad) {
-    return <LoadingSpinner message="Cargando..." className="py-20" />
+    return <LoadingSpinner message={t('dashboard.loading')} className="py-20" />
   }
 
   const firstName = currentMember?.full_name?.split(' ')[0]
@@ -139,250 +140,72 @@ export function DashboardPage() {
       {queryError && (
         <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3 flex items-center gap-2 text-sm text-destructive">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>Error al cargar algunos datos. Intenta recargar la página.</span>
+          <span>{t('dashboard.error')}</span>
         </div>
       )}
 
       <MorosoStatusBanner />
 
-      {/* Estado de la Nación — Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
-            Estado de la Nación
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {community?.name ?? labels.community} &middot; Hola, {firstName}
-          </p>
-          {legalFramework && (
-            <p className="text-xs text-muted-foreground/70 mt-0.5">
-              Marco legal: {legalFramework.displayName}
+      {/* Header + Health indicator */}
+      <PageHeader
+        title={t('dashboard.title')}
+        subtitle={`${community?.name ?? labels.community} \u00b7 ${t('dashboard.greeting')}, ${firstName}`}
+        meta={legalFramework ? `${t('dashboard.legalFramework')}: ${legalFramework.displayName}` : undefined}
+        actions={
+          <div className="text-right">
+            <div className="flex items-center gap-2 justify-end">
+              <Heart className={`h-5 w-5 ${health.color}`} />
+              <span className={`text-2xl font-bold ${health.color}`}>{health.overall}%</span>
+            </div>
+            <p className={`text-xs font-medium ${health.color}`}>
+              {t(`dashboard.health.${health.level}` as any)}
             </p>
-          )}
-        </div>
-        {/* Health indicator */}
-        <div className="text-right shrink-0">
-          <div className="flex items-center gap-2 justify-end">
-            <Heart className={`h-5 w-5 ${health.color}`} />
-            <span className={`text-2xl font-bold ${health.color}`}>{health.overall}%</span>
           </div>
-          <p className={`text-xs font-medium ${health.color}`}>{health.label}</p>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Health pillars — mini progress bars */}
       {isAdmin && (
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg border p-3">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Users className="h-3.5 w-3.5 text-violet-500" />
-              <span className="text-xs font-medium">{labels.memberPlural}</span>
-              <span className="ml-auto text-xs font-bold">{health.identity}%</span>
-            </div>
-            <Progress value={health.identity} className="h-1.5" />
-          </div>
-          <div className="rounded-lg border p-3">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Wallet className="h-3.5 w-3.5 text-emerald-500" />
-              <span className="text-xs font-medium">Hacienda</span>
-              <span className="ml-auto text-xs font-bold">{health.treasury}%</span>
-            </div>
-            <Progress value={health.treasury} className="h-1.5" />
-          </div>
-          <div className="rounded-lg border p-3">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Vote className="h-3.5 w-3.5 text-blue-500" />
-              <span className="text-xs font-medium">Gobierno</span>
-              <span className="ml-auto text-xs font-bold">{health.governance}%</span>
-            </div>
-            <Progress value={health.governance} className="h-1.5" />
-          </div>
-        </div>
+        <HealthPillars
+          identity={health.identity}
+          treasury={health.treasury}
+          governance={health.governance}
+          memberLabel={labels.memberPlural}
+        />
       )}
 
       {isAdmin && <FirstStepsChecklist />}
-
       <QuickActions />
-
       <AnnouncementFeed limit={3} />
 
-      {/* KPI row — visible for admins */}
+      {/* KPI row */}
       {isAdmin && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
-          <Card className="rounded-xl border-border/80">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle className="text-xs font-medium text-muted-foreground">{labels.memberPlural}</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl font-bold">{members?.length ?? 0}</div>
-            </CardContent>
-          </Card>
-
-          {hasFinancialData && (
-            <>
-              <Card className="rounded-xl border-border/80">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <CardTitle className="text-xs font-medium text-muted-foreground">Balance</CardTitle>
-                  <Wallet className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-xl font-bold ${(stats?.balance ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(stats?.balance ?? 0)}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-xl border-border/80">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <CardTitle className="text-xs font-medium text-muted-foreground">Ingresos</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-green-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold text-green-600">{formatCurrency(stats!.totalIncome)}</div>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-xl border-border/80">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <CardTitle className="text-xs font-medium text-muted-foreground">Egresos</CardTitle>
-                  <TrendingDown className="h-4 w-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold text-red-600">{formatCurrency(stats!.totalExpenses)}</div>
-                </CardContent>
-              </Card>
-            </>
-          )}
-
-          {collStats && (
-            <>
-              <Card className="rounded-xl border-border/80">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <CardTitle className="text-xs font-medium text-muted-foreground">Tasa cobro</CardTitle>
-                  <ArrowUpCircle className="h-4 w-4 text-blue-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold">{((collStats.collectionRate ?? 0) * 100).toFixed(0)}%</div>
-                  <Progress value={(collStats.collectionRate ?? 0) * 100} className="mt-1 h-1.5" />
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-xl border-border/80">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-                  <CardTitle className="text-xs font-medium text-muted-foreground">Vencidos</CardTitle>
-                  <Receipt className="h-4 w-4 text-red-500" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-xl font-bold text-red-600">{collStats.overdueCount ?? 0}</div>
-                  {collStats.overdueAmount > 0 && (
-                    <p className="text-xs text-muted-foreground">{formatCurrency(collStats.overdueAmount)}</p>
-                  )}
-                </CardContent>
-              </Card>
-            </>
-          )}
-        </div>
+        <KpiRow
+          memberCount={members?.length ?? 0}
+          memberLabel={labels.memberPlural}
+          balance={stats?.balance}
+          totalIncome={stats?.totalIncome}
+          totalExpenses={stats?.totalExpenses}
+          collectionRate={collStats?.collectionRate}
+          overdueCount={collStats?.overdueCount}
+          overdueAmount={collStats?.overdueAmount}
+          hasFinancialData={!!hasFinancialData}
+        />
       )}
 
       {/* Two-column layout: governance + finance */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Governance widgets */}
         <div className="space-y-4">
-          {/* Active proposals */}
-          <Card className="rounded-xl">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Vote className="h-4 w-4 text-blue-500" />
-                Propuestas activas
-              </CardTitle>
-              <Link to={path('governance')}>
-                <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                  Ver todas <ChevronRight className="h-3 w-3" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              {!activeProposals?.length ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">Sin propuestas activas</p>
-              ) : (
-                <div className="space-y-2">
-                  {activeProposals.slice(0, 4).map((p) => (
-                    <Link
-                      key={p.id}
-                      to={path(`governance/${p.id}`)}
-                      className="flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50"
-                    >
-                      <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{p.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {p.type || 'general'}
-                        </p>
-                      </div>
-                      <Badge variant="secondary" className="shrink-0 text-xs">
-                        {p.status === 'active' ? 'Votando' : p.status}
-                      </Badge>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Upcoming assemblies */}
-          <Card className="rounded-xl">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Calendar className="h-4 w-4 text-violet-500" />
-                Próximas asambleas
-              </CardTitle>
-              <Link to={path('governance')}>
-                <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                  Ver todas <ChevronRight className="h-3 w-3" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              {upcomingAssemblies.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4 text-center">Sin asambleas programadas</p>
-              ) : (
-                <div className="space-y-2">
-                  {upcomingAssemblies.map((a) => (
-                    <Link
-                      key={a.id}
-                      to={path(`governance/assemblies/${a.id}`)}
-                      className="flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50"
-                    >
-                      <Calendar className="h-4 w-4 shrink-0 text-violet-500" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{a.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(a.scheduled_date).toLocaleDateString('es-MX', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                      </div>
-                      <Badge variant="secondary" className="shrink-0 text-xs">{a.status}</Badge>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <ProposalWidget proposals={activeProposals} pathFn={path} t={t} />
+          <AssemblyWidget assemblies={upcomingAssemblies} pathFn={path} t={t} />
         </div>
 
         {/* Financial widgets */}
         <div className="space-y-4">
-          {/* Chart */}
           {isAdmin && hasFinancialData && stats && (
             <Card className="rounded-xl">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Ingresos vs Egresos</CardTitle>
+                <CardTitle className="text-base">{t('dashboard.incomeVsExpense')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <IncomeVsExpenseChart data={stats.monthlyData ?? []} />
@@ -390,17 +213,16 @@ export function DashboardPage() {
             </Card>
           )}
 
-          {/* Recent transactions */}
           {isAdmin && latestTransactions.length > 0 && (
             <Card className="rounded-xl">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Receipt className="h-4 w-4 text-emerald-500" />
-                  Últimas transacciones
+                  {t('dashboard.latestTransactions')}
                 </CardTitle>
                 <Link to={path('treasury')}>
                   <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                    Ver todas <ChevronRight className="h-3 w-3" />
+                    {t('dashboard.viewAll')} <ChevronRight className="h-3 w-3" />
                   </Button>
                 </Link>
               </CardHeader>
@@ -430,7 +252,7 @@ export function DashboardPage() {
       {/* Activity feed */}
       <Card className="rounded-xl">
         <CardHeader>
-          <CardTitle className="text-base">Actividad Reciente</CardTitle>
+          <CardTitle className="text-base">{t('dashboard.recentActivity')}</CardTitle>
         </CardHeader>
         <CardContent>
           <AuditLog compact />
@@ -439,103 +261,128 @@ export function DashboardPage() {
 
       {/* System config — admin only */}
       {isAdmin && (
-        <Card className="rounded-xl">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Shield className="h-4 w-4" />
-              Configuración del Sistema
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-lg border p-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  <UserCheck className="h-4 w-4 text-violet-500" />
-                  <span className="text-sm font-medium">Identidad</span>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tu standing</span>
-                    <Badge variant={financialStanding === 'good_standing' ? 'default' : financialStanding === 'grace_period' ? 'secondary' : 'destructive'}>
-                      {financialStanding === 'good_standing' ? 'Al corriente' : financialStanding === 'grace_period' ? 'Periodo de gracia' : 'Moroso'}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Pago → Voto</span>
-                    <Badge variant={isPaymentToVoteEnabled ? 'default' : 'secondary'}>
-                      {isPaymentToVoteEnabled ? 'Activo' : 'Desactivado'}
-                    </Badge>
-                  </div>
-                  {members && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Al corriente / Morosos</span>
-                      <span className="font-medium">{goodStandingCount} / {delinquentCount}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="rounded-lg border p-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-4 w-4 text-emerald-500" />
-                  <span className="text-sm font-medium">Tesorería</span>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Modo</span>
-                    <Badge variant="secondary">{treasuryMode}</Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Moneda</span>
-                    <span className="font-medium">{rules.treasury.currency}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Límite admin</span>
-                    <span className="font-medium">{formatCurrency(rules.treasury.admin_spending_limit)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border p-4 space-y-2">
-                <div className="flex items-center gap-2">
-                  <Vote className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm font-medium">Gobernanza</span>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Auto-ejecución</span>
-                    <Badge variant={rules.governance.auto_execution_enabled ? 'default' : 'secondary'}>
-                      {rules.governance.auto_execution_enabled ? 'Activa' : 'Manual'}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Delegación</span>
-                    <Badge variant={rules.governance.delegation_enabled ? 'default' : 'secondary'}>
-                      {rules.governance.delegation_enabled ? 'Activa' : 'Desactivada'}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Enfriamiento</span>
-                    <span className="font-medium">{rules.governance.cool_down_hours}h</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 flex gap-2">
-              <Link to={path('settings')}>
-                <Button variant="outline" size="sm">Configurar Reglas</Button>
-              </Link>
-              <Link to={path('census')}>
-                <Button variant="outline" size="sm">
-                  <BarChart3 className="mr-2 h-3 w-3" />
-                  Ver Censo
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+        <SystemConfigPanel
+          financialStanding={financialStanding}
+          isPaymentToVoteEnabled={isPaymentToVoteEnabled}
+          goodStandingCount={goodStandingCount}
+          delinquentCount={delinquentCount}
+          hasMemberData={!!members}
+          treasuryMode={treasuryMode}
+          currency={rules.treasury.currency}
+          adminSpendingLimit={rules.treasury.admin_spending_limit}
+          autoExecutionEnabled={rules.governance.auto_execution_enabled}
+          delegationEnabled={rules.governance.delegation_enabled}
+          coolDownHours={rules.governance.cool_down_hours}
+          settingsPath={path('settings')}
+          censusPath={path('census')}
+        />
       )}
     </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Inline sub-components (keep in same file — small and dashboard-specific)
+// ---------------------------------------------------------------------------
+
+interface ProposalWidgetProps {
+  proposals: Array<{ id: string; title: string; type?: string; status: string }> | undefined
+  pathFn: (p: string) => string
+  t: (key: any) => string
+}
+
+function ProposalWidget({ proposals, pathFn, t }: ProposalWidgetProps) {
+  return (
+    <Card className="rounded-xl">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Vote className="h-4 w-4 text-blue-500" />
+          {t('dashboard.proposals')}
+        </CardTitle>
+        <Link to={pathFn('governance')}>
+          <Button variant="ghost" size="sm" className="gap-1 text-xs">
+            {t('dashboard.viewAll')} <ChevronRight className="h-3 w-3" />
+          </Button>
+        </Link>
+      </CardHeader>
+      <CardContent>
+        {!proposals?.length ? (
+          <EmptyState message={t('proposals.empty')} className="py-4" />
+        ) : (
+          <div className="space-y-2">
+            {proposals.slice(0, 4).map((p) => (
+              <Link
+                key={p.id}
+                to={pathFn(`governance/${p.id}`)}
+                className="flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50"
+              >
+                <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{p.title}</p>
+                  <p className="text-xs text-muted-foreground">{p.type || 'general'}</p>
+                </div>
+                <Badge variant="secondary" className="shrink-0 text-xs">
+                  {p.status === 'active' ? 'Votando' : p.status}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+interface AssemblyWidgetProps {
+  assemblies: Array<{ id: string; title: string; status: string; scheduled_date: string }>
+  pathFn: (p: string) => string
+  t: (key: any) => string
+}
+
+function AssemblyWidget({ assemblies, pathFn, t }: AssemblyWidgetProps) {
+  return (
+    <Card className="rounded-xl">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Calendar className="h-4 w-4 text-violet-500" />
+          {t('dashboard.assemblies')}
+        </CardTitle>
+        <Link to={pathFn('governance')}>
+          <Button variant="ghost" size="sm" className="gap-1 text-xs">
+            {t('dashboard.viewAll')} <ChevronRight className="h-3 w-3" />
+          </Button>
+        </Link>
+      </CardHeader>
+      <CardContent>
+        {assemblies.length === 0 ? (
+          <EmptyState message={t('assemblies.empty')} className="py-4" />
+        ) : (
+          <div className="space-y-2">
+            {assemblies.map((a) => (
+              <Link
+                key={a.id}
+                to={pathFn(`governance/assemblies/${a.id}`)}
+                className="flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50"
+              >
+                <Calendar className="h-4 w-4 shrink-0 text-violet-500" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{a.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(a.scheduled_date).toLocaleDateString('es-MX', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </p>
+                </div>
+                <Badge variant="secondary" className="shrink-0 text-xs">{a.status}</Badge>
+              </Link>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
