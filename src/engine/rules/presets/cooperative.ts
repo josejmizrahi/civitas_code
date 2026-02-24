@@ -33,6 +33,7 @@ export const cooperativePreset: CommunityPreset = {
         budget: 0.66,
         election: 0.5,
         amendment: 0.75,
+        gasto: 0.5,
       },
       majority_by_type: {
         ordinary: 0.5,
@@ -40,6 +41,7 @@ export const cooperativePreset: CommunityPreset = {
         budget: 0.66,
         election: 0.5,
         amendment: 0.75,
+        gasto: 0.5,
       },
       min_endorsements: 3,
       endorsement_bypass_roles: ['admin'],

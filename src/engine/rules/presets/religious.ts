@@ -33,6 +33,7 @@ export const religiousPreset: CommunityPreset = {
         budget: 0.33,
         election: 0.5,
         amendment: 0.5,
+        gasto: 0.5,
       },
       majority_by_type: {
         ordinary: 0.5,
@@ -40,6 +41,7 @@ export const religiousPreset: CommunityPreset = {
         budget: 0.5,
         election: 0.5,
         amendment: 0.66,
+        gasto: 0.5,
       },
       min_endorsements: 0,
       endorsement_bypass_roles: ['admin'],
