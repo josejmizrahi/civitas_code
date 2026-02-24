@@ -5,6 +5,7 @@ import { useAllRatingSummaries } from '../hooks/useRatings'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { Button } from '@/shared/components/ui/button'
 import { Select } from '@/shared/components/ui/select'
 import { Input } from '@/shared/components/ui/input'
@@ -83,12 +84,9 @@ export function EntityList() {
     }
   }
 
-  function statusVariant(status: string): 'success' | 'secondary' | 'destructive' {
-    switch (status) {
-      case 'active': return 'success'
-      case 'blacklisted': return 'destructive'
-      default: return 'secondary'
-    }
+  const ENTITY_VARIANTS: Record<string, 'success' | 'destructive'> = {
+    active: 'success',
+    blacklisted: 'destructive',
   }
 
   return (
@@ -196,9 +194,7 @@ export function EntityList() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusVariant(entity.status)}>
-                        {ENTITY_STATUS_LABELS[entity.status as EntityStatus] || entity.status}
-                      </Badge>
+                      <StatusBadge status={entity.status} variantMap={ENTITY_VARIANTS} labelMap={ENTITY_STATUS_LABELS} />
                     </TableCell>
                     {canManageTreasury && (
                       <TableCell>

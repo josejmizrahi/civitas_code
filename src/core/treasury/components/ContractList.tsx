@@ -4,6 +4,7 @@ import { useEntities } from '@/core/entities/hooks/useEntities'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -37,13 +38,22 @@ const STATUS_LABELS: Record<string, string> = {
   suspended: 'Suspendido',
 }
 
-function statusVariant(s: string): 'success' | 'destructive' | 'warning' | 'secondary' {
-  switch (s) {
-    case 'active': return 'success'
-    case 'defaulted': return 'destructive'
-    case 'draft': return 'warning'
-    default: return 'secondary'
-  }
+const CONTRACT_VARIANTS: Record<string, 'success' | 'destructive' | 'warning'> = {
+  active: 'success',
+  defaulted: 'destructive',
+  draft: 'warning',
+}
+
+const INSTALLMENT_VARIANTS: Record<string, 'success' | 'destructive' | 'warning'> = {
+  paid: 'success',
+  overdue: 'destructive',
+  pending: 'warning',
+}
+
+const INSTALLMENT_LABELS: Record<string, string> = {
+  paid: 'Pagado',
+  overdue: 'Vencido',
+  pending: 'Pendiente',
 }
 
 function ComplianceBar({ score }: { score: number }) {
@@ -103,13 +113,7 @@ function InstallmentView({ contract }: { contract: Contract }) {
                 <TableCell className="text-right">{formatCurrency(inst.amount)}</TableCell>
                 <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(inst.due_date)}</TableCell>
                 <TableCell>
-                  <Badge variant={
-                    inst.status === 'paid' ? 'success' :
-                    inst.status === 'overdue' ? 'destructive' :
-                    inst.status === 'pending' ? 'warning' : 'secondary'
-                  }>
-                    {inst.status === 'paid' ? 'Pagado' : inst.status === 'overdue' ? 'Vencido' : inst.status === 'pending' ? 'Pendiente' : inst.status}
-                  </Badge>
+                  <StatusBadge status={inst.status} variantMap={INSTALLMENT_VARIANTS} labelMap={INSTALLMENT_LABELS} />
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   {inst.paid_at ? formatDate(inst.paid_at) : '—'}
@@ -218,9 +222,7 @@ export function ContractList() {
             <h3 className="text-lg font-bold">{selectedContract.name}</h3>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <Badge variant="secondary">{TYPE_LABELS[selectedContract.type] || selectedContract.type}</Badge>
-              <Badge variant={statusVariant(selectedContract.status)}>
-                {STATUS_LABELS[selectedContract.status] || selectedContract.status}
-              </Badge>
+              <StatusBadge status={selectedContract.status} variantMap={CONTRACT_VARIANTS} labelMap={STATUS_LABELS} />
             </div>
             {selectedContract.description && <p className="mt-2 text-sm text-muted-foreground">{selectedContract.description}</p>}
           </div>
@@ -405,7 +407,7 @@ export function ContractList() {
                   <TableCell className="hidden lg:table-cell">{c.number_of_installments}</TableCell>
                   <TableCell className="hidden md:table-cell"><ComplianceBar score={c.compliance_score} /></TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant(c.status)}>{STATUS_LABELS[c.status] || c.status}</Badge>
+                    <StatusBadge status={c.status} variantMap={CONTRACT_VARIANTS} labelMap={STATUS_LABELS} />
                   </TableCell>
                   {canManageTreasury && (
                     <TableCell>

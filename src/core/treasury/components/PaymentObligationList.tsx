@@ -3,7 +3,7 @@ import { usePaymentObligations, useUpdateObligationStatus } from '../hooks/usePa
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
-import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { Button } from '@/shared/components/ui/button'
 import { Select } from '@/shared/components/ui/select'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
@@ -12,14 +12,13 @@ import { CreateObligationDialog } from './CreateObligationDialog'
 import { RegisterPaymentDialog } from './RegisterPaymentDialog'
 import type { PaymentObligation } from '../types'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { usePagination } from '@/shared/hooks/usePagination'
+import { Pagination } from '@/shared/components/ui/pagination'
 
-function statusVariant(status: string): 'warning' | 'success' | 'destructive' | 'secondary' {
-  switch (status) {
-    case 'paid': return 'success'
-    case 'overdue': return 'destructive'
-    case 'pending': return 'warning'
-    default: return 'secondary'
-  }
+const PAYMENT_VARIANTS: Record<string, 'warning' | 'success' | 'destructive'> = {
+  paid: 'success',
+  overdue: 'destructive',
+  pending: 'warning',
 }
 
 export function PaymentObligationList({
@@ -53,6 +52,8 @@ export function PaymentObligationList({
   const filtered = statusFilter
     ? obligations?.filter((o) => o.status === statusFilter)
     : obligations
+
+  const { page, totalPages, totalItems, pageSize, paginatedItems, setPage } = usePagination(filtered)
 
   const handleStatusChange = (obligation: PaymentObligation, newStatus: string) => {
     if (newStatus === 'paid') {
@@ -140,16 +141,14 @@ export function PaymentObligationList({
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((ob) => (
+              paginatedItems.map((ob) => (
                 <TableRow key={ob.id}>
                   <TableCell className="font-medium">{memberMap.get(ob.member_id) || ob.member_id.slice(0, 8)}</TableCell>
                   <TableCell className="hidden md:table-cell">{ob.concept}</TableCell>
                   <TableCell className="text-right font-medium">{formatCurrency(ob.amount)}</TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground">{formatDate(ob.due_date)}</TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant(ob.status)}>
-                      {statusLabels[ob.status] || ob.status}
-                    </Badge>
+                    <StatusBadge status={ob.status} variantMap={PAYMENT_VARIANTS} labelMap={statusLabels} />
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     {ob.payment_transaction_id ? (
@@ -195,6 +194,8 @@ export function PaymentObligationList({
           </TableBody>
         </Table>
       </div>
+
+      <Pagination page={page} totalPages={totalPages} totalItems={totalItems} pageSize={pageSize} onPageChange={setPage} />
 
       <CreateObligationDialog open={showCreate} onOpenChange={setShowCreate} />
       <RegisterPaymentDialog

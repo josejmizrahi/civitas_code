@@ -344,7 +344,7 @@ export function AdminTreasuryView() {
 
 import { useSpendRequests } from '@/core/treasury/hooks/useSpendRequests'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/components/ui/table'
-import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import type { SpendRequestStatus } from '@/core/treasury/types'
 
 const SR_STATUS_LABELS: Record<SpendRequestStatus, string> = {
@@ -359,11 +359,14 @@ const SR_STATUS_LABELS: Record<SpendRequestStatus, string> = {
   cancelled: 'Cancelado',
 }
 
-function statusVariant(s: SpendRequestStatus): 'secondary' | 'warning' | 'success' | 'destructive' {
-  if (s === 'executed' || s === 'verified') return 'success'
-  if (s === 'rejected' || s === 'cancelled') return 'destructive'
-  if (s === 'pending_approval' || s === 'pending_vote' || s === 'executing') return 'warning'
-  return 'secondary'
+const SR_VARIANTS: Record<string, 'success' | 'destructive' | 'warning'> = {
+  executed: 'success',
+  verified: 'success',
+  rejected: 'destructive',
+  cancelled: 'destructive',
+  pending_approval: 'warning',
+  pending_vote: 'warning',
+  executing: 'warning',
 }
 
 function SpendRequestsInline() {
@@ -392,7 +395,7 @@ function SpendRequestsInline() {
               <TableCell>{formatCurrency(r.amount)}</TableCell>
               <TableCell className="text-xs">N{r.authorization_level ?? '—'}</TableCell>
               <TableCell>
-                <Badge variant={statusVariant(r.status)}>{SR_STATUS_LABELS[r.status] || r.status}</Badge>
+                <StatusBadge status={r.status} variantMap={SR_VARIANTS} labelMap={SR_STATUS_LABELS} />
               </TableCell>
             </TableRow>
           ))}

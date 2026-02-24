@@ -3,7 +3,7 @@ import { useCommunityContext } from '@/app/providers'
 import { useReservations, useCancelReservation, useCommonAreas, useCreateReservation } from '../hooks/useResidential'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
-import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent } from '@/shared/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
@@ -241,9 +241,7 @@ function ReservationCard({
               <MapPin className="h-3 w-3" /> {r.area_name}
             </p>
           </div>
-          <Badge variant={STATUS_VARIANTS[r.status] || 'secondary'} className="shrink-0 text-xs">
-            {STATUS_LABELS[r.status] || r.status}
-          </Badge>
+          <StatusBadge status={r.status} variantMap={STATUS_VARIANTS} labelMap={STATUS_LABELS} className="shrink-0 text-xs" />
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">

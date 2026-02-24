@@ -2,6 +2,7 @@ import { useAssembly, useConvocatorias, useUpdateAssemblyStatus } from '../hooks
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { Button } from '@/shared/components/ui/button'
 import { useToast } from '@/shared/components/ui/toast'
 import { usePermissions } from '@/shared/hooks/usePermissions'
@@ -182,9 +183,12 @@ export function AssemblyDetail({ assemblyId }: Props) {
                 <Badge variant={assembly.type === 'extraordinary' ? 'default' : 'secondary'}>
                   {TYPE_LABEL_KEYS[assembly.type] ? t(TYPE_LABEL_KEYS[assembly.type] as never) : assembly.type}
                 </Badge>
-                <Badge variant={STATUS_VARIANTS[assembly.status] || 'default'}>
-                  {STATUS_LABEL_KEYS[assembly.status] ? t(STATUS_LABEL_KEYS[assembly.status] as never) : assembly.status}
-                </Badge>
+                <StatusBadge
+                  status={assembly.status}
+                  variantMap={STATUS_VARIANTS}
+                  label={STATUS_LABEL_KEYS[assembly.status] ? t(STATUS_LABEL_KEYS[assembly.status] as never) : undefined}
+                  fallbackVariant="default"
+                />
                 {assembly.quorum_met && (
                   <Badge variant="success">{t('assemblyDetail.quorumMet')}</Badge>
                 )}

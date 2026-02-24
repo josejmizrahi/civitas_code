@@ -3,7 +3,7 @@ import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { usePaymentObligations } from '../hooks/usePaymentStatus'
 import { getCollectionConfig, generatePaymentReference } from '../services/treasury.service'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
 import { formatCurrency, formatDate } from '@/shared/lib/utils'
 import { AlertTriangle, CheckCircle2, Clock, Building2, Copy } from 'lucide-react'
@@ -28,13 +28,10 @@ function statusIcon(status: string) {
   }
 }
 
-function statusVariant(status: string): 'warning' | 'success' | 'destructive' | 'secondary' {
-  switch (status) {
-    case 'paid': return 'success'
-    case 'overdue': return 'destructive'
-    case 'pending': return 'warning'
-    default: return 'secondary'
-  }
+const PAYMENT_VARIANTS: Record<string, 'warning' | 'success' | 'destructive'> = {
+  paid: 'success',
+  overdue: 'destructive',
+  pending: 'warning',
 }
 
 export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boolean }) {
@@ -162,9 +159,7 @@ export function MyPayments({ showSummaryCards = true }: { showSummaryCards?: boo
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {statusIcon(ob.status)}
-                          <Badge variant={statusVariant(ob.status)}>
-                            {statusLabels[ob.status] || ob.status}
-                          </Badge>
+                          <StatusBadge status={ob.status} variantMap={PAYMENT_VARIANTS} labelMap={statusLabels} />
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{ob.concept}</TableCell>

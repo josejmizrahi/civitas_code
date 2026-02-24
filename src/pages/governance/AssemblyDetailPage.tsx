@@ -5,6 +5,7 @@ import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { useToast } from '@/shared/components/ui/toast'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityContext } from '@/app/providers'
@@ -99,9 +100,7 @@ export function AssemblyDetailPage() {
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{assembly.title}</h1>
-            <Badge variant={STATUS_VARIANTS[assembly.status] || 'default'}>
-              {STATUS_LABELS[assembly.status] || assembly.status}
-            </Badge>
+            <StatusBadge status={assembly.status} variantMap={STATUS_VARIANTS} labelMap={STATUS_LABELS} fallbackVariant="default" />
             <Badge variant={assembly.type === 'extraordinary' ? 'default' : 'secondary'}>
               {assembly.type === 'extraordinary' ? t('assemblies.type.extraordinary') : t('assemblies.type.ordinary')}
             </Badge>

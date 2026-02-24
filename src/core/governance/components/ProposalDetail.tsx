@@ -19,6 +19,7 @@ import { ImplementationTracker } from '@/core/accountability/components/Implemen
 import { ProposalContextPanel } from './ProposalContextPanel'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Textarea } from '@/shared/components/ui/textarea'
@@ -293,9 +294,12 @@ export function ProposalDetail({ proposalId }: Props) {
               {proposal.appealed && (
                 <Badge variant="destructive" className="text-xs">{t('proposalDetail.badge.appealed')}</Badge>
               )}
-              <Badge variant={(STATUS_VARIANTS[proposal.status] || 'default') as 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'}>
-                {STATUS_LABEL_KEYS[proposal.status] ? t(STATUS_LABEL_KEYS[proposal.status]) : proposal.status}
-              </Badge>
+              <StatusBadge
+                status={proposal.status}
+                variantMap={STATUS_VARIANTS}
+                label={STATUS_LABEL_KEYS[proposal.status] ? t(STATUS_LABEL_KEYS[proposal.status]) : undefined}
+                fallbackVariant="default"
+              />
             </div>
           </div>
         </CardHeader>

@@ -2,6 +2,7 @@ import { useAssemblies } from '../hooks/useAssemblies'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { formatDateTime } from '@/shared/lib/utils'
 import { Link } from 'react-router-dom'
 import { Calendar, MapPin, Users } from 'lucide-react'
@@ -71,12 +72,8 @@ export function AssemblyList({ statusFilter }: Props) {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <CardTitle className="text-base">{a.title}</CardTitle>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={TYPE_VARIANTS[a.type] || 'secondary'}>
-                      {TYPE_LABELS[a.type] || a.type}
-                    </Badge>
-                    <Badge variant={STATUS_VARIANTS[a.status] || 'default'}>
-                      {STATUS_LABELS[a.status] || a.status}
-                    </Badge>
+                    <StatusBadge status={a.type} variantMap={TYPE_VARIANTS} labelMap={TYPE_LABELS} />
+                    <StatusBadge status={a.status} variantMap={STATUS_VARIANTS} labelMap={STATUS_LABELS} fallbackVariant="default" />
                   </div>
                 </div>
               </CardHeader>

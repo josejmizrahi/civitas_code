@@ -18,6 +18,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { verifyTransaction } from '../services/receipt.service'
 import type { FundType } from '@/shared/types/rules'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { usePagination } from '@/shared/hooks/usePagination'
+import { Pagination } from '@/shared/components/ui/pagination'
 
 export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
   const { t } = useI18n()
@@ -55,6 +57,8 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
 
   const hasFilters = fundType || type || dateFrom || dateTo
   const { data: transactions, isLoading } = useTransactions(hasFilters ? filters : undefined)
+
+  const { page, totalPages, totalItems, pageSize, paginatedItems, setPage } = usePagination(transactions)
 
   const exportData = (transactions ?? []).map(tx => ({
     [t('transactions.table.date')]: tx.date,
@@ -119,7 +123,7 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                 </TableCell>
               </TableRow>
             ) : (
-              transactions?.map((tx) => {
+              paginatedItems.map((tx) => {
                 return (
                   <TableRow
                     key={tx.id}
@@ -220,6 +224,8 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
           </TableBody>
         </Table>
       </div>
+
+      <Pagination page={page} totalPages={totalPages} totalItems={totalItems} pageSize={pageSize} onPageChange={setPage} />
 
       <p className="text-xs text-muted-foreground">
         Las transacciones son inmutables. Para corregir un movimiento, usa el botón de corrección en cada fila.

@@ -5,7 +5,7 @@ import { useUpdateMaintenanceStatus, useAssignMaintenance } from '../hooks/useRe
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
-import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { Select } from '@/shared/components/ui/select'
 import { formatDate } from '@/shared/lib/utils'
 import type { MaintenanceStatus, MaintenancePriority } from '@/shared/types'
@@ -114,9 +114,7 @@ export function MaintenanceRequestList() {
                 <TableCell className="font-medium">{req.unit_number || '\u2014'}</TableCell>
                 <TableCell className="max-w-64 truncate">{req.description}</TableCell>
                 <TableCell>
-                  <Badge variant={PRIORITY_VARIANTS[req.priority] || 'default'}>
-                    {PRIORITY_LABELS[req.priority] || req.priority}
-                  </Badge>
+                  <StatusBadge status={req.priority} variantMap={PRIORITY_VARIANTS} labelMap={PRIORITY_LABELS} fallbackVariant="default" />
                 </TableCell>
                 <TableCell>
                   {isAdmin ? (
@@ -132,9 +130,7 @@ export function MaintenanceRequestList() {
                       ))}
                     </Select>
                   ) : (
-                    <Badge variant={STATUS_VARIANTS[req.status] || 'default'}>
-                      {STATUS_LABELS[req.status] || req.status}
-                    </Badge>
+                    <StatusBadge status={req.status} variantMap={STATUS_VARIANTS} labelMap={STATUS_LABELS} fallbackVariant="default" />
                   )}
                 </TableCell>
                 {isAdmin && (

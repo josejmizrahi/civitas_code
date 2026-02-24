@@ -18,6 +18,8 @@ import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { ROLE_LABELS, ROLE_BADGE_VARIANT, STANDING_LABELS, STANDING_BADGE_VARIANT } from '@/shared/constants/roles'
 import { UserPlus, UserMinus, UserCheck, Search } from 'lucide-react'
+import { usePagination } from '@/shared/hooks/usePagination'
+import { Pagination } from '@/shared/components/ui/pagination'
 
 export function MemberDirectory() {
   const navigate = useNavigate()
@@ -48,6 +50,8 @@ export function MemberDirectory() {
     if (standingFilter && (m.financial_standing ?? '') !== standingFilter) return false
     return true
   }) ?? []
+
+  const { page, totalPages, totalItems, pageSize, paginatedItems, setPage } = usePagination(filteredMembers)
 
   if (isLoading) {
     return <LoadingSpinner message={t('memberDir.loading')} className="py-8" />
@@ -111,7 +115,7 @@ export function MemberDirectory() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredMembers.map((member) => (
+            {paginatedItems.map((member) => (
               <TableRow
                 key={member.id}
                 className="cursor-pointer hover:bg-muted/50"
@@ -218,6 +222,8 @@ export function MemberDirectory() {
           </TableBody>
         </Table>
       </div>
+
+      <Pagination page={page} totalPages={totalPages} totalItems={totalItems} pageSize={pageSize} onPageChange={setPage} />
 
       <InviteMemberDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </div>

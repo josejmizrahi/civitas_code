@@ -2,6 +2,7 @@ import { useProposals } from '../hooks/useProposals'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
+import { StatusBadge } from '@/shared/components/ui/status-badge'
 import { formatDate } from '@/shared/lib/utils'
 import { Link } from 'react-router-dom'
 import { EndorsementBar } from './EndorsementBar'
@@ -59,9 +60,7 @@ export function ProposalList({ statusFilter }: Props) {
                 <CardTitle className="text-base">{p.title}</CardTitle>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">{TYPE_LABELS[p.type] || p.type}</Badge>
-                  <Badge variant={STATUS_VARIANTS[p.status] || 'default'}>
-                    {STATUS_LABELS[p.status] || p.status}
-                  </Badge>
+                  <StatusBadge status={p.status} variantMap={STATUS_VARIANTS} labelMap={STATUS_LABELS} fallbackVariant="default" />
                 </div>
               </div>
             </CardHeader>
