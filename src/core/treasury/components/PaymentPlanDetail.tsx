@@ -1,13 +1,11 @@
 import { useMemo } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCommunityContext } from '@/app/providers'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import {
-  getPaymentPlan,
-  getInstallments,
-  markInstallmentPaid,
-  cancelPaymentPlan,
-} from '../services/payment-plan.service'
+  usePaymentPlan,
+  useInstallments,
+  useMarkInstallmentPaid,
+  useCancelPaymentPlan,
+} from '../hooks/usePaymentPlans'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
 import { Button } from '@/shared/components/ui/button'
@@ -43,36 +41,11 @@ const installmentStatusIcon: Record<string, typeof CheckCircle2> = {
 }
 
 export function PaymentPlanDetail({ planId, onClose }: Props) {
-  const { communityId: _communityId } = useCommunityContext()
   const { isAdmin } = usePermissions()
-  const queryClient = useQueryClient()
-
-  const { data: plan, isLoading: planLoading } = useQuery({
-    queryKey: ['payment-plan', planId],
-    queryFn: () => getPaymentPlan(planId),
-  })
-
-  const { data: installments, isLoading: instLoading } = useQuery({
-    queryKey: ['payment-plan-installments', planId],
-    queryFn: () => getInstallments(planId),
-  })
-
-  const markPaidMut = useMutation({
-    mutationFn: ({ id, amount }: { id: string; amount: number }) => markInstallmentPaid(id, amount),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['payment-plan-installments', planId] })
-      queryClient.invalidateQueries({ queryKey: ['payment-plan', planId] })
-      queryClient.invalidateQueries({ queryKey: ['payment-plans'] })
-    },
-  })
-
-  const cancelMut = useMutation({
-    mutationFn: () => cancelPaymentPlan(planId, 'Cancelado por administrador'),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['payment-plan', planId] })
-      queryClient.invalidateQueries({ queryKey: ['payment-plans'] })
-    },
-  })
+  const { data: plan, isLoading: planLoading } = usePaymentPlan(planId)
+  const { data: installments, isLoading: instLoading } = useInstallments(planId)
+  const markPaidMut = useMarkInstallmentPaid()
+  const cancelMut = useCancelPaymentPlan()
 
   const progress = useMemo(() => {
     if (!installments || installments.length === 0) return { paid: 0, total: 0, pct: 0, paidAmount: 0 }
@@ -152,7 +125,7 @@ export function PaymentPlanDetail({ planId, onClose }: Props) {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => cancelMut.mutate()}
+                onClick={() => cancelMut.mutate({ planId, reason: 'Cancelado por administrador' })}
                 disabled={cancelMut.isPending}
               >
                 <Ban className="h-3.5 w-3.5 mr-1" />
@@ -225,7 +198,7 @@ export function PaymentPlanDetail({ planId, onClose }: Props) {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => markPaidMut.mutate({ id: inst.id, amount: inst.amount })}
+                          onClick={() => markPaidMut.mutate({ installmentId: inst.id, paidAmount: inst.amount })}
                           disabled={markPaidMut.isPending}
                         >
                           <CheckCircle2 className="h-3.5 w-3.5 mr-1" />

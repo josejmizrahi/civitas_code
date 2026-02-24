@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { AppError } from '@/shared/lib/errors'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -76,6 +77,15 @@ export async function startTerm(
   role: string,
   assemblyId?: string,
 ): Promise<AdminTerm> {
+  // LPCI Art. 42: Validate re-election eligibility before starting a new term
+  const eligible = await canBeReElected(communityId, memberId)
+  if (!eligible) {
+    throw new AppError(
+      'Este miembro ha alcanzado el maximo de periodos consecutivos permitidos (Art. 42 LPCI).',
+      'VALIDATION',
+    )
+  }
+
   // Get last consecutive term number for this member
   const { data: lastTerm } = await supabase
     .from('admin_terms')

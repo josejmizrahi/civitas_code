@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCommunityContext, useAuth } from '@/app/providers'
 import { getTransactions, createTransaction, createCorrectionTransaction, setVigilanceFlag } from '../services/treasury.service'
+import { verifyTransaction } from '../services/receipt.service'
 
 const txKeys = {
   all: ['transactions'] as const,
@@ -68,6 +69,18 @@ export function useSetVigilanceFlag() {
       memberId,
     }: { transactionId: string; flag: boolean; note?: string | null; memberId: string }) =>
       setVigilanceFlag(communityId!, memberId, transactionId, flag, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: txKeys.all })
+    },
+  })
+}
+
+export function useVerifyTransaction() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'verified' | 'disputed' }) =>
+      verifyTransaction(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: txKeys.all })
     },

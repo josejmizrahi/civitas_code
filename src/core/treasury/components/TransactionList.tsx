@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useTransactions } from '../hooks/useTransactions'
+import { useTransactions, useVerifyTransaction } from '../hooks/useTransactions'
 import { usePermissions } from '@/shared/hooks/usePermissions'
 import { useCommunityContext } from '@/app/providers'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/components/ui/table'
@@ -14,8 +14,6 @@ import { TransactionDetailDialog } from './TransactionDetailDialog'
 import { FlagVigilanceDialog } from './FlagVigilanceDialog'
 import type { Transaction } from '../types'
 import { useToast } from '@/shared/components/ui/toast'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { verifyTransaction } from '../services/receipt.service'
 import type { FundType } from '@/shared/types/rules'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { usePagination } from '@/shared/hooks/usePagination'
@@ -33,18 +31,8 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
   const { communityId } = useCommunityContext()
   const { canManageTreasury, role, isAdmin } = usePermissions()
   const toast = useToast()
-  const queryClient = useQueryClient()
   const canFlagVigilance = role === 'comite_vigilancia' || isAdmin
-
-  const verifyMut = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: 'verified' | 'disputed' }) =>
-      verifyTransaction(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['transactions'] })
-      toast.success(t('transactions.toast.verified'))
-    },
-    onError: () => toast.error(t('transactions.toast.verifyError')),
-  })
+  const verifyMut = useVerifyTransaction()
 
   void communityId
 
@@ -193,7 +181,10 @@ export function TransactionList({ fundType }: { fundType?: FundType } = {}) {
                                 <Button
                                   size="icon"
                                   variant="ghost"
-                                  onClick={() => verifyMut.mutate({ id: tx.id, status: 'verified' })}
+                                  onClick={() => verifyMut.mutate({ id: tx.id, status: 'verified' }, {
+                                  onSuccess: () => toast.success(t('transactions.toast.verified')),
+                                  onError: () => toast.error(t('transactions.toast.verifyError')),
+                                })}
                                   disabled={verifyMut.isPending}
                                   aria-label={t('transactions.action.verify')}
                                   title={t('transactions.action.verify')}

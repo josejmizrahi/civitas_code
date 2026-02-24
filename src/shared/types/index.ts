@@ -4,7 +4,7 @@ export type MemberStatus = 'active' | 'inactive' | 'pending'
 
 export type ProposalStatus = 'draft' | 'discussion' | 'active' | 'closed' | 'approved' | 'rejected' | 'executed'
 
-export type ProposalType = 'ordinary' | 'extraordinary' | 'budget' | 'election' | 'amendment'
+export type ProposalType = 'ordinary' | 'extraordinary' | 'budget' | 'election' | 'amendment' | 'gasto'
 
 export type VoteValue = 'yes' | 'no' | 'abstain' | 'agree' | 'disagree' | 'block'
   | 'option_1' | 'option_2' | 'option_3' | 'option_4' | 'option_5'

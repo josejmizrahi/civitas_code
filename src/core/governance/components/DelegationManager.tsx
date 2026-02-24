@@ -1,8 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCommunityContext } from '@/app/providers'
 import { useMembers } from '@/core/identity/hooks/useMembers'
 import { useRulesEngine } from '@/shared/hooks/useRulesEngine'
-import { getDelegations, createDelegation, revokeDelegation } from '../services/governance.service'
+import { useDelegations, useCreateDelegation, useRevokeDelegation } from '../hooks/useDelegation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
 import { Select } from '@/shared/components/ui/select'
@@ -18,36 +16,14 @@ interface Props {
 
 export function DelegationManager({ memberId }: Props) {
   const { t } = useI18n()
-  const { communityId } = useCommunityContext()
-  const queryClient = useQueryClient()
   const { data: members } = useMembers()
   const { canDelegate } = useRulesEngine()
   const toast = useToast()
   const [selectedMember, setSelectedMember] = useState('')
 
-  const { data: delegations } = useQuery({
-    queryKey: ['delegations', communityId],
-    queryFn: () => getDelegations(communityId!),
-    enabled: !!communityId,
-  })
-
-  const createMut = useMutation({
-    mutationFn: () => createDelegation({
-      community_id: communityId!,
-      from_member_id: memberId,
-      to_member_id: selectedMember,
-      scope: 'all',
-    }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['delegations', communityId] })
-      setSelectedMember('')
-    },
-  })
-
-  const revokeMut = useMutation({
-    mutationFn: (delegationId: string) => revokeDelegation(delegationId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['delegations', communityId] }),
-  })
+  const { data: delegations } = useDelegations()
+  const createMut = useCreateDelegation()
+  const revokeMut = useRevokeDelegation()
 
   // My delegations (I delegated to someone)
   const myDelegations = delegations?.filter((d) => d.from_member_id === memberId) ?? []
@@ -142,10 +118,13 @@ export function DelegationManager({ memberId }: Props) {
             </Select>
             <Button
               size="sm"
-              onClick={() => createMut.mutate(undefined, {
-                onSuccess: () => toast.success(t('delegation.toast.created')),
-                onError: () => toast.error(t('delegation.toast.createError')),
-              })}
+              onClick={() => createMut.mutate(
+                { from_member_id: memberId, to_member_id: selectedMember, scope: 'all' },
+                {
+                  onSuccess: () => { setSelectedMember(''); toast.success(t('delegation.toast.created')) },
+                  onError: () => toast.error(t('delegation.toast.createError')),
+                },
+              )}
               disabled={!selectedMember || createMut.isPending}
             >
               {t('delegation.delegate')}
