@@ -6,6 +6,7 @@ import { supabase } from '@/shared/lib/supabase'
 import type { Category } from '../types'
 import type { CategoryType } from '@/shared/types'
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner'
+import { useI18n } from '@/shared/hooks/useI18n'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Select } from '@/shared/components/ui/select'
@@ -42,6 +43,7 @@ async function deleteCategory(categoryId: string): Promise<void> {
 }
 
 export function CategoryManager() {
+  const { t } = useI18n()
   const { communityId } = useCommunityContext()
   const queryClient = useQueryClient()
   const toast = useToast()
@@ -79,32 +81,32 @@ export function CategoryManager() {
     setEditName(cat.name)
   }
 
-  if (isLoading) return <LoadingSpinner message="Cargando categorías..." className="py-8" />
+  if (isLoading) return <LoadingSpinner message={t('treasury.loadingCategories' as any)} className="py-8" />
 
   return (
     <div className="space-y-4">
       {/* Create form */}
       <div className="flex gap-2">
         <Input
-          placeholder="Nombre de categoría"
+          placeholder={t('treasury.categoryNamePlaceholder' as any)}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           className="flex-1"
         />
         <Select value={newType} onChange={(e) => setNewType(e.target.value as CategoryType)} className="w-32">
-          <option value="expense">Gasto</option>
-          <option value="income">Ingreso</option>
+          <option value="expense">{t('treasury.expense' as any)}</option>
+          <option value="income">{t('treasury.income' as any)}</option>
         </Select>
         <Button
           onClick={() => createMut.mutate(undefined, {
-            onSuccess: () => toast.success('Categoría creada exitosamente'),
-            onError: () => toast.error('Error al crear categoría'),
+            onSuccess: () => toast.success(t('treasury.categoryCreated' as any)),
+            onError: () => toast.error(t('treasury.errorCreatingCategory' as any)),
           })}
           disabled={!newName.trim() || createMut.isPending}
           size="sm"
         >
           <Plus className="mr-1 h-4 w-4" />
-          Crear
+          {t('treasury.create' as any)}
         </Button>
       </div>
 
@@ -113,10 +115,10 @@ export function CategoryManager() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Sistema</TableHead>
-              <TableHead className="w-24">Acciones</TableHead>
+              <TableHead>{t('common.name')}</TableHead>
+              <TableHead>{t('entities.type' as any)}</TableHead>
+              <TableHead>{t('treasury.system' as any)}</TableHead>
+              <TableHead className="w-24">{t('entities.actions' as any)}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -135,15 +137,15 @@ export function CategoryManager() {
                         size="icon"
                         variant="ghost"
                         onClick={() => updateMut.mutate({ id: cat.id, name: editName }, {
-                          onSuccess: () => toast.success('Categoría actualizada'),
-                          onError: () => toast.error('Error al actualizar categoría'),
+                          onSuccess: () => toast.success(t('treasury.categoryUpdated' as any)),
+                          onError: () => toast.error(t('treasury.errorUpdatingCategory' as any)),
                         })}
                         disabled={!editName.trim()}
-                        aria-label="Guardar"
+                        aria-label={t('common.save')}
                       >
                         <Check className="h-4 w-4 text-green-600" />
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => setEditingId(null)} aria-label="Cancelar">
+                      <Button size="icon" variant="ghost" onClick={() => setEditingId(null)} aria-label={t('common.cancel')}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -153,16 +155,16 @@ export function CategoryManager() {
                 </TableCell>
                 <TableCell>
                   <Badge variant={cat.type === 'income' ? 'success' : 'secondary'}>
-                    {cat.type === 'income' ? 'Ingreso' : 'Gasto'}
+                    {cat.type === 'income' ? t('treasury.income' as any) : t('treasury.expense' as any)}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {cat.is_system && <Badge variant="outline">Sistema</Badge>}
+                  {cat.is_system && <Badge variant="outline">{t('treasury.system' as any)}</Badge>}
                 </TableCell>
                 <TableCell>
                   {!cat.is_system && editingId !== cat.id && (
                     <div className="flex gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => startEdit(cat)} aria-label="Editar">
+                      <Button size="icon" variant="ghost" onClick={() => startEdit(cat)} aria-label={t('common.edit')}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
@@ -170,18 +172,18 @@ export function CategoryManager() {
                         variant="ghost"
                         onClick={async () => {
                           const ok = await confirm({
-                            title: 'Eliminar categoría',
-                            description: '¿Eliminar esta categoría? Las transacciones existentes conservarán su historial.',
-                            confirmLabel: 'Eliminar',
+                            title: t('treasury.deleteCategory' as any),
+                            description: t('treasury.confirmDeleteCategory' as any),
+                            confirmLabel: t('common.delete'),
                             variant: 'destructive',
                           })
                           if (!ok) return
                           deleteMut.mutate(cat.id, {
-                            onSuccess: () => toast.success('Categoría eliminada'),
-                            onError: () => toast.error('Error al eliminar categoría'),
+                            onSuccess: () => toast.success(t('treasury.categoryDeleted' as any)),
+                            onError: () => toast.error(t('treasury.errorDeletingCategory' as any)),
                           })
                         }}
-                        aria-label="Eliminar"
+                        aria-label={t('common.delete')}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -193,7 +195,7 @@ export function CategoryManager() {
             {(!categories || categories.length === 0) && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  No hay categorías configuradas
+                  {t('treasury.noCategories' as any)}
                 </TableCell>
               </TableRow>
             )}
