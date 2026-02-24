@@ -4,6 +4,11 @@ import {
   Handshake,
   Factory,
   Building2,
+  Trophy,
+  GraduationCap,
+  HeartHandshake,
+  Users,
+  Settings,
   type LucideIcon,
 } from 'lucide-react'
 import type { CommunityType } from '@/shared/types'
@@ -28,10 +33,34 @@ export const VERTICALS: Record<CommunityType, VerticalConfig> = {
     icon: Home,
     navItems: [{ name: 'Residencial', href: '/residential', icon: Home }],
   },
+  association: {
+    type: 'association',
+    label: 'Asociación',
+    icon: Users,
+    navItems: [],
+  },
+  club: {
+    type: 'club',
+    label: 'Club',
+    icon: Trophy,
+    navItems: [],
+  },
+  school: {
+    type: 'school',
+    label: 'Escuela',
+    icon: GraduationCap,
+    navItems: [],
+  },
   religious: {
     type: 'religious',
-    label: 'Religiosa',
+    label: 'Comunidad religiosa',
     icon: Church,
+    navItems: [],
+  },
+  ngo: {
+    type: 'ngo',
+    label: 'ONG / Fundación',
+    icon: HeartHandshake,
     navItems: [],
   },
   cooperative: {
@@ -40,6 +69,13 @@ export const VERTICALS: Record<CommunityType, VerticalConfig> = {
     icon: Handshake,
     navItems: [],
   },
+  custom: {
+    type: 'custom',
+    label: 'Personalizado',
+    icon: Settings,
+    navItems: [],
+  },
+  // Legacy types (mapped to new equivalents)
   manufacturing: {
     type: 'manufacturing',
     label: 'Manufacturera',
@@ -55,5 +91,5 @@ export const VERTICALS: Record<CommunityType, VerticalConfig> = {
 }
 
 export function getVerticalConfig(type: CommunityType): VerticalConfig {
-  return VERTICALS[type] ?? VERTICALS.other
+  return VERTICALS[type] ?? VERTICALS.custom
 }

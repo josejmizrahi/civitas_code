@@ -123,6 +123,64 @@ const PRESETS: Record<CommunityType, CommunityConfigShape> = {
       expense: ['Operación', 'Negociación', 'Certificaciones', 'Otros egresos'],
     },
   },
+  association: {
+    vertical: 'association',
+    member_label: 'Asociado',
+    entity_label: 'Proveedor',
+    contribution_label: 'Cuota de asociado',
+    voting_weight: { formula: 'one_person_one_vote', source_field: null },
+    membership_attributes: [
+      { key: 'membership_type', label: 'Tipo de membresía', type: 'enum', options: ['fundador', 'activo', 'honorario'] },
+    ],
+    financial_categories: {
+      income: ['Cuotas de asociados', 'Eventos', 'Patrocinios', 'Otros ingresos'],
+      expense: ['Eventos', 'Personal', 'Oficina', 'Comunicación', 'Otros egresos'],
+    },
+  },
+  club: {
+    vertical: 'club',
+    member_label: 'Socio',
+    entity_label: 'Proveedor',
+    contribution_label: 'Membresía',
+    voting_weight: { formula: 'one_person_one_vote', source_field: null },
+    membership_attributes: [
+      { key: 'membership_tier', label: 'Tipo de membresía', type: 'enum', options: ['pleno', 'deportivo', 'social', 'juvenil'] },
+    ],
+    financial_categories: {
+      income: ['Membresías', 'Inscripciones', 'Eventos', 'Otros ingresos'],
+      expense: ['Instalaciones', 'Personal', 'Eventos', 'Equipo', 'Otros egresos'],
+    },
+  },
+  school: {
+    vertical: 'school',
+    member_label: 'Padre de familia',
+    entity_label: 'Proveedor',
+    contribution_label: 'Cuota escolar',
+    voting_weight: { formula: 'one_person_one_vote', source_field: null },
+    membership_attributes: [
+      { key: 'student_name', label: 'Nombre del alumno', type: 'text' },
+      { key: 'grade', label: 'Grado', type: 'text' },
+    ],
+    financial_categories: {
+      income: ['Inscripciones', 'Cuotas mensuales', 'Eventos', 'Otros ingresos'],
+      expense: ['Material didáctico', 'Mantenimiento', 'Eventos', 'Seguridad', 'Otros egresos'],
+    },
+  },
+  ngo: {
+    vertical: 'ngo',
+    member_label: 'Miembro',
+    entity_label: 'Aliado',
+    contribution_label: 'Aportación',
+    voting_weight: { formula: 'one_person_one_vote', source_field: null },
+    membership_attributes: [
+      { key: 'role_type', label: 'Rol', type: 'enum', options: ['fundador', 'consejero', 'voluntario', 'donante'] },
+    ],
+    financial_categories: {
+      income: ['Donativos', 'Cuotas', 'Fondos gubernamentales', 'Fondos internacionales', 'Otros ingresos'],
+      expense: ['Programas', 'Personal', 'Oficina', 'Comunicación', 'Otros egresos'],
+    },
+  },
+  custom: DEFAULT_CONFIG,
   other: DEFAULT_CONFIG,
 }
 

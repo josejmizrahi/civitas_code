@@ -28,7 +28,18 @@ export type MaintenancePriority = 'low' | 'medium' | 'high' | 'urgent'
 
 export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'cancelled'
 
-export type CommunityType = 'residential' | 'religious' | 'manufacturing' | 'cooperative' | 'other'
+export type CommunityType =
+  | 'residential'   // Condominios, fraccionamientos
+  | 'association'   // Asociaciones civiles (A.C.)
+  | 'club'          // Clubes deportivos, sociales, culturales
+  | 'school'        // Escuelas, sociedades de padres
+  | 'religious'     // Iglesias, templos, congregaciones
+  | 'ngo'           // ONGs, fundaciones, donatarias
+  | 'cooperative'   // Cooperativas
+  | 'custom'        // Cualquier otra comunidad
+  // Legacy (mapped to new types)
+  | 'manufacturing' // → maps to 'cooperative' in presets
+  | 'other'         // → maps to 'custom' in presets
 
 export type EntityType = 'proveedor' | 'socio_comercial' | 'contratista' | 'arrendador' | 'gobierno' | 'institucion' | 'otro'
 
