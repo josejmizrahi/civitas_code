@@ -17,7 +17,9 @@ import type {
 import {
   emitObligationCreated,
   emitObligationPaid,
+  emitObligationOverdue,
   emitTransactionCreated,
+  emitBudgetExceeded,
 } from '@/primitives/treasury/events'
 
 async function getMemberIdByUserId(communityId: string, userId: string): Promise<string | null> {
@@ -121,6 +123,16 @@ async function validateExpenseAgainstBudget(
       `Intento de registro de egreso que excede el presupuesto. Categoría: ${categoryId}. Periodo: ${period}. Disponible: ${available.toLocaleString('es-MX')}, solicitado: ${amount.toLocaleString('es-MX')}.`,
       { category_id: categoryId, period, available, requested: amount },
     )
+
+    // Emit domain event for budget exceeded
+    void emitBudgetExceeded(communityId, null, {
+      budgetId: (budget as { id: string }).id,
+      categoryId,
+      budgetAmount,
+      spentAmount: spent,
+      excessAmount: amount - available,
+    })
+
     throw new AppError(
       `Presupuesto insuficiente. Disponible: ${available.toLocaleString('es-MX')}, solicitado: ${amount.toLocaleString('es-MX')}.`,
       'FORBIDDEN',
@@ -557,6 +569,19 @@ export async function refreshOverdueObligations(communityId: string): Promise<nu
     .select()
 
   if (error) throw error
+
+  // Emit domain events for each obligation that became overdue
+  for (const ob of (data ?? []) as PaymentObligation[]) {
+    const daysOverdue = Math.floor((Date.now() - new Date(ob.due_date).getTime()) / (1000 * 60 * 60 * 24))
+    void emitObligationOverdue(communityId, null, {
+      obligationId: ob.id,
+      memberId: ob.member_id,
+      amount: Number(ob.amount),
+      dueDate: ob.due_date,
+      daysOverdue,
+    })
+  }
+
   return data?.length ?? 0
 }
 

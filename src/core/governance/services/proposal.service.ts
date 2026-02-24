@@ -270,6 +270,63 @@ export async function appealProposal(proposalId: string, communityId: string, ap
   return data as unknown as Proposal
 }
 
+/**
+ * Resolve an appeal: either uphold (reject the proposal) or dismiss (allow execution).
+ */
+export async function resolveAppeal(
+  proposalId: string,
+  communityId: string,
+  resolvedByUserId: string,
+  resolution: 'upheld' | 'dismissed',
+): Promise<Proposal> {
+  const proposal = await getProposal(proposalId)
+  if (!proposal.appealed) throw new AppError('Esta propuesta no tiene una apelación activa', 'VALIDATION')
+  if (proposal.status !== 'approved') throw new AppError('Solo se pueden resolver apelaciones de propuestas aprobadas', 'VALIDATION')
+
+  const updateData: Record<string, unknown> = {
+    appealed: false,
+    appeal_resolution: resolution,
+    appeal_resolved_at: new Date().toISOString(),
+    appeal_resolved_by: resolvedByUserId,
+  }
+
+  if (resolution === 'upheld') {
+    // Appeal upheld → reject the proposal, block execution
+    updateData.status = 'rejected'
+    updateData.result = 'Rechazada — apelación sostenida'
+    updateData.execution_status = 'cancelled'
+  }
+  // If dismissed, proposal stays approved and can proceed to execution
+
+  const { data, error } = await supabase.from('proposals')
+    .update(updateData)
+    .eq('id', proposalId)
+    .select()
+    .single()
+  if (error) throw error
+
+  try {
+    await supabase.from('audit_log').insert({
+      community_id: communityId,
+      user_id: resolvedByUserId,
+      action: 'resolve_appeal',
+      entity_type: 'proposal',
+      entity_id: proposalId,
+      details: { resolution, resolved_at: new Date().toISOString() },
+    })
+  } catch { /* audit best-effort */ }
+
+  try {
+    const { notifyCommunity } = await import('@/shared/services/notification.service')
+    const msg = resolution === 'upheld'
+      ? 'La apelación fue sostenida. La propuesta ha sido rechazada.'
+      : 'La apelación fue desestimada. La propuesta puede ejecutarse.'
+    await notifyCommunity(communityId, 'proposal_closed', `Apelación resuelta: ${proposal.title}`, msg, { proposal_id: proposalId, resolution })
+  } catch { /* best-effort */ }
+
+  return data as unknown as Proposal
+}
+
 export async function updateProposalStatus(proposalId: string, status: string, extra?: Record<string, unknown>): Promise<void> {
   const { error } = await supabase.from('proposals').update({ status, ...extra }).eq('id', proposalId)
   if (error) throw error
@@ -289,6 +346,20 @@ export async function closeProposal(proposalId: string, communityId: string, clo
       : 'Rechazada - no alcanz? qu?rum'
 
   const updateData: Record<string, unknown> = { status: resultStatus, result: resultText, closed_at: new Date().toISOString(), closed_by: closedByUserId }
+
+  // Persist winning option for multiple_choice proposals
+  if (resultStatus === 'approved' && model === 'multiple_choice') {
+    const votes = await getVotes(proposalId)
+    const totals = new Map<string, number>()
+    for (const v of votes) {
+      if (v.value === 'abstain') continue
+      totals.set(v.value, (totals.get(v.value) ?? 0) + Number(v.weight || 1))
+    }
+    if (totals.size > 0) {
+      const sorted = [...totals.entries()].sort((a, b) => b[1] - a[1])
+      updateData.winning_option = sorted[0][0]
+    }
+  }
 
   if (resultStatus === 'approved' && proposal.financial_instruction) {
     const { data: community } = await supabase.from('communities').select('config, rules').eq('id', communityId).single()

@@ -80,6 +80,7 @@ export function useCloseProposal() {
       queryClient.invalidateQueries({ queryKey: ['proposal', variables.proposalId] })
       queryClient.invalidateQueries({ queryKey: ['proposals', communityId] })
       queryClient.invalidateQueries({ queryKey: ['vote-summary', variables.proposalId] })
+      queryClient.invalidateQueries({ queryKey: ['votes', variables.proposalId] })
     },
   })
 }
@@ -121,6 +122,9 @@ export function useExecuteProposal() {
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
       queryClient.invalidateQueries({ queryKey: ['budgets', communityId] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['members'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-terms'] })
+      queryClient.invalidateQueries({ queryKey: ['payment-obligations'] })
     },
   })
 }

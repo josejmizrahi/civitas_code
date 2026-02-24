@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import type { AssemblyStatus } from '../types'
 import { useI18n } from '@/shared/hooks/useI18n'
+import { useMorosoMembers } from '@/core/identity/hooks/useMoroso'
 
 const STATUS_LABEL_KEYS: Record<string, string> = {
   scheduled: 'assemblyDetail.status.scheduled',
@@ -64,6 +65,7 @@ export function AssemblyDetail({ assemblyId }: Props) {
   const { isAdmin } = usePermissions()
   const { community } = useCommunityContext()
   const toast = useToast()
+  const { data: morosoMembers } = useMorosoMembers()
 
   const rules = community
     ? getCommunityRules(community.config, community.rules as any)
@@ -73,13 +75,16 @@ export function AssemblyDetail({ assemblyId }: Props) {
   if (isLoading) return <LoadingSpinner message={t('assemblyDetail.loading')} className="py-8" />
   if (!assembly) return <p className="text-muted-foreground">{t('assemblyDetail.notFound')}</p>
 
+  const morosoMemberIds = (morosoMembers ?? []).map((m: { id: string }) => m.id)
+
   const quorumInfo =
     governanceRules && assembly.attendance?.length
       ? calculateAssemblyQuorum(
           assembly.attendance,
           governanceRules,
           assembly.current_call,
-          assembly.type
+          assembly.type,
+          morosoMemberIds
         )
       : null
 

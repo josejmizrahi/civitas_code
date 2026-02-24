@@ -2,6 +2,22 @@ import { supabase } from '@/shared/lib/supabase'
 import type { ImplementationTask, DecisionArchiveEntry } from '../types'
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+async function resolveResponsibleNames(tasks: any[]): Promise<Map<string, string>> {
+  const memberIds = [...new Set(tasks.map(t => t.responsible_member_id).filter(Boolean))]
+  if (memberIds.length === 0) return new Map()
+
+  const { data } = await (supabase.from('member_profiles' as any) as any)
+    .select('id, full_name')
+    .in('id', memberIds)
+
+  if (!data) return new Map()
+  return new Map((data as Array<{ id: string; full_name: string | null }>).map(m => [m.id, m.full_name ?? '']))
+}
+
+// ---------------------------------------------------------------------------
 // Implementation Tasks CRUD
 // ---------------------------------------------------------------------------
 
@@ -17,9 +33,12 @@ export async function getTasks(proposalId: string): Promise<ImplementationTask[]
 
   if (error) throw error
 
-  return ((data ?? []) as any[]).map((t) => ({
+  const tasks = (data ?? []) as any[]
+  const memberNames = await resolveResponsibleNames(tasks)
+
+  return tasks.map((t) => ({
     ...t,
-    responsible_name: null,
+    responsible_name: memberNames.get(t.responsible_member_id) ?? null,
     responsible: undefined,
   })) as ImplementationTask[]
 }
@@ -37,9 +56,12 @@ export async function getTasksByCommunity(communityId: string): Promise<Implemen
 
   if (error) throw error
 
-  return ((data ?? []) as any[]).map((t) => ({
+  const tasks = (data ?? []) as any[]
+  const memberNames = await resolveResponsibleNames(tasks)
+
+  return tasks.map((t) => ({
     ...t,
-    responsible_name: null,
+    responsible_name: memberNames.get(t.responsible_member_id) ?? null,
     proposal_title: t.proposal?.title ?? null,
     responsible: undefined,
     proposal: undefined,

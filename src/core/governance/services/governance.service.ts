@@ -20,6 +20,7 @@ export {
   openVotingFromDiscussion,
   declareOutcome,
   appealProposal,
+  resolveAppeal,
   updateProposalStatus,
   closeProposal,
   processExpiredProposals,

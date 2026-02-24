@@ -3,6 +3,8 @@ import type { CommunityRules, FinancialStanding } from '@/shared/types/rules'
 import { DEFAULT_RULES } from '@/shared/types/rules'
 import type { Role } from '@/shared/types'
 import { AppError } from '@/shared/lib/errors'
+import { emitRuleChanged } from '@/primitives/governance/events'
+import { emitStandingChanged } from '@/primitives/identity/events'
 
 export function getCommunityRules(config: Record<string, unknown> | null, rules?: Record<string, unknown> | null): CommunityRules {
   const raw = rules || config?.rules as Record<string, unknown> | undefined
@@ -41,6 +43,14 @@ export async function updateCommunityRules(
     .update({ rules: rules as any })
     .eq('id', communityId)
   if (error) throw error
+
+  // Emit domain event for rule changes
+  void emitRuleChanged(communityId, user?.id ?? null, {
+    ruleKey: 'rules',
+    previousValue: null,
+    newValue: rules,
+    proposalId: proposalId ?? null,
+  })
 }
 
 export async function getMemberFinancialStanding(
@@ -56,10 +66,38 @@ export async function getMemberFinancialStanding(
 }
 
 export async function refreshFinancialStandings(communityId: string): Promise<void> {
+  // Snapshot current standings before refresh
+  const { data: before } = await supabase
+    .from('members')
+    .select('id, financial_standing')
+    .eq('community_id', communityId)
+    .eq('status', 'active')
+  const standingsBefore = new Map(
+    ((before ?? []) as Array<{ id: string; financial_standing: string }>).map(m => [m.id, m.financial_standing])
+  )
+
   const { error } = await supabase.rpc('refresh_financial_standings', {
     p_community_id: communityId,
   })
   if (error) throw error
+
+  // Detect changes and emit events
+  const { data: after } = await supabase
+    .from('members')
+    .select('id, financial_standing')
+    .eq('community_id', communityId)
+    .eq('status', 'active')
+  for (const member of ((after ?? []) as Array<{ id: string; financial_standing: string }>)) {
+    const prev = standingsBefore.get(member.id) ?? 'good_standing'
+    if (prev !== member.financial_standing) {
+      void emitStandingChanged(communityId, null, {
+        memberId: member.id,
+        previousStanding: prev,
+        newStanding: member.financial_standing,
+        reason: 'financial_standing_refresh',
+      })
+    }
+  }
 }
 
 // Check if a member can perform an action based on rules
