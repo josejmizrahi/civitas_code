@@ -25,6 +25,7 @@ import { ARCOAdminPanel } from '@/core/privacy/components/ARCOAdminPanel'
 import { AdminTermTracker } from '@/core/identity/components/AdminTermTracker'
 import { VigilanciaPanel } from '@/core/identity/components/VigilanciaPanel'
 import { isPushSubscribed, subscribeToPush, unsubscribeFromPush } from '@/shared/services/push-notification.service'
+import { getDisplayName } from '@/engine/rules'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { useCommunityPath } from '@/shared/hooks/useCommunityPath'
 import { AuditLog } from '@/shared/components/AuditLog'
@@ -181,13 +182,6 @@ export function SettingsPage() {
     navigator.clipboard.writeText(url)
   }
 
-  const communityTypeLabels: Record<string, string> = {
-    residential: 'Residencial',
-    religious: 'Religiosa',
-    cooperative: 'Cooperativa',
-    manufacturing: 'Manufacturera',
-    other: 'General',
-  }
 
   const rulesCurrencyValid = isValidCurrencyCode(rules.treasury.currency)
   const rulesLocaleValid = isValidLocaleCode(rules.treasury.locale)
@@ -292,7 +286,7 @@ export function SettingsPage() {
               <label className="text-sm font-medium text-muted-foreground">Tipo de comunidad</label>
               <p className="mt-1">
                 <Badge variant="secondary">
-                  {communityTypeLabels[community?.type ?? 'other'] ?? 'General'}
+                  {getDisplayName(community?.type ?? 'other')}
                 </Badge>
               </p>
             </div>

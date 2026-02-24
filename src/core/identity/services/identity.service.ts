@@ -3,7 +3,7 @@ import { logger } from '@/shared/lib/logger'
 import { sendEmail } from '@/shared/services/email.service'
 import { getCommunityConfigPreset, mergeCommunityConfig } from '@/shared/config/community-config'
 import { DEFAULT_RULES } from '@/shared/types/rules'
-import { getPresetForType } from '@/shared/config/vertical-presets'
+import { getPreset } from '@/engine/rules'
 import type { CommunityType } from '@/shared/types'
 import type { Member, Invitation, Community } from '../types'
 import { emitMemberJoined, emitMemberRoleChanged, emitMemberDeactivated } from '@/primitives/identity/events'
@@ -231,12 +231,13 @@ function hasNonEmptyObject(value: unknown): value is Record<string, unknown> {
 }
 
 function getDefaultRulesForType(type: CommunityType): Record<string, unknown> {
-  const preset = getPresetForType(type)
+  const preset = getPreset(type as import('@/engine/rules/types').CommunityType)
+  const rules = preset.defaultRules
   return {
     ...DEFAULT_RULES,
-    governance: { ...DEFAULT_RULES.governance, ...(preset?.rules.governance ?? {}) },
-    treasury: { ...DEFAULT_RULES.treasury, ...(preset?.rules.treasury ?? {}) },
-    identity: { ...DEFAULT_RULES.identity, ...(preset?.rules.identity ?? {}) },
+    governance: { ...DEFAULT_RULES.governance, ...(rules.governance ?? {}) },
+    treasury: { ...DEFAULT_RULES.treasury, ...(rules.treasury ?? {}) },
+    identity: { ...DEFAULT_RULES.identity, ...(rules.identity ?? {}) },
   } as unknown as Record<string, unknown>
 }
 

@@ -21,7 +21,7 @@ import { Textarea } from '@/shared/components/ui/textarea'
 import { Badge } from '@/shared/components/ui/badge'
 import { cn } from '@/shared/lib/utils'
 import { isValidCurrencyCode, isValidLocaleCode, normalizeCurrencyCode, normalizeLocaleCode } from '@/shared/lib/locale'
-import { getCompliancePreset } from '@/shared/config/compliance-presets'
+import type { ComplianceRules } from '@/shared/types/compliance'
 import { useI18n } from '@/shared/hooks/useI18n'
 import { COMMUNITY_TYPE_OPTIONS, getPreset } from '@/engine/rules'
 import type { CommunityType as EngineCommunityType } from '@/engine/rules'
@@ -86,10 +86,11 @@ function getRulesForType(type: CommunityType): CommunityRules {
   const preset = getPreset(engineType)
   const defaultRules = preset.defaultRules
 
-  // Map legal framework to compliance preset
-  const compliancePreset = preset.legalFrameworkKey?.startsWith('mx.')
-    ? getCompliancePreset('mx')
-    : getCompliancePreset('custom')
+  // Derive compliance jurisdiction from legal framework key
+  const isMx = preset.legalFrameworkKey?.startsWith('mx.')
+  const compliancePreset: ComplianceRules = isMx
+    ? { jurisdiction: 'mx', privacy_framework: 'lfpdppp', property_framework: 'lpci_cdmx' }
+    : { jurisdiction: 'custom', privacy_framework: 'custom', property_framework: 'custom' }
 
   return {
     governance: { ...DEFAULT_RULES.governance, ...(defaultRules.governance || {}) },

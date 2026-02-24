@@ -38,6 +38,18 @@ export const COMMUNITY_TYPE_OPTIONS = Object.values(COMMUNITY_PRESETS).map((p) =
   icon: p.icon,
 }))
 
+/** Display name for any community type string, including legacy types */
+const LEGACY_TYPE_NAMES: Record<string, string> = {
+  manufacturing: 'Manufacturera',
+  other: 'General',
+}
+
+export function getDisplayName(type: string): string {
+  const preset = COMMUNITY_PRESETS[type as CommunityType]
+  if (preset) return preset.displayName
+  return LEGACY_TYPE_NAMES[type] ?? type
+}
+
 export {
   residentialPreset,
   associationPreset,

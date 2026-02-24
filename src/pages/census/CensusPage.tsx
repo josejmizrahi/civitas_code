@@ -46,13 +46,7 @@ import {
   Cell,
 } from 'recharts'
 
-const TYPE_LABELS: Record<string, string> = {
-  residential: 'Residencial',
-  religious: 'Religiosa',
-  cooperative: 'Cooperativa',
-  manufacturing: 'Manufacturera',
-  other: 'Otro',
-}
+import { getDisplayName } from '@/engine/rules'
 
 const PIE_COLORS = ['hsl(221, 83%, 53%)', 'hsl(142, 76%, 36%)', 'hsl(38, 92%, 50%)', 'hsl(0, 72%, 51%)', 'hsl(270, 60%, 50%)']
 
@@ -269,7 +263,7 @@ function PlatformCensusTab() {
     : '0'
 
   const typeData = (census.community_types ?? []).map((t) => ({
-    name: TYPE_LABELS[t.type] || t.type,
+    name: getDisplayName(t.type),
     value: Number(t.count),
   }))
 
