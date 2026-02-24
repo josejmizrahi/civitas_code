@@ -9,6 +9,7 @@ export interface QuorumByType {
   budget: number
   election: number
   amendment: number
+  gasto: number
 }
 
 export interface MajorityByType {
@@ -17,6 +18,7 @@ export interface MajorityByType {
   budget: number
   election: number
   amendment: number
+  gasto: number
 }
 
 export interface GovernanceRules {
@@ -134,6 +136,7 @@ export const DEFAULT_RULES: CommunityRules = {
       budget: 0.5,
       election: 0.5,
       amendment: 0.75,
+      gasto: 0.5,
     },
     majority_by_type: {
       ordinary: 0.5,
@@ -141,6 +144,7 @@ export const DEFAULT_RULES: CommunityRules = {
       budget: 0.5,
       election: 0.5,
       amendment: 0.66,
+      gasto: 0.5,
     },
     // Endorsement defaults
     min_endorsements: 3,
