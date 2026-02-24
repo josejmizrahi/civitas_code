@@ -58,7 +58,7 @@ const STATUS_LABEL_KEYS: Record<string, I18nKey> = {
   executed: 'proposalDetail.status.executed',
 }
 
-const STATUS_VARIANTS: Record<string, string> = {
+const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'> = {
   draft: 'default',
   discussion: 'secondary',
   active: 'default',
