@@ -854,7 +854,6 @@ export type I18nKey =
   | 'governance.subtitle.minutes'
   | 'governance.subtitle.rules'
   | 'governance.loadingMember'
-  | 'community.tabs.directory'
   | 'community.directory.members'
   | 'community.directory.providers'
   | 'residential.title'
@@ -1717,7 +1716,6 @@ const es: Dictionary = {
   'governance.subtitle.minutes': 'Actas generadas a partir de propuestas ejecutadas',
   'governance.subtitle.rules': 'Reglamento vigente de la comunidad',
   'governance.loadingMember': 'Cargando información de miembro...',
-  'community.tabs.directory': 'Directorio',
   'community.directory.members': 'Miembros',
   'community.directory.providers': 'Proveedores',
   'residential.title': 'Residencial',
@@ -2579,7 +2577,6 @@ const en: Dictionary = {
   'governance.subtitle.minutes': 'Minutes generated from executed proposals',
   'governance.subtitle.rules': 'Current community rulebook',
   'governance.loadingMember': 'Loading member information...',
-  'community.tabs.directory': 'Directory',
   'community.directory.members': 'Members',
   'community.directory.providers': 'Providers',
   'residential.title': 'Residential',

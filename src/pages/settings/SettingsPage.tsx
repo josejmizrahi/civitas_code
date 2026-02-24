@@ -266,7 +266,7 @@ export function SettingsPage() {
             isSaving={updateRulesMut.isPending}
             saveError={updateRulesMut.isError}
             legalFramework={legalFramework}
-            fintocStatus={community?.fintoc_status}
+            fintocStatus={community?.fintoc_status ?? undefined}
             onUpdateGovernance={updateGovernance}
             onUpdateTreasury={updateTreasury}
             onUpdateIdentity={updateIdentity}
