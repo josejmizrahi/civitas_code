@@ -46,6 +46,24 @@ export type I18nKey =
   | 'community.subtitle'
   | 'common.settings'
   | 'common.logout'
+  | 'common.save'
+  | 'common.saving'
+  | 'common.cancel'
+  | 'common.edit'
+  | 'common.delete'
+  | 'common.add'
+  | 'common.close'
+  | 'common.confirm'
+  | 'common.send'
+  | 'common.sending'
+  | 'common.search'
+  | 'common.email'
+  | 'common.password'
+  | 'common.loading'
+  | 'common.error'
+  | 'common.success'
+  | 'common.back'
+  | 'common.name'
   | 'onboarding.step.type'
   | 'onboarding.step.data'
   | 'onboarding.step.structure'
@@ -915,6 +933,24 @@ const es: Dictionary = {
   'community.subtitle': 'Miembros, directorio y actividad de tu comunidad',
   'common.settings': 'Administracion',
   'common.logout': 'Cerrar sesion',
+  'common.save': 'Guardar',
+  'common.saving': 'Guardando...',
+  'common.cancel': 'Cancelar',
+  'common.edit': 'Editar',
+  'common.delete': 'Eliminar',
+  'common.add': 'Agregar',
+  'common.close': 'Cerrar',
+  'common.confirm': 'Confirmar',
+  'common.send': 'Enviar',
+  'common.sending': 'Enviando...',
+  'common.search': 'Buscar',
+  'common.email': 'Correo electrónico',
+  'common.password': 'Contraseña',
+  'common.loading': 'Cargando...',
+  'common.error': 'Error',
+  'common.success': 'Listo',
+  'common.back': 'Volver',
+  'common.name': 'Nombre',
   'onboarding.step.type': 'Tipo',
   'onboarding.step.data': 'Datos',
   'onboarding.step.structure': 'Estructura',
@@ -1779,6 +1815,24 @@ const en: Dictionary = {
   'community.subtitle': 'Members, directory and activity for your community',
   'common.settings': 'Administration',
   'common.logout': 'Sign out',
+  'common.save': 'Save',
+  'common.saving': 'Saving...',
+  'common.cancel': 'Cancel',
+  'common.edit': 'Edit',
+  'common.delete': 'Delete',
+  'common.add': 'Add',
+  'common.close': 'Close',
+  'common.confirm': 'Confirm',
+  'common.send': 'Send',
+  'common.sending': 'Sending...',
+  'common.search': 'Search',
+  'common.email': 'Email',
+  'common.password': 'Password',
+  'common.loading': 'Loading...',
+  'common.error': 'Error',
+  'common.success': 'Done',
+  'common.back': 'Back',
+  'common.name': 'Name',
   'onboarding.step.type': 'Type',
   'onboarding.step.data': 'Data',
   'onboarding.step.structure': 'Structure',
