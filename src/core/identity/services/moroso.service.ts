@@ -205,20 +205,20 @@ export async function createMorosoNotice(
   const notice = data as MorosoNotice
   // Send moroso email to the affected member (fire-and-forget)
   Promise.resolve(
-    supabase
-      .from('member_profiles' as any)
-      .select('email')
-      .eq('id', memberId)
-      .single()
-  ).then(({ data: profile }) => {
-    const email = (profile as { email?: string } | null)?.email
+    Promise.all([
+      (supabase.from('member_profiles' as any) as any).select('email').eq('id', memberId).single(),
+      supabase.from('communities').select('name').eq('id', communityId).single(),
+    ])
+  ).then(([profileRes, communityRes]) => {
+    const email = (profileRes.data as { email?: string } | null)?.email
+    const communityName = communityRes.data?.name || communityId
     if (email) {
       sendEmail(email, 'moroso_notice', {
         overdue_count: opts?.obligations?.length ?? 1,
         total_debt: outstandingAmount,
         currency: 'MXN',
-        community_name: communityId,
-        app_url: window.location.origin,
+        community_name: communityName,
+        app_url: typeof window !== 'undefined' ? window.location.origin : '',
       })
     }
   }).catch(() => {})

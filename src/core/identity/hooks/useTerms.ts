@@ -65,7 +65,8 @@ export function useStartTerm() {
       assemblyId?: string
     }) => startTerm(communityId!, memberId, role, assemblyId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: termKeys.list(communityId!) })
+      queryClient.invalidateQueries({ queryKey: termKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['members'] })
     },
   })
 }
@@ -77,7 +78,8 @@ export function useEndTerm() {
   return useMutation({
     mutationFn: (termId: string) => endTerm(termId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: termKeys.list(communityId!) })
+      queryClient.invalidateQueries({ queryKey: termKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['members'] })
     },
   })
 }

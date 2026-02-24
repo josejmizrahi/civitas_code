@@ -162,8 +162,8 @@ export async function canBeReElected(
 // ---------------------------------------------------------------------------
 
 export async function getVigilanciaReports(communityId: string): Promise<VigilanciaReport[]> {
-  const { data, error } = await (supabase
-    .from('vigilancia_reports' as any) as any)
+  const { data, error } = await supabase
+    .from('vigilancia_reports')
     .select('*')
     .eq('community_id', communityId)
     .order('created_at', { ascending: false })
@@ -184,8 +184,8 @@ export async function createVigilanciaReport(
     recommendations: Array<{ recommendation: string; priority: string }>
   },
 ): Promise<VigilanciaReport> {
-  const { data: report, error } = await (supabase
-    .from('vigilancia_reports' as any) as any)
+  const { data: report, error } = await supabase
+    .from('vigilancia_reports')
     .insert({
       community_id: communityId,
       author_id: data.author_id,
@@ -204,8 +204,8 @@ export async function createVigilanciaReport(
 }
 
 export async function submitVigilanciaReport(reportId: string): Promise<void> {
-  const { error } = await (supabase
-    .from('vigilancia_reports' as any) as any)
+  const { error } = await supabase
+    .from('vigilancia_reports')
     .update({
       status: 'submitted',
       submitted_at: new Date().toISOString(),
