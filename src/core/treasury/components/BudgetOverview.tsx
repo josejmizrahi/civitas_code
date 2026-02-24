@@ -70,7 +70,7 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
     e.preventDefault()
     setCreateError('')
     if (!newCategoryId || !newPeriod || !newAmount) {
-      setCreateError(t('treasury.allFieldsRequired' as any))
+      setCreateError(t('treasury.allFieldsRequired'))
       return
     }
     try {
@@ -82,7 +82,7 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
       resetCreate()
       setShowCreate(false)
     } catch (err: unknown) {
-      setCreateError(err instanceof Error ? err.message : t('treasury.errorCreatingBudget' as any))
+      setCreateError(err instanceof Error ? err.message : t('treasury.errorCreatingBudget'))
     }
   }
 
@@ -102,25 +102,25 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
       await updateBudget.mutateAsync({ id: editingId, updates: editValues })
       setEditingId(null)
     } catch {
-      toast.error(t('treasury.errorUpdatingBudget' as any))
+      toast.error(t('treasury.errorUpdatingBudget'))
     }
   }
 
   const handleDelete = async (id: string) => {
     const ok = await confirm({
-      title: t('treasury.deleteBudget' as any),
-      description: t('treasury.confirmDeleteBudget' as any),
+      title: t('treasury.deleteBudget'),
+      description: t('treasury.confirmDeleteBudget'),
       confirmLabel: t('common.delete'),
       variant: 'destructive',
     })
     if (!ok) return
     deleteBudget.mutate(id, {
-      onSuccess: () => toast.success(t('treasury.budgetDeleted' as any)),
-      onError: () => toast.error(t('treasury.errorDeletingBudget' as any)),
+      onSuccess: () => toast.success(t('treasury.budgetDeleted')),
+      onError: () => toast.error(t('treasury.errorDeletingBudget')),
     })
   }
 
-  if (isLoading) return <LoadingSpinner message={t('treasury.loadingBudgets' as any)} className="py-8" />
+  if (isLoading) return <LoadingSpinner message={t('treasury.loadingBudgets')} className="py-8" />
 
   return (
     <div className="space-y-4">
@@ -128,24 +128,24 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
         <div className="flex justify-end">
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            {t('treasury.newBudget' as any)}
+            {t('treasury.newBudget')}
           </Button>
         </div>
       )}
 
       {!budgets || budgets.length === 0 ? (
-        <p className="text-muted-foreground">{t('treasury.noBudgets' as any)}</p>
+        <p className="text-muted-foreground">{t('treasury.noBudgets')}</p>
       ) : (
         <div className="overflow-x-auto rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('treasury.category' as any)}</TableHead>
-                <TableHead className="hidden sm:table-cell">{t('treasury.period' as any)}</TableHead>
-                <TableHead className="text-right">{t('treasury.budget' as any)}</TableHead>
-                <TableHead className="text-right">{t('treasury.actual' as any)}</TableHead>
-                <TableHead className="hidden sm:table-cell text-right">{t('treasury.difference' as any)}</TableHead>
-                {canManageTreasury && <TableHead className="w-24">{t('entities.actions' as any)}</TableHead>}
+                <TableHead>{t('treasury.category')}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t('treasury.period')}</TableHead>
+                <TableHead className="text-right">{t('treasury.budget')}</TableHead>
+                <TableHead className="text-right">{t('treasury.actual')}</TableHead>
+                <TableHead className="hidden sm:table-cell text-right">{t('treasury.difference')}</TableHead>
+                {canManageTreasury && <TableHead className="w-24">{t('entities.actions')}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -227,7 +227,7 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent onClose={() => setShowCreate(false)}>
           <DialogHeader>
-            <DialogTitle>{t('treasury.newBudget' as any)}</DialogTitle>
+            <DialogTitle>{t('treasury.newBudget')}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreate}>
             <div className="space-y-4 py-4">
@@ -235,16 +235,16 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
                 <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{createError}</div>
               )}
               <div className="space-y-2">
-                <Label>{t('treasury.category' as any)}</Label>
+                <Label>{t('treasury.category')}</Label>
                 <Select value={newCategoryId} onChange={(e) => setNewCategoryId(e.target.value)}>
-                  <option value="">{t('treasury.selectCategory' as any)}</option>
+                  <option value="">{t('treasury.selectCategory')}</option>
                   {expenseCategories.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>{t('treasury.period' as any)}</Label>
+                <Label>{t('treasury.period')}</Label>
                 <Input
                   value={newPeriod}
                   onChange={(e) => setNewPeriod(e.target.value)}
@@ -253,7 +253,7 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
                 />
               </div>
               <div className="space-y-2">
-                <Label>{t('treasury.amount' as any)}</Label>
+                <Label>{t('treasury.amount')}</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -270,7 +270,7 @@ export function BudgetOverview({ fundType }: { fundType?: FundType } = {}) {
                 {t('common.cancel')}
               </Button>
               <Button type="submit" disabled={createBudget.isPending}>
-                {createBudget.isPending ? t('treasury.creating' as any) : t('treasury.create' as any)}
+                {createBudget.isPending ? t('treasury.creating') : t('treasury.create')}
               </Button>
             </DialogFooter>
           </form>

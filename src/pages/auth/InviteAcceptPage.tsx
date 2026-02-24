@@ -35,7 +35,7 @@ export function InviteAcceptPage() {
         setLoading(false)
       })
       .catch(() => {
-        setError(t('auth.invite.verifyError' as any))
+        setError(t('auth.invite.verifyError'))
         setLoading(false)
       })
   }, [token])
@@ -53,7 +53,7 @@ export function InviteAcceptPage() {
       // Redirect to dashboard after 2 seconds
       setTimeout(() => navigate('/communities'), 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.invite.acceptError' as any))
+      setError(err instanceof Error ? err.message : t('auth.invite.acceptError'))
     } finally {
       setAccepting(false)
     }
@@ -64,7 +64,7 @@ export function InviteAcceptPage() {
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="mt-2 text-muted-foreground">{t('auth.invite.verifying' as any)}</p>
+          <p className="mt-2 text-muted-foreground">{t('auth.invite.verifying')}</p>
         </div>
       </div>
     )
@@ -76,12 +76,12 @@ export function InviteAcceptPage() {
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
           <XCircle className="mx-auto h-12 w-12 text-destructive" />
-          <h1 className="mt-4 text-xl font-semibold">{t('auth.invite.invalidTitle' as any)}</h1>
+          <h1 className="mt-4 text-xl font-semibold">{t('auth.invite.invalidTitle')}</h1>
           <p className="mt-2 text-muted-foreground">
-            {t('auth.invite.invalidDesc' as any)}
+            {t('auth.invite.invalidDesc')}
           </p>
           <Link to="/login">
-            <Button className="mt-6">{t('auth.invite.goHome' as any)}</Button>
+            <Button className="mt-6">{t('auth.invite.goHome')}</Button>
           </Link>
         </div>
       </div>
@@ -94,21 +94,21 @@ export function InviteAcceptPage() {
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
           <Building2 className="mx-auto h-12 w-12 text-primary" />
-          <h1 className="mt-4 text-xl font-semibold">{t('auth.invite.youAreInvited' as any)}</h1>
+          <h1 className="mt-4 text-xl font-semibold">{t('auth.invite.youAreInvited')}</h1>
           <p className="mt-2 text-muted-foreground">
             {communityName ? (
-              <>{t('auth.invite.invitedTo' as any)} <strong>{communityName}</strong> {t('auth.invite.withRole' as any)} <strong>{invitation.role}</strong>.</>
+              <>{t('auth.invite.invitedTo')} <strong>{communityName}</strong> {t('auth.invite.withRole')} <strong>{invitation.role}</strong>.</>
             ) : (
-              <>{t('auth.invite.invitedWithRole' as any)} <strong>{invitation.role}</strong>.</>
+              <>{t('auth.invite.invitedWithRole')} <strong>{invitation.role}</strong>.</>
             )}
-            {' '}{t('auth.invite.createOrLogin' as any)}
+            {' '}{t('auth.invite.createOrLogin')}
           </p>
           <div className="mt-6 flex gap-3 justify-center">
             <Link to={`/register?invite=${token}`}>
-              <Button>{t('auth.invite.createAccount' as any)}</Button>
+              <Button>{t('auth.invite.createAccount')}</Button>
             </Link>
             <Link to={`/login?invite=${token}`}>
-              <Button variant="outline">{t('auth.invite.signIn' as any)}</Button>
+              <Button variant="outline">{t('auth.invite.signIn')}</Button>
             </Link>
           </div>
         </div>
@@ -122,9 +122,9 @@ export function InviteAcceptPage() {
       <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
           <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
-          <h1 className="mt-4 text-xl font-semibold">{t('auth.invite.welcome' as any)}</h1>
+          <h1 className="mt-4 text-xl font-semibold">{t('auth.invite.welcome')}</h1>
           <p className="mt-2 text-muted-foreground">
-            {t('auth.invite.acceptedRedirecting' as any)}
+            {t('auth.invite.acceptedRedirecting')}
           </p>
         </div>
       </div>
@@ -136,16 +136,16 @@ export function InviteAcceptPage() {
     <div className="flex min-h-dvh items-center justify-center bg-background">
       <div className="mx-auto max-w-md rounded-lg border bg-card p-8 text-center shadow-sm">
         <Building2 className="mx-auto h-12 w-12 text-primary" />
-        <h1 className="mt-4 text-xl font-semibold">{t('auth.invite.pendingTitle' as any)}</h1>
+        <h1 className="mt-4 text-xl font-semibold">{t('auth.invite.pendingTitle')}</h1>
         <p className="mt-2 text-muted-foreground">
           {communityName ? (
-            <>{t('auth.invite.invitedTo' as any)} <strong>{communityName}</strong> {t('auth.invite.asRole' as any)} <strong>{invitation.role}</strong>.</>
+            <>{t('auth.invite.invitedTo')} <strong>{communityName}</strong> {t('auth.invite.asRole')} <strong>{invitation.role}</strong>.</>
           ) : (
-            <>{t('auth.invite.invitedAsRole' as any)} <strong>{invitation.role}</strong>.</>
+            <>{t('auth.invite.invitedAsRole')} <strong>{invitation.role}</strong>.</>
           )}
         </p>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t('auth.invite.invitedEmail' as any)} <strong>{invitation.email}</strong>
+          {t('auth.invite.invitedEmail')} <strong>{invitation.email}</strong>
         </p>
 
         {error && (
@@ -160,10 +160,10 @@ export function InviteAcceptPage() {
           {accepting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {t('auth.invite.accepting' as any)}
+              {t('auth.invite.accepting')}
             </>
           ) : (
-            t('auth.invite.acceptInvitation' as any)
+            t('auth.invite.acceptInvitation')
           )}
         </Button>
       </div>

@@ -25,9 +25,9 @@ export function AnnouncementManager() {
   const toast = useToast()
 
   const PRIORITY_LABELS: Record<string, string> = {
-    low: t('announcements.priority.low' as any),
-    normal: t('announcements.priority.normal' as any),
-    urgent: t('announcements.priority.urgent' as any),
+    low: t('announcements.priority.low'),
+    normal: t('announcements.priority.normal'),
+    urgent: t('announcements.priority.urgent'),
   }
 
   const [showForm, setShowForm] = useState(false)
@@ -70,24 +70,24 @@ export function AnnouncementManager() {
     try {
       if (editing) {
         await update.mutateAsync({ id: editing.id, updates: payload })
-        toast.success(t('announcements.updated' as any))
+        toast.success(t('announcements.updated'))
       } else {
         await create.mutateAsync(payload)
-        toast.success(t('announcements.published' as any))
+        toast.success(t('announcements.published'))
       }
       setShowForm(false)
     } catch {
-      toast.error(t('announcements.errorSaving' as any))
+      toast.error(t('announcements.errorSaving'))
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('announcements.confirmDelete' as any))) return
+    if (!confirm(t('announcements.confirmDelete'))) return
     try {
       await remove.mutateAsync(id)
-      toast.success(t('announcements.deleted' as any))
+      toast.success(t('announcements.deleted'))
     } catch {
-      toast.error(t('announcements.errorDeleting' as any))
+      toast.error(t('announcements.errorDeleting'))
     }
   }
 
@@ -102,10 +102,10 @@ export function AnnouncementManager() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{announcements?.length ?? 0} {t('announcements.publishedCount' as any)}</p>
+        <p className="text-sm text-muted-foreground">{announcements?.length ?? 0} {t('announcements.publishedCount')}</p>
         {canManageMembers && (
           <Button onClick={openCreate} className="gap-1.5">
-            <Plus className="h-4 w-4" /> {t('announcements.new' as any)}
+            <Plus className="h-4 w-4" /> {t('announcements.new')}
           </Button>
         )}
       </div>
@@ -113,10 +113,10 @@ export function AnnouncementManager() {
       {!announcements?.length ? (
         <div className="rounded-lg border border-dashed p-8 text-center">
           <Megaphone className="mx-auto h-8 w-8 text-muted-foreground/50 mb-2" />
-          <p className="text-sm text-muted-foreground">{t('announcements.empty' as any)}</p>
+          <p className="text-sm text-muted-foreground">{t('announcements.empty')}</p>
           {canManageMembers && (
             <Button variant="outline" size="sm" className="mt-3" onClick={openCreate}>
-              {t('announcements.publishFirst' as any)}
+              {t('announcements.publishFirst')}
             </Button>
           )}
         </div>
@@ -138,12 +138,12 @@ export function AnnouncementManager() {
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{a.body}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(a.published_at).toLocaleDateString('es-MX', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                      {a.expires_at && ` · ${t('announcements.expires' as any)} ${new Date(a.expires_at).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}`}
+                      {a.expires_at && ` · ${t('announcements.expires')} ${new Date(a.expires_at).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}`}
                     </p>
                   </div>
                   {canManageMembers && (
                     <div className="flex items-center gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" title={a.pinned ? t('announcements.unpin' as any) : t('announcements.pin' as any)} onClick={() => handleTogglePin(a)}>
+                      <Button variant="ghost" size="icon" title={a.pinned ? t('announcements.unpin') : t('announcements.pin')} onClick={() => handleTogglePin(a)}>
                         <Pin className={`h-4 w-4 ${a.pinned ? 'text-amber-500' : 'text-muted-foreground'}`} />
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => openEdit(a)}>
@@ -164,40 +164,40 @@ export function AnnouncementManager() {
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent onClose={() => setShowForm(false)}>
           <DialogHeader>
-            <DialogTitle>{editing ? t('announcements.edit' as any) : t('announcements.new' as any)}</DialogTitle>
+            <DialogTitle>{editing ? t('announcements.edit') : t('announcements.new')}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>{t('announcements.title' as any)}</Label>
+                <Label>{t('announcements.title')}</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Ej: Aviso de corte de agua" />
               </div>
               <div className="space-y-2">
-                <Label>{t('announcements.message' as any)}</Label>
+                <Label>{t('announcements.message')}</Label>
                 <Textarea value={body} onChange={(e) => setBody(e.target.value)} required rows={4} placeholder="Detalle del anuncio..." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>{t('announcements.priority' as any)}</Label>
+                  <Label>{t('announcements.priority')}</Label>
                   <Select value={priority} onChange={(e) => setPriority(e.target.value)}>
-                    <option value="low">{t('announcements.priority.low' as any)}</option>
-                    <option value="normal">{t('announcements.priority.normal' as any)}</option>
-                    <option value="urgent">{t('announcements.priority.urgent' as any)}</option>
+                    <option value="low">{t('announcements.priority.low')}</option>
+                    <option value="normal">{t('announcements.priority.normal')}</option>
+                    <option value="urgent">{t('announcements.priority.urgent')}</option>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('announcements.expiresOptional' as any)}</Label>
+                  <Label>{t('announcements.expiresOptional')}</Label>
                   <Input type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} />
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <input id="pin-toggle" type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} className="h-4 w-4 rounded border-input" />
-                <Label htmlFor="pin-toggle">{t('announcements.pinToTop' as any)}</Label>
+                <Label htmlFor="pin-toggle">{t('announcements.pinToTop')}</Label>
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowForm(false)}>{t('common.cancel')}</Button>
-              <Button type="submit" disabled={isPending}>{isPending ? t('common.saving') : editing ? t('common.save') : t('announcements.publish' as any)}</Button>
+              <Button type="submit" disabled={isPending}>{isPending ? t('common.saving') : editing ? t('common.save') : t('announcements.publish')}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

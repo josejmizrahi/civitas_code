@@ -45,17 +45,17 @@ export function ResetPasswordPage() {
   const [checkingSession, setCheckingSession] = useState(true)
 
   const PASSWORD_REQUIREMENTS: PasswordRequirement[] = useMemo(() => [
-    { label: t('auth.resetPassword.req.minChars' as any), test: PASSWORD_TESTS[0] },
-    { label: t('auth.resetPassword.req.uppercase' as any), test: PASSWORD_TESTS[1] },
-    { label: t('auth.resetPassword.req.lowercase' as any), test: PASSWORD_TESTS[2] },
-    { label: t('auth.resetPassword.req.number' as any), test: PASSWORD_TESTS[3] },
+    { label: t('auth.resetPassword.req.minChars'), test: PASSWORD_TESTS[0] },
+    { label: t('auth.resetPassword.req.uppercase'), test: PASSWORD_TESTS[1] },
+    { label: t('auth.resetPassword.req.lowercase'), test: PASSWORD_TESTS[2] },
+    { label: t('auth.resetPassword.req.number'), test: PASSWORD_TESTS[3] },
   ], [t])
 
   const strengthLabels: Record<string, string> = useMemo(() => ({
-    weak: t('auth.resetPassword.strength.weak' as any),
-    fair: t('auth.resetPassword.strength.fair' as any),
-    good: t('auth.resetPassword.strength.good' as any),
-    strong: t('auth.resetPassword.strength.strong' as any),
+    weak: t('auth.resetPassword.strength.weak'),
+    fair: t('auth.resetPassword.strength.fair'),
+    good: t('auth.resetPassword.strength.good'),
+    strong: t('auth.resetPassword.strength.strong'),
   }), [t])
 
   // Only allow password reset through a valid PASSWORD_RECOVERY flow
@@ -97,12 +97,12 @@ export function ResetPasswordPage() {
     setError('')
 
     if (!allRequirementsMet) {
-      setError(t('auth.resetPassword.requirementsNotMet' as any))
+      setError(t('auth.resetPassword.requirementsNotMet'))
       return
     }
 
     if (!passwordsMatch) {
-      setError(t('auth.resetPassword.passwordsNoMatch' as any))
+      setError(t('auth.resetPassword.passwordsNoMatch'))
       return
     }
 
@@ -112,7 +112,7 @@ export function ResetPasswordPage() {
       setSuccess(true)
       setTimeout(() => navigate('/communities'), 3000)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('auth.resetPassword.updateError' as any))
+      setError(err instanceof Error ? err.message : t('auth.resetPassword.updateError'))
     } finally {
       setLoading(false)
     }
@@ -123,8 +123,8 @@ export function ResetPasswordPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t('auth.resetPassword.verifyingLink' as any)}</CardTitle>
-          <CardDescription>{t('auth.resetPassword.validatingRequest' as any)}</CardDescription>
+          <CardTitle>{t('auth.resetPassword.verifyingLink')}</CardTitle>
+          <CardDescription>{t('auth.resetPassword.validatingRequest')}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -140,22 +140,22 @@ export function ResetPasswordPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t('auth.resetPassword.invalidLink' as any)}</CardTitle>
+          <CardTitle>{t('auth.resetPassword.invalidLink')}</CardTitle>
           <CardDescription>
-            {t('auth.resetPassword.invalidLinkDesc' as any)}
+            {t('auth.resetPassword.invalidLinkDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            {t('auth.resetPassword.linksExpire' as any)}
+            {t('auth.resetPassword.linksExpire')}
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <Link to="/forgot-password" className="w-full">
-            <Button className="w-full">{t('auth.resetPassword.requestNewLink' as any)}</Button>
+            <Button className="w-full">{t('auth.resetPassword.requestNewLink')}</Button>
           </Link>
           <Link to="/login" className="text-sm text-muted-foreground hover:underline">
-            {t('auth.resetPassword.backToLogin' as any)}
+            {t('auth.resetPassword.backToLogin')}
           </Link>
         </CardFooter>
       </Card>
@@ -170,9 +170,9 @@ export function ResetPasswordPage() {
           <div className="flex items-center gap-3">
             <ShieldCheck className="h-8 w-8 text-green-600" />
             <div>
-              <CardTitle>{t('auth.resetPassword.successTitle' as any)}</CardTitle>
+              <CardTitle>{t('auth.resetPassword.successTitle')}</CardTitle>
               <CardDescription>
-                {t('auth.resetPassword.successDesc' as any)}
+                {t('auth.resetPassword.successDesc')}
               </CardDescription>
             </div>
           </div>
@@ -184,8 +184,8 @@ export function ResetPasswordPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('auth.resetPassword.title' as any)}</CardTitle>
-        <CardDescription>{t('auth.resetPassword.subtitle' as any)}</CardDescription>
+        <CardTitle>{t('auth.resetPassword.title')}</CardTitle>
+        <CardDescription>{t('auth.resetPassword.subtitle')}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -195,7 +195,7 @@ export function ResetPasswordPage() {
 
           {/* New Password */}
           <div className="space-y-2">
-            <Label htmlFor="password">{t('auth.resetPassword.newPassword' as any)}</Label>
+            <Label htmlFor="password">{t('auth.resetPassword.newPassword')}</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -203,7 +203,7 @@ export function ResetPasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder={t('auth.resetPassword.enterNewPassword' as any)}
+                placeholder={t('auth.resetPassword.enterNewPassword')}
                 className="pr-10"
               />
               <button
@@ -222,7 +222,7 @@ export function ResetPasswordPage() {
             <div className="space-y-3">
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">{t('auth.resetPassword.strengthLabel' as any)}</span>
+                  <span className="text-muted-foreground">{t('auth.resetPassword.strengthLabel')}</span>
                   <span className="font-medium">{strengthLabels[strength.label]}</span>
                 </div>
                 <div className="flex gap-1">
@@ -260,7 +260,7 @@ export function ResetPasswordPage() {
 
           {/* Confirm Password */}
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">{t('auth.resetPassword.confirmPassword' as any)}</Label>
+            <Label htmlFor="confirmPassword">{t('auth.resetPassword.confirmPassword')}</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
@@ -268,7 +268,7 @@ export function ResetPasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                placeholder={t('auth.resetPassword.repeatPassword' as any)}
+                placeholder={t('auth.resetPassword.repeatPassword')}
                 className="pr-10"
               />
               <button
@@ -282,7 +282,7 @@ export function ResetPasswordPage() {
             </div>
             {confirmPassword.length > 0 && (
               <p className={`text-xs ${passwordsMatch ? 'text-green-600' : 'text-destructive'}`}>
-                {passwordsMatch ? t('auth.resetPassword.passwordsMatch' as any) : t('auth.resetPassword.passwordsNoMatch' as any)}
+                {passwordsMatch ? t('auth.resetPassword.passwordsMatch') : t('auth.resetPassword.passwordsNoMatch')}
               </p>
             )}
           </div>
@@ -293,10 +293,10 @@ export function ResetPasswordPage() {
             className="w-full"
             disabled={loading || !allRequirementsMet || !passwordsMatch}
           >
-            {loading ? t('auth.resetPassword.updating' as any) : t('auth.resetPassword.updatePassword' as any)}
+            {loading ? t('auth.resetPassword.updating') : t('auth.resetPassword.updatePassword')}
           </Button>
           <Link to="/login" className="text-sm text-muted-foreground hover:underline">
-            {t('auth.resetPassword.backToLogin' as any)}
+            {t('auth.resetPassword.backToLogin')}
           </Link>
         </CardFooter>
       </form>

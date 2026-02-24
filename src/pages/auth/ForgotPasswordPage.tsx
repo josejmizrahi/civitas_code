@@ -47,17 +47,17 @@ export function ForgotPasswordPage() {
           <div className="flex items-center gap-3">
             <Mail className="h-8 w-8 text-primary" />
             <div>
-              <CardTitle>{t('auth.forgotPassword.checkEmail' as any)}</CardTitle>
+              <CardTitle>{t('auth.forgotPassword.checkEmail')}</CardTitle>
               <CardDescription>
-                {t('auth.forgotPassword.ifAccountExists' as any)} <strong>{email}</strong>{t('auth.forgotPassword.willReceiveLink' as any)}
+                {t('auth.forgotPassword.ifAccountExists')} <strong>{email}</strong>{t('auth.forgotPassword.willReceiveLink')}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <div className="rounded-md bg-muted p-4 text-sm text-muted-foreground space-y-2">
-            <p>{t('auth.forgotPassword.checkInbox' as any)}</p>
-            <p>{t('auth.forgotPassword.linkExpiry' as any)}</p>
+            <p>{t('auth.forgotPassword.checkInbox')}</p>
+            <p>{t('auth.forgotPassword.linkExpiry')}</p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
@@ -69,12 +69,12 @@ export function ForgotPasswordPage() {
               setEmail('')
             }}
           >
-            {t('auth.forgotPassword.sendAgain' as any)}
+            {t('auth.forgotPassword.sendAgain')}
           </Button>
           <Link to="/login" className="w-full">
             <Button variant="ghost" className="w-full">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              {t('auth.forgotPassword.backToLogin' as any)}
+              {t('auth.forgotPassword.backToLogin')}
             </Button>
           </Link>
         </CardFooter>
@@ -85,9 +85,9 @@ export function ForgotPasswordPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('auth.forgotPassword.title' as any)}</CardTitle>
+        <CardTitle>{t('auth.forgotPassword.title')}</CardTitle>
         <CardDescription>
-          {t('auth.forgotPassword.subtitle' as any)}
+          {t('auth.forgotPassword.subtitle')}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -109,11 +109,11 @@ export function ForgotPasswordPage() {
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading}>
             <Mail className="mr-2 h-4 w-4" />
-            {loading ? t('common.sending') : t('auth.forgotPassword.sendResetLink' as any)}
+            {loading ? t('common.sending') : t('auth.forgotPassword.sendResetLink')}
           </Button>
           <Link to="/login" className="text-sm text-muted-foreground hover:underline flex items-center gap-1">
             <ArrowLeft className="h-3 w-3" />
-            {t('auth.forgotPassword.backToLogin' as any)}
+            {t('auth.forgotPassword.backToLogin')}
           </Link>
         </CardFooter>
       </form>

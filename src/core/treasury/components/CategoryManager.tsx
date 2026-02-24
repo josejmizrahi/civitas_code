@@ -81,32 +81,32 @@ export function CategoryManager() {
     setEditName(cat.name)
   }
 
-  if (isLoading) return <LoadingSpinner message={t('treasury.loadingCategories' as any)} className="py-8" />
+  if (isLoading) return <LoadingSpinner message={t('treasury.loadingCategories')} className="py-8" />
 
   return (
     <div className="space-y-4">
       {/* Create form */}
       <div className="flex gap-2">
         <Input
-          placeholder={t('treasury.categoryNamePlaceholder' as any)}
+          placeholder={t('treasury.categoryNamePlaceholder')}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           className="flex-1"
         />
         <Select value={newType} onChange={(e) => setNewType(e.target.value as CategoryType)} className="w-32">
-          <option value="expense">{t('treasury.expense' as any)}</option>
-          <option value="income">{t('treasury.income' as any)}</option>
+          <option value="expense">{t('treasury.expense')}</option>
+          <option value="income">{t('treasury.income')}</option>
         </Select>
         <Button
           onClick={() => createMut.mutate(undefined, {
-            onSuccess: () => toast.success(t('treasury.categoryCreated' as any)),
-            onError: () => toast.error(t('treasury.errorCreatingCategory' as any)),
+            onSuccess: () => toast.success(t('treasury.categoryCreated')),
+            onError: () => toast.error(t('treasury.errorCreatingCategory')),
           })}
           disabled={!newName.trim() || createMut.isPending}
           size="sm"
         >
           <Plus className="mr-1 h-4 w-4" />
-          {t('treasury.create' as any)}
+          {t('treasury.create')}
         </Button>
       </div>
 
@@ -116,9 +116,9 @@ export function CategoryManager() {
           <TableHeader>
             <TableRow>
               <TableHead>{t('common.name')}</TableHead>
-              <TableHead>{t('entities.type' as any)}</TableHead>
-              <TableHead>{t('treasury.system' as any)}</TableHead>
-              <TableHead className="w-24">{t('entities.actions' as any)}</TableHead>
+              <TableHead>{t('entities.type')}</TableHead>
+              <TableHead>{t('treasury.system')}</TableHead>
+              <TableHead className="w-24">{t('entities.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -137,8 +137,8 @@ export function CategoryManager() {
                         size="icon"
                         variant="ghost"
                         onClick={() => updateMut.mutate({ id: cat.id, name: editName }, {
-                          onSuccess: () => toast.success(t('treasury.categoryUpdated' as any)),
-                          onError: () => toast.error(t('treasury.errorUpdatingCategory' as any)),
+                          onSuccess: () => toast.success(t('treasury.categoryUpdated')),
+                          onError: () => toast.error(t('treasury.errorUpdatingCategory')),
                         })}
                         disabled={!editName.trim()}
                         aria-label={t('common.save')}
@@ -155,11 +155,11 @@ export function CategoryManager() {
                 </TableCell>
                 <TableCell>
                   <Badge variant={cat.type === 'income' ? 'success' : 'secondary'}>
-                    {cat.type === 'income' ? t('treasury.income' as any) : t('treasury.expense' as any)}
+                    {cat.type === 'income' ? t('treasury.income') : t('treasury.expense')}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {cat.is_system && <Badge variant="outline">{t('treasury.system' as any)}</Badge>}
+                  {cat.is_system && <Badge variant="outline">{t('treasury.system')}</Badge>}
                 </TableCell>
                 <TableCell>
                   {!cat.is_system && editingId !== cat.id && (
@@ -172,15 +172,15 @@ export function CategoryManager() {
                         variant="ghost"
                         onClick={async () => {
                           const ok = await confirm({
-                            title: t('treasury.deleteCategory' as any),
-                            description: t('treasury.confirmDeleteCategory' as any),
+                            title: t('treasury.deleteCategory'),
+                            description: t('treasury.confirmDeleteCategory'),
                             confirmLabel: t('common.delete'),
                             variant: 'destructive',
                           })
                           if (!ok) return
                           deleteMut.mutate(cat.id, {
-                            onSuccess: () => toast.success(t('treasury.categoryDeleted' as any)),
-                            onError: () => toast.error(t('treasury.errorDeletingCategory' as any)),
+                            onSuccess: () => toast.success(t('treasury.categoryDeleted')),
+                            onError: () => toast.error(t('treasury.errorDeletingCategory')),
                           })
                         }}
                         aria-label={t('common.delete')}
@@ -195,7 +195,7 @@ export function CategoryManager() {
             {(!categories || categories.length === 0) && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  {t('treasury.noCategories' as any)}
+                  {t('treasury.noCategories')}
                 </TableCell>
               </TableRow>
             )}

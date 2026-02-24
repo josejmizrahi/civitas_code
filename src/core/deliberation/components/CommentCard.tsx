@@ -75,7 +75,7 @@ export function CommentCard({
   }
 
   const handleDelete = () => {
-    if (window.confirm(t('deliberation.confirmDeleteComment' as any))) {
+    if (window.confirm(t('deliberation.confirmDeleteComment'))) {
       onDelete(comment.id)
     }
   }
@@ -104,7 +104,7 @@ export function CommentCard({
           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
             {(comment.author_name ?? 'M').charAt(0).toUpperCase()}
           </div>
-          <span className="font-medium text-foreground">{comment.author_name ?? t('deliberation.member' as any)}</span>
+          <span className="font-medium text-foreground">{comment.author_name ?? t('deliberation.member')}</span>
           {comment.author_role && comment.author_role !== 'miembro' && (
             <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
               {comment.author_role}
@@ -118,7 +118,7 @@ export function CommentCard({
             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true, locale: es })}
           </span>
           {comment.edited_at && (
-            <span className="text-muted-foreground/60">({t('deliberation.edited' as any)})</span>
+            <span className="text-muted-foreground/60">({t('deliberation.edited')})</span>
           )}
         </div>
 
@@ -166,7 +166,7 @@ export function CommentCard({
                   onClick={() => setShowReplyForm(!showReplyForm)}
                 >
                   <MessageSquare className="mr-1 h-3 w-3" />
-                  {t('deliberation.reply' as any)}
+                  {t('deliberation.reply')}
                 </Button>
               )}
               {isAuthor && (
@@ -203,7 +203,7 @@ export function CommentCard({
             onSubmit={(content, sentiment, mentions) => handleReply(content, sentiment, mentions)}
             members={members}
             isPending={isPending}
-            placeholder={t('deliberation.writeReplyPlaceholder' as any)}
+            placeholder={t('deliberation.writeReplyPlaceholder')}
             compact
             autoFocus
             onCancel={() => setShowReplyForm(false)}

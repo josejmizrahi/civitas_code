@@ -882,6 +882,284 @@ export type I18nKey =
   | 'memberDetail.notFound'
   | 'entityDetail.title'
   | 'common.notFound'
+  // Announcements, auth, contracts, deliberation, entities, recurring, treasury
+  | 'announcements.confirmDelete'
+  | 'announcements.deleted'
+  | 'announcements.edit'
+  | 'announcements.empty'
+  | 'announcements.errorDeleting'
+  | 'announcements.errorSaving'
+  | 'announcements.expires'
+  | 'announcements.expiresOptional'
+  | 'announcements.message'
+  | 'announcements.new'
+  | 'announcements.pin'
+  | 'announcements.pinToTop'
+  | 'announcements.priority'
+  | 'announcements.priority.low'
+  | 'announcements.priority.normal'
+  | 'announcements.priority.urgent'
+  | 'announcements.publish'
+  | 'announcements.publishFirst'
+  | 'announcements.published'
+  | 'announcements.publishedCount'
+  | 'announcements.unpin'
+  | 'announcements.updated'
+  | 'auth.forgotPassword.backToLogin'
+  | 'auth.forgotPassword.checkEmail'
+  | 'auth.forgotPassword.checkInbox'
+  | 'auth.forgotPassword.ifAccountExists'
+  | 'auth.forgotPassword.linkExpiry'
+  | 'auth.forgotPassword.sendAgain'
+  | 'auth.forgotPassword.sendResetLink'
+  | 'auth.forgotPassword.subtitle'
+  | 'auth.forgotPassword.title'
+  | 'auth.forgotPassword.willReceiveLink'
+  | 'auth.invite.acceptError'
+  | 'auth.invite.acceptInvitation'
+  | 'auth.invite.acceptedRedirecting'
+  | 'auth.invite.accepting'
+  | 'auth.invite.asRole'
+  | 'auth.invite.createAccount'
+  | 'auth.invite.createOrLogin'
+  | 'auth.invite.goHome'
+  | 'auth.invite.invalidDesc'
+  | 'auth.invite.invalidTitle'
+  | 'auth.invite.invitedAsRole'
+  | 'auth.invite.invitedEmail'
+  | 'auth.invite.invitedTo'
+  | 'auth.invite.invitedWithRole'
+  | 'auth.invite.pendingTitle'
+  | 'auth.invite.signIn'
+  | 'auth.invite.verifyError'
+  | 'auth.invite.verifying'
+  | 'auth.invite.welcome'
+  | 'auth.invite.withRole'
+  | 'auth.invite.youAreInvited'
+  | 'auth.login.error'
+  | 'auth.login.forgotPassword'
+  | 'auth.login.inviteMessage'
+  | 'auth.login.noAccount'
+  | 'auth.login.signUp'
+  | 'auth.login.signingIn'
+  | 'auth.login.subtitle'
+  | 'auth.login.title'
+  | 'auth.register.checkEmail'
+  | 'auth.register.confirmToAccess'
+  | 'auth.register.confirmationSent'
+  | 'auth.register.error'
+  | 'auth.register.fullName'
+  | 'auth.register.goToLogin'
+  | 'auth.register.hasAccount'
+  | 'auth.register.minChars'
+  | 'auth.register.registering'
+  | 'auth.register.signIn'
+  | 'auth.register.subtitle'
+  | 'auth.register.title'
+  | 'auth.resetPassword.backToLogin'
+  | 'auth.resetPassword.confirmPassword'
+  | 'auth.resetPassword.enterNewPassword'
+  | 'auth.resetPassword.invalidLink'
+  | 'auth.resetPassword.invalidLinkDesc'
+  | 'auth.resetPassword.linksExpire'
+  | 'auth.resetPassword.newPassword'
+  | 'auth.resetPassword.passwordsMatch'
+  | 'auth.resetPassword.passwordsNoMatch'
+  | 'auth.resetPassword.repeatPassword'
+  | 'auth.resetPassword.req.lowercase'
+  | 'auth.resetPassword.req.minChars'
+  | 'auth.resetPassword.req.number'
+  | 'auth.resetPassword.req.uppercase'
+  | 'auth.resetPassword.requestNewLink'
+  | 'auth.resetPassword.requirementsNotMet'
+  | 'auth.resetPassword.strength.fair'
+  | 'auth.resetPassword.strength.good'
+  | 'auth.resetPassword.strength.strong'
+  | 'auth.resetPassword.strength.weak'
+  | 'auth.resetPassword.strengthLabel'
+  | 'auth.resetPassword.subtitle'
+  | 'auth.resetPassword.successDesc'
+  | 'auth.resetPassword.successTitle'
+  | 'auth.resetPassword.title'
+  | 'auth.resetPassword.updateError'
+  | 'auth.resetPassword.updatePassword'
+  | 'auth.resetPassword.updating'
+  | 'auth.resetPassword.validatingRequest'
+  | 'auth.resetPassword.verifyingLink'
+  | 'contracts.action'
+  | 'contracts.activeContracts'
+  | 'contracts.allStatuses'
+  | 'contracts.approvedByProposal'
+  | 'contracts.backToContracts'
+  | 'contracts.by'
+  | 'contracts.compliance'
+  | 'contracts.confirmDelete'
+  | 'contracts.confirmRegisterPayment'
+  | 'contracts.contract'
+  | 'contracts.contractParties'
+  | 'contracts.create'
+  | 'contracts.created'
+  | 'contracts.createdBy'
+  | 'contracts.creating'
+  | 'contracts.defaulted'
+  | 'contracts.deleteContract'
+  | 'contracts.deleted'
+  | 'contracts.description'
+  | 'contracts.descriptionLabel'
+  | 'contracts.dueDate'
+  | 'contracts.empty'
+  | 'contracts.endDate'
+  | 'contracts.entity'
+  | 'contracts.entityProvider'
+  | 'contracts.errorCreating'
+  | 'contracts.errorDeleting'
+  | 'contracts.errorRegisteringPayment'
+  | 'contracts.errorUpdatingStatus'
+  | 'contracts.freq.annual'
+  | 'contracts.freq.bimonthly'
+  | 'contracts.freq.biweekly'
+  | 'contracts.freq.monthly'
+  | 'contracts.freq.oneTime'
+  | 'contracts.freq.quarterly'
+  | 'contracts.freq.semiannual'
+  | 'contracts.freq.weekly'
+  | 'contracts.indefinite'
+  | 'contracts.installmentAutoGenNote'
+  | 'contracts.installments'
+  | 'contracts.loadingInstallments'
+  | 'contracts.member'
+  | 'contracts.nameAndAmountRequired'
+  | 'contracts.namePlaceholder'
+  | 'contracts.new'
+  | 'contracts.noEntity'
+  | 'contracts.noLinkedParties'
+  | 'contracts.numInstallments'
+  | 'contracts.paidDate'
+  | 'contracts.pay'
+  | 'contracts.paymentFrequency'
+  | 'contracts.paymentPlan'
+  | 'contracts.paymentRegistered'
+  | 'contracts.registerPayment'
+  | 'contracts.startDate'
+  | 'contracts.statusUpdated'
+  | 'contracts.totalAmount'
+  | 'deliberation.comment'
+  | 'deliberation.commentPlaceholder'
+  | 'deliberation.confirmDeleteComment'
+  | 'deliberation.ctrlEnterToSend'
+  | 'deliberation.edited'
+  | 'deliberation.member'
+  | 'deliberation.reply'
+  | 'deliberation.stance'
+  | 'deliberation.writeReplyPlaceholder'
+  | 'entities.actions'
+  | 'entities.address'
+  | 'entities.addressPlaceholder'
+  | 'entities.allStatuses'
+  | 'entities.allTypes'
+  | 'entities.confirmDelete'
+  | 'entities.contact'
+  | 'entities.contactPerson'
+  | 'entities.contactPersonPlaceholder'
+  | 'entities.create'
+  | 'entities.creating'
+  | 'entities.deleted'
+  | 'entities.empty'
+  | 'entities.errorCreating'
+  | 'entities.errorDeleting'
+  | 'entities.namePlaceholder'
+  | 'entities.nameRequired'
+  | 'entities.new'
+  | 'entities.notes'
+  | 'entities.notesPlaceholder'
+  | 'entities.optional'
+  | 'entities.phone'
+  | 'entities.rating'
+  | 'entities.rfc'
+  | 'entities.searchPlaceholder'
+  | 'entities.status'
+  | 'entities.type'
+  | 'entities.unrated'
+  | 'recurring.activate'
+  | 'recurring.active'
+  | 'recurring.activeStatus'
+  | 'recurring.allActiveMembers'
+  | 'recurring.allMembers'
+  | 'recurring.collection'
+  | 'recurring.collectionToMembers'
+  | 'recurring.collections'
+  | 'recurring.confirmDelete'
+  | 'recurring.creating'
+  | 'recurring.dayOfMonth'
+  | 'recurring.deleteRecurring'
+  | 'recurring.deleted'
+  | 'recurring.description'
+  | 'recurring.descriptionLabel'
+  | 'recurring.empty'
+  | 'recurring.end'
+  | 'recurring.endDateOptional'
+  | 'recurring.entityProviderPartner'
+  | 'recurring.errorCreating'
+  | 'recurring.errorDeleting'
+  | 'recurring.errorProcessing'
+  | 'recurring.errorRunning'
+  | 'recurring.errorUpdating'
+  | 'recurring.frequency'
+  | 'recurring.lastRun'
+  | 'recurring.members'
+  | 'recurring.more'
+  | 'recurring.nameAndAmountRequired'
+  | 'recurring.namePlaceholder'
+  | 'recurring.new'
+  | 'recurring.newRecurring'
+  | 'recurring.nextRun'
+  | 'recurring.obligationsGenerated'
+  | 'recurring.pause'
+  | 'recurring.paused'
+  | 'recurring.payment'
+  | 'recurring.paymentToEntity'
+  | 'recurring.payments'
+  | 'recurring.pendingProcessed'
+  | 'recurring.processPending'
+  | 'recurring.runNow'
+  | 'recurring.runs'
+  | 'recurring.select'
+  | 'recurring.specificMembers'
+  | 'recurring.target'
+  | 'recurring.updated'
+  | 'treasury.actual'
+  | 'treasury.allFieldsRequired'
+  | 'treasury.amount'
+  | 'treasury.budget'
+  | 'treasury.budgetDeleted'
+  | 'treasury.category'
+  | 'treasury.categoryCreated'
+  | 'treasury.categoryDeleted'
+  | 'treasury.categoryNamePlaceholder'
+  | 'treasury.categoryUpdated'
+  | 'treasury.confirmDeleteBudget'
+  | 'treasury.confirmDeleteCategory'
+  | 'treasury.create'
+  | 'treasury.creating'
+  | 'treasury.deleteBudget'
+  | 'treasury.deleteCategory'
+  | 'treasury.difference'
+  | 'treasury.errorCreatingBudget'
+  | 'treasury.errorCreatingCategory'
+  | 'treasury.errorDeletingBudget'
+  | 'treasury.errorDeletingCategory'
+  | 'treasury.errorUpdatingBudget'
+  | 'treasury.errorUpdatingCategory'
+  | 'treasury.expense'
+  | 'treasury.income'
+  | 'treasury.loadingBudgets'
+  | 'treasury.loadingCategories'
+  | 'treasury.newBudget'
+  | 'treasury.noBudgets'
+  | 'treasury.noCategories'
+  | 'treasury.period'
+  | 'treasury.selectCategory'
+  | 'treasury.system'
 
 type Dictionary = Record<I18nKey, string>
 
@@ -1765,6 +2043,284 @@ const es: Dictionary = {
   'memberDetail.notFound': 'Miembro no encontrado',
   'entityDetail.title': 'Detalle de Entidad',
   'common.notFound': 'No encontrado',
+  // Announcements, auth, contracts, deliberation, entities, recurring, treasury
+  'announcements.confirmDelete': '¿Eliminar este anuncio?',
+  'announcements.deleted': 'Anuncio eliminado',
+  'announcements.edit': 'Editar Anuncio',
+  'announcements.empty': 'Sin anuncios publicados.',
+  'announcements.errorDeleting': 'Error al eliminar',
+  'announcements.errorSaving': 'Error al guardar anuncio',
+  'announcements.expires': 'Expira',
+  'announcements.expiresOptional': 'Expira (opcional)',
+  'announcements.message': 'Mensaje',
+  'announcements.new': 'Nuevo Anuncio',
+  'announcements.pin': 'Fijar',
+  'announcements.pinToTop': 'Fijar en la parte superior',
+  'announcements.priority': 'Prioridad',
+  'announcements.priority.low': 'Baja',
+  'announcements.priority.normal': 'Normal',
+  'announcements.priority.urgent': 'Urgente',
+  'announcements.publish': 'Publicar',
+  'announcements.publishFirst': 'Publicar el primero',
+  'announcements.published': 'Anuncio publicado',
+  'announcements.publishedCount': 'anuncios publicados',
+  'announcements.unpin': 'Desfijar',
+  'announcements.updated': 'Anuncio actualizado',
+  'auth.forgotPassword.backToLogin': 'Volver al inicio de sesión',
+  'auth.forgotPassword.checkEmail': 'Revisa tu correo',
+  'auth.forgotPassword.checkInbox': 'Revisa tu bandeja de entrada y la carpeta de spam.',
+  'auth.forgotPassword.ifAccountExists': 'Si existe una cuenta con ',
+  'auth.forgotPassword.linkExpiry': 'El enlace expirará en 1 hora por seguridad.',
+  'auth.forgotPassword.sendAgain': 'Enviar de nuevo',
+  'auth.forgotPassword.sendResetLink': 'Enviar enlace de recuperación',
+  'auth.forgotPassword.subtitle': 'Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.',
+  'auth.forgotPassword.title': 'Recuperar Contraseña',
+  'auth.forgotPassword.willReceiveLink': ', recibirás un enlace para restablecer tu contraseña.',
+  'auth.invite.acceptError': 'Error al aceptar la invitación',
+  'auth.invite.acceptInvitation': 'Aceptar invitación',
+  'auth.invite.acceptedRedirecting': 'Has aceptado la invitación. Redirigiendo al dashboard...',
+  'auth.invite.accepting': 'Aceptando...',
+  'auth.invite.asRole': 'como',
+  'auth.invite.createAccount': 'Crear cuenta',
+  'auth.invite.createOrLogin': 'Crea una cuenta o inicia sesión para aceptar.',
+  'auth.invite.goHome': 'Ir al inicio',
+  'auth.invite.invalidDesc': 'Esta invitación ha expirado, ya fue utilizada o no existe.',
+  'auth.invite.invalidTitle': 'Invitación no válida',
+  'auth.invite.invitedAsRole': 'Has sido invitado como',
+  'auth.invite.invitedEmail': 'Invitado a:',
+  'auth.invite.invitedTo': 'Te han invitado a',
+  'auth.invite.invitedWithRole': 'Se te ha invitado con el rol de',
+  'auth.invite.pendingTitle': 'Invitación pendiente',
+  'auth.invite.signIn': 'Iniciar sesión',
+  'auth.invite.verifyError': 'No se pudo verificar la invitación',
+  'auth.invite.verifying': 'Verificando invitación...',
+  'auth.invite.welcome': 'Bienvenido',
+  'auth.invite.withRole': 'con el rol de',
+  'auth.invite.youAreInvited': 'Has sido invitado',
+  'auth.login.error': 'Credenciales inválidas',
+  'auth.login.forgotPassword': '¿Olvidaste tu contraseña?',
+  'auth.login.inviteMessage': 'Tienes una invitación pendiente. Inicia sesión para aceptarla.',
+  'auth.login.noAccount': '¿No tienes cuenta?',
+  'auth.login.signUp': 'Regístrate',
+  'auth.login.signingIn': 'Ingresando...',
+  'auth.login.subtitle': 'Ingresa a tu cuenta',
+  'auth.login.title': 'Iniciar Sesión',
+  'auth.register.checkEmail': '¡Revisa tu correo!',
+  'auth.register.confirmToAccess': 'Confirma tu correo electrónico para acceder a tu cuenta.',
+  'auth.register.confirmationSent': 'Te hemos enviado un correo de confirmación a',
+  'auth.register.error': 'Error al registrar',
+  'auth.register.fullName': 'Nombre completo',
+  'auth.register.goToLogin': 'Ir a inicio de sesión',
+  'auth.register.hasAccount': '¿Ya tienes cuenta?',
+  'auth.register.minChars': 'Mínimo 6 caracteres',
+  'auth.register.registering': 'Registrando...',
+  'auth.register.signIn': 'Inicia sesión',
+  'auth.register.subtitle': 'Crea tu cuenta para comenzar',
+  'auth.register.title': 'Crear Cuenta',
+  'auth.resetPassword.backToLogin': 'Volver al login',
+  'auth.resetPassword.confirmPassword': 'Confirmar contraseña',
+  'auth.resetPassword.enterNewPassword': 'Ingresa tu nueva contraseña',
+  'auth.resetPassword.invalidLink': 'Enlace inválido',
+  'auth.resetPassword.invalidLinkDesc': 'Este enlace de recuperación no es válido o ha expirado.',
+  'auth.resetPassword.linksExpire': 'Los enlaces de recuperación expiran después de 1 hora.',
+  'auth.resetPassword.newPassword': 'Nueva contraseña',
+  'auth.resetPassword.passwordsMatch': 'Las contraseñas coinciden',
+  'auth.resetPassword.passwordsNoMatch': 'Las contraseñas no coinciden',
+  'auth.resetPassword.repeatPassword': 'Repetir contraseña',
+  'auth.resetPassword.req.lowercase': 'Una minúscula',
+  'auth.resetPassword.req.minChars': 'Mínimo 8 caracteres',
+  'auth.resetPassword.req.number': 'Un número',
+  'auth.resetPassword.req.uppercase': 'Una mayúscula',
+  'auth.resetPassword.requestNewLink': 'Solicitar nuevo enlace',
+  'auth.resetPassword.requirementsNotMet': 'La contraseña no cumple los requisitos',
+  'auth.resetPassword.strength.fair': 'Regular',
+  'auth.resetPassword.strength.good': 'Buena',
+  'auth.resetPassword.strength.strong': 'Fuerte',
+  'auth.resetPassword.strength.weak': 'Débil',
+  'auth.resetPassword.strengthLabel': 'Fortaleza:',
+  'auth.resetPassword.subtitle': 'Establece tu nueva contraseña',
+  'auth.resetPassword.successDesc': 'Tu contraseña ha sido actualizada correctamente.',
+  'auth.resetPassword.successTitle': '¡Contraseña actualizada!',
+  'auth.resetPassword.title': 'Restablecer Contraseña',
+  'auth.resetPassword.updateError': 'Error al actualizar contraseña',
+  'auth.resetPassword.updatePassword': 'Actualizar contraseña',
+  'auth.resetPassword.updating': 'Actualizando...',
+  'auth.resetPassword.validatingRequest': 'Validando solicitud...',
+  'auth.resetPassword.verifyingLink': 'Verificando enlace de recuperación...',
+  'contracts.action': 'Acción',
+  'contracts.activeContracts': 'Contratos activos',
+  'contracts.allStatuses': 'Todos los estados',
+  'contracts.approvedByProposal': 'Aprobado por propuesta',
+  'contracts.backToContracts': 'Volver a contratos',
+  'contracts.by': 'por',
+  'contracts.compliance': 'Cumplimiento',
+  'contracts.confirmDelete': '¿Eliminar este contrato? Esta acción no se puede deshacer.',
+  'contracts.confirmRegisterPayment': '¿Registrar este pago?',
+  'contracts.contract': 'Contrato',
+  'contracts.contractParties': 'Partes del contrato',
+  'contracts.create': 'Crear Contrato',
+  'contracts.created': 'Contrato creado',
+  'contracts.createdBy': 'Creado por',
+  'contracts.creating': 'Creando...',
+  'contracts.defaulted': 'Incumplido',
+  'contracts.deleteContract': 'Eliminar contrato',
+  'contracts.deleted': 'Contrato eliminado',
+  'contracts.description': 'Descripción',
+  'contracts.descriptionLabel': 'Descripción',
+  'contracts.dueDate': 'Vencimiento',
+  'contracts.empty': 'Sin contratos registrados',
+  'contracts.endDate': 'Fecha fin',
+  'contracts.entity': 'Entidad',
+  'contracts.entityProvider': 'Entidad / Proveedor',
+  'contracts.errorCreating': 'Error al crear contrato',
+  'contracts.errorDeleting': 'Error al eliminar contrato',
+  'contracts.errorRegisteringPayment': 'Error al registrar pago',
+  'contracts.errorUpdatingStatus': 'Error al actualizar estado',
+  'contracts.freq.annual': 'Anual',
+  'contracts.freq.bimonthly': 'Bimestral',
+  'contracts.freq.biweekly': 'Quincenal',
+  'contracts.freq.monthly': 'Mensual',
+  'contracts.freq.oneTime': 'Único',
+  'contracts.freq.quarterly': 'Trimestral',
+  'contracts.freq.semiannual': 'Semestral',
+  'contracts.freq.weekly': 'Semanal',
+  'contracts.indefinite': 'Indefinido',
+  'contracts.installmentAutoGenNote': 'Las parcialidades se generarán automáticamente según la frecuencia.',
+  'contracts.installments': 'Parcialidades',
+  'contracts.loadingInstallments': 'Cargando parcialidades...',
+  'contracts.member': 'Miembro',
+  'contracts.nameAndAmountRequired': 'Nombre y monto son obligatorios',
+  'contracts.namePlaceholder': 'Nombre del contrato',
+  'contracts.new': 'Nuevo Contrato',
+  'contracts.noEntity': 'Sin entidad',
+  'contracts.noLinkedParties': 'Sin partes vinculadas',
+  'contracts.numInstallments': 'Num. parcialidades',
+  'contracts.paidDate': 'Pagado',
+  'contracts.pay': 'Pagar',
+  'contracts.paymentFrequency': 'Frecuencia de pago',
+  'contracts.paymentPlan': 'Plan de pagos',
+  'contracts.paymentRegistered': 'Pago registrado',
+  'contracts.registerPayment': 'Registrar pago',
+  'contracts.startDate': 'Fecha inicio',
+  'contracts.statusUpdated': 'Estado actualizado',
+  'contracts.totalAmount': 'Monto total',
+  'deliberation.comment': 'Comentario',
+  'deliberation.commentPlaceholder': 'Escribe tu comentario...',
+  'deliberation.confirmDeleteComment': '¿Eliminar este comentario?',
+  'deliberation.ctrlEnterToSend': 'Ctrl+Enter para enviar',
+  'deliberation.edited': '(editado)',
+  'deliberation.member': 'Miembro',
+  'deliberation.reply': 'Responder',
+  'deliberation.stance': 'Postura',
+  'deliberation.writeReplyPlaceholder': 'Escribe tu respuesta...',
+  'entities.actions': 'Acciones',
+  'entities.address': 'Dirección',
+  'entities.addressPlaceholder': 'Dirección fiscal',
+  'entities.allStatuses': 'Todos los estados',
+  'entities.allTypes': 'Todos los tipos',
+  'entities.confirmDelete': '¿Eliminar esta entidad?',
+  'entities.contact': 'Contacto',
+  'entities.contactPerson': 'Persona de Contacto',
+  'entities.contactPersonPlaceholder': 'Nombre del contacto principal',
+  'entities.create': 'Crear Entidad',
+  'entities.creating': 'Creando...',
+  'entities.deleted': 'Entidad eliminada',
+  'entities.empty': 'No hay entidades registradas. Agrega proveedores, socios y contratistas.',
+  'entities.errorCreating': 'Error al crear entidad',
+  'entities.errorDeleting': 'Error al eliminar entidad',
+  'entities.namePlaceholder': 'Nombre de la entidad',
+  'entities.nameRequired': 'El nombre es obligatorio',
+  'entities.new': 'Nueva Entidad',
+  'entities.notes': 'Notas',
+  'entities.notesPlaceholder': 'Notas internas',
+  'entities.optional': 'Opcional',
+  'entities.phone': 'Teléfono',
+  'entities.rating': 'Calificación',
+  'entities.rfc': 'RFC',
+  'entities.searchPlaceholder': 'Buscar por nombre, RFC, contacto...',
+  'entities.status': 'Estado',
+  'entities.type': 'Tipo',
+  'entities.unrated': 'Sin calificar',
+  'recurring.activate': 'Activar',
+  'recurring.active': 'Activos',
+  'recurring.activeStatus': 'Activo',
+  'recurring.allActiveMembers': 'Todos los miembros activos',
+  'recurring.allMembers': 'Todos los miembros',
+  'recurring.collection': 'Cobro',
+  'recurring.collectionToMembers': 'Cobro (a miembros)',
+  'recurring.collections': 'Cobros',
+  'recurring.confirmDelete': '¿Eliminar este cobro/pago recurrente? No se eliminarán las obligaciones ya generadas.',
+  'recurring.creating': 'Creando...',
+  'recurring.dayOfMonth': 'Día del mes',
+  'recurring.deleteRecurring': 'Eliminar recurrente',
+  'recurring.deleted': 'Recurrente eliminado',
+  'recurring.description': 'Cobros o pagos que se repiten en el tiempo (ej. cuota mensual, aportación periódica).',
+  'recurring.descriptionLabel': 'Descripción',
+  'recurring.empty': 'Sin cobros o pagos recurrentes. Crea uno para automatizar cuotas y pagos a proveedores.',
+  'recurring.end': 'Fin',
+  'recurring.endDateOptional': 'Fecha fin (opcional)',
+  'recurring.entityProviderPartner': 'Entidad (proveedor/socio)',
+  'recurring.errorCreating': 'Error al crear',
+  'recurring.errorDeleting': 'Error al eliminar recurrente',
+  'recurring.errorProcessing': 'Error al procesar pendientes',
+  'recurring.errorRunning': 'Error al ejecutar recurrente',
+  'recurring.errorUpdating': 'Error al actualizar recurrente',
+  'recurring.frequency': 'Frecuencia',
+  'recurring.lastRun': 'Última',
+  'recurring.members': 'Miembros',
+  'recurring.more': 'más',
+  'recurring.nameAndAmountRequired': 'Nombre y monto son obligatorios',
+  'recurring.namePlaceholder': 'Nombre del cobro/pago',
+  'recurring.new': 'Nuevo Recurrente',
+  'recurring.newRecurring': 'Nuevo Cobro/Pago Recurrente',
+  'recurring.nextRun': 'Próxima',
+  'recurring.obligationsGenerated': 'Obligaciones generadas',
+  'recurring.pause': 'Pausar',
+  'recurring.paused': 'Pausado',
+  'recurring.payment': 'Pago',
+  'recurring.paymentToEntity': 'Pago (a entidad)',
+  'recurring.payments': 'Pagos',
+  'recurring.pendingProcessed': 'Pendientes procesados',
+  'recurring.processPending': 'Procesar Pendientes',
+  'recurring.runNow': 'Ejecutar ahora',
+  'recurring.runs': 'ejecuciones',
+  'recurring.select': 'Seleccionar...',
+  'recurring.specificMembers': 'Miembros específicos',
+  'recurring.target': 'Destino',
+  'recurring.updated': 'Recurrente actualizado',
+  'treasury.actual': 'Real',
+  'treasury.allFieldsRequired': 'Todos los campos son obligatorios',
+  'treasury.amount': 'Monto',
+  'treasury.budget': 'Presupuesto',
+  'treasury.budgetDeleted': 'Presupuesto eliminado',
+  'treasury.category': 'Categoría',
+  'treasury.categoryCreated': 'Categoría creada exitosamente',
+  'treasury.categoryDeleted': 'Categoría eliminada',
+  'treasury.categoryNamePlaceholder': 'Nombre de categoría',
+  'treasury.categoryUpdated': 'Categoría actualizada',
+  'treasury.confirmDeleteBudget': '¿Estás seguro de eliminar este presupuesto? Esta acción no se puede deshacer.',
+  'treasury.confirmDeleteCategory': '¿Eliminar esta categoría? Las transacciones existentes conservarán su historial.',
+  'treasury.create': 'Crear',
+  'treasury.creating': 'Creando...',
+  'treasury.deleteBudget': 'Eliminar presupuesto',
+  'treasury.deleteCategory': 'Eliminar categoría',
+  'treasury.difference': 'Diferencia',
+  'treasury.errorCreatingBudget': 'Error al crear presupuesto',
+  'treasury.errorCreatingCategory': 'Error al crear categoría',
+  'treasury.errorDeletingBudget': 'Error al eliminar presupuesto',
+  'treasury.errorDeletingCategory': 'Error al eliminar categoría',
+  'treasury.errorUpdatingBudget': 'Error al actualizar presupuesto',
+  'treasury.errorUpdatingCategory': 'Error al actualizar categoría',
+  'treasury.expense': 'Gasto',
+  'treasury.income': 'Ingreso',
+  'treasury.loadingBudgets': 'Cargando presupuestos...',
+  'treasury.loadingCategories': 'Cargando categorías...',
+  'treasury.newBudget': 'Nuevo Presupuesto',
+  'treasury.noBudgets': 'No hay presupuestos definidos.',
+  'treasury.noCategories': 'No hay categorías configuradas',
+  'treasury.period': 'Periodo',
+  'treasury.selectCategory': 'Seleccionar categoría...',
+  'treasury.system': 'Sistema',
 }
 
 const en: Dictionary = {
@@ -2647,6 +3203,284 @@ const en: Dictionary = {
   'memberDetail.notFound': 'Member not found',
   'entityDetail.title': 'Entity Detail',
   'common.notFound': 'Not found',
+  // Announcements, auth, contracts, deliberation, entities, recurring, treasury
+  'announcements.confirmDelete': 'Delete this announcement?',
+  'announcements.deleted': 'Announcement deleted',
+  'announcements.edit': 'Edit Announcement',
+  'announcements.empty': 'No announcements published.',
+  'announcements.errorDeleting': 'Error deleting',
+  'announcements.errorSaving': 'Error saving announcement',
+  'announcements.expires': 'Expires',
+  'announcements.expiresOptional': 'Expires (optional)',
+  'announcements.message': 'Message',
+  'announcements.new': 'New Announcement',
+  'announcements.pin': 'Pin',
+  'announcements.pinToTop': 'Pin to top',
+  'announcements.priority': 'Priority',
+  'announcements.priority.low': 'Low',
+  'announcements.priority.normal': 'Normal',
+  'announcements.priority.urgent': 'Urgent',
+  'announcements.publish': 'Publish',
+  'announcements.publishFirst': 'Publish the first one',
+  'announcements.published': 'Announcement published',
+  'announcements.publishedCount': 'announcements published',
+  'announcements.unpin': 'Unpin',
+  'announcements.updated': 'Announcement updated',
+  'auth.forgotPassword.backToLogin': 'Back to login',
+  'auth.forgotPassword.checkEmail': 'Check your email',
+  'auth.forgotPassword.checkInbox': 'Check your inbox and spam folder.',
+  'auth.forgotPassword.ifAccountExists': 'If an account exists for ',
+  'auth.forgotPassword.linkExpiry': 'The link will expire in 1 hour for security.',
+  'auth.forgotPassword.sendAgain': 'Send again',
+  'auth.forgotPassword.sendResetLink': 'Send reset link',
+  'auth.forgotPassword.subtitle': 'Enter your email and we will send you a link to reset your password.',
+  'auth.forgotPassword.title': 'Recover Password',
+  'auth.forgotPassword.willReceiveLink': ', you will receive a link to reset your password.',
+  'auth.invite.acceptError': 'Error accepting invitation',
+  'auth.invite.acceptInvitation': 'Accept invitation',
+  'auth.invite.acceptedRedirecting': 'Invitation accepted. Redirecting to dashboard...',
+  'auth.invite.accepting': 'Accepting...',
+  'auth.invite.asRole': 'as',
+  'auth.invite.createAccount': 'Create account',
+  'auth.invite.createOrLogin': 'Create an account or sign in to accept.',
+  'auth.invite.goHome': 'Go home',
+  'auth.invite.invalidDesc': 'This invitation has expired, was already used, or does not exist.',
+  'auth.invite.invalidTitle': 'Invalid invitation',
+  'auth.invite.invitedAsRole': 'You have been invited as',
+  'auth.invite.invitedEmail': 'Invited to:',
+  'auth.invite.invitedTo': 'You have been invited to',
+  'auth.invite.invitedWithRole': 'You have been invited with the role of',
+  'auth.invite.pendingTitle': 'Pending invitation',
+  'auth.invite.signIn': 'Sign in',
+  'auth.invite.verifyError': 'Could not verify invitation',
+  'auth.invite.verifying': 'Verifying invitation...',
+  'auth.invite.welcome': 'Welcome',
+  'auth.invite.withRole': 'with the role of',
+  'auth.invite.youAreInvited': 'You have been invited',
+  'auth.login.error': 'Invalid credentials',
+  'auth.login.forgotPassword': 'Forgot your password?',
+  'auth.login.inviteMessage': 'You have a pending invitation. Sign in to accept it.',
+  'auth.login.noAccount': 'Don\'t have an account?',
+  'auth.login.signUp': 'Sign up',
+  'auth.login.signingIn': 'Signing in...',
+  'auth.login.subtitle': 'Sign in to your account',
+  'auth.login.title': 'Sign In',
+  'auth.register.checkEmail': 'Check your email!',
+  'auth.register.confirmToAccess': 'Confirm your email to access your account.',
+  'auth.register.confirmationSent': 'We sent a confirmation email to',
+  'auth.register.error': 'Registration error',
+  'auth.register.fullName': 'Full name',
+  'auth.register.goToLogin': 'Go to login',
+  'auth.register.hasAccount': 'Already have an account?',
+  'auth.register.minChars': 'Minimum 6 characters',
+  'auth.register.registering': 'Registering...',
+  'auth.register.signIn': 'Sign in',
+  'auth.register.subtitle': 'Create your account to get started',
+  'auth.register.title': 'Create Account',
+  'auth.resetPassword.backToLogin': 'Back to login',
+  'auth.resetPassword.confirmPassword': 'Confirm password',
+  'auth.resetPassword.enterNewPassword': 'Enter your new password',
+  'auth.resetPassword.invalidLink': 'Invalid link',
+  'auth.resetPassword.invalidLinkDesc': 'This recovery link is invalid or has expired.',
+  'auth.resetPassword.linksExpire': 'Recovery links expire after 1 hour.',
+  'auth.resetPassword.newPassword': 'New password',
+  'auth.resetPassword.passwordsMatch': 'Passwords match',
+  'auth.resetPassword.passwordsNoMatch': 'Passwords do not match',
+  'auth.resetPassword.repeatPassword': 'Repeat password',
+  'auth.resetPassword.req.lowercase': 'One lowercase',
+  'auth.resetPassword.req.minChars': 'Minimum 8 characters',
+  'auth.resetPassword.req.number': 'One number',
+  'auth.resetPassword.req.uppercase': 'One uppercase',
+  'auth.resetPassword.requestNewLink': 'Request new link',
+  'auth.resetPassword.requirementsNotMet': 'Password does not meet requirements',
+  'auth.resetPassword.strength.fair': 'Fair',
+  'auth.resetPassword.strength.good': 'Good',
+  'auth.resetPassword.strength.strong': 'Strong',
+  'auth.resetPassword.strength.weak': 'Weak',
+  'auth.resetPassword.strengthLabel': 'Strength:',
+  'auth.resetPassword.subtitle': 'Set your new password',
+  'auth.resetPassword.successDesc': 'Your password has been updated successfully.',
+  'auth.resetPassword.successTitle': 'Password updated!',
+  'auth.resetPassword.title': 'Reset Password',
+  'auth.resetPassword.updateError': 'Error updating password',
+  'auth.resetPassword.updatePassword': 'Update password',
+  'auth.resetPassword.updating': 'Updating...',
+  'auth.resetPassword.validatingRequest': 'Validating request...',
+  'auth.resetPassword.verifyingLink': 'Verifying recovery link...',
+  'contracts.action': 'Action',
+  'contracts.activeContracts': 'Active contracts',
+  'contracts.allStatuses': 'All statuses',
+  'contracts.approvedByProposal': 'Approved by proposal',
+  'contracts.backToContracts': 'Back to contracts',
+  'contracts.by': 'by',
+  'contracts.compliance': 'Compliance',
+  'contracts.confirmDelete': 'Delete this contract? This action cannot be undone.',
+  'contracts.confirmRegisterPayment': 'Register this payment?',
+  'contracts.contract': 'Contract',
+  'contracts.contractParties': 'Contract parties',
+  'contracts.create': 'Create Contract',
+  'contracts.created': 'Contract created',
+  'contracts.createdBy': 'Created by',
+  'contracts.creating': 'Creating...',
+  'contracts.defaulted': 'Defaulted',
+  'contracts.deleteContract': 'Delete contract',
+  'contracts.deleted': 'Contract deleted',
+  'contracts.description': 'Description',
+  'contracts.descriptionLabel': 'Description',
+  'contracts.dueDate': 'Due date',
+  'contracts.empty': 'No contracts registered',
+  'contracts.endDate': 'End date',
+  'contracts.entity': 'Entity',
+  'contracts.entityProvider': 'Entity / Provider',
+  'contracts.errorCreating': 'Error creating contract',
+  'contracts.errorDeleting': 'Error deleting contract',
+  'contracts.errorRegisteringPayment': 'Error registering payment',
+  'contracts.errorUpdatingStatus': 'Error updating status',
+  'contracts.freq.annual': 'Annual',
+  'contracts.freq.bimonthly': 'Bimonthly',
+  'contracts.freq.biweekly': 'Biweekly',
+  'contracts.freq.monthly': 'Monthly',
+  'contracts.freq.oneTime': 'One-time',
+  'contracts.freq.quarterly': 'Quarterly',
+  'contracts.freq.semiannual': 'Semiannual',
+  'contracts.freq.weekly': 'Weekly',
+  'contracts.indefinite': 'Indefinite',
+  'contracts.installmentAutoGenNote': 'Installments will be auto-generated based on frequency.',
+  'contracts.installments': 'Installments',
+  'contracts.loadingInstallments': 'Loading installments...',
+  'contracts.member': 'Member',
+  'contracts.nameAndAmountRequired': 'Name and amount are required',
+  'contracts.namePlaceholder': 'Contract name',
+  'contracts.new': 'New Contract',
+  'contracts.noEntity': 'No entity',
+  'contracts.noLinkedParties': 'No linked parties',
+  'contracts.numInstallments': 'Num. installments',
+  'contracts.paidDate': 'Paid',
+  'contracts.pay': 'Pay',
+  'contracts.paymentFrequency': 'Payment frequency',
+  'contracts.paymentPlan': 'Payment plan',
+  'contracts.paymentRegistered': 'Payment registered',
+  'contracts.registerPayment': 'Register payment',
+  'contracts.startDate': 'Start date',
+  'contracts.statusUpdated': 'Status updated',
+  'contracts.totalAmount': 'Total amount',
+  'deliberation.comment': 'Comment',
+  'deliberation.commentPlaceholder': 'Write your comment...',
+  'deliberation.confirmDeleteComment': 'Delete this comment?',
+  'deliberation.ctrlEnterToSend': 'Ctrl+Enter to send',
+  'deliberation.edited': '(edited)',
+  'deliberation.member': 'Member',
+  'deliberation.reply': 'Reply',
+  'deliberation.stance': 'Stance',
+  'deliberation.writeReplyPlaceholder': 'Write your reply...',
+  'entities.actions': 'Actions',
+  'entities.address': 'Address',
+  'entities.addressPlaceholder': 'Fiscal address',
+  'entities.allStatuses': 'All statuses',
+  'entities.allTypes': 'All types',
+  'entities.confirmDelete': 'Delete this entity?',
+  'entities.contact': 'Contact',
+  'entities.contactPerson': 'Contact Person',
+  'entities.contactPersonPlaceholder': 'Primary contact name',
+  'entities.create': 'Create Entity',
+  'entities.creating': 'Creating...',
+  'entities.deleted': 'Entity deleted',
+  'entities.empty': 'No entities registered. Add providers, partners and contractors.',
+  'entities.errorCreating': 'Error creating entity',
+  'entities.errorDeleting': 'Error deleting entity',
+  'entities.namePlaceholder': 'Entity name',
+  'entities.nameRequired': 'Name is required',
+  'entities.new': 'New Entity',
+  'entities.notes': 'Notes',
+  'entities.notesPlaceholder': 'Internal notes',
+  'entities.optional': 'Optional',
+  'entities.phone': 'Phone',
+  'entities.rating': 'Rating',
+  'entities.rfc': 'Tax ID',
+  'entities.searchPlaceholder': 'Search by name, tax ID, contact...',
+  'entities.status': 'Status',
+  'entities.type': 'Type',
+  'entities.unrated': 'Unrated',
+  'recurring.activate': 'Activate',
+  'recurring.active': 'Active',
+  'recurring.activeStatus': 'Active',
+  'recurring.allActiveMembers': 'All active members',
+  'recurring.allMembers': 'All members',
+  'recurring.collection': 'Collection',
+  'recurring.collectionToMembers': 'Collection (to members)',
+  'recurring.collections': 'Collections',
+  'recurring.confirmDelete': 'Delete this recurring payment? Existing obligations will not be deleted.',
+  'recurring.creating': 'Creating...',
+  'recurring.dayOfMonth': 'Day of month',
+  'recurring.deleteRecurring': 'Delete recurring',
+  'recurring.deleted': 'Recurring deleted',
+  'recurring.description': 'Recurring charges or payments (e.g. monthly fee, periodic contribution).',
+  'recurring.descriptionLabel': 'Description',
+  'recurring.empty': 'No recurring payments. Create one to automate fees and provider payments.',
+  'recurring.end': 'End',
+  'recurring.endDateOptional': 'End date (optional)',
+  'recurring.entityProviderPartner': 'Entity (provider/partner)',
+  'recurring.errorCreating': 'Error creating',
+  'recurring.errorDeleting': 'Error deleting recurring',
+  'recurring.errorProcessing': 'Error processing pending',
+  'recurring.errorRunning': 'Error running recurring',
+  'recurring.errorUpdating': 'Error updating recurring',
+  'recurring.frequency': 'Frequency',
+  'recurring.lastRun': 'Last run',
+  'recurring.members': 'Members',
+  'recurring.more': 'more',
+  'recurring.nameAndAmountRequired': 'Name and amount are required',
+  'recurring.namePlaceholder': 'Payment name',
+  'recurring.new': 'New Recurring',
+  'recurring.newRecurring': 'New Recurring Payment',
+  'recurring.nextRun': 'Next run',
+  'recurring.obligationsGenerated': 'Obligations generated',
+  'recurring.pause': 'Pause',
+  'recurring.paused': 'Paused',
+  'recurring.payment': 'Payment',
+  'recurring.paymentToEntity': 'Payment (to entity)',
+  'recurring.payments': 'Payments',
+  'recurring.pendingProcessed': 'Pending processed',
+  'recurring.processPending': 'Process Pending',
+  'recurring.runNow': 'Run now',
+  'recurring.runs': 'runs',
+  'recurring.select': 'Select...',
+  'recurring.specificMembers': 'Specific members',
+  'recurring.target': 'Target',
+  'recurring.updated': 'Recurring updated',
+  'treasury.actual': 'Actual',
+  'treasury.allFieldsRequired': 'All fields are required',
+  'treasury.amount': 'Amount',
+  'treasury.budget': 'Budget',
+  'treasury.budgetDeleted': 'Budget deleted',
+  'treasury.category': 'Category',
+  'treasury.categoryCreated': 'Category created successfully',
+  'treasury.categoryDeleted': 'Category deleted',
+  'treasury.categoryNamePlaceholder': 'Category name',
+  'treasury.categoryUpdated': 'Category updated',
+  'treasury.confirmDeleteBudget': 'Are you sure you want to delete this budget? This action cannot be undone.',
+  'treasury.confirmDeleteCategory': 'Delete this category? Existing transactions will retain their history.',
+  'treasury.create': 'Create',
+  'treasury.creating': 'Creating...',
+  'treasury.deleteBudget': 'Delete budget',
+  'treasury.deleteCategory': 'Delete category',
+  'treasury.difference': 'Difference',
+  'treasury.errorCreatingBudget': 'Error creating budget',
+  'treasury.errorCreatingCategory': 'Error creating category',
+  'treasury.errorDeletingBudget': 'Error deleting budget',
+  'treasury.errorDeletingCategory': 'Error deleting category',
+  'treasury.errorUpdatingBudget': 'Error updating budget',
+  'treasury.errorUpdatingCategory': 'Error updating category',
+  'treasury.expense': 'Expense',
+  'treasury.income': 'Income',
+  'treasury.loadingBudgets': 'Loading budgets...',
+  'treasury.loadingCategories': 'Loading categories...',
+  'treasury.newBudget': 'New Budget',
+  'treasury.noBudgets': 'No budgets defined.',
+  'treasury.noCategories': 'No categories configured',
+  'treasury.period': 'Period',
+  'treasury.selectCategory': 'Select category...',
+  'treasury.system': 'System',
 }
 
 export const MESSAGES: Record<string, Dictionary> = {

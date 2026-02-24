@@ -67,21 +67,21 @@ export function EntityList() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name) { setError(t('entities.nameRequired' as any)); return }
+    if (!form.name) { setError(t('entities.nameRequired')); return }
     try {
       await createEntity.mutateAsync(form)
       resetForm()
       setShowCreate(false)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('entities.errorCreating' as any))
+      setError(err instanceof Error ? err.message : t('entities.errorCreating'))
     }
   }
 
   const handleDelete = (id: string, name: string) => {
-    if (confirm(`${t('entities.confirmDelete' as any)} "${name}"?`)) {
+    if (confirm(`${t('entities.confirmDelete')} "${name}"?`)) {
       deleteEntity.mutate(id, {
-        onSuccess: () => toast.success(t('entities.deleted' as any)),
-        onError: () => toast.error(t('entities.errorDeleting' as any)),
+        onSuccess: () => toast.success(t('entities.deleted')),
+        onError: () => toast.error(t('entities.errorDeleting')),
       })
     }
   }
@@ -98,7 +98,7 @@ export function EntityList() {
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={t('entities.searchPlaceholder' as any)}
+              placeholder={t('entities.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
@@ -106,13 +106,13 @@ export function EntityList() {
           </div>
           <div className="flex gap-2">
             <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className="flex-1 sm:w-44">
-              <option value="">{t('entities.allTypes' as any)}</option>
+              <option value="">{t('entities.allTypes')}</option>
               {Object.entries(ENTITY_TYPE_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
               ))}
             </Select>
             <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="flex-1 sm:w-36">
-              <option value="">{t('entities.allStatuses' as any)}</option>
+              <option value="">{t('entities.allStatuses')}</option>
               {Object.entries(ENTITY_STATUS_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
               ))}
@@ -122,7 +122,7 @@ export function EntityList() {
         {canManageTreasury && (
           <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
-            {t('entities.new' as any)}
+            {t('entities.new')}
           </Button>
         )}
       </div>
@@ -132,11 +132,11 @@ export function EntityList() {
           <TableHeader>
             <TableRow>
               <TableHead>{t('common.name')}</TableHead>
-              <TableHead>{t('entities.type' as any)}</TableHead>
-              <TableHead className="hidden md:table-cell">{t('entities.contact' as any)}</TableHead>
-              <TableHead className="hidden sm:table-cell">{t('entities.rating' as any)}</TableHead>
-              <TableHead>{t('entities.status' as any)}</TableHead>
-              {canManageTreasury && <TableHead className="w-20">{t('entities.actions' as any)}</TableHead>}
+              <TableHead>{t('entities.type')}</TableHead>
+              <TableHead className="hidden md:table-cell">{t('entities.contact')}</TableHead>
+              <TableHead className="hidden sm:table-cell">{t('entities.rating')}</TableHead>
+              <TableHead>{t('entities.status')}</TableHead>
+              {canManageTreasury && <TableHead className="w-20">{t('entities.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -149,7 +149,7 @@ export function EntityList() {
             ) : !entities || filteredEntities.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={canManageTreasury ? 6 : 5} className="text-center text-muted-foreground">
-                  {t('entities.empty' as any)}
+                  {t('entities.empty')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -192,7 +192,7 @@ export function EntityList() {
                           <span className="text-xs text-muted-foreground">({rating.total_ratings})</span>
                         </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground">{t('entities.unrated' as any)}</span>
+                        <span className="text-xs text-muted-foreground">{t('entities.unrated')}</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -222,7 +222,7 @@ export function EntityList() {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent onClose={() => setShowCreate(false)}>
           <DialogHeader>
-            <DialogTitle>{t('entities.new' as any)}</DialogTitle>
+            <DialogTitle>{t('entities.new')}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreate}>
             <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
@@ -231,10 +231,10 @@ export function EntityList() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2 sm:col-span-2">
                   <Label>{t('common.name')} *</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder={t('entities.namePlaceholder' as any)} />
+                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder={t('entities.namePlaceholder')} />
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('entities.type' as any)}</Label>
+                  <Label>{t('entities.type')}</Label>
                   <Select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as EntityType })}>
                     {Object.entries(ENTITY_TYPE_LABELS).map(([k, v]) => (
                       <option key={k} value={k}>{v}</option>
@@ -242,35 +242,35 @@ export function EntityList() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('entities.rfc' as any)}</Label>
-                  <Input value={form.rfc} onChange={(e) => setForm({ ...form, rfc: e.target.value })} placeholder={t('entities.optional' as any)} />
+                  <Label>{t('entities.rfc')}</Label>
+                  <Input value={form.rfc} onChange={(e) => setForm({ ...form, rfc: e.target.value })} placeholder={t('entities.optional')} />
                 </div>
                 <div className="space-y-2">
                   <Label>{t('common.email')}</Label>
                   <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="contacto@empresa.com" />
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('entities.phone' as any)}</Label>
+                  <Label>{t('entities.phone')}</Label>
                   <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+52 ..." />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>{t('entities.contactPerson' as any)}</Label>
-                  <Input value={form.contact_person} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder={t('entities.contactPersonPlaceholder' as any)} />
+                  <Label>{t('entities.contactPerson')}</Label>
+                  <Input value={form.contact_person} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} placeholder={t('entities.contactPersonPlaceholder')} />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>{t('entities.address' as any)}</Label>
-                  <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder={t('entities.addressPlaceholder' as any)} />
+                  <Label>{t('entities.address')}</Label>
+                  <Input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder={t('entities.addressPlaceholder')} />
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label>{t('entities.notes' as any)}</Label>
-                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder={t('entities.notesPlaceholder' as any)} rows={2} />
+                  <Label>{t('entities.notes')}</Label>
+                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder={t('entities.notesPlaceholder')} rows={2} />
                 </div>
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => { resetForm(); setShowCreate(false) }}>{t('common.cancel')}</Button>
               <Button type="submit" disabled={createEntity.isPending}>
-                {createEntity.isPending ? t('entities.creating' as any) : t('entities.create' as any)}
+                {createEntity.isPending ? t('entities.creating') : t('entities.create')}
               </Button>
             </DialogFooter>
           </form>

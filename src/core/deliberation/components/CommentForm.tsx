@@ -35,7 +35,7 @@ export function CommentForm({
   onCancel,
 }: Props) {
   const { t } = useI18n()
-  const defaultPlaceholder = t('deliberation.commentPlaceholder' as any)
+  const defaultPlaceholder = t('deliberation.commentPlaceholder')
   const [content, setContent] = useState('')
   const [sentiment, setSentiment] = useState<Sentiment>('neutral')
   const [mentions, setMentions] = useState<MentionRef[]>([])
@@ -89,7 +89,7 @@ export function CommentForm({
     <form onSubmit={handleSubmit} className="space-y-2">
       {/* Sentiment selector */}
       <div className="flex items-center gap-1">
-        <span className="text-xs text-muted-foreground mr-1">{t('deliberation.stance' as any)}:</span>
+        <span className="text-xs text-muted-foreground mr-1">{t('deliberation.stance')}:</span>
         {SENTIMENTS.map((s) => {
           const config = SENTIMENT_CONFIG[s]
           return (
@@ -158,7 +158,7 @@ export function CommentForm({
       {/* Submit row */}
       <div className="flex items-center justify-between">
         <p className="text-[10px] text-muted-foreground">
-          {t('deliberation.ctrlEnterToSend' as any)}
+          {t('deliberation.ctrlEnterToSend')}
         </p>
         <div className="flex gap-2">
           {onCancel && (
@@ -168,7 +168,7 @@ export function CommentForm({
           )}
           <Button type="submit" size="sm" disabled={isPending || !content.trim()}>
             <Send className="mr-1.5 h-3.5 w-3.5" />
-            {isPending ? t('common.sending') : t('deliberation.comment' as any)}
+            {isPending ? t('common.sending') : t('deliberation.comment')}
           </Button>
         </div>
       </div>

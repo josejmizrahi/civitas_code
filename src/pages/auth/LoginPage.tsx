@@ -33,7 +33,7 @@ export function LoginPage() {
     try {
       await signIn(email, password)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('auth.login.error' as any))
+      setError(err instanceof Error ? err.message : t('auth.login.error'))
     } finally {
       setLoading(false)
     }
@@ -42,14 +42,14 @@ export function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('auth.login.title' as any)}</CardTitle>
-        <CardDescription>{t('auth.login.subtitle' as any)}</CardDescription>
+        <CardTitle>{t('auth.login.title')}</CardTitle>
+        <CardDescription>{t('auth.login.subtitle')}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {inviteToken && (
             <div className="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
-              {t('auth.login.inviteMessage' as any)}
+              {t('auth.login.inviteMessage')}
             </div>
           )}
           {error && (
@@ -66,14 +66,14 @@ export function LoginPage() {
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? t('auth.login.signingIn' as any) : t('auth.login.title' as any)}
+            {loading ? t('auth.login.signingIn') : t('auth.login.title')}
           </Button>
           <Link to="/forgot-password" className="text-sm text-muted-foreground hover:underline">
-            {t('auth.login.forgotPassword' as any)}
+            {t('auth.login.forgotPassword')}
           </Link>
           <p className="text-sm text-muted-foreground">
-            {t('auth.login.noAccount' as any)}{' '}
-            <Link to={inviteToken ? `/register?invite=${inviteToken}` : '/register'} className="font-medium text-primary hover:underline">{t('auth.login.signUp' as any)}</Link>
+            {t('auth.login.noAccount')}{' '}
+            <Link to={inviteToken ? `/register?invite=${inviteToken}` : '/register'} className="font-medium text-primary hover:underline">{t('auth.login.signUp')}</Link>
           </p>
         </CardFooter>
       </form>

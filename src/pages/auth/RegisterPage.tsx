@@ -34,7 +34,7 @@ export function RegisterPage() {
       setNeedsConfirmation(true)
       setLoading(false)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('auth.register.error' as any))
+      setError(err instanceof Error ? err.message : t('auth.register.error'))
       setLoading(false)
     }
   }
@@ -52,14 +52,14 @@ export function RegisterPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t('auth.register.checkEmail' as any)}</CardTitle>
+          <CardTitle>{t('auth.register.checkEmail')}</CardTitle>
           <CardDescription>
-            {t('auth.register.confirmationSent' as any)} <strong>{email}</strong>. {t('auth.register.confirmToAccess' as any)}
+            {t('auth.register.confirmationSent')} <strong>{email}</strong>. {t('auth.register.confirmToAccess')}
           </CardDescription>
         </CardHeader>
         <CardFooter>
           <Link to={inviteToken ? `/login?invite=${inviteToken}` : '/login'} className="w-full">
-            <Button className="w-full">{t('auth.register.goToLogin' as any)}</Button>
+            <Button className="w-full">{t('auth.register.goToLogin')}</Button>
           </Link>
         </CardFooter>
       </Card>
@@ -69,8 +69,8 @@ export function RegisterPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('auth.register.title' as any)}</CardTitle>
-        <CardDescription>{t('auth.register.subtitle' as any)}</CardDescription>
+        <CardTitle>{t('auth.register.title')}</CardTitle>
+        <CardDescription>{t('auth.register.subtitle')}</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -78,7 +78,7 @@ export function RegisterPage() {
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
           )}
           <div className="space-y-2">
-            <Label htmlFor="fullName">{t('auth.register.fullName' as any)}</Label>
+            <Label htmlFor="fullName">{t('auth.register.fullName')}</Label>
             <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required placeholder="Juan Pérez" />
           </div>
           <div className="space-y-2">
@@ -87,7 +87,7 @@ export function RegisterPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">{t('common.password')}</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder={t('auth.register.minChars' as any)} />
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} placeholder={t('auth.register.minChars')} />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
@@ -99,11 +99,11 @@ export function RegisterPage() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading || !privacyAccepted}>
-            {loading ? t('auth.register.registering' as any) : t('auth.register.title' as any)}
+            {loading ? t('auth.register.registering') : t('auth.register.title')}
           </Button>
           <p className="text-sm text-muted-foreground">
-            {t('auth.register.hasAccount' as any)}{' '}
-            <Link to={inviteToken ? `/login?invite=${inviteToken}` : '/login'} className="font-medium text-primary hover:underline">{t('auth.register.signIn' as any)}</Link>
+            {t('auth.register.hasAccount')}{' '}
+            <Link to={inviteToken ? `/login?invite=${inviteToken}` : '/login'} className="font-medium text-primary hover:underline">{t('auth.register.signIn')}</Link>
           </p>
         </CardFooter>
       </form>
