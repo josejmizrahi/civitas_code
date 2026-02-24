@@ -67,6 +67,7 @@ export function useProcessRecurringSchedules() {
       queryClient.invalidateQueries({ queryKey: recurringKeys.all })
       queryClient.invalidateQueries({ queryKey: ['payment_obligations'] })
       queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })
 }

@@ -50,6 +50,7 @@ export function useRespondDiscretionaryApproval() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['discretionary-approvals'] })
       qc.invalidateQueries({ queryKey: ['transactions'] })
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })
 }

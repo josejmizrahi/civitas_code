@@ -126,7 +126,8 @@ export function useExecuteSpendRequest() {
     onSuccess: (_, { spendRequestId }) => {
       queryClient.invalidateQueries({ queryKey: ['spend-requests', communityId] })
       queryClient.invalidateQueries({ queryKey: ['spend-request', spendRequestId] })
-      queryClient.invalidateQueries({ queryKey: ['transactions', communityId] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
     },
   })
 }
